@@ -1,12 +1,12 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
 
-include_once"../../php_tori/connect.php";
-include_once "../funcs.php";
+include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
@@ -35,9 +35,9 @@ $color1 = "#ddffff";
 $color2 = "#ddeedd";
 $color3 = "#ffffff";
 
-mysql_query( 'SET NAMES utf8' );
+mysqli_set_charset($link, "utf8");
 
-$query = mysql_query("SELECT * FROM ADD_TIME 
+$query = mysqli_query($link, "SELECT * FROM ADD_TIME 
                       WHERE   
                       USERID='$userID_'
                         and
@@ -46,7 +46,7 @@ $query = mysql_query("SELECT * FROM ADD_TIME
                       pause_mode = 1
                       ORDER BY ID DESC"); 
 
-while($row = mysql_fetch_array($query, MYSQL_ASSOC))
+while($row = mysqli_fetch_array($query, MYSQLI_ASSOC))
 {
   $ta_id = $row["ID"];
   $ta_suir = $row["SUIR"];
@@ -86,6 +86,3 @@ while($row = mysql_fetch_array($query, MYSQL_ASSOC))
 
 echo "</table>";
 ?>
-
-
-                                                                         

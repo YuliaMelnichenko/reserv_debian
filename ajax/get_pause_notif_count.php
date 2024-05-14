@@ -1,9 +1,9 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
-include_once "../funcs.php";
+include_once "/var/www/tori/funcs.php";
 
 session_start();
 
@@ -20,6 +20,3 @@ if ( isset( $_SESSION['ss_id'] ) )
 
 echo "<h5 class=\"biggersmall\">По приостановкам учета времени $notifCountStr</h5>";
 ?>
-
-
-                                                                         

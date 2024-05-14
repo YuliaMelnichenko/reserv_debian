@@ -5,25 +5,23 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
                 
-include "/php_tori/connect.php";
-include "funcs.php";
+include "/var/www/tori/php_tori/connect.php";
+include "/var/www/tori/funcs.php";
 
-$login = $mysqli -> real_escape_string($_POST['login']);
-$passwd = md5(md5(trim($mysqli -> real_escape_string($_POST['passwd']))));
+$__login = mysqli_real_escape_string($link, $_POST['login']);
+$__passwd = md5(md5(trim(mysqli_real_escape_string($link, $_POST['passwd']))));
 
-$query = ("SELECT id, rate, defaultStartTime, allowedDelayMinutes, userTimeZoneMins, dayTransitionTime, remoteWork FROM employees WHERE login='$__login' AND passwd='$__passwd'");
-$result = $mysqli->query($query);
-$merr=$mysqli -> error();
+$query = mysqli_query($link, "SELECT id, rate, defaultStartTime, allowedDelayMinutes, userTimeZoneMins, dayTransitionTime, remoteWork FROM employees WHERE login='$__login' AND passwd='$__passwd'");
 if ( !$query ) 
 {
   echo "<br>mysqli_error = $merr<br>";
 }
 else
 {
-  $vn= $mysql -> num_rows($query);
+  $vn= mysqli_num_rows($query);
   if ( $vn == 1 )
   {
-    $row = $result -> fetch_array(MYSQLI_ASSOC);
+    $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
     $_SESSION['ss_id'] = $row["id"];
     $_SESSION['ss_rate'] = $row["rate"];
     $ss_defaultStartTime = $row["defaultStartTime"];	

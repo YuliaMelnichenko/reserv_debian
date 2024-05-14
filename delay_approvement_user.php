@@ -1,9 +1,10 @@
-<?
+<?php
 ob_start();
-
 ?>
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<?
+
+<?php
 echo "<html>";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";
@@ -12,8 +13,8 @@ echo "<link rel=\"stylesheet\" href=\"style/style.css\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 echo "<body bgcolor=\"#ffffff\" >";
-
 ?>
+
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
 <script type="text/javascript" src="js/tory.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
@@ -34,14 +35,12 @@ var timerId=setInterval( "update_clock()", 10000 );
 
 </script> 
 
-<?
-
-#echo "<table background=\"tori.jpg\"><tr><td>";
+<?php
 
 session_start();
 
 ////////////////////////////////////////////////////////
-include_once "funcs.php";
+include_once "/var/www/tori/funcs.php";
 save_last_location( "delay_approvement.php" );
 auth();
 ////////////////////////////////////////////////////////
@@ -59,9 +58,9 @@ if ( $uidValid == 0 )
 
 echo "<div align=\"left\">";
 
-include_once"../php_tori/connect.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
-mysql_query( 'SET NAMES utf8' );
+mysqli_set_charset($link, "utf8");
 
 echo "<input id=\"recIDTempVal\" type=\"hidden\" value=\"\">";
 echo "<input id=\"acceptTempVal\" type=\"hidden\" value=\"\">";
@@ -72,7 +71,7 @@ echo "<input id=\"penUserIDTempVal\" type=\"hidden\" value=\"\">";
 echo "<table border=0>";
   echo "<tr>";
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
-      include_once "navigate.php";
+      include_once "/var/www/tori/navigate.php";
     echo "</td>";    
 
     $wholeWidth = 1272;
@@ -277,13 +276,10 @@ echo "<table id=\"delay_approvement_table\" border=0>";
 
           echo "</td>";  
       }
-
       echo "</table>";
     echo "</td>";
   echo "</tr>";
 echo "</table>";
-
-
 
       echo "<div id=\"delay_approvement_desc\">";
         echo "<table class=\"add_time\"  border=0>";
@@ -314,20 +310,15 @@ echo "</table>";
         echo "</table>";
       echo "</div>";                
 
-
     echo "</td>"; 
   echo "</tr>";
 echo "</table>";
 echo "</div>";
-
 ?>
 
 <script type="text/javascript" src="js/tory.js"></script> 
 
-<?
-
+<?php
 echo "</body>";
 echo "</html>";  
 ?>
-
-                                                                         

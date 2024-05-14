@@ -1,7 +1,5 @@
-<?
-////////////////////////////////////////////////////////
+<?php
 auth();
-////////////////////////////////////////////////////////
 
 function show_month_stat( $monthDate, $user_id, $user_rate, $user_defaultStartTime, $user_defaultStartHour, $user_defaultStartMinute, $user_allowedDelay )
 {  
@@ -36,23 +34,12 @@ function show_month_stat( $monthDate, $user_id, $user_rate, $user_defaultStartTi
 
   if ( $currMonth == $monthNum )
   {
-    $normByCurrentMonthAdd = get_norm_time_by_current_day_sec( $userID, $user_defaultStartHour, $user_defaultStartMinute );
+    $normByCurrentMonthAdd = get_norm_time_by_current_day_sec( $user_id, $user_defaultStartHour, $user_defaultStartMinute );
   }
-
-
-//echo $newdateFirstMonthDay." ".$newdateCurrentMonthDay." ".format_time_d_hhmm_pure( $normByCurrentMonth )."  +  ".format_time_d_hhmm_pure( $normByCurrentMonthAdd );
-
-//echo $StatMonthNorm;
-
 
   $normByCurrentMonth = $normByCurrentMonth + $normByCurrentMonthAdd;
 
-  //echo format_time_d_hhmm_pure( $normByCurrentMonth );
-
   $currenMonthWorkDuration = $stat[2];
-
-//echo $currenMonthWorkDuration;
-
 
   $currenMonthWorkDurationAdd = 0;
 
@@ -64,11 +51,6 @@ function show_month_stat( $monthDate, $user_id, $user_rate, $user_defaultStartTi
   $currenMonthWorkDuration = $currenMonthWorkDuration + $currenMonthWorkDurationAdd;
 
   $currenMonthWorkDurationStr = format_time_d_hhmm_pure( $currenMonthWorkDuration );
-
-
-
-//echo format_time_d_hhmm_pure( $currenMonthWorkDuration )." - ".format_time_d_hhmm_pure( $normByCurrentMonth )."   *";
-
 
   $goodColor = "b5fe10";
   $badColor = "ff9696";
@@ -119,7 +101,6 @@ function show_month_stat( $monthDate, $user_id, $user_rate, $user_defaultStartTi
   {
     $penaltyColor = $badColor;
   }
-
 
   $workDuration = $stat[2];  
   $normkDuration = $StatMonthNorm * 60 * 60;
@@ -240,6 +221,4 @@ function show_month_stat( $monthDate, $user_id, $user_rate, $user_defaultStartTi
     echo "</tr>";
   echo "</table>";
 }
-/////////////////////////////////////////////////////
 ?>
-

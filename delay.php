@@ -1,9 +1,10 @@
-<?
+<?php
 ob_start();
-
 ?>
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<?
+
+<?php
 echo "<html>";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";
@@ -12,18 +13,16 @@ echo "<link rel=\"stylesheet\" href=\"style/style.css\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 echo "<body bgcolor=\"#ffffff\" >";
-
 ?>
+
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
 <script type="text/javascript" src="js/tory.js"></script> 
-<?
 
-#echo "<table background=\"tori.jpg\"><tr><td>";
-
+<?php
 session_start();
 
 ////////////////////////////////////////////////////////
-include_once "funcs.php";
+include_once "/var/www/tori/funcs.php";
 save_last_location( "time_add.php" );
 auth();
 ////////////////////////////////////////////////////////
@@ -37,7 +36,7 @@ echo "<table border=0>";
 echo "<tr>";
 
 echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
-include_once "navigate.php";
+include_once "/var/www/tori/navigate.php";
 echo "</td>";    
 
 $wholeWidth = 1425;
@@ -54,10 +53,9 @@ echo "</tr>";
 echo "</table>";    
 echo "</tr>";
 echo "</table>";
-
 echo "</div>";
-
 ?>
+
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
@@ -80,12 +78,9 @@ function update_clock()
 }
 
 var timerId=setInterval( "update_clock()", 10000 );
-
 </script> 
 
-<?
+<?php
 echo "</body>";
 echo "</html>";  
 ?>
-
-                                                                         

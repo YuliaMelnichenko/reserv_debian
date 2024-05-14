@@ -2,15 +2,12 @@
 
 function get_current_datetime_in_timezone()
 {
-    session_start();
+    // session_start();
 
     $valid = 0;
 
     $dateStr = "";
     $timeStr = "";
-    $timezoneStr = "";
-
-    $retVal = "";
 
     if( isset($_SESSION['ss_sessid']) )
     {
@@ -24,8 +21,6 @@ function get_current_datetime_in_timezone()
         $timeZoneHours = floor( abs( $timeZoneMinsSrc ) / 60 );
         $timeZoneMins = abs( $timeZoneMinsSrc ) - $timeZoneHours * 60;
 
-        $strtotimecorrectStr = "$timeZoneSign $timeZoneHours hour $timeZoneSign $timeZoneMins minute";
-
         $timeZoneHoursStr = (string)$timeZoneHours;
         $timeZoneMinsStr = (string)$timeZoneMins;
 
@@ -33,7 +28,6 @@ function get_current_datetime_in_timezone()
         if ( $timeZoneMins < 10 ) $timeZoneMinsStr = "0".$timeZoneMinsStr;
 
         $timeZoneStr = "UTC".$timeZoneSign.$timeZoneHoursStr.":".$timeZoneMinsStr;
-        //        $timeZoneStr = "".$timeZoneSign.$timeZoneHoursStr.":".$timeZoneMinsStr;
 
         $datetime = gmdate("Y-m-d H:i:s");
 
@@ -47,10 +41,9 @@ function get_current_datetime_in_timezone()
     }
     else
     {
-        session_destroy();
-        $dateStr = "";
-        $timeStr = "";
-        $timezoneStr = "";
+      session_destroy();
+      $dateStr = "";
+      $timeStr = "";
     }
 
     return array($valid, $datetime, $dateStr, $timeStr, $timeZoneMinsSrc, $timeZoneStr);
@@ -81,9 +74,9 @@ function get_current_datetime_in_timezone_str( $showDate, $showTimeZone )
     $timeStr = $result[3];
     $timezoneStr = $result[5];
 
-    $timeZoneMins = $timezone;
-    $timeZoneHours = round( $timeZoneMins / 60 );
-    $timeZoneMins = $timeZoneMins - $timeZoneHours * 60;
+    // $timeZoneMins = $timezone; // неизвестная переменная $timezone
+    // $timeZoneHours = round( $timeZoneMins / 60 );
+    // $timeZoneMins = $timeZoneMins - $timeZoneHours * 60;
 
     if ( $valid == 1 )
     {
@@ -255,7 +248,7 @@ function time_to_second( $timeStr )
 
 function shift_datetimestr_by_day_num( $datetimeStr, $dayCnt )
 {
-    $dateArr = datetimestr_to_day_start_stop_DT_str( $dateTime );
+    //$dateArr = datetimestr_to_day_start_stop_DT_str( $dateTime );
     
     $sign = "+";
     if ( $dayCnt < 0 )
@@ -314,21 +307,17 @@ function get_last_location()
   return $_SESSION['ss_last_location'];
 }  
 
-function save_last_location( $location )
-{
-  session_start();
+function save_last_location( $location ){
+  // session_start();
   $_SESSION['ss_last_location'] = $location;
 }  
 
-function move_to_last_location()
-{
+function move_to_last_location(){
   session_start();
-  if ( isset( $_SESSION['ss_last_location'] ) )
-  {
+  if ( isset( $_SESSION['ss_last_location'] ) ){
     $lastLoc = $_SESSION['ss_last_location'];
 
-    if ( strsmp($lastLoc, "index.php") == 0 && ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ) )
-    {  
+    if ( strcmp($lastLoc, "index.php") == 0 && ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ) ){
       $lastLoc = "my_report.php";
     }
 
@@ -344,13 +333,6 @@ function move_to_last_location()
 
 function auth() 
 {
-  /*$ip=$_SERVER['REMOTE_ADDR'];
-
-  if ( $ip == "192.168.100.540")
-  {
-    header("Location: auth.php");
-  }  */
-
   if ( !isset($_SESSION['ss_id']) ) 
   {
     header("Location: auth.php");
@@ -359,23 +341,23 @@ function auth()
 
 function get_dbsetup_param( $paramName ) 
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
-  mysql_query( 'SET NAMES utf8' );      
+  mysqli_set_charset($link, "utf8");     
 
-  $query = mysql_query("SELECT valueInt, valueFloat, valueStr FROM DBSETUP WHERE paramName = '$paramName'"); 
+  $query = mysqli_query($link, "SELECT valueInt, valueFloat, valueStr FROM DBSETUP WHERE paramName = '$paramName'"); 
 
-  $merr=mysql_error();
+  // $merr=mysqlii_error($link);
   if ( !$query ) 
   {
     $success = 0;
   }
   else
   {
-    $vn=mysql_num_rows($query);
+    $vn = mysqli_num_rows($query);
     if ( $vn == 1 )
     {  
-      $row0 = mysql_fetch_array($query, MYSQL_ASSOC);
+      $row0 = mysqli_fetch_array($query, MYSQLI_ASSOC);
       $valInt = $row0["valueInt"]; 	
       $valFloat = $row0["valueFloat"]; 	
       $valStr = $row0["valueStr"]; 	
@@ -386,24 +368,23 @@ function get_dbsetup_param( $paramName )
   return array( $success, $valInt, $valFloat, $valStr );
 }  
 
-
 function get_sv_name_by_userid( $user_id )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
-  $query0 = mysql_query("SELECT SUPERVISORID FROM groups WHERE TYPE = 100 and USERID='$user_id'"); 
+  $query0 = mysqli_query($link, "SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 and USERID='$user_id'"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    $vn=mysql_num_rows($query0);
+    $vn=mysqli_num_rows($query0);
     if ( $vn >= 1 )
     {  
-      $row0 = mysql_fetch_array($query0, MYSQL_ASSOC);
+      $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC);
       $svID = $row0["SUPERVISORID"]; 	
     }
     else
@@ -412,18 +393,18 @@ function get_sv_name_by_userid( $user_id )
     }
   } 	
 
-  $query = mysql_query("SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID='$svID'"); 
-  $merr=mysql_error();
+  $query = mysqli_query($link, "SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID='$svID'"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    $vn=mysql_num_rows($query);
+    $vn=mysqli_num_rows($query);
     if ( $vn == 1 )
     {  
-      $row = mysql_fetch_array($query, MYSQL_ASSOC);
+      $row = mysqli_fetch_assoc($query);
       return $row["SURNAME"]." ".$row["FIRSTNAME"]." ".$row["LASTNAME"];
     }
     else
@@ -433,38 +414,37 @@ function get_sv_name_by_userid( $user_id )
   } 
 }  
 
-
 function get_group_user_IDs_by_svID( $svID, $mode )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
   $userIDs=array();
 
-  mysql_query( 'SET NAMES utf8' );
+  mysqli_set_charset($link, "utf8");
   if ( $svID !=-1 )
   {
-    $query0 = mysql_query("SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID='$svID' and TYPE='$mode'"); 
+    $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID='$svID' and TYPE='$mode'"); 
   }
   else
   {
-    $query0 = mysql_query("SELECT DISTINCT USERID FROM GROUPS WHERE TYPE='$mode'"); 
+    $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE TYPE='$mode'"); 
   }
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    $vn=mysql_num_rows($query0);
+    $vn=mysqli_num_rows($query0);
     if ($vn == 0)
     {
       $userIDs[] = $svID;
     }
     else
     {
-      while($row = mysql_fetch_array($query0, MYSQL_ASSOC))
+      while($row = mysqli_fetch_array($query0, MYSQLI_ASSOC))
       {
         $userIDs[] = $row["USERID"];  
       }
@@ -475,42 +455,41 @@ function get_group_user_IDs_by_svID( $svID, $mode )
 
 function get_group_user_info_by_svID( $svID, $mode )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
   $userIDs=array();
 
-  mysql_query( 'SET NAMES utf8' );
+  mysqli_set_charset($link, "utf8");
   if ( $svID !=-1 )
   {
-    $query0 = mysql_query("SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID='$svID' and TYPE='$mode'"); 
+    $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID='$svID' and TYPE='$mode'"); 
   }
   else
   {
-    $query0 = mysql_query("SELECT DISTINCT USERID FROM GROUPS WHERE TYPE='$mode'"); 
+    $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE TYPE='$mode'"); 
   }
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    $vn=mysql_num_rows($query0);
+    $vn=mysqli_num_rows($query0);
     if ($vn == 0)
     {
       $userIDs[] = $svID;
     }
     else
     {
-      while($row = mysql_fetch_array($query0, MYSQL_ASSOC))
+      while($row = mysqli_fetch_array($query0, MYSQLI_ASSOC))
       {
         $userIDs[] = $row["USERID"];  
       }
     }
   }
   
-  //foreach ($userIDs as $val){ echo "$val\n"; } echo "<br>";
 
   $newUserIDs=array();
 
@@ -527,9 +506,6 @@ function get_group_user_info_by_svID( $svID, $mode )
     }
   }
 
-
-  //asort($userIDs);
-
   foreach ($userIDs as $val)
   {
     if ( $val != $ownUserID )
@@ -544,21 +520,20 @@ function get_group_user_info_by_svID( $svID, $mode )
   $usersDefaultStartMinute=array();
   $usersAllowedDelay=array();
   
-
   foreach ( $newUserIDs as $ID )
   {
-    $query = mysql_query("SELECT rate, defaultStartTime, defaultStartHour, defaultStartMinute, AllowedDelayMinutes FROM employees WHERE ID='$ID'"); 
-    $merr=mysql_error();
+    $query = mysqli_query($link, "SELECT rate, defaultStartTime, defaultStartHour, defaultStartMinute, AllowedDelayMinutes FROM employees WHERE ID='$ID'"); 
+    $merr=mysqli_error($link);
     if ( !$query ) 
     {
-      echo "<br>mysql_error = $merr<br>";
+      echo "<br>mysqli_error = $merr<br>";
     }
     else
     {
-      $vn=mysql_num_rows($query);
+      $vn=mysqli_num_rows($query);
       if ( $vn == 1 )
       {  
-        $row = mysql_fetch_array($query, MYSQL_ASSOC);
+        $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
  	$usersRate[] = $row["rate"];
  	$usersDdefaultStartTime[] = $row["defaultStartTime"];
  	$usersDefaultStartHour[] = $row["defaultStartHour"];
@@ -578,40 +553,37 @@ function get_group_user_info_by_svID( $svID, $mode )
   return $usersInfo;
 }  
 
-
-///***
-
 function get_group_user_IDs_by_svID_for_report( $svID )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
   $userIDs=array();
 
-  mysql_query( 'SET NAMES utf8' );
+  mysqli_set_charset($link, "utf8");
   if ( $svID !=-1 )
   {
-    $query0 = mysql_query("SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID='$svID' and ( TYPE=0 or TYPE=-1 ) "); 
+    $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID='$svID' and ( TYPE=0 or TYPE=-1 ) "); 
   }
   else
   {
-    $query0 = mysql_query("SELECT DISTINCT USERID FROM GROUPS WHERE TYPE=0 or TYPE=-1"); 
+    $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE TYPE=0 or TYPE=-1"); 
   }
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    $vn=mysql_num_rows($query0);
+    $vn=mysqli_num_rows($query0);
     if ($vn == 0)
     {
       $userIDs[] = $svID;
     }
     else
     {
-      while($row = mysql_fetch_array($query0, MYSQL_ASSOC))
+      while($row = mysqli_fetch_array($query0, MYSQLI_ASSOC))
       {
         $userIDs[] = $row["USERID"];  
       }
@@ -622,48 +594,46 @@ function get_group_user_IDs_by_svID_for_report( $svID )
 
 function get_group_user_info_by_svID_for_report_ex( $svID )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
   $userIDs=array();
 
-  mysql_query( 'SET NAMES utf8' );
+  mysqli_set_charset($link, "utf8");
   if ( $svID !=-1 )
   {
-    $query0 = mysql_query("SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID='$svID' and ( TYPE=0 or TYPE=-1 ) "); 
+    $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID='$svID' and ( TYPE=0 or TYPE=-1 ) "); 
   }
   else
   {
-    $query0 = mysql_query("SELECT DISTINCT USERID FROM GROUPS WHERE TYPE=0 or TYPE=-1"); 
+    $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE TYPE=0 or TYPE=-1"); 
   }
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    $vn=mysql_num_rows($query0);
+    $vn=mysqli_num_rows($query0);
     if ($vn == 0)
     {
       $userIDs[] = $svID;
     }
     else
     {
-      while($row = mysql_fetch_array($query0, MYSQL_ASSOC))
+      while($row = mysqli_fetch_array($query0, MYSQLI_ASSOC))
       {
         $userIDs[] = $row["USERID"];  
       }
     }
   }
-  
-  //foreach ($userIDs as $val){ echo "$val\n"; } echo "<br>";
 
   $newUserIDs=array();
 
   $ownUserID = -1;
 
-  session_start();
+  // session_start();
 
   if ( isset( $_SESSION['ss_id'] ) )
   {
@@ -674,8 +644,6 @@ function get_group_user_info_by_svID_for_report_ex( $svID )
     }
   }
 
-    //asort($userIDs);
-
   foreach ($userIDs as $val)
   {
     if ( $val != $ownUserID )
@@ -683,26 +651,24 @@ function get_group_user_info_by_svID_for_report_ex( $svID )
       $newUserIDs[] = $val;
     }
   }
-  //  foreach ($newUserIDs as $val){ echo "$val\n"; } echo "<br>";
-
 
   $usersRate=array();
   $usersFIO=array();
   
   foreach ( $newUserIDs as $ID )
   {
-    $query = mysql_query("SELECT rate, firstname, lastname, surname FROM employees WHERE ID='$ID'"); 
-    $merr=mysql_error();
+    $query = mysqli_query($link, "SELECT rate, firstname, lastname, surname FROM employees WHERE ID='$ID'"); 
+    $merr=mysqli_error($link);
     if ( !$query ) 
     {
-      echo "<br>mysql_error = $merr<br>";
+      echo "<br>mysqli_error = $merr<br>";
     }
     else
     {
-      $vn=mysql_num_rows($query);
+      $vn=mysqli_num_rows($query);
       if ( $vn == 1 )
       {  
-        $row = mysql_fetch_array($query, MYSQL_ASSOC);
+        $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
  	$usersRate[] = $row["rate"];
         $usersFIO[] = $row["surname"]." <span style=\"color:#94A097\"> </br>".$row["firstname"]." </br>".$row["lastname"]." </span>";
       }
@@ -717,26 +683,21 @@ function get_group_user_info_by_svID_for_report_ex( $svID )
   return $usersInfo;
 }  
 
-
-
-///***
-
-
 function get_name_by_userid( $user_id )
 {
-  include_once"../php_tori/connect.php";
-  $query = mysql_query("SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID='$user_id'"); 
-  $merr=mysql_error();
+  include "/var/www/tori/php_tori/connect.php";
+  $query = mysqli_query($link, "SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID='$user_id'"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    $vn=mysql_num_rows($query);
+    $vn=mysqli_num_rows($query);
     if ( $vn == 1 )
     {  
-      $row = mysql_fetch_array($query, MYSQL_ASSOC);
+      $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
       return $row["SURNAME"]." ".$row["FIRSTNAME"]." ".$row["LASTNAME"];
     }
     else
@@ -820,7 +781,7 @@ function format_time_hour_min( $short_time_ )
   $secs = (int)($short_time_ - $hours*(3600) - $mins*(60) );
   
   if ( $secs > 30 )
-    $short_time_ = $short_time_ - $secs_ + 60;
+    $short_time_ = $short_time_ - $secs + 60;
 
   $hours = (int)($short_time_/(3600));
 
@@ -845,7 +806,7 @@ function format_time_differs_from_norm_hour_min( $short_time_, $norm )
   $secs = (int)($short_time_ - $hours*(3600) - $mins*(60) );
   
   if ( $secs > 30 )
-    $short_time_ = $short_time_ - $secs_ + 60;
+    $short_time_ = $short_time_ - $secs + 60;
 
   $hours = (int)($short_time_/(3600));
 
@@ -963,40 +924,35 @@ function GetMonthNameEx( $offset )
 function GetHourNormByMonth( $date, $rate )
 {
 
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
   $duration = 0;
 
-  $query0 = mysql_query("SELECT dur40, dur36, dur24 FROM factory_calendar WHERE date='$date'"); 
+  $query0 = mysqli_query($link, "SELECT dur40, dur36, dur24 FROM factory_calendar WHERE date='$date'"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
    
-    $vn=mysql_num_rows($query0);
-    //echo "".$vn."";
+    $vn=mysqli_num_rows($query0);
     if ( $vn > 1 )
     {  
       return "Error 378. Dublicate factory calendar dates";
     }
     else
     {
-      $row0 = mysql_fetch_array($query0, MYSQL_ASSOC);
+      $row0 = mysqli_fetch_array($query0,MYSQLI_ASSOC);
       if ( $rate == 40 ){ $duration = $row0["dur40"]; }	
       if ( $rate == 36 ){ $duration = $row0["dur36"]; }	
       if ( $rate == 24 ){ $duration = $row0["dur24"]; }	
-
-      //	echo $date, "  :  ", $row0["dur40"], " ", $row0["dur36"], " ", $row0["dur24"];
     }  
   }
   return $duration; 	
 }
-
-
 
 function DayInc( $day )
 {
@@ -1010,21 +966,19 @@ function DayDec( $day )
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function am_i_superuser( $userID )
-{
-  include_once"../php_tori/connect.php";
-  $query = mysql_query("SELECT * FROM groups WHERE SUPERVISORID='$userID' and TYPE <> -1"); 
-  $merr=mysql_error();
-  if ( !$query ) 
-  {
-    echo "<br>mysql_error = $merr<br>";
+function am_i_superuser( $userID ) {
+  include "/var/www/tori/php_tori/connect.php";
+
+  $query = mysqli_query($link, "SELECT * FROM GROUPS WHERE SUPERVISORID='$userID' and TYPE <> -1"); 
+  $merr = mysqli_error($link);
+  if ( !$query ) {
+    echo "<br>mysqli_error = $merr<br>";
     return 0;
   }
 
-  $vn = mysql_num_rows( $query );
+  $vn = mysqli_num_rows( $query );
 
-  if ( $vn > 0 )
-  {
+  if ( $vn > 0 ){
     return 1;
   }
   return 0;
@@ -1032,7 +986,8 @@ function am_i_superuser( $userID )
 
 function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotificationCount, &$refusedNotificationCount, &$deletedNotificationCount, &$newNotificationCount )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
+
   $notificationCount = 0;
   $newNotificationCount = 0;
   $acceptedNotificationCount = 0;
@@ -1045,9 +1000,9 @@ function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotifi
   
   $paramInt = (-1)*$paramArr[1];
   
-  mysql_query( 'SET NAMES utf8' ); 
+  mysqli_set_charset($link, "utf8");
 
-  $query = mysql_query("SELECT a.status 
+  $query = mysqli_query($link, "SELECT a.status 
                         from Delays a 
                         join visiting b
                         on 
@@ -1061,15 +1016,15 @@ function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotifi
                         and
                           a.date > ADDDATE( '$currentDate', INTERVAL -180 DAY )");
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
     return 0;
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $approved = $row["status"];
       if ( $approved == 0 )
@@ -1096,25 +1051,26 @@ function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotifi
 
 function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNotificationCount )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
+
   $notificationCount = 0;
   $currentDayNotificationCount = 0;
   $currentDate = date('Y-m-d');
 
-  $query = mysql_query("SELECT * from ADD_TIME where USERID='$user_id' and PAUSE_MODE = 1"); 
+  $query = mysqli_query($link, "SELECT * from ADD_TIME where USERID='$user_id' and PAUSE_MODE = 1"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
 
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
     return 0;
   }
   else
   {
-    while ( $row1 = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row1 = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
-      $startDate = $row1[STARTDATE];
+      $startDate = $row1["START_DT"];
 
       if ( $startDate == $currentDate )
       {       
@@ -1128,7 +1084,7 @@ function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNoti
 
 function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNotificationCount, &$refusedNotificationCount, &$deletedNotificationCount, &$newNotificationCount )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
   
   $notificationCount = 0;
   $newNotificationCount = 0;
@@ -1142,17 +1098,17 @@ function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNot
   
   $paramInt = (-1)*$paramArr[1];
   
-  $query = mysql_query("SELECT APPROVED from add_time where PAUSE_MODE=0 and USERID='$user_id' and STOP_DT > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )"); 
+  $query = mysqli_query($link, "SELECT APPROVED from add_time where PAUSE_MODE=0 and USERID='$user_id' and STOP_DT > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
     return 0;
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $approved = $row["APPROVED"];
       if ( $approved == 0 )
@@ -1179,7 +1135,7 @@ function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNot
 
 function get_notification_count( $user_id )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
   $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
@@ -1187,23 +1143,23 @@ function get_notification_count( $user_id )
   
   $paramInt = (-1)*$paramArr[1];
   
-  $query = mysql_query("SELECT * from add_time where approved=0 and pause_mode=0 and STOP_DT > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )
+  $query = mysqli_query($link, "SELECT * from ADD_TIME where approved=0 and pause_mode=0 and STOP_DT > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )
                         and userid in (SELECT userid FROM GROUPS WHERE supervisorid='$user_id' and type=0)"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    return mysql_num_rows($query);
+    return mysqli_num_rows($query);
   }
 }
 
 function get_delay_notification_count( $user_id )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
   $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
@@ -1211,7 +1167,7 @@ function get_delay_notification_count( $user_id )
   
   $paramInt = (-1)*$paramArr[1];
   
-  $query = mysql_query("SELECT * from 
+  $query = mysqli_query($link, "SELECT * from 
                         Delays a join 
                         visiting b on a.date = cast( b.in_dt as date) and a.userID = b.user_id   
                         where 
@@ -1223,14 +1179,14 @@ function get_delay_notification_count( $user_id )
                         and 
                            a.userid in (SELECT c.userid FROM GROUPS c WHERE c.supervisorid=$user_id and type=3)"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    return mysql_num_rows($query);
+    return mysqli_num_rows($query);
   }
 }
 
@@ -1238,16 +1194,18 @@ function get_delay_notification_count( $user_id )
 
 function get_penalty_id()
 {
-  $query0 = mysql_query("SELECT max(ID) FROM Penalty"); 
+  include "/var/www/tori/php_tori/connect.php";
+
+  $query0 = mysqli_query($link, "SELECT max(ID) FROM Penalty"); 
 
   $newID = 0;
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
-  else if ( $row = mysql_fetch_array($query0) )
+  else if ( $row = mysqli_fetch_array($query0) )
   {
     $newID = $row[0] + 1;
   }
@@ -1259,18 +1217,15 @@ function time_defined( $time_ )
   if ( $time_ == "00:00:00" )
   {
     return 0;
-    //echo "0";
   }
   else
   {
     return 1;
-    //echo "1";
   }
 }
 
 function represent_time( $time_ )
 {
-   //echo "v".$time_;
   if ( time_defined( $time_ ) == 1 )
   {
     return "<font size=\"2\" color=\"#000000\" face=\"Arial\">$time_</font>";    
@@ -1283,8 +1238,6 @@ function represent_time( $time_ )
 
 function isWeekEnd( $day )
 {
-    //echo "---".$day."---<br>";
-
   $week_day = GetWeekDayD( $day );
 
   if ( $week_day == 6 OR $week_day == 7 )
@@ -1306,7 +1259,6 @@ function round_to_minute( $time )
   }
   return $timeMinutes;
 }
-
 
 function work_day_duration_current_date( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration )
 {
@@ -1349,7 +1301,6 @@ function work_day_duration( $in_time, $out_time, $eat_start, $eat_stop, $add_tim
     return format_time_d( strtotime($out_time) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) ) + $add_time_duration );  
   }
 }
-
 
 function work_day_duration_current_date_n( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration )
 {
@@ -1405,7 +1356,6 @@ function work_day_duration_current_date_nn( $in_time, $out_time, $eat_start, $ea
   }
 }
 
-
 function work_day_duration_n( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration )
 {
   if ( time_defined( $in_time ) == 0 OR time_defined( $out_time ) == 0 OR time_defined( $eat_start ) == 0 OR time_defined( $eat_stop ) == 0 )
@@ -1420,7 +1370,6 @@ function work_day_duration_n( $in_time, $out_time, $eat_start, $eat_stop, $add_t
     return strtotime($out_time) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) ) + $add_time_duration;  
   }
 }
-
 
 function format_time_d( $short_time_ )
 {
@@ -1461,7 +1410,6 @@ function format_time_d_pure( $short_time_ )
   $result_time = $hours.":".$mins.":".$secs;
   return $result_time;
 }
-
 
 function format_time_d_hhmm( $short_time_ )
 {
@@ -1541,7 +1489,6 @@ function format_time_d_hhmmss_pure_partial( $short_time_ )
   return $result_time;
 }
 
-
 function format_time_d_hhmmss_pure_HH( $short_time_ )
 {
   if ( $short_time_ >= 0 )
@@ -1588,9 +1535,7 @@ function hours_norm( $stop_date, $start_date, $use_start_date )
 
   if ( $use_start_date == 0 )
   {
-        //echo $start_date." ";
     $start_date = DayIncDN( $start_date, 1 );
-        //echo $start_date." ";
 
   }
 
@@ -1615,8 +1560,6 @@ function hours_norm( $stop_date, $start_date, $use_start_date )
       break; 
   }
 
-    //echo $validDays;
-
   return $validDays * 8;
 }
 
@@ -1625,12 +1568,7 @@ function estimate_hours( $hoursMinutesNorm, $realSeconds )
 {
   $border = 0; //Percent  
 
-   //echo $hoursMinutesNorm;
-
   $secondsNorm = $hoursMinutesNorm;
-
-  //echo $realSeconds;
-
 
   if ( $realSeconds - $secondsNorm < 0 )
   {
@@ -1644,7 +1582,6 @@ function estimate_hours( $hoursMinutesNorm, $realSeconds )
   else
     return 1;
 }
-
 
 function H_to_hhmm( $hours, $Minutes )
 {
@@ -1670,17 +1607,17 @@ function is_weakend( $date )
 
 function is_workday( $date )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
     
-  $query = mysql_query("SELECT * FROM work_dayoff where date = '$date' and type = 1"); 
-  $merr=mysql_error();
+  $query = mysqli_query($link, "SELECT * FROM work_dayoff where date = '$date' and type = 1"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    $vn=mysql_num_rows($query);
+    $vn=mysqli_num_rows($query);
     if ( $vn == 1 )
     {
       return 1;
@@ -1705,17 +1642,17 @@ function currentWorcDayDurationHours()
 
 function is_holiday( $date )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
-  $query = mysql_query("SELECT * FROM work_dayoff where date = '$date' and type = 0"); 
-  $merr=mysql_error();
+  $query = mysqli_query($link, "SELECT * FROM work_dayoff where date = '$date' and type = 0"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    $vn=mysql_num_rows($query);
+    $vn=mysqli_num_rows($query);
     if ( $vn == 1 )
     {
       return 1;
@@ -1730,17 +1667,17 @@ function get_workdays_holidays_bay_range( $startDate, $stopDate )
 {
   $dates = array();
   $types = array();
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
-  $query = mysql_query("SELECT distinct DATE, TYPE FROM work_dayoff where date >= '$startDate' and date <= '$stopDate'"); 
-  $merr=mysql_error();
+  $query = mysqli_query($link, "SELECT distinct DATE, TYPE FROM work_dayoff where date >= '$startDate' and date <= '$stopDate'"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $dates[] = $row["DATE"];
       $types[] = $row["TYPE"];
@@ -1749,7 +1686,6 @@ function get_workdays_holidays_bay_range( $startDate, $stopDate )
   $result = array();
   $result[0] = $dates;
   $result[1] = $types;
-
  
   return $result;
 }
@@ -1759,17 +1695,17 @@ function get_holidays()
 {
   $holidays = array();
   $index = 1;
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
-  $query = mysql_query("SELECT DATE FROM work_dayoff where type = 0"); 
-  $merr=mysql_error();
+  $query = mysqli_query($link, "SELECT DATE FROM work_dayoff where type = 0"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $holidays[$index] = $row["DATE"];
       $index = $index + 1;
@@ -1782,17 +1718,17 @@ function get_work_day()
 {
   $workDays = array();
   $index = 1;
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
-  $query = mysql_query("SELECT DATE FROM work_dayoff where type = 1"); 
-  $merr=mysql_error();
+  $query = mysqli_query($link, "SELECT DATE FROM work_dayoff where type = 1"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $workDays[$index] = $row["DATE"];
       $index = $index + 1;
@@ -1866,8 +1802,6 @@ function get_days_wo_holidays( $daysRange )
     }
   }
 
-   // echo "-=".count($days)."<br>";
-
   return $days;
 }
 
@@ -1876,8 +1810,6 @@ function get_days_wo_holidays( $daysRange )
 function get_days_with_add_workdays( $daysRange )
 {
   $workDays = get_work_day();
-
-  //  echo $workDays[2]."<br>";
 
   $days = $daysRange;
   $idx = count($daysRange) + 1;
@@ -1925,7 +1857,7 @@ function min_date( $daysRange )
   $minDate = $daysRange[1];
   for ( $idx1 = 1; $idx1 < count( $daysRange ); $idx1 ++ )
   {
-    if( strtotime( $daysRange[$idx1] ) < strtotime( $maxDate ) )
+    if( strtotime( $daysRange[$idx1] ) < strtotime( max_date( $daysRange ) ) )
     {
       $minDate = $daysRange[$idx1];
     }
@@ -1933,22 +1865,18 @@ function min_date( $daysRange )
   return $minDate;  
 }
 
-function order_days( $daysRange )
-{
+function order_days( $daysRange ){
   $maxDate = max_date( $daysRange );
-  $minDate = min_date( $daysRange );
+  $minDate = min_date( $daysRange);
 
   $newDaysRange = array();
   $idx = 1;
 
-  for ( $date = $minDate; ; $date = DayIncDN( $date, 1 ) )
-  {
-    for ( $idx1 = 1; $idx1 <= count( $daysRange ); $idx1 ++ )
-    {
-      if( $daysRange[$idx1] == $date )
-      {
+  for ( $date = $minDate; ; $date = DayIncDN( $date, 1 ) ){
+    for ( $idx1 = 1; $idx1 <= count( $daysRange ); $idx1 ++ ){
+      if( $daysRange[$idx1] == $date ){
         $newDaysRange[$idx] = $date;
-        $idx ++;
+        $idx++;
         break;
       }
     }         
@@ -1956,25 +1884,23 @@ function order_days( $daysRange )
   return $newDaysRange;
 }
 
-function get_user_days( $daysRange, $userID )
-{
+function get_user_days( $daysRange, $userID ){
   $maxDate = max_date( $daysRange );
   $minDate = min_date( $daysRange );
   
   $newDaysRange = array();
   $idx = 1;
   
-  include_once"../php_tori/connect.php";
-  $query = mysql_query("SELECT date FROM visiting where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
+  include "/var/www/tori/php_tori/connect.php";
+  $query = mysqli_query($link, "SELECT date FROM visiting where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
 
-  $merr=mysql_error();
-  if ( !$query ) 
-  {
-    echo "<br>mysql_error = $merr<br>";
+  $merr=mysqli_error($link);
+  if ( !$query ) {
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $newDaysRange[$idx] = $row["date"];
     }
@@ -1990,18 +1916,18 @@ function get_users_current_day_in_time_by_superuser( $SUID )
 
   $currentDate = Date("Y-m-d");
 
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
-  $query = mysql_query("SELECT v.user_id, v.in_time, v.adj FROM visiting v inner join employees e on v.user_id = e.id where date = '$currentDate' order by e.SURNAME"); 
+  $query = mysqli_query($link, "SELECT v.user_id, v.in_time, v.adj FROM visiting v inner join employees e on v.user_id = e.id where date = '$currentDate' order by e.SURNAME"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $regUserID = $row["user_id"];
       $regUserInTime = $row["in_time"];
@@ -2036,17 +1962,17 @@ function get_days_with_delay( $daysRange, $userID, $user_defaultStartTime, $user
   $delayDaysRange = array();
   $idx = 1;
   
-  include_once"../php_tori/connect.php";
-  $query = mysql_query("SELECT date, in_time FROM visiting where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
+  include "/var/www/tori/php_tori/connect.php";
+  $query = mysqli_query($link, "SELECT date, in_time FROM visiting where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $date = $row["date"];
       $inTime = strtotime( $row["in_time"] );
@@ -2069,17 +1995,17 @@ function get_disease_days_by_user_id( $daysRange, $userID )
   $disease = array();
   $idx = 1;
   
-  include_once"../php_tori/connect.php";
-  $query = mysql_query("SELECT date FROM Disease where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
+  include "/var/www/tori/php_tori/connect.php";
+  $query = mysqli_query($link, "SELECT date FROM Disease where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $date = $row["date"];
       $disease[$idx] = $date;
@@ -2097,17 +2023,17 @@ function get_business_trip_days_by_user_id( $daysRange, $userID )
   $businessTrip = array();
   $idx = 1;
   
-  include_once"../php_tori/connect.php";
-  $query = mysql_query("SELECT date FROM Business_trip where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
+  include "/var/www/tori/php_tori/connect.php";
+  $query = mysqli_query($link, "SELECT date FROM Business_trip where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $date = $row["date"];
       $businessTrip[$idx] = $date;
@@ -2139,7 +2065,7 @@ function get_days_WO_disease( $daysRange, $diseaseDays )
       $idx ++;  
     }
   }
-  return $days;
+  return $newDaysRange;
 }
 
 function get_days_WO_business_trip( $daysRange, $businessTripDays )
@@ -2164,7 +2090,7 @@ function get_days_WO_business_trip( $daysRange, $businessTripDays )
       $idx ++;  
     }
   }
-  return $days;
+  return $newDaysRange;
 }
 
 function get_delays_by_user_days( $userDays, $userID, $user_defaultStartTime, $user_allowedDelay )	
@@ -2178,17 +2104,17 @@ function get_delays_by_user_days( $userDays, $userID, $user_defaultStartTime, $u
   $Delays = array();
   $idx = 1;
   
-  include_once"../php_tori/connect.php";
-  $query = mysql_query("SELECT date, in_time FROM visiting where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
+  include "/var/www/tori/php_tori/connect.php";
+  $query = mysqli_query($link, "SELECT date, in_time FROM visiting where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $date = $row["date"];
       $inTime = strtotime( $row["in_time"] );
@@ -2208,8 +2134,6 @@ function get_delays_by_user_days( $userDays, $userID, $user_defaultStartTime, $u
   }
   return $Delays;
 }
-
-
 
 function get_delays_by_days_range_and_user_days( $daysRange, $userDays, $currentDelays )
 {
@@ -2246,17 +2170,17 @@ function get_penalties( $userDays, $userID )
 
   $penalties = array();
   $idx = 1;
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
-  $query = mysql_query("SELECT date from Penalty where date >= '$minDate' and date <= '$maxDate' and userID = '$userID'"); 
-  $merr=mysql_error();
+  $query = mysqli_query($link, "SELECT date from Penalty where date >= '$minDate' and date <= '$maxDate' and userID = '$userID'"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $penaltyDate = $row["date"];
 
@@ -2320,91 +2244,24 @@ function get_penalties_by_range_and_user_id( $startDate, $stopDate, $userID, $us
   $userPenalties = get_penalties( $userDays, $userID );
   $penaltyDays = get_result_penalties( $userDays, $userPenalties );
 
-
-
-
-  get_delays_by_user_days( $userDays, $currentDelays );	
-  
-
-  /*
-
-
-
-  $delays = array();
-
-
-
-  $daysRange = order_days( $daysRange );
-
-
-
-
-  $delaysAcceptedAsValid = get_penalties( $startDate, $stopDate, $userID );
-
-  $pureWorkDays = array();
-
-  for ( $date = $startDate; ; $date = DayIncDN( $date, 1 ) )
-  {
-
-    
-    if ( $date == $stopDate )
-    {
-      break;
-    }
-  }
-
-
-
-  for ( $date = $startDate; ; $date = DayIncDN( $date, 1 ) )
-  {
-      if ( isWeekEnd( $date ) )
-      {
-        $takeIntoAccount = 0;
-        for ( $idx = 1; $idx < count( $workDays ) + 1; $idx ++ )
-        {
-	  if ( $workDays[$idx] == $date )
-          {
-            $takeIntoAccount = 1;
-            break;
-          }
-        } 
-      }	
-      else
-      {
-        $takeIntoAccount = 1;
-        for ( $idx = 1; $idx < count( $holidays ) + 1; $idx ++ )
-        {
-	  if ( $holidays[$idx] == $date )
-          {
-            $takeIntoAccount = 0;
-            break;
-          }
-        }         
-      }
-
-      break;
-  }
-      */
-
-
 }
 
 function get_user_rate( $userID )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
   $rate = 40;
 
-  $query = mysql_query("SELECT RATE FROM employees where ID = '$userID' "); 
+  $query = mysqli_query($link, "SELECT RATE FROM employees where ID = '$userID' "); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    if ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    if ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $rate = $row["RATE"];
     }
@@ -2416,20 +2273,20 @@ function get_user_rate( $userID )
 
 function get_norm_by_range_sec( $startDate, $stopDate, $userID )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
   $rate = 40;
 
-  $query = mysql_query("SELECT RATE FROM employees where ID = '$userID' "); 
+  $query = mysqli_query($link, "SELECT RATE FROM employees where ID = '$userID' "); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $rate = $row["RATE"];
     }
@@ -2449,20 +2306,20 @@ function get_norm_by_range_sec( $startDate, $stopDate, $userID )
 
 function get_current_day_duration_sec( $userID, $defaultStartTime )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
   $inTime = 0;
 
-  $query = mysql_query("SELECT in_time FROM visiting where USER_ID = '$userID' "); 
+  $query = mysqli_query($link, "SELECT in_time FROM visiting where USER_ID = '$userID' "); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $inTime = $row["in_time"];
     }
@@ -2489,17 +2346,17 @@ function get_norm_time_by_current_day_sec( $userID, $user_defaultStartHour, $use
 
 function is_there_add_time_by_alert( $Date, $userID )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
-  $query = mysql_query("SELECT * from ADD_TIME where STARTDATE = '$Date' and USERID = '$userID' and BYALERT = 1"); 
-  $merr=mysql_error();
+  $query = mysqli_query($link, "SELECT * from ADD_TIME where STARTDATE = '$Date' and USERID = '$userID' and BYALERT = 1"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    $vn=mysql_num_rows($query);
+    $vn=mysqli_num_rows($query);
     if ( $vn == 1 )
     {
       return 1;
@@ -2510,7 +2367,7 @@ function is_there_add_time_by_alert( $Date, $userID )
 
 function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTime, $user_allowedDelay )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
   $statArr = array();
   $holidays = array();
@@ -2531,39 +2388,34 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
 
   $def_in_time = strtotime( $user_defaultStartTime ) + $user_allowedDelay * 60;
 
-  $query1 = mysql_query("SELECT STARTTIME, STOPTIME FROM ADD_TIME where STARTDATE >= '$startDate' and STARTDATE <= '$stopDate' and USERID = '$userID' and APPROVED = 1"); 
+  $query1 = mysqli_query($link, "SELECT STARTTIME, STOPTIME FROM ADD_TIME where STARTDATE >= '$startDate' and STARTDATE <= '$stopDate' and USERID = '$userID' and APPROVED = 1"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query1 ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row1 = mysql_fetch_array($query1, MYSQL_ASSOC) )
+    while ( $row1 = mysqli_fetch_array($query1, MYSQLI_ASSOC) )
     {
       $step_add_time_duration = strtotime($row1["STOPTIME"]) - strtotime($row1["STARTTIME"]); 
       $add_time_work_dayduration += $step_add_time_duration;
     }
   }
 
-  //echo "+++".count($workDays)."+++";
-
-  $query2 = mysql_query("SELECT date, in_time, out_time, eat_start, eat_stop, state FROM visiting where date >= '$startDate' and date <= '$stopDate' and user_id = '$userID' and state = 0"); 
-  $merr=mysql_error();
+  $query2 = mysqli_query($link, "SELECT date, in_time, out_time, eat_start, eat_stop, state FROM visiting where date >= '$startDate' and date <= '$stopDate' and user_id = '$userID' and state = 0"); 
+  $merr=mysqli_error($link);
   if ( !$query2 ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
 
-    while ( $row2 = mysql_fetch_array($query2, MYSQL_ASSOC) )
+    while ( $row2 = mysqli_fetch_array($query2, MYSQLI_ASSOC) )
     {
       $date = $row2["date"];
-
-            //if ( $currentDate == $date )
-      //  break;
 
       $step_full_work_day_duration = strtotime($row2["out_time"]) - strtotime($row2["in_time"]); 
       $step_eat_work_day_duration = strtotime($row2["eat_stop"]) - strtotime($row2["eat_start"]); 
@@ -2571,20 +2423,12 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
 
       $step_in_time = strtotime( $row2["in_time"] );
 
-//$dddddd = $dddddd + $step_pure_work_day_duration;
-
-  //    echo  $currentDate."=====".$date." ".format_time_d_hhmm_pure( $step_pure_work_day_duration)."<br>";
-      
-
       $takeIntoAccount = 1; 
-            //echo ".date  ".$stopDate."<br>"; 
       if ( isWeekEnd( $date ) )
       {
-        	//echo "->is weakend<br>";
         $takeIntoAccount = 0;
         for ( $idx = 1; $idx < count( $workDays ) + 1; $idx ++ )
         { 
-          	  //echo ".  wd    ".$workDays[$idx]. " - - ".$date."<br>"; 
 	  if ( $workDays[$idx] == $date )
           {
             $takeIntoAccount = 1;
@@ -2593,22 +2437,16 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
         } 
       }	
       else
-      {
-       	//echo "->is holiday<br>"; 
+      { 
         $takeIntoAccount = 1;
         for ( $idx = 1; $idx < count( $holidays ) + 1; $idx ++ )
         {
-          	  //echo ".  hd    ".$holidays[$idx]. " - - ".$date."<br>"; 
-	  if ( $holidays[$idx] == $date )
-          {
+	        if ( $holidays[$idx] == $date ){
             $takeIntoAccount = 0;
             break;
           }
         }         
       }
-
-            //echo ".       takeIntoAccount  ".$takeIntoAccount."<br>"; 
-
          
       if ( $takeIntoAccount AND $step_in_time > $def_in_time )
       {
@@ -2682,18 +2520,18 @@ function is_there_additional_alerts( $userID )
 {
   $currentDate = date('Y-m-d');           
 
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
-  $query = mysql_query("SELECT * FROM ALERTS where DATE = '$currentDate' and USERID = '$userID' and VIEWED = '0'"); 
+  $query = mysqli_query($link, "SELECT * FROM ALERTS where DATE = '$currentDate' and USERID = '$userID' and VIEWED = '0'"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row1 = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row1 = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {   
       return 1;
     }
@@ -2711,7 +2549,7 @@ function is_there_common_alerts( $userID )
   $user_defaultStartTime = $_SESSION['ss_defaultStartTime'];
   $user_allowedDelay = $_SESSION['ss_allowedDelay'];
 
-  $stats = get_stat_set_by_range_full( $startDate, $stopDate, $userID, $user_defaultStartTime, $user_allowedDelay, $user_rate );
+  $stats = get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $user_defaultStartTime, $user_allowedDelay, $user_rate );
 
   $_SESSION['ss_fails_stat'] = $stats;
 
@@ -2733,8 +2571,6 @@ function timeStr_to_hours_minutes( $timeStr )
   $time[] = (int)( substr( $timeStr, 0, 2 ) );
   $time[] = (int)( substr( $timeStr, 3, 2 ) );
   $time[] = (int)( substr( $timeStr, 6, 2 ) ); 
-
-//echo "$time[0] $time[1] $time[2]";
 
   return $time;
 }
@@ -2801,18 +2637,6 @@ function get_range_by_times_pair( $firstTime, $secondTime, $currentDay, $workTim
   $firstTime = $timeArray[0];
   $validTime = $timeArray[1];
 
-
-/*  if ( is_time_defined( $firstTime ) == 1 )
-  {  */
-    //$result = $result . "[";
-   /* if ( $workTime == 0 )
-    {
-      $result = $result . $firstTime;  
-    }
-    else
-    {   */
-     // if ( strtotime( $firstTime ) < strtotime( $defaultInTime ) )
-     // {
   if ( $validTime == 1 ) 
   {
     $result = $result . "<h5 class=\"middleSmall\">". $firstTime. " - </h5>";  
@@ -2821,21 +2645,6 @@ function get_range_by_times_pair( $firstTime, $secondTime, $currentDay, $workTim
   {
     $result = $result . "<h5 class=\"middleSmallGrey\">". $firstTime. " - </h5>";  
   }
-  //}
- /* if ( strtotime( $firstTime ) > strtotime( $defaultInTime ) AND strtotime( $firstTime ) <= strtotime( $defaultInTime ) + $allowedDelay * 60 )
-  {
-    $result = $result . "<h5 class=\"middleYellow\">". $firstTime. "</h5>";  
-  }
-        if ( strtotime( $firstTime ) > strtotime( $defaultInTime ) + $allowedDelay * 60 )
-      {
-        $result = $result . "<h5 class=\"middleRedBold\">". $firstTime. "</h5>";  
-      }*/
-/*    }
-  }
-  else
-  {
-    $result = $result . "<h5 class=\"$styleClass\">__:__:__";  
-  }  */
 
   $timeArray = represent_is_time_defined($secondTime, $crossDayPeriod);
 
@@ -2927,7 +2736,7 @@ function get_pause_time_duration_by_times( $addTimeInfo )
   return $result;
 }
 
-function get_day_duration_by_times( $inTime, $outTime, $eatStartTime, $defaultStartTimeStr, $currentDay, &$error )
+function get_day_duration_by_times( $inTime, $outTime, $eatStartTime, $currentDay, &$error )
 {
   $result = 0;
 
@@ -2972,18 +2781,15 @@ function get_day_duration_by_times( $inTime, $outTime, $eatStartTime, $defaultSt
   return $result;
 }
 
-function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime, $allowedDelay )
-{
-  mysql_query( 'SET NAMES utf8' ); 
+function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime, $allowedDelay ){
+  include "/var/www/tori/php_tori/connect.php";  
+  mysqli_set_charset($link, "utf8"); 
 
   $rets = Array();
 
-  $query0 = mysql_query("SELECT distinct id, supervisorID, explaneDesk, acceptorID, penaltyID, penaltyReply, status FROM Delays where date = '$date' and userID = '$userID_'"); 
+  $query0 = mysqli_query($link, "SELECT distinct id, supervisorID, explaneDesk, acceptorID, penaltyID, penaltyReply, status FROM Delays where date = '$currentDate' and userID = '$userID_'"); 
 
-  $found = 0;
-
-  while ( $row0 = mysql_fetch_array($query0, MYSQL_ASSOC) )
-  {  
+  while ( $row0 = mysqli_fetch_assoc($query0) ){
     $ID = $row0["id"];
 
     $supervisorID = $row0["supervisorID"];
@@ -2993,25 +2799,22 @@ function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime
     $penaltyReply = $row0["penaltyReply"];
     $status = $row0["status"];
     
-    $query1 = mysql_query("SELECT in_time FROM visiting where user_id = '$userID_' and date = '$date'    in_dt > ADDDATE( '$currentDate', INTERVAL -1 DAY )                      "); 
+    $query1 = mysqli_query($link, "SELECT in_time FROM visiting where user_id = '$userID_' and date = '$date' in_dt > ADDDATE( '$currentDate', INTERVAL -1 DAY )                      "); 
  
     if ( !$query1 ) 
     {
     }
  
     $in_time_def = strtotime( $defauiltInTime );
-    $in_time_defStr = format_time_d_hhmmss_pure( $in_time_def );
     $in_time = 0;
 
-    if ( $row1 = mysql_fetch_array($query1, MYSQL_ASSOC) )
-    {  
+    if ( $row1 = mysqli_fetch_array($query1, MYSQLI_ASSOC) ){
       $in_time = $row1["in_time"];
     }
 
     $delayVal = 0; 
 
-    if ( strtotime( $in_time ) > $in_time_def )
-    {
+    if ( strtotime( $in_time ) > $in_time_def ){
       $delayVal = strtotime( $in_time ) - $in_time_def;
     }
 
@@ -3035,20 +2838,20 @@ function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime
 
 function get_superuser_names_by_user_id( $ID )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";  
+  mysqli_set_charset($link, "utf8");
 
   $ret = Array();
 
-  mysql_query( 'SET NAMES utf8' ); 
-  $query = mysql_query("SELECT DISTINCT ID, FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID in ( select SUPERVISORID from groups where userid = '$ID' )"); 
-  $merr=mysql_error();
+  $query = mysqli_query($link, "SELECT DISTINCT ID, FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID in ( select SUPERVISORID from GROUPS where userid = '$ID' )"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $tempArray = Array();
       $tempArray[] = $row["SURNAME"]." ".$row["FIRSTNAME"]." ".$row["LASTNAME"];
@@ -3067,21 +2870,21 @@ function get_superuser_name_by_id( $suID )
 
 function get_user_name_by_id( $suID )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";  
+  mysqli_set_charset($link, "utf8");
 
-  mysql_query( 'SET NAMES utf8' ); 
-  $query = mysql_query("SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID='$suID'"); 
-  $merr=mysql_error();
+  $query = mysqli_query($link, "SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID='$suID'"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    $vn=mysql_num_rows($query);
+    $vn=mysqli_num_rows($query);
     if ( $vn == 1 )
     {  
-      $row = mysql_fetch_array($query, MYSQL_ASSOC);
+      $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
       return $row["SURNAME"]." ".$row["FIRSTNAME"]." ".$row["LASTNAME"];
     }
     else
@@ -3094,13 +2897,14 @@ function get_user_name_by_id( $suID )
 
 function get_pause_agree_able_superusers_by_userID( $userID )
 {
-  mysql_query( 'SET NAMES utf8' ); 
+  include "/var/www/tori/php_tori/connect.php";  
+  mysqli_set_charset($link, "utf8");
 
-  $query0 = mysql_query("SELECT SUPERVISORID FROM GROUPS where USERID = '$userID' and type = '3'"); 
+  $query0 = mysqli_query($link, "SELECT SUPERVISORID FROM GROUPS where USERID = '$userID' and type = '3'"); 
 
   $rets = Array();
 
-  while ( $row0 = mysql_fetch_array($query0, MYSQL_ASSOC) )
+  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) )
   {  
     $SUID = $row0["SUPERVISORID"];
 
@@ -3118,13 +2922,14 @@ function get_pause_agree_able_superusers_by_userID( $userID )
 
 function get_users_by_superusers_and_type( $SUID, $type )
 {
-  mysql_query( 'SET NAMES utf8' ); 
+  include "/var/www/tori/php_tori/connect.php";  
+  mysqli_set_charset($link, "utf8"); 
 
-  $query0 = mysql_query("SELECT g.USERID FROM GROUPS g inner join employees e on g.userid = e.id where g.SUPERVISORID = '$SUID' and g.type = '$type' order by e.SURNAME asc"); 
+  $query0 = mysqli_query($link, "SELECT g.USERID FROM GROUPS g inner join employees e on g.userid = e.id where g.SUPERVISORID = '$SUID' and g.type = '$type' order by e.SURNAME asc"); 
 
   $rets = Array();
 
-  while ( $row0 = mysql_fetch_array($query0, MYSQL_ASSOC) )
+  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) )
   {  
     $UID = $row0["USERID"];
 
@@ -3136,20 +2941,21 @@ function get_users_by_superusers_and_type( $SUID, $type )
 
 function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $defauiltInTime, $allowedDelay )
 {
-  mysql_query( 'SET NAMES utf8' ); 
+  include "/var/www/tori/php_tori/connect.php";  
+  mysqli_set_charset($link, "utf8");
 
-  $query0 = mysql_query("SELECT distinct id, date, supervisorID, explaneDesk, acceptorID, penaltyID, penaltyReply, status FROM Delays where date >= '$startDate' and date <= '$stopDate' and userID = '$userID' order by date desc"); 
-  $merr=mysql_error();
+  $query0 = mysqli_query($link, "SELECT distinct id, date, supervisorID, explaneDesk, acceptorID, penaltyID, penaltyReply, status FROM Delays where date >= '$startDate' and date <= '$stopDate' and userID = '$userID' order by date desc"); 
+  $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
 
   $found = 0;
 
   $retArray = Array();
 
-  while ( $row0 = mysql_fetch_array($query0, MYSQL_ASSOC) )
+  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) )
   {  
     $ID = $row0["id"];
     $delayDate = $row0["date"];
@@ -3161,7 +2967,7 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
     $penaltyReply = $row0["penaltyReply"];
     $status = $row0["status"];
     
-    $query1 = mysql_query("SELECT in_time FROM visiting where user_id = '$userID' and date = '$delayDate'"); 
+    $query1 = mysqli_query($link, "SELECT in_time FROM visiting where user_id = '$userID' and date = '$delayDate'"); 
 
     $found = 0;
 
@@ -3171,7 +2977,7 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
       $in_time_defStr = format_time_d_hhmmss_pure( $in_time_def );
       $in_time = 0;
 
-      if ( $row1 = mysql_fetch_array($query1, MYSQL_ASSOC) )
+      if ( $row1 = mysqli_fetch_array($query1,MYSQLI_ASSOC) )
       {  
         $in_time = $row1["in_time"];
         $found = 1;
@@ -3235,7 +3041,8 @@ function get_delay_value( $in_dt, $defauiltInTime, $allowedDelay )
 function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
 {
 
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";  
+  mysqli_set_charset($link, "utf8");
 
   $currentDateArr = get_current_datetime_in_timezone();
   $currentDate = $currentDateArr[2];
@@ -3244,9 +3051,7 @@ function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
   
   $paramInt = (-1)*$paramArr[1];
   
-  mysql_query( 'SET NAMES utf8' ); 
-
-  $query = mysql_query("SELECT distinct a.id, a.date, b.in_dt, a.supervisorID, a.explaneDesk, a.acceptorID, a.penaltyID, a.penaltyReply, a.status, b.timeZoneSec
+  $query = mysqli_query($link, "SELECT distinct a.id, a.date, b.in_dt, a.supervisorID, a.explaneDesk, a.acceptorID, a.penaltyID, a.penaltyReply, a.status, b.timeZoneSec
                          FROM Delays a 
                          join visiting b
                          on 
@@ -3261,15 +3066,15 @@ function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
                            b.remoteWorkState = 0
                          order by date desc"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }                     
 
   $retArray = Array();
 
-  while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
   {  
     $ID = $row["id"];
     $delayDate = $row["date"];
@@ -3315,21 +3120,22 @@ function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
 
 function get_reasons()
 {
-  mysql_query( 'SET NAMES utf8' ); 
+  include "/var/www/tori/php_tori/connect.php";  
+  mysqli_set_charset($link, "utf8"); 
 
   $sqlQuery = "SELECT DISTINCT a.ID, a.DESCRIPTION FROM REASONS a where a.ID > 0";
                
-  $query0 = mysql_query( $sqlQuery ); 
+  $query0 = mysqli_query($link, $sqlQuery); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }                     
 
   $results = Array();
  
-  while ( $row0 = mysql_fetch_array($query0, MYSQL_ASSOC) )
+  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) )
   {
     $result = Array();
       
@@ -3345,7 +3151,8 @@ function get_reasons()
  
 function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr, $restrictDTRangeToCurrentDay )
 {
-  mysql_query( 'SET NAMES utf8' ); 
+  include "/var/www/tori/php_tori/connect.php";  
+  mysqli_set_charset($link, "utf8"); 
 
   $sqlQuery = "SELECT DISTINCT a.ID, a.START_DT, a.STOP_DT, a.SUIR, a.REASON, b.DESCRIPTION as REASONDESCRIPTION, a.DESCRIPTION, a.SUPERVISORDESC, a.APPROVED, a.PAUSE_MODE 
                FROM 
@@ -3365,17 +3172,17 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
                ORDER BY START_DT";
 
                
-  $query = mysql_query( $sqlQuery ); 
+  $query = mysqli_query($link, $sqlQuery ); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }                     
 
   $results = Array();
  
-  while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
   {
     $result = Array();
       
@@ -3413,10 +3220,6 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
     {
         $result[6] = strtotime( $result[1] ) - strtotime( $result[0] );
     }
-
-//echo "[[[ $result8 | $START_DT_VAL1 | $startDTStr | $START_DT_VAL ]]]<br>";
-//echo "[[[$restrictDTRangeToCurrentDay | $result8 | $START_DT_VAL1 | $STOP_DT_VAL1 | $startDTStr | $stopDTStr | $result[6]]]]<br>";
-
      
     $results[] = $result;
   }
@@ -3432,9 +3235,10 @@ function get_all_add_work_info_by_user( $userID, $pauseMode )
   
   $paramInt = (-1)*$paramArr[1];
   
-  mysql_query( 'SET NAMES utf8' ); 
+  include "/var/www/tori/php_tori/connect.php";  
+  mysqli_set_charset($link, "utf8");
 
-  $query = mysql_query("SELECT DISTINCT a.ID, a.START_DT, a.STOP_DT, a.SUIR, a.REASON, b.DESCRIPTION as REASONDESCRIPTION, a.DESCRIPTION, a.SUPERVISORDESC, 
+  $query = mysqli_query($link, "SELECT DISTINCT a.ID, a.START_DT, a.STOP_DT, a.SUIR, a.REASON, b.DESCRIPTION as REASONDESCRIPTION, a.DESCRIPTION, a.SUPERVISORDESC, 
                          a.APPROVED, a.PAUSE_MODE
                          FROM 
                          ADD_TIME a
@@ -3443,15 +3247,15 @@ function get_all_add_work_info_by_user( $userID, $pauseMode )
                          ON a.REASON = b.ID
                          where a.USERID = '$userID' AND a.PAUSE_MODE = '$pauseMode' and a.STOP_DT > ADDDATE( '$currentDate', INTERVAL $paramInt DAY ) order by a.START_DT"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }                     
 
   $results = Array();
 
-  while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
   {
     $result = Array();
     
@@ -3482,18 +3286,19 @@ function get_all_add_work_info_by_user( $userID, $pauseMode )
 
 function get_add_work_info_by_user_and_day_range( $userID_, $startDate, $stopDate )
 {
-  mysql_query( 'SET NAMES utf8' ); 
+  include "/var/www/tori/php_tori/connect.php";  
+  mysqli_set_charset($link, "utf8"); 
 
-  $query0 = mysql_query("SELECT DISTINCT ID, STARTDATE, SUIR, STARTTIME, STOPTIME, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE FROM ADD_TIME where STARTDATE >= '$startDate' and STARTDATE <= '$stopDate' and USERID = '$userID_' order by STARTDATE desc, STARTTIME desc"); 
-  $merr=mysql_error();
+  $query0 = mysqli_query($link, "SELECT DISTINCT ID, STARTDATE, SUIR, STARTTIME, STOPTIME, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE FROM ADD_TIME where STARTDATE >= '$startDate' and STARTDATE <= '$stopDate' and USERID = '$userID_' order by STARTDATE desc, STARTTIME desc"); 
+  $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
 
   $results = Array();
 
-  while ( $row0 = mysql_fetch_array($query0, MYSQL_ASSOC) )
+  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) )
   {
     $result = Array();
   
@@ -3578,19 +3383,15 @@ function get_eat_time_duration_by_times_ex( $eatStartTime, $eatStopTime, $state,
   return $result;
 }
 
-function get_add_time_duration_by_times_ex( $addTimeInfo )
-{
+function get_add_time_duration_by_times_ex( $addTimeInfo ){
   $result = 0;
 
-  if ( is_time_defined( $addTimeInfo ) == 1 )
-  {
-    for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
-    {
+  if ( is_time_defined( $addTimeInfo ) == 1 ){
+    for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ ){
       $addInf = $addTimeInfo[$idx];
-      if ( $addInf[4] == 1 AND $addInf[7] == 0 ) 
-      {
-        if ( strtotime( $addInf[1] ) > strtotime( $addInf[0] ) )
-        {
+
+      if ( $addInf[4] == 1 AND $addInf[7] == 0 ) {
+        if ( strtotime( $addInf[1] ) > strtotime( $addInf[0] ) ){
           $result = $result + ( strtotime( $addInf[1] ) - strtotime( $addInf[0] ) );
         }  
       }
@@ -3599,22 +3400,19 @@ function get_add_time_duration_by_times_ex( $addTimeInfo )
   return $result;
 }
 
-function get_durations( $inTime, $outTime, $eatStartTime, $eatStopTime, $addTimeInfo, $state, $currentDay )
-{
-  $allowedStartTime = strtotime( $defaultStartTimeStr ) + $allowedDelayMin * 60;
+function get_durations( $inTime, $outTime, $eatStartTime, $eatStopTime, $addTimeInfo, $state, $currentDay ){
+  $user_defaultStartTimeStr = $_SESSION['ss_defaultStartTime'];
+  $user_allowedDelay = $_SESSION['ss_allowedDelay'];
+  $allowedStartTime = strtotime( $user_defaultStartTimeStr ) + $user_allowedDelay * 60;
 
   $result = Array();
 
-  $errorALL = 0;
-  $errorWT = 0;
-  $errorEAT = 0;
   $result[0] = get_work_time_duration_by_times_ex( $inTime, $outTime, $eatStartTime, $eatStopTime, $state, $currentDay ); 
   $result[1] = get_eat_time_duration_by_times_ex( $eatStartTime, $eatStopTime, $state, $currentDay );
   $result[2] = get_add_time_duration_by_times_ex( $addTimeInfo );
   $result[4] = 0;
 
-  if ( strtotime( $inTime ) > $allowedStartTime )
-  { 
+  if ( strtotime( $inTime ) > $allowedStartTime ){
     $result[4] = strtotime( $inTime )." ** ".$allowedStartTime."  ---   ".strtotime( $inTime ) - $allowedStartTime; 
   }
   $result[5] = get_pause_time_duration_by_times( $addTimeInfo );
@@ -3624,24 +3422,20 @@ function get_durations( $inTime, $outTime, $eatStartTime, $eatStopTime, $addTime
   return $result;
 }
 
-function colored_result( $prefix, $realTime, $needTime, $inverse, $check, $isresult )
-{
+function colored_result( $prefix, $realTime, $needTime, $inverse, $check, $isresult ){
   $resultStr = format_time_d_hhmmss_pure( $realTime );
 
-  if ( $isresult == 1 )
-  {
+  if ( $isresult == 1 ){
     $colorClass = "bigbigbig";
   }
-  else
-  {
+  else{
     $colorClass = "middle";
   }
 
   $resAdd1 = "(";
   $resAdd2 = ")";
 
-  if( $isresult ) 
-  {
+  if( $isresult ) {
     $resAdd1 = "";
     $resAdd2 = "";
   }
@@ -3649,19 +3443,14 @@ function colored_result( $prefix, $realTime, $needTime, $inverse, $check, $isres
   $result = "<h5 class=\"$colorClass\">$prefix$resAdd1$resultStr$resAdd2"; 
 
 
-  if ( $check == 1 )
-  {
-    if( $inverse == 1 )
-    {
-      if ( $realTime > $needTime )
-      {
+  if ( $check == 1 ){
+    if( $inverse == 1 ){
+      if ( $realTime > $needTime ){
         $result = "<h5 class=\"$colorClass"."Red\">$prefix$resAdd1$resultStr$resAdd2";
       }
     }
-    else
-    {
-      if ( $realTime < $needTime )
-      {
+    else{
+      if ( $realTime < $needTime ){
         $result = "<h5 class=\"$colorClass"."Red\">$prefix$resAdd1$resultStr$resAdd2";
       }
     }
@@ -3669,12 +3458,10 @@ function colored_result( $prefix, $realTime, $needTime, $inverse, $check, $isres
   return $result;
 }
 
-function colored_result_partial( $prefix, $realTime, $needTime, $inverse, $check, $isresult )
-{
+function colored_result_partial( $prefix, $realTime, $needTime, $inverse, $check, $isresult ){
   $resultStr = format_time_d_hhmmss_pure_partial( $realTime );
 
-  if ( $isresult == 1 )
-  {
+  if ( $isresult == 1 ){
     $colorClass = "bigbigbig";
   }
   else
@@ -3800,9 +3587,10 @@ function is_there_day_change_betw( $in_dt, $eat_start_dt, $eat_stop_dt, $out_dt,
 }
 
 function take_changes_time ($userID) {
-  mysql_query( 'SET NAMES utf8' );
-  $changes = mysql_query("SELECT changes FROM visiting WHERE user_id = '$userID'");
-  $row2 = mysql_fetch_array( $changes, MYSQL_ASSOC );
+  include "/var/www/tori/php_tori/connect.php";  
+  mysqli_set_charset($link, "utf8");
+  $changes = mysqli_query($link, "SELECT changes FROM visiting WHERE user_id = '$userID'");
+  $row2 = mysqli_fetch_array( $changes, MYSQLI_ASSOC );
   $change_value = $row2["changes"];
   if ($change_value == "1") {
     $res = "<img title=\"время скорректировано\" src=\"img/red.png\">";
@@ -3810,14 +3598,11 @@ function take_changes_time ($userID) {
   return $res;
 }
 
-
-function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $defaultStartTimeStr, $user_allowedDelay )
-{
+function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $defaultStartTimeStr, $user_allowedDelay ){
   $userID = $_SESSION['ss_id'];
   $change = take_changes_time ($userID); 
-    //$currentDate = Date("Y-m-d");
 
-  $dayTypes = get_workdays_holidays_bay_range( $startDate, $stopDate );
+  // $dayTypes = get_workdays_holidays_bay_range( $startDate, $stopDate );
   $currentDateArr = get_current_datetime_in_timezone();
   $currentDate = $currentDateArr[2];
 
@@ -3929,9 +3714,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
  
   if ( $days_penalties == 1 )
   { 
-        //$penaltyDuration = $durations[4];
     $penaltyDurationStr = format_time_d_hhmmss_pure( $penaltyDuration );
-    //    $penaltyDurationStr = $penaltyDuration;
   }
 
   $resultPureTime = $durations[3];
@@ -4001,7 +3784,6 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
 
   
   $workDayRange = "";
-    //if ( is_time_defined( $days_work_start ) == 1 )
   {
     $workDayRange = get_range_by_times_pair( $days_work_start, $days_work_stop, $isCurrentDay, $commonChechState, $defaultStartTimeStr, $user_allowedDelay, $crossDayPeriod );
   }
@@ -4010,7 +3792,6 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
   }
 
   $eatRange = "";
-    //if ( is_time_defined( $days_eat_start ) == 1 )
   {
     $eatRange = get_range_by_times_pair( $days_eat_start, $days_eat_stop, $isCurrentDay, 0, $defaultStartTimeStr, $user_allowedDelay, $crossDayPeriod );
   }
@@ -4055,10 +3836,6 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
   }
   else
   {
-    // if ( $days_day_state != 0 )
-    // { 
-    //   $prefix = "<h5 class=\"smallRed11\">Недостаточно сведений!";
-    // }
     if ( is_time_defined( $days_work_start ) == 0 
       && is_time_defined( $days_work_stop ) == 0 
       && is_time_defined( $days_eat_start ) == 0 
@@ -4072,7 +3849,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
     }
   }
   
-  $workPureContent .= "<h5 class=\"bigbig\">$resultPureTimeStr ($resultPureTimePartStr)</h5>";
+  $workPureContent = "<h5 class=\"bigbig\">$resultPureTimeStr ($resultPureTimePartStr)</h5>";
   
   if ( $currentDate != $days_dates_set AND $errorDur == 1 )
   {
@@ -4081,7 +3858,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
 
   if ( $isThereData == 1 )
   {
-    $tableContent .=   "<div class = \"right_table\">";
+    $tableContent =   "<div class = \"right_table\">";
     $tableContent .=     "<div class = \"current_day\">"; 
      
     $tableContent .=       "<div class = \"report_no_padding_rep\">";
@@ -4118,7 +3895,6 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
       $tableContent .=            $change;
       $tableContent .=           "</div>";
     }
-     
 
     $tableContent .=           "<div class = \"report_no_padding_rep time $uniqueId\" align = \"center\" width = 230px>";
     $tableContent .=             $workDayRange;
@@ -4136,7 +3912,6 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
     }
  
     $tableContent .=   "</div>"; 
- 
  
     $tableContent .=   "<div class = \"time_rep\">"; 
     $tableContent .=       "<div class = \"work_time_rep\">";
@@ -4173,8 +3948,6 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
     }
     $tableContent .=   "</div>";
 
-
-
     if ( $pauseTimeDuration != 0 )
     { 
       $tableContent .=   "<div class = \"time_rep\">"; 
@@ -4193,9 +3966,6 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
       $tableContent .=             "<h5 class=\"middleGrey\">(__:__:__)</h5>";
       $tableContent .=           "</div>";  
     } 
-
-
-
 
     if ( $penaltyDuration != 0 )
     {
@@ -4241,7 +4011,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
   }
 
   $unformattedContent1 = $prefix;
-  $unformattedContent2 = $workContent.$eatContent.$addTimeContent.$pauseTimeContent.$PenaltyContent.$workPureContent;
+  // $unformattedContent2 = $workContent.$eatContent.$addTimeContent.$pauseTimeContent.$PenaltyContent.$workPureContent;
   
    if ($prefix == "<h5 class=\"middleBold\">Текущий день"){
    $content  = "<td class=\"report_no_padding\" bgcolor=\"$dayColor\" bordercolor=\"#888888\" valign=\"$valignMode\" align=\"$cellaligment\" width = $cellWidth>";
@@ -4262,7 +4032,6 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
 
   return $content;
 }
-
 
 function redmine_represent( $timeIn )
 {
@@ -4287,11 +4056,6 @@ $timeInSrc = $timeIn;
   
   $minutesStr = substr( $minutesStr, 2, 2 );
 
-   /* if ($minutes < 10)
-  {
-    $minutesStr = "0".$minutesStr;
-  }  */
-
   $result = $hoursStr.".".$minutesStr;
 
   return $result;
@@ -4309,15 +4073,6 @@ function get_results_cell_content_by_stat( $stats, $index, $cellWidth, $userID, 
 
   $contentDT = "";
   $content = "";
-
-
-  //echo "$userID<b>";
-
-/*if( strcmp($userID, "Цветков Александр Владимирович" ) == 0 )
-{
-  $rr = $days_dates_results[0][8];
-  $content .= "{{{$rr}}}<br>";
-}    */
 
   foreach( $days_dates_results as $results )
   {
@@ -4408,7 +4163,7 @@ function get_results_cell_content_by_stat( $stats, $index, $cellWidth, $userID, 
         $overloadAbsolute = $results[2] - $results[6];
       }
 
-      $content .= "<td class=\"report_no_padding\" bgcolor=\"$resultColor\" bordercolor=\"#888888\" valign=\"top\" align=\"$left\">";
+      $content .= "<td class=\"report_no_padding\" bgcolor=\"$resultColor\" bordercolor=\"#888888\" valign=\"top\" align=\"left\">";
       $content .=   "<div class=\"report_body_head_summary\" id=\"report_body_head_summary\">"; 
 
       $content .=            "<div class = \"time_rep\">";
@@ -4421,15 +4176,12 @@ function get_results_cell_content_by_stat( $stats, $index, $cellWidth, $userID, 
       $Val3 = (int)($results[3]); 
       $Val9 = (int)($results[9]); 
 
-      //$Val = $Val2 - $Val4 - $Val3 + $Val9;              
 $Val = $Val2 + $Val4 - $Val3 + $Val9;              
       $content .=                  format_time_d_hhmmss_pure_styled( $Val );
              
       $content .=                "</div>";
 
       $content .=          "</div>";
-
-
 
       $content .=            "<div class = \"time_rep\">";
       $content .=                "<div class = \"report_no_padding_rep\">";
@@ -4442,8 +4194,6 @@ $Val = $Val2 + $Val4 - $Val3 + $Val9;
       $content .=                "</div>";
       $content .=            "</div>";
 
-
-
       $content .=            "<div class = \"time_rep\">";
       $content .=                "<div class = \"report_no_padding_rep\" align = \"left\" width = 5px>";
       $content .=                  "<img title=\"рабочее время вне офиса за указанный интервал времени\" src=\"$addTimeImg\"/>";
@@ -4455,8 +4205,6 @@ $Val = $Val2 + $Val4 - $Val3 + $Val9;
       $content .=                "</div>";
       $content .=            "</div>";
 
-
-
       $content .=            "<div class = \"time_rep\">";
       $content .=                "<div class = \"report_no_padding_rep\">";
       $content .=                  "<img title=\"приостановки учета времени за указанный интервал времени\" src=\"$pauseTimeImg\"/>";
@@ -4467,7 +4215,6 @@ $Val = $Val2 + $Val4 - $Val3 + $Val9;
              
       $content .=                "</div>";
       $content .=            "</div>";
-
 
       $content .=        "<div class = \"time_rep\">";
 
@@ -4505,55 +4252,8 @@ $Val = $Val2 + $Val4 - $Val3 + $Val9;
 
       $content .=      "</div>";
 
-
-
-      /* $tableContent .=             "<table width = 70px>";
-    $tableContent .=               "<tr>";
-    $tableContent .=                 "<td class = \"report_no_padding_rep\" width = 15px>";
-    $tableContent .=                   "<img title=\"удаленный режим работы\" src=\"$remoteWorkImg\"/>";
-    $tableContent .=                 "</td>";
-    $tableContent .=                 "<td class = \"report_no_padding_rep\" width = 10px>";
-    $tableContent .=                 "</td>";
-    $tableContent .=                 "<td class = \"report_no_padding_rep\" width = 45px>";
-    $tableContent .=                   "<span title=\"время смены суток\">(<h5 class=\"middleSmall\">".$days_dayTransitionTime."</h5>)</span>";
-    $tableContent .=                 "</td>";
-    $tableContent .=               "</tr>";
-    $tableContent .=             "</table>";
-
-    
-     */
-
-
      $content .=   "</div>"; 
-     $content .= "</td>";      
-
-
-
-
-/*      $content .= "<td class=\"report_no_padding\" bgcolor=\"$resultColor\" bordercolor=\"#888888\" valign=\"top\" align=\"$left\">";
-     $content .=   "<div class=\"report_body_head_summary\" id=\"report_body_head_summary\">"; 
-     $content .=     "<img title=\"норма часов за указанный интервал времени\" src=\"$normImg\"/><h5 class=\"middle\"> ".format_time_d_hhmm_pure( $results[6] )."<br>";
-     $content .=     "<img title=\"фактическая наработка за указанный интервал времени\" src=\"$timeSpendImg\"/><h5 class=\"middle\"> ".format_time_d_hhmmss_pure( $results[2] )."<br>";
-     $content .=     "<img title=\"$overloadTitle\" src=\"$overloadImg\"/><h5 class=\"middle\"> ".format_time_d_hhmmss_pure( $overloadAbsolute )."<br>";
-
-//       if ( $results[3] > 0 )
-//     {
-//       $content .=     "<img title=\"рабочее время вне офиса за указанный интервал времени\" src=\"$addTimeImg\"/><h5 class=\"middle\"> ".format_time_d_hhmmss_pure( $results[3] )."<img title=\"Подробнее\" onclick=\"show_adds_info( '$results[0]', '$results[1]', '$userID' );\" );\" src=\"$addTimeListImg\"/><br>";
-//     }
-//     if ( $results[5] > 0 )
-//     {
-//       $content .=     "<img title=\"рабочее время вне офиса за указанный интервал времени\" src=\"$addTimeImg\"/><h5 class=\"middle\"> ".format_time_d_hhmmss_pure( $results[5] )."<img title=\"Подробнее\" onclick=\"show_adds_info( '$results[0]', '$results[1]', '$userID' );\" );\" src=\"$addTimeListImg\"/><br>";
-//     } 
-
-     $content .=     "<img title=\"обеденное время за указанный интервал времени\" src=\"$lunchImg\"/><h5 class=\"middle\"> ".format_time_d_hhmmss_pure( $results[4] )."<br>";
-     if ( $results[8] > 0 )       
-     {
-       $content .=     "<img title=\"штрафные санкции за опоздание по неуважительной причине за указанный интервал времени\" src=\"$penaltyImg\"/><h5 class=\"middle\"> ".format_time_d_hhmmss_pure( $results[7] )."<h3 class=\"small1\"> [$results[8]x1000 = $results[8]000р.]";
-      // $content .=     "<img title=\"Подробнее\" onclick=\"show_penalties_info( '$results[0]', '$results[1]', '$userID' );\" src=\"$addTimeListImg\"/>";
-     }
-
-      $content .=   "</div>"; 
-      $content .= "</div>";*/
+     $content .= "</td>";
     }   
   }
 
@@ -4562,20 +4262,20 @@ $Val = $Val2 + $Val4 - $Val3 + $Val9;
 
 function get_user_defStartTime_and_allowedDelay( $USERiD, &$user_defaultStartTime, &$user_allowedDelay )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";  
 
-  $query = mysql_query("SELECT defaultStartTime, AllowedDelayMinutes FROM employees where ID = '$USERiD' "); 
+  $query = mysqli_query($link, "SELECT defaultStartTime, AllowedDelayMinutes FROM employees where ID = '$USERiD' "); 
 
   $ret = 0;
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    if ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    if ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $user_defaultStartTime = $row["defaultStartTime"];
       $user_allowedDelay = $row["AllowedDelayMinutes"];
@@ -4587,40 +4287,32 @@ function get_user_defStartTime_and_allowedDelay( $USERiD, &$user_defaultStartTim
 
 function get_cell_content_result( $startDate, $stopDate, $userID, $currentDate, $month = 0 )
 {
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";  
 
   $hoursNorm = 0;
   $minutesNorm = 0;
 
- 
-
   if ( $stopDate == $currentDate )
   {
 
-if ( $userID == 3 AND $month == 1 )
-{
-echo $stopDate."    ---     ".$startDate." ** ".$currentDate."---".$month."<br>";
-}
+  if ( $userID == 3 AND $month == 1 )
+  {
+    echo $stopDate."    ---     ".$startDate." ** ".$currentDate."---".$month."<br>";
+  }
 
-    
     $hoursNorm = hours_norm( $stopDate, $startDate, 0 );// + currentWorcDayDurationHours();
     $minutesNorm = currentWorcDayDurationMinutes();
   }
   else
   {
 
-if ( $userID == 3 AND $month == 1 )
-{
-echo $stopDate."    +++     ".$startDate." ** ".$currentDate."---".$month."<br>";	
-}
-
+  if ( $userID == 3 AND $month == 1 )
+  {
+    echo $stopDate."    +++     ".$startDate." ** ".$currentDate."---".$month."<br>";	
+  }
 
     $hoursNorm = hours_norm( $stopDate, $startDate, 1 );
   }
-
-  //return ;
-  
-//echo " ".$hoursNorm." ";
 
   $cellContenAr = array();
   $cellContent = "";
@@ -4630,16 +4322,16 @@ echo $stopDate."    +++     ".$startDate." ** ".$currentDate."---".$month."<br>"
 
   $time_duration = 0;
 
-  $query1 = mysql_query("SELECT STARTTIME, STOPTIME FROM ADD_TIME where STARTDATE >= '$startDate' and STARTDATE <= '$stopDate' and USERID = '$userID' and APPROVED = 1"); 
+  $query1 = mysqli_query($link, "SELECT STARTTIME, STOPTIME FROM ADD_TIME where STARTDATE >= '$startDate' and STARTDATE <= '$stopDate' and USERID = '$userID' and APPROVED = 1"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query1 ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row1 = mysql_fetch_array($query1, MYSQL_ASSOC) )
+    while ( $row1 = mysqli_fetch_array($query1,MYSQLI_ASSOC) )
     {
       $add_start_time = $row1["STARTTIME"];
       $add_stop_time = $row1["STOPTIME"];
@@ -4650,22 +4342,22 @@ echo $stopDate."    +++     ".$startDate." ** ".$currentDate."---".$month."<br>"
     }
   }
 
-  $query = mysql_query("SELECT date, in_time, out_time, eat_start, eat_stop, state FROM visiting where date >= '$startDate' AND date <= '$stopDate' and user_id = '$userID' "); 
+  $query = mysqli_query($link, "SELECT date, in_time, out_time, eat_start, eat_stop, state FROM visiting where date >= '$startDate' AND date <= '$stopDate' and user_id = '$userID' "); 
 
-  $vn=mysql_num_rows($query);
+  $vn=mysqli_num_rows($query);
 
   $tempTime = 0;
 
 $dcc = 0;
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $date = $row["date"];
       $in_time = $row["in_time"];
@@ -4674,25 +4366,19 @@ $dcc = 0;
       $eat_stop = $row["eat_stop"]; 
       $state = $row["state"];
 
-      //$dcc ++;
 
       if ( $date == $currentDate )
       {
         $tempTime = work_day_duration_current_date_nn( $in_time, $out_time, $eat_start, $eat_stop, 0 );
-        //echo $tempTime;
       }
       else
       {
         $tempTime = work_day_duration_n( $in_time, $out_time, $eat_start, $eat_stop, 0 );
-        //echo $tempTime;
       }
 
       $time_duration += $tempTime;
     }
   }
-  
-//if ( $userID == 3 )
-//echo $dcc;
 
   if ( $time_duration != 0 )
   {
@@ -4700,9 +4386,7 @@ $dcc = 0;
     if ( estimate_hours( $hoursNorm*60*60 + $minutesNorm*60, $time_duration ) )
     {
       $cellColor = "00ff00";
-      $result_time_str = "наработка = ".$time_duration_str."<br>норма = ".H_to_hhmm( $hoursNorm, $minutesNorm )."<br>переработка = ".format_time_d_hhmm( $time_duration - $hoursNorm*60*60 ); 	
-            //$result_time_str .= "<br>real = ".$time_duration."<br>"."norm = ".$hoursNorm*60*60;  	
-
+      $result_time_str = "наработка = ".$time_duration_str."<br>норма = ".H_to_hhmm( $hoursNorm, $minutesNorm )."<br>переработка = ".format_time_d_hhmm( $time_duration - $hoursNorm*60*60 );
     }
     else  
     {
@@ -4726,247 +4410,13 @@ $dcc = 0;
          
   
 }
-
-
-
-
-// function get_cell_content_new( $procDate, $userID, $currentDate )
-// {
-//     //echo 1;		
-
-//   $userID = $userID;
-
-//   include_once"../php_tori/connect.php";
-
-//   $cellContenAr = array();
-//   $cellContent = "";
-//   $cellColor = "ddeeff";
-//   $cellAlign = "left";
-//   $cellValign = "top";
-
-//   $add_time_duration = 0;
-
-//   $query1 = mysql_query("SELECT STARTTIME, STOPTIME FROM ADD_TIME where STARTDATE = '$procDate' and USERID = '$userID' and APPROVED = 1"); 
-
-//   $merr=mysql_error();
-//   if ( !$query1 ) 
-//   {
-//     echo "<br>mysql_error = $merr<br>";
-//   }
-//   else
-//   {
-//     while ( $row1 = mysql_fetch_array($query1, MYSQL_ASSOC) )
-//     {
-//       $add_start_time = $row1["STARTTIME"];
-//       $add_stop_time = $row1["STOPTIME"];
-
-//       $add_time_duration += strtotime($add_stop_time) - strtotime($add_start_time);
-//     }
-//     $add_time_duration_str = format_time_d( $add_time_duration );
-//   }
-
-//   $query = mysql_query("SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = '$procDate' and user_id = '$userID'"); 
-//   $merr=mysql_error();
-//   if ( !$query ) 
-//   {
-//     echo "<br>mysql_error = $merr<br>";
-//   }
-//   else
-//   {
-//     if ( $currentDate == 1 )
-//     {
-//       $cellContent  = "<font size=\"2\" color=\"#000000\" face=\"Arial\">Текущий рабочий день:</font><br>";
-
-//       if ( mysql_num_rows($query) == 0 AND $add_time_duration_str == 0 )
-//       {
-
-//         if ( is_weakend( $procDate ) )
-//         {
-//           if ( is_workday( $procDate ) )
-//           {
-//             //echo "1atd = ".$add_time_duration_str;
-//             $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br><br>Нет сведений!</font>";
-//             $cellTextColor = "ff0000";
-//             $cellAlign = "center";              
-//           }
-//           else
-//           {
-//             $cellContent .= "<font size=\"4\" color=\"#000000\" face=\"Arial\"><br><br>Выходной</font>";
-//             $cellTextColor = "000000";
-//             $cellColor = "dddddd";
-//             $cellAlign = "center";
-//             $cellValign = "middle";
-//           }        
-//         }
-//         else
-//         {
-//           if ( !is_holiday( $procDate ) )
-//           {
-//             //echo "2atd = ".$add_time_duration_str;
-//             $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br><br>Нет сведений!</font>";
-//             $cellTextColor = "ff0000";
-//             $cellAlign = "center";              
-//           }
-//           else
-//           {
-//             $cellContent .= "<font size=\"4\" color=\"#000000\" face=\"Arial\"><br><br>Праздничный день!</font>";
-//             $cellTextColor = "000000";
-//             $cellColor = "dddddd";
-//             $cellAlign = "center"; 
-//             $cellValign = "middle";             
-//           }        
-//         }
-//       }
-//       else
-//       {
-//         if ( mysql_num_rows($query) != 0 )
-//         {
-// 	  $row = mysql_fetch_array($query, MYSQL_ASSOC);
-//           $in_time = $row["in_time"];
-//           $out_time = $row["out_time"];
-//           $eat_start = $row["eat_start"];
-//           $eat_stop = $row["eat_stop"]; 
-//           $state = $row["state"];
-//         }
-//         else
-//         {
-//           $in_time = "00:00:00";
-//           $out_time = $row["out_time"];
-//           $eat_start = $row["eat_start"];
-//           $eat_stop = $row["eat_stop"]; 
-//           $state = $row["state"];
-//         }
-
-//                 //echo $in_time."--".$out_time;
-
-//         //if (  )
-//         {
-
-//           $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Раб.в.</font>[".represent_time( $in_time )." - ".represent_time( $out_time )."]<br>";
-//           //          $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Раб.в.</font>[".represent_time( $in_time )." - ".represent_time( $out_time )."]<br>";
-//           $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Обед </font>[".represent_time( $eat_start )." - ".represent_time( $eat_stop )."]<br>";
-//           if ( $add_time_duration != 0 ) $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Работа вне офиса: </font> ".$add_time_duration_str."<br>";
-//           else $cellContent .= "<br>";
-
-
-//           $cellContent .= "<br><font size=\"2\" color=\"#444444\" face=\"Arial black\">Итог: </font>".work_day_duration_current_date( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration )."<br>";
-
-//                     //$cellColor = "ff0000";
-//         }
- 
-
-//       }
-//     }
-//     else
-//     {
-//       if ( mysql_num_rows($query) == 0 AND $add_time_duration == 0 )
-//       {
-//         if ( is_weakend( $procDate ) )
-//         {
-//           if ( is_workday( $procDate ) )
-//           {
-//             //echo "3atd = ".$add_time_duration_str;
-//             $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br><br>Нет сведений!</font>";
-//             $cellTextColor = "ff0000";
-//             $cellAlign = "center";              
-//           }
-//           else
-//           {
-//             $cellContent .= "<font size=\"4\" color=\"#000000\" face=\"Arial\"><br><br>Выходной</font>";
-//             $cellTextColor = "000000";
-//             $cellColor = "dddddd";
-//             $cellAlign = "center";  
-//             $cellValign = "middle";            
-//           }        
-//         }
-//         else
-//         {
-//           if ( !is_holiday( $procDate ) )
-//           {
-//             //echo "4atd = ".$add_time_duration;
-//             $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br><br>Нет сведений!</font>";
-//             $cellTextColor = "ff0000";
-//             $cellAlign = "center";              
-//           }
-//           else
-//           {
-//             $cellContent .= "<font size=\"4\" color=\"#000000\" face=\"Arial\"><br><br>Праздничный день!</font>";
-//             $cellTextColor = "000000";
-//             $cellColor = "dddddd";
-//             $cellAlign = "center";    
-//             $cellValign = "middle";          
-//           }        
-//         }
-//       }
-//       else
-//       {
-//         if ( mysql_num_rows($query) != 0 )
-//         {
-// 	  $row = mysql_fetch_array($query, MYSQL_ASSOC);
-//           $in_time = $row["in_time"];
-//           $out_time = $row["out_time"];
-//           $eat_start = $row["eat_start"];
-//           $eat_stop = $row["eat_stop"]; 
-//           $state = $row["state"];
-//         }
-//         else
-//         {
-//           $in_time = "00:00:00";
-//           $out_time = "00:00:00";
-//           $eat_start = "00:00:00";
-//           $eat_stop = "00:00:00"; 
-//           $state = 0;
-//         }
-
-//                 //echo $in_time."--".$out_time;
-
-//         //if (  )
-//         {
-
-//           $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Раб.в.</font>[".represent_time( $in_time )." - ".represent_time( $out_time )."]<br>";
-//           $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Обед </font>[".represent_time( $eat_start )." - ".represent_time( $eat_stop )."]<br>";
-          
-//           $offs = 0;
-
-//           if ( $add_time_duration != 0 ) $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Работа вне офиса: </font> ".$add_time_duration_str."<br>";
-//           else $offs = 1;
-
-//           $wdDuration = work_day_duration( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration );
-           
-//           if ( $wdDuration != "-1" )
-//           {
-//             $cellColor = "99ff99";
-//             if ( $offs == 1 )  $cellContent .= "<br>";
-//             $cellContent .= "<br><font size=\"2\" color=\"#444444\" face=\"Arial black\">Итог: </font>".$wdDuration."<br>";
-//           }
-//           else
-//           {
-//             $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br>Недостаточно сведений!</font>";
-//             $cellColor = "ffccccc";
-//           }
-          
-//           //$cellColor = "ff0000";
-//         }
- 
-
-//       }
-//     }
-
-//   $cellContenAr[1] = $cellContent;
-//   $cellContenAr[2] = $cellColor;
-//   $cellContenAr[3] = $cellAlign;
-//   $cellContenAr[4] = $cellValign;
-
-//   return $cellContenAr;
-// }  
+  
 
 function get_cell_content( $procDate, $userID, $currentDate )
 {
-    //echo 1;		
-
   $userID = $userID;
 
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
   $cellContenAr = array();
   $cellContent = "";
@@ -4976,16 +4426,16 @@ function get_cell_content( $procDate, $userID, $currentDate )
 
   $add_time_duration = 0;
 
-  $query1 = mysql_query("SELECT STARTTIME, STOPTIME FROM ADD_TIME where STARTDATE = '$procDate' and USERID = '$userID' and APPROVED = 1"); 
+  $query1 = mysqli_query($link, "SELECT STARTTIME, STOPTIME FROM ADD_TIME where STARTDATE = '$procDate' and USERID = '$userID' and APPROVED = 1"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query1 ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
-    while ( $row1 = mysql_fetch_array($query1, MYSQL_ASSOC) )
+    while ( $row1 = mysqli_fetch_array($query1, MYSQLI_ASSOC) )
     {
       $add_start_time = $row1["STARTTIME"];
       $add_stop_time = $row1["STOPTIME"];
@@ -4995,11 +4445,11 @@ function get_cell_content( $procDate, $userID, $currentDate )
     $add_time_duration_str = format_time_d( $add_time_duration );
   }
 
-  $query = mysql_query("SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = '$procDate' and user_id = '$userID'"); 
-  $merr=mysql_error();
+  $query = mysqli_query($link, "SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = '$procDate' and user_id = '$userID'"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo "<br>mysqli_error = $merr<br>";
   }
   else
   {
@@ -5007,14 +4457,13 @@ function get_cell_content( $procDate, $userID, $currentDate )
     {
       $cellContent  = "<font size=\"2\" color=\"#000000\" face=\"Arial\">Текущий рабочий день:</font><br>";
 
-      if ( mysql_num_rows($query) == 0 AND $add_time_duration_str == 0 )
+      if ( mysqli_num_rows($query) == 0 AND $add_time_duration_str == 0 )
       {
 
         if ( is_weakend( $procDate ) )
         {
           if ( is_workday( $procDate ) )
           {
-            //echo "1atd = ".$add_time_duration_str;
             $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br><br>Нет сведений!</font>";
             $cellTextColor = "ff0000";
             $cellAlign = "center";              
@@ -5032,7 +4481,6 @@ function get_cell_content( $procDate, $userID, $currentDate )
         {
           if ( !is_holiday( $procDate ) )
           {
-            //echo "2atd = ".$add_time_duration_str;
             $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br><br>Нет сведений!</font>";
             $cellTextColor = "ff0000";
             $cellAlign = "center";              
@@ -5049,9 +4497,9 @@ function get_cell_content( $procDate, $userID, $currentDate )
       }
       else
       {
-        if ( mysql_num_rows($query) != 0 )
+        if ( mysqli_num_rows($query) != 0 )
         {
-	  $row = mysql_fetch_array($query, MYSQL_ASSOC);
+	  $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
           $in_time = $row["in_time"];
           $out_time = $row["out_time"];
           $eat_start = $row["eat_start"];
@@ -5067,35 +4515,26 @@ function get_cell_content( $procDate, $userID, $currentDate )
           $state = $row["state"];
         }
 
-                //echo $in_time."--".$out_time;
-
-        //if (  )
         {
 
           $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Раб.в.</font>[".represent_time( $in_time )." - ".represent_time( $out_time )."]<br>";
-          //          $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Раб.в.</font>[".represent_time( $in_time )." - ".represent_time( $out_time )."]<br>";
           $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Обед </font>[".represent_time( $eat_start )." - ".represent_time( $eat_stop )."]<br>";
           if ( $add_time_duration != 0 ) $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Работа вне офиса: </font> ".$add_time_duration_str."<br>";
           else $cellContent .= "<br>";
 
 
           $cellContent .= "<br><font size=\"2\" color=\"#444444\" face=\"Arial black\">Итог: </font>".work_day_duration_current_date( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration )."<br>";
-
-                    //$cellColor = "ff0000";
         }
- 
-
       }
     }
     else
     {
-      if ( mysql_num_rows($query) == 0 AND $add_time_duration == 0 )
+      if ( mysqli_num_rows($query) == 0 AND $add_time_duration == 0 )
       {
         if ( is_weakend( $procDate ) )
         {
           if ( is_workday( $procDate ) )
           {
-            //echo "3atd = ".$add_time_duration_str;
             $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br><br>Нет сведений!</font>";
             $cellTextColor = "ff0000";
             $cellAlign = "center";              
@@ -5113,7 +4552,6 @@ function get_cell_content( $procDate, $userID, $currentDate )
         {
           if ( !is_holiday( $procDate ) )
           {
-            //echo "4atd = ".$add_time_duration;
             $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br><br>Нет сведений!</font>";
             $cellTextColor = "ff0000";
             $cellAlign = "center";              
@@ -5130,9 +4568,9 @@ function get_cell_content( $procDate, $userID, $currentDate )
       }
       else
       {
-        if ( mysql_num_rows($query) != 0 )
+        if ( mysqli_num_rows($query) != 0 )
         {
-	  $row = mysql_fetch_array($query, MYSQL_ASSOC);
+	  $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
           $in_time = $row["in_time"];
           $out_time = $row["out_time"];
           $eat_start = $row["eat_start"];
@@ -5147,10 +4585,6 @@ function get_cell_content( $procDate, $userID, $currentDate )
           $eat_stop = "00:00:00"; 
           $state = 0;
         }
-
-                //echo $in_time."--".$out_time;
-
-        //if (  )
         {
 
           $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Раб.в.</font>[".represent_time( $in_time )." - ".represent_time( $out_time )."]<br>";
@@ -5174,50 +4608,9 @@ function get_cell_content( $procDate, $userID, $currentDate )
             $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br>Недостаточно сведений!</font>";
             $cellColor = "ffccccc";
           }
-
-                    //$cellColor = "ff0000";
         }
- 
-
       }
     }
-
-    
-            
-
-
-    /*
-
-
-
-
-    if ( mysql_num_rows($query) == 0 )
-    {
-      $cellContent = "Нет сведений!";
-      $cellColor = "ff0000";
-    }
-    else
-    {
-      $row = mysql_fetch_array($query, MYSQL_ASSOC);
-    
-      if ( $in_time == "00:00:00" )
-      {
-        $cellContent = "Нет сведений!";
-        $cellColor = "ff0000";
-      }
-      //else if ( $in_time != "00:00:00" $in_time != "00:00:00" )
-{}
-
-
-
-      $in_time = $row["in_time"];
-      $out_time = $row["out_time"];
-      $eat_start = $row["eat_start"];
-      $eat_stop = $row["eat_stop"]; 
-      $state = $row["state"];
-
-      $cellContent = $in_time."<br>".$out_time."<br>".$eat_start."<br>".$eat_stop."<br>".$state;
-    }*/
   }
   $cellContenAr[1] = $cellContent;
   $cellContenAr[2] = $cellColor;
@@ -5570,14 +4963,10 @@ function extractUidFromMaskedUID( $maskedStr )
   $maskedStrIdPart2 = substr( $maskedStr, 21, 9 );
   $maskedStrIdPart1 = substr( $maskedStr, 32, 6 );
 
-         
-
-
   $maskedStrHashPart1 = substr( $maskedStr, 10, 2 );
   $maskedStrHashPart2 = substr( $maskedStr, 19, 2 );
   $maskedStrHashPart3 = substr( $maskedStr, 30, 2 );
   $maskedStrHashPart4 = substr( $maskedStr, 38, 2 );
-
 
   $maskedIdStrCheck = $maskedStrIdPart1.$maskedStrIdPart2.$maskedStrIdPart3.$maskedStrIdPart4;
 
@@ -5600,7 +4989,6 @@ function extractUidFromMaskedUID( $maskedStr )
   return array( $valid, $uidVal );
 }
 
-
 function shift_dt_by_transition_time( $dateTime, $transTime, $shiftDir )
 {
   $transTimeH = (int)date("H", strtotime($transTime));
@@ -5619,11 +5007,10 @@ function shift_dt_by_transition_time( $dateTime, $transTime, $shiftDir )
   return $dateTime;
 }
 
-function get_and_update_start_time_status( $userID )
-{
-  session_start();
+function get_and_update_start_time_status( $userID ){
+  // session_start();
                 
-  include_once"../php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
 
   $dtArr = get_splited_current_date_time_in_timezone();
 
@@ -5631,26 +5018,25 @@ function get_and_update_start_time_status( $userID )
 
   $isThereDelay = 0;
 
-  $query = mysql_query("SELECT defaultStartTime, allowedDelayMinutes, remoteWork FROM employees WHERE id='$userID'"); 
-  $merr=mysql_error();
-  if ( !$query ) 
-  {
-    echo "<br>mysql_error = $merr<br>";
+  $query = mysqli_query($link, "SELECT defaultStartTime, allowedDelayMinutes, remoteWork FROM employees WHERE id='$userID'"); 
+  $merr=mysqli_error($link);
+
+  if ( !$query ) {
+    echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
-    $vn=mysql_num_rows($query);
-    if ( $vn == 1 )
-    { 
-      $row = mysql_fetch_array($query, MYSQL_ASSOC);
+  else{
+    $vn=mysqli_num_rows($query);
+    
+    if ( $vn == 1 ){ 
+      $row = mysqli_fetch_assoc($query);
       $ss_defaultStartTime = $row["defaultStartTime"];	
       $ss_allowedDelay = $row["allowedDelayMinutes"];
       $ss_RemoteWork = $row["remoteWork"];
 
       $_SESSION['ss_RemoteWorkStr'] = "В ОФИСЕ";
       $_SESSION['ss_RemoteWork'] = 0;
-      if ( $ss_RemoteWork == 1 )
-      {
+
+      if ( $ss_RemoteWork == 1 ){
         $_SESSION['ss_RemoteWork'] = 1;
         $_SESSION['ss_RemoteWorkStr'] = "УДАЛЕННЫЙ";
       }
@@ -5664,12 +5050,10 @@ function get_and_update_start_time_status( $userID )
       $ss_defaultStartTimeWithDelayVal = strtotime($ss_defaultStartTimeWithDelay);
       $_SESSION['ss_defaultStartTimeWithDelayVal'] = $ss_defaultStartTimeWithDelayVal;
 
-      if ( $currentTimeHHMMSS <= $user_defaultStartTimeWithDelayVal || $ss_RemoteWork == 1 )
-      {
+      if ( $currentTimeHHMMSS <= $ss_defaultStartTimeWithDelayVal || $ss_RemoteWork == 1 ){
         $isThereDelay = 0;
       }
-      else
-      {
+      else{
         $isThereDelay = 2;
       }
 

@@ -1,9 +1,10 @@
-<?
+<?php
 ob_start();
-
 ?>
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<?
+
+<?php
 echo "<html>";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";
@@ -12,24 +13,18 @@ echo "<link rel=\"stylesheet\" href=\"style/style.css\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 echo "<body bgcolor=\"#ffffff\" >";
-
 ?>
+
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
 <script type="text/javascript" src="js/tory.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
-
 </script>
 
-<?
-
-#echo "<table background=\"tori.jpg\"><tr><td>";
-
+<?php
 session_start();
-
 ////////////////////////////////////////////////////////
 
-include_once "funcs.php";
-
+include_once "/var/www/tori/funcs.php";
 save_last_location( "delay_approvement.php" );
 auth();
 ////////////////////////////////////////////////////////
@@ -38,14 +33,14 @@ $userID_ = $_SESSION['ss_id'];
 
 echo "<div align=\"left\">";
 
-include_once"../php_tori/connect.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
-mysql_query( 'SET NAMES utf8' );
+mysqli_set_charset($link, "utf8");
 
 echo "<table border=0>";
   echo "<tr>";
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
-      include_once "navigate.php";
+      include_once "/var/www/tori/navigate.php";
     echo "</td>"; 
 
       $wholeWidth = 562;
@@ -73,16 +68,16 @@ echo "<table border=0>";
     $color = "#ddffff";
     $img = "go1.png";
 
-    mysql_query( 'SET NAMES utf8' );
+    mysqli_set_charset($link, "utf8");
 
-    $query = mysql_query("SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = '$userID_' AND TYPE = 4 "); 
+    $query = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = '$userID_' AND TYPE = 4 "); 
     if (!$query)
     {
       echo "<br>mysql_error = $merr<br>";
     }
     else
     {
-      while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+      while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
       {  
         $userID = $row["USERID"];
         $userName = get_user_name_by_id($userID);
@@ -125,8 +120,6 @@ echo "<table border=0>";
     echo "</tr>";
   echo "</table>";
 echo "</div>";
-
-
 ?>
 
 <script type="text/javascript" src="js/tory.js"></script> 
@@ -145,13 +138,9 @@ function update_clock()
 }
 
 var timerId=setInterval( "update_clock()", 1000 );
-
 </script> 
 
-<?
-
+<?php
 echo "</body>";
 echo "</html>";  
 ?>
-
-                                                                         

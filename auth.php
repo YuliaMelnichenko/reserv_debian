@@ -8,8 +8,9 @@ $ip=$_SERVER['REMOTE_ADDR'];
 
 echo $ip;
 
-include_once "../funcs.php";
+include_once "/var/www/tori/funcs.php";
 ?>
+
 <?php
 echo "<html>";
 echo "<head>";

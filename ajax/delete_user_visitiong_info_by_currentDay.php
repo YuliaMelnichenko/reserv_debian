@@ -1,4 +1,4 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -14,11 +14,11 @@ if ( isset($_POST['userID']) )
   $newEatStartTime = "";
   $newEatStopTime = "";
 
-  include_once "../php_tori/connect.php";
-  include_once "../funcs.php";
+  include_once "/var/www/tori/funcs.php";
+  include_once "/var/www/tori/php_tori/connect.php";
 
-  $query = mysql_query("DELETE FROM visiting where date = '$currentDate' and user_id = '$userID'"); 
-  $merr=mysql_error();
+  $query = mysqli_query($link, "DELETE FROM visiting where date = '$currentDate' and user_id = '$userID'"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
     $days_errors[] = "MYSQL : $merr";
@@ -30,6 +30,4 @@ if ( isset($_POST['userID']) )
   }  
 }
 echo "0";
-
-?>    
-                                                                         
+?>

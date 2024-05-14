@@ -1,12 +1,12 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
 
-include_once"../../php_tori/connect.php";
-include_once "../funcs.php";
+include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
 $userID_ = $_SESSION['ss_id']; 
 $user_defaultStartTime = $_SESSION['ss_defaultStartTime'];
@@ -101,9 +101,6 @@ foreach( $delays as $delay )
   { 
     $approvedStr = "отклонено"; 
     $cellColor = "#FFAAAA"; 
-    //$ta_approved_str_add1 = " <img title=\"решение принял: $superUserName\" src=\"img/superuserBad.png\">";
-    //$ta_approved_str_add2 = " <img title=\"комментарий: $delSUserReply\" src=\"img/delaySUExpl2Bad.png\">";
-
     $buttonAdd1 = "disabled";
     $buttonAdd2 = "";
     $buttonAdd3 = "title=\"запись уже заквитирована. Изменение невозможно\"";
@@ -112,9 +109,6 @@ foreach( $delays as $delay )
   { 
     $approvedStr = "принято"; 
     $cellColor = "#AAFFAA"; 
-    //$ta_approved_str_add1 = " <img title=\"решение принял: $superUserName\" src=\"img/superuserGood.png\">";
-    //$ta_approved_str_add2 = " <img title=\"комментарий: $delSUserReply\" src=\"img/delaySUExpl2Good.png\">";
-
     $buttonAdd1 = "disabled";
     $buttonAdd2 = "";
     $buttonAdd3 = "title=\"запись уже заквитирована. Изменение невозможно\"";
@@ -137,6 +131,3 @@ foreach( $delays as $delay )
 }
 echo "</table>";
 ?>
-
-
-                                                                         

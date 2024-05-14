@@ -1,17 +1,17 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
 
-include_once "../funcs.php";
+include_once "/var/www/tori/funcs.php";
 
 $userID_ = $_SESSION['ss_id']; 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
-include_once"../../php_tori/connect.php";
-include_once "../funcs.php";
+include_once "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/funcs.php";
 
 $newID = 0;
 
@@ -119,9 +119,4 @@ else
     }
   echo "</table>";
 }
-
-
-?>
-
-
-                                                                         
+?>                                                                   

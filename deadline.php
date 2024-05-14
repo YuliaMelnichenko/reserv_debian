@@ -1,7 +1,5 @@
-<?
+<?php
 ob_start();
-//include_once "check_pause.php";
-
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
@@ -203,11 +201,7 @@ echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 echo "<body bgcolor=\"#ffffff\" >";
 
-#echo "<table background=\"tori.jpg\"><tr><td>";
-
 session_start();
-
-#echo "<font size=\"5\" color=\"#119999\" face=\"Arial\"> !!! 2019.11.15 восстановлена работа кнопки ПАУЗА</font>    <img title=\":)\" src=\"img/pauseBig.png\"><br><br>";
 
 echo "<font size=\"0\" color=\"#DDDDDD\" face=\"Arial\"> !!! 2021.12.30 Опоздание может быть принято 'по уважительной причине', если тому виной стал транспортный коллапс значительного размера.</font><br><br>";
 echo "<font size=\"0\" color=\"#EEEEEE\" face=\"Arial\">Для этого необходимо:</font><br>";
@@ -216,10 +210,6 @@ echo "<font size=\"0\" color=\"#EEEEEE\" face=\"Arial\">&emsp;На скринш�
 echo "<font size=\"0\" color=\"#EEEEEE\" face=\"Arial\">&emsp;&emsp;а) Пройденный путь, оставшийся путь и текущее местоположение</font><br>";
 echo "<font size=\"0\" color=\"#EEEEEE\" face=\"Arial\">&emsp;&emsp;б) Наличие огромной пробки, в которую Вы внезапно въехали</font><br>";
 echo "<font size=\"0\" color=\"#EEEEEE\" face=\"Arial\">2) В условиях отсутствия транспорного коллапса, расчётное время прибытия из текущего местоположения в офис должно быть ранее, чем 10:00.</font><br>";
-
-//echo "<font size=\"0\" color=\"#009900\" face=\"Arial\">! HAND</font><br><br>";
-
-
 
 echo "<div id=\"pause_result_head\">";
 echo "</div>";
@@ -233,7 +223,6 @@ echo "</div>";
 echo "<div id=\"delay_explanation_add_time_part\">";                     
 echo "</div>"; 
 
-
 echo "<div id=\"delay_explanation_add_time\" >";
 echo "</div>";
 
@@ -242,38 +231,26 @@ echo "</div>";
                                                               
 echo "<div align=\"left\">";
 
-
-
-////////////////////////////////////////////////////////
-include_once "funcs.php";
-include_once "short_stat.php";
+include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/short_stat.php";
 
 $ip = $_SERVER['REMOTE_ADDR'];
 
-if ( $ip == "192.168.100.50" or $ip == "192.168.100.69" )
-{ 
-    $_SESSION['rep_start_stop_date_mode'] = 2;	
-    save_last_location( "my_report_scr.php" );
-}
-/*else if ( $ip == "192.168.100.54" )
-{ 
-    $_SESSION['rep_start_stop_date_mode'] = 2;	
-    save_last_location( "my_report_scr.php" );
-} */
-else
-{
-    save_last_location( "index.php" );
-}
-
+// if ( $ip == "192.168.100.50" or $ip == "192.168.100.69" )
+// { 
+//     $_SESSION['rep_start_stop_date_mode'] = 2;	
+//     save_last_location( "my_report_scr.php" );
+// }
+// else
+// {
+//     save_last_location( "index.php" );
+// }
 
 auth();
 
-////////////////////////////////////////////////////////
+  include_once "/var/www/tori/start.php";
 
-  include_once "start.php";
-
-
-  include_once "../php_tori/connect.php";
+  include_once "/var/www/tori/php_tori/connect.php";
   if ( isset( $_SESSION['ss_id'] ) )
   { 
     $user_id = $_SESSION['ss_id'];
@@ -284,46 +261,35 @@ auth();
     $user_allowedDelay = $_SESSION['ss_allowedDelay'];
     $_date = date('Y-m-d');
 
-    mysql_query( 'SET NAMES utf8' );
-    $query0 = mysql_query("SELECT * FROM employees WHERE id = '$user_id'"); 
-    $vn0=mysql_num_rows($query0);
+    mysqli_set_charset($link, "utf8");
+    $query0 = mysqli_query($link, "SELECT * FROM employees WHERE id = '$user_id'"); 
+    $vn0=mysqli_num_rows($query0);
 
     echo "<table cellpadding=\"10\" cellspacing=\"0\" border=1>";
     echo "<tr>";
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 120>";
 
-    include_once "navigate.php";
+    include_once "/var/www/tori/navigate.php";
 
     echo "</td>";               
 
-
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 500>";
-
-
-	//echo "<font size=\"3\" color=\"#FF0000\" face=\"Arial\">! ВНИМАНИЕ"."</font><br>";	
-	//echo "<font size=\"2\" color=\"#FF0000\" face=\"Arial\">- начиная с 27.10.2016 любое, вне зависимости от причины, неучтенное системой рабочее время, необходимо вносить САМОСТОЯТЕЛЬНО через раздел РАБОТА ВНЕ ОФИСА.<br>";
-	//echo "<font size=\"2\" color=\"#FF0000\" face=\"Arial\">- при нажатии на кнопки учета времени, необходимо смотреть на реакцию системы, убеждаться в корректном учете. При необходимости обновлять страницу до/после нажатия кнопок.</font>";
-
-	//echo "<br><br>";
 
     echo "<h5 class=\"dark\">/текущий день</h5>";
  
-    //-----------------------------------------------------------------------------------------------------------------
-    
-    
     if ( $vn0 == 1 )
     {
-      $row0 = mysql_fetch_array($query0, MYSQL_ASSOC);
+      $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC);
 
       $empl_state = $row0["STATE"];
 
       $sv_name = get_sv_name_by_userid( $user_id );
 
-      mysql_query( 'SET NAMES utf8' );
+      mysqli_set_charset($link, "utf8");
     
-      $query01 = mysql_query("SELECT * FROM DEPARTMENTS WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = '$user_id')"); 
+      $query01 = mysqli_query($link, "SELECT * FROM DEPARTMENTS WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = '$user_id')"); 
 
-      $row01 = mysql_fetch_array($query01, MYSQL_ASSOC);
+      $row01 = mysqli_fetch_array($query01, MYSQLI_ASSOC);
 
       $depName = $row01["NAME"];
 
@@ -475,12 +441,13 @@ auth();
       echo "</td>";                                                                                     	
     }
     
-
     echo "</tr>";
     echo "</table>";
   }
   echo "<font size=\"2\" color=\"#444444\" face=\"Arial\">";
-    include_once "end.php";
+
+  include_once "/var/www/tori/end.php";
+
   echo "</font>";
 echo "</div>";
 ?>
@@ -496,8 +463,7 @@ var timerId=setInterval( "update_clock()", 5000 );
 
 </script> 
 
-<?
+<?php
 echo "</body>";
 echo "</html>";  
 ?>
-

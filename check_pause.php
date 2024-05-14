@@ -1,15 +1,12 @@
-<?
+<?php
 ob_start();
 
 session_start();
-echo "<div id="pause_div">";
-
-
-
+echo "<div id=\"pause_div\">";
 
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<?
+<?php
 echo "<html>";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";
@@ -26,23 +23,15 @@ function auth()
 	var login  = document.getElementById('login').value;
 	var passwd = document.getElementById('passwd').value;
 
-
-//alert(login);
-
-
 	$.post('ajax/auth.php', {login: login, passwd: passwd}, RetSWT);
-	                                      
-//alert( 1 );
 
-
-        function RetSWT(dat) 
+  function RetSWT(dat) 
 	{  
 //alert( 2 );
 		if ( dat.length > 100 )
 			alert( dat );
-
-        	window.location=self.location;
-	}  
+      window.location=self.location;
+	  }  
 }
 
 function set_focus()
@@ -50,14 +39,8 @@ function set_focus()
 	document.getElementById("auth_btn").focus();
 }
 </script>
-<?
-echo "<body bgcolor=\"#ffffff\" onload=\"set_focus();\">";
-#echo "<table background=\"tori.jpg\"><tr><td>";
-
-
-
-///echo "555 = ".$_SESSION['ss_id'];
-                                                              
+<?php
+echo "<body bgcolor=\"#ffffff\" onload=\"set_focus();\">";                                                              
 echo "<div align=\"center\">";
 
 $ip = $_SERVER['REMOTE_ADDR'];
@@ -67,14 +50,6 @@ if ( $ip == "192.168.100.50" or $ip == "192.168.100.69" )
   $_SESSION['ss_id'] = -1; 
   move_to_last_location(); 
 }
-
-/*if ( $ip == "192.168.100.54" )
-{ 
-  $_SESSION['ss_id'] = -1; 
-  move_to_last_location(); 
-} */
-
-//echo "userID = ".$_SESSION['ss_id'];
 
 if ( !isset($_SESSION['ss_id']) )
 {
@@ -97,14 +72,10 @@ if ( !isset($_SESSION['ss_id']) )
 
   echo "<h4>Для продолжения необходима авторизация</h3>";
 
-//  echo "<form>";
   echo "<font size=\"3\" color=\"#222222\" face=\"Arial\">Логин: </font><input type=\"text\" value=\"\" id=\"login\" style=\"width:120px;\" />";
   echo "<font size=\"3\" color=\"#222222\" face=\"Arial\"> Пароль: </font><input type=\"password\" value=\"\" id=\"passwd\" style=\"width:120px;\" /><br />";
-  #echo "Чему равна сумма ".$first_num." и ".$second_num." ? ";
   echo "<input type=\"hidden\" value=\"$summ_\" name=\"check\" style=\"width:30px;\" /><br />";
-  //echo "<input type=\"submit\" style=\"font-size: 150%; width:420px; height:50px; background-color:#f8d888; border:1px solid #888888;\" value=\"Авторизоваться\"/>";
   echo "<button id=\"auth_btn\" class=\"$button_style_1\" style=\"font-size: 150%; width:420px; height:50px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"auth();\" name=\"nextBtn\">Авторизоваться</button>";
-//  echo "</form>";  
   
   echo "</td>";
   echo "</tr>";
@@ -127,4 +98,3 @@ echo "</div>";
 echo "</body>";
 echo "</html>";  
 ?>
-

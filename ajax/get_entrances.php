@@ -1,12 +1,12 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
 
-include_once"../../php_tori/connect.php";
-include_once "../funcs.php";
+include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
 $userID_ = $_SESSION['ss_id']; 
 
@@ -26,8 +26,6 @@ $color2 = "#ddeedd";
 $color3 = "#ffffff";
 
 $userInTimes = get_users_current_day_in_time_by_superuser( $userID_ );
-
-//echo count($userInTimes);
 
 $rowID = 0;
 
@@ -65,19 +63,5 @@ foreach( $userInTimes as $userInTime )
   echo "</td>";
   echo "</tr>";  
 }
-
-/*
-  echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-  echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$date</h5>"."</td>";
-  echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$prefix: $postfix</h5>"."</td>";
-  echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
-    echo "<button id = \"explBtn\" title = \"Просмотреть\" style=\"padding: 0px 0px 0px 0px; background-color:#ffffff; border:0px solid #888888;\" onclick=\"fill_alerts_by_user( '$userID_', '$date', '$Sttime', '$messStr' );\"><img src=\"img/$img\"></button>";
-  echo "</td>";
-  echo "</tr>";
-} */
-
 echo "</table>";
 ?>
-
-
-                                                                         

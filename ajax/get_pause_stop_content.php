@@ -1,4 +1,4 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -7,38 +7,37 @@ session_start();
 
 $userID = $_SESSION['ss_id']; 
 
-include_once"../../php_tori/connect.php";
-include_once "../funcs.php";
+include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
 $dtResult = get_current_datetime_in_timezone(); 
 $currentDate = $dtResult[2];
 $currentDateTime = $dtResult[1];
 
 
-mysql_query( 'SET NAMES utf8' ); 
+mysqli_set_charset($link, "utf8");
 
 error_reporting(E_ALL | E_STRICT) ;
 ini_set('display_errors', 'On');
 
-//$query = mysql_query("select ID, SUIR, STARTTIME, DESCRIPTION from ADD_TIME where ID in ( select max(ID) from ADD_TIME where STARTDATE = '$currentDate' and USERID = '$userID')");
-$query = mysql_query("select ID, SUIR, START_DT, DESCRIPTION from ADD_TIME where ADDDATE = '$currentDate' and USERID = '$userID' and PAUSE_MODE = 1 order by ADDDATE desc, START_DT desc limit 1");
+$query = mysqli_query($link, "select ID, SUIR, START_DT, DESCRIPTION from ADD_TIME where ADDDATE = '$currentDate' and USERID = '$userID' and PAUSE_MODE = 1 order by ADDDATE desc, START_DT desc limit 1");
 
 
-$merr=mysql_error();
+$merr=mysqli_error($link);
 if (!$query)
 {
   echo "<br>mysql_error = $merr<br>";
 }
 else
 {
-  $vn=mysql_num_rows($query);
+  $vn=mysqli_num_rows($query);
   if ( $vn == 0 )
   {
     echo "0";
   } 
   else
   {
-    if ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    if ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {  
       $id = $row["ID"];
       $suid = $row["SUIR"];
@@ -121,6 +120,3 @@ else
   echo "</script>";
 }
 ?>
-
-
-                                                                         

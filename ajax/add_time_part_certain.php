@@ -1,12 +1,12 @@
-<?
+<?php 
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
 
-include_once "../funcs.php";
-include_once"../../php_tori/connect.php";
+include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
 $userID = $_SESSION['ss_id']; 
 
@@ -30,11 +30,11 @@ else
 $start_time = $start_time.":00";
 $stop_time = $stop_time.":00";
   
-mysql_query( 'SET NAMES utf8' ); 
+mysqli_set_charset($link, "utf8"); 
                                             
-$query = mysql_query("insert into ADD_TIME (ADDDATE,        USERID,   START_DT,     STOP_DT,     REASON, DESCRIPTION, APPROVED, PAUSE_MODE, BYALERT ) 
+$query = mysqli_query($link, "insert into ADD_TIME (ADDDATE,        USERID,   START_DT,     STOP_DT,     REASON, DESCRIPTION, APPROVED, PAUSE_MODE, BYALERT ) 
                       VALUES              ('$currentDate','$userID','$start_time','$stop_time','$base','$desk',      '0',      '0',         '$byAlert')");
-$merr=mysql_error();
+$merr=mysqli_error($link);
 if (!$query)
 {
   echo "<br>mysql_error = $merr<br>";
@@ -43,17 +43,17 @@ else
 {
   if ( isset($_SESSION['ss_ch_delay_ID']) )
   {
-    mysql_query( 'SET NAMES utf8' ); 
+    mysqli_set_charset($link, "utf8"); 
 
     $addTimeDescID = $_SESSION['ss_ch_delay_ID'];
 
     $descDel = "<font color=\"#FF0000\">Из доп. времени:</font> ".$desk;
 
-    $query1 = mysql_query("update Delays set explaneDesk = '$descDel' where id = '$addTimeDescID'");
+    $query1 = mysqli_query($link, "update Delays set explaneDesk = '$descDel' where id = '$addTimeDescID'");
 
     unset($_SESSION['ss_ch_delay_ID']);
                                         
-    $merr1=mysql_error();
+    $merr1=mysqli_error($link);
     if (!$query1)
     {
       echo "<br>mysql_error = $merr<br>";
@@ -69,6 +69,3 @@ else
   }
 }
 ?>
-
-
-                                                                         

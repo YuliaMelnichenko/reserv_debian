@@ -1,8 +1,9 @@
-<?
+<?php
 ob_start();
-
 ?>
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
 <?
 echo "<html>";
 echo "<head>";
@@ -13,18 +14,16 @@ echo "<link rel=\"stylesheet\" href=\"style/style.css\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 echo "<body bgcolor=\"#ffffff\" >";
-
 ?>
+
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
 <script type="text/javascript" src="js/tory.js"></script> 
-<?
 
-#echo "<table background=\"tori.jpg\"><tr><td>";
-
+<?php
 session_start();
 
 ////////////////////////////////////////////////////////
-include_once "funcs.php";
+include_once "/var/www/tori/funcs.php";
 save_last_location( "time_add.php" );
 auth();
 ////////////////////////////////////////////////////////
@@ -45,7 +44,7 @@ echo "<tr>";
 
 echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
 
-include_once "navigate.php";
+include_once "/var/www/tori/navigate.php";
 
 echo "</td>";               
 
@@ -63,10 +62,9 @@ echo "</tr>";
 echo "</table>";    
 echo "</tr>";
 echo "</table>";
-
 echo "</div>";
-
 ?>
+
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
@@ -89,12 +87,9 @@ function update_clock()
 }
 
 var timerId=setInterval( "update_clock()", 10000 );
-
 </script> 
 
-<?
+<?php
 echo "</body>";
 echo "</html>";  
-?>
-
-                                                                         
+?>                                                                    

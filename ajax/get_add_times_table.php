@@ -1,17 +1,17 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
 
-include_once"../../php_tori/connect.php";
-include_once "../funcs.php";
+include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
 $userID = $_SESSION['ss_id']; 
 
 echo "<table border=0>";
-echo "<tr bgcolor=\"$color2\" bordercolor=\"#888888\">";
+echo "<tr bgcolor=\"#ddeedd\" bordercolor=\"#888888\">";
 
 echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" height = 30>";
 echo "<button style=\" cursor: pointer; font-size: 80%; width:150px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"as_add_time();\">Добавить время</button><br>";
@@ -133,6 +133,3 @@ for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
 
 echo "</table>";
 ?>
-
-
-                                                                         

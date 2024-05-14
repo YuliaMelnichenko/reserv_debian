@@ -1,12 +1,12 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
 
-include_once"../../php_tori/connect.php";
-include_once "../funcs.php";
+include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
 $userID = $_SESSION['ss_id']; 
 
@@ -29,15 +29,15 @@ echo "</tr>";
 $color = "#ddffff";
 $img = "go1.png";
 
-mysql_query( 'SET NAMES utf8' );
-$query = mysql_query("SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = '$userID' AND TYPE = 0 "); 
+mysqli_set_charset($link, "utf8");
+$query = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = '$userID' AND TYPE = 0 "); 
 if (!$query)
 {
   echo "<br>mysql_error = $merr<br>";
 }
 else
 {
-  while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
   {  
     $userID = $row["USERID"];
     $userName = get_user_name_by_id($userID);
@@ -79,6 +79,3 @@ else
 
 echo "</table>";
 ?>
-
-
-                                                                         

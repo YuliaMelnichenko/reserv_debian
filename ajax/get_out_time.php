@@ -1,4 +1,4 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -7,8 +7,7 @@ session_start();
 $userID = $_SESSION['ss_id']; 
 $currentDate = date('Y-m-d');
 
-include_once "../funcs.php";
-include_once "../../php_tori/connect.php";
+include_once "/var/www/tori/funcs.php";
 
 $last_day = date("Y-m-d", strtotime('yesterday')); 
 $last_days = date("Y-m-d", strtotime('-3 days')); 

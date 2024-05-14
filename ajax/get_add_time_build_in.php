@@ -1,4 +1,4 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -8,26 +8,26 @@ session_start();
 $userID_ = $_SESSION['ss_id']; 
 $currentDate = date('Y-m-d');
 
-include_once"../../php_tori/connect.php";
-include_once "../funcs.php";
+include_once "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/funcs.php";
 
 $newID = 0;
 
 $user_defaultStartTime = $_SESSION['ss_defaultStartTime'];
 $user_allowedDelay = $_SESSION['ss_allowedDelay'];
 
-$addRets = get_add_work_info_by_user_and_day( $userID_, $currentDate );
+// $addRets = get_add_work_info_by_user_and_day( $userID_, $currentDate );
 
 $found = 0;
 $status = 0;
 $suid = -1;
 
-foreach( $addRets as $addRet )
-{
-  if ( $addRet[7] == 1 ){ continue; }
-  if ( $addRet[4] == -2 ){ continue; }
-  $found = 1;
-}
+// foreach( $addRets as $addRet )
+// {
+//   if ( $addRet[7] == 1 ){ continue; }
+//   if ( $addRet[4] == -2 ){ continue; }
+//   $found = 1;
+// }
 
 if ( $found == 0 )
 {
@@ -137,7 +137,6 @@ else
     echo "</tr>";
   }
 
-
   foreach( $addRets as $addRet )
   {
     $startTime = $addRet[0];
@@ -180,9 +179,4 @@ else
 
   echo "</table>";
 }
-
-
-?>
-
-
-                                                                         
+?>                                                                  

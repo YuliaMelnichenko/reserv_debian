@@ -1,9 +1,9 @@
-<?
+<?php
 ob_start();
 
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<?
+<?php
 echo "<html>";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";
@@ -20,28 +20,25 @@ echo "<body bgcolor=\"#ffffff\" >";
 
 </script>
 
-<?
-
-#echo "<table background=\"tori.jpg\"><tr><td>";
-
+<?php
 session_start();
 
 ////////////////////////////////////////////////////////
-include_once "funcs.php";
+include_once "/var/www/tori/funcs.php";
 save_last_location( "delay_approvement.php" );
 auth();
 ////////////////////////////////////////////////////////
 
 echo "<div align=\"left\">";
 
-include_once"../php_tori/connect.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
-mysql_query( 'SET NAMES utf8' );
+mysqli_set_charset($link, "utf8");
 
 echo "<table border=1>";
   echo "<tr>";
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 120>";
-      include_once "navigate.php";
+      include_once "/var/www/tori/navigate.php";
     echo "</td>";    
     echo "<td class=\"nopadding_s\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 120>";
       echo "<h5 class=\"dark\">/уведомления по учету времени за текущий квартал</h5>";
@@ -53,20 +50,15 @@ echo "<table border=1>";
   echo "</tr>";
 echo "</table>";
 echo "</div>";
-
 ?>
 
 <script type="text/javascript" src="js/tory.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
       
 show_alerts_page();
-
 </script> 
 
-<?
-
+<?php
 echo "</body>";
 echo "</html>";  
 ?>
-
-                                                                         

@@ -1,9 +1,10 @@
-<?
+<?php
 ob_start();
-
 ?>
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<?
+
+<?php
 echo "<html>";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";
@@ -12,8 +13,8 @@ echo "<link rel=\"stylesheet\" href=\"style/style.css\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 echo "<body bgcolor=\"#ffffff\" >";
-
 ?>
+
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
 <script type="text/javascript" src="js/tory.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
@@ -31,20 +32,13 @@ function update_clock()
 }
 
 var timerId=setInterval( "update_clock()", 1000 );
-
 </script> 
 
-</script>
-
-<?
-
-#echo "<table background=\"tori.jpg\"><tr><td>";
-
+<?php
 session_start();
-
 ////////////////////////////////////////////////////////
 
-include_once "funcs.php";
+include_once "/var/www/tori/funcs.php";
 
 save_last_location( "delay_approvement.php" );
 auth();
@@ -63,16 +57,15 @@ if ( $uidValid == 0 )
 
 echo "<div align=\"left\">";
 
-include_once"../php_tori/connect.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
-mysql_query( 'SET NAMES utf8' );
+mysqli_set_charset($link, "utf8");
 
 echo "<table border=0>";
   echo "<tr>";
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
-      include_once "navigate.php";
+      include_once "/var/www/tori/navigate.php";
     echo "</td>"; 
-
       $wholeWidth = 688;
 
       echo "<td id=\"add_time_content_width\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
@@ -150,8 +143,6 @@ echo "<table id=\"pause_approvement_table\" border=0>";
       foreach( $addTimes as $addTime )
       {
 
-//echo "[[[ $addInf[8] ]]] ";
-
         $ta_id = $addTime[8];
         $ta_start_dt = $addTime[0];
         $ta_stop_dt = $addTime[1];
@@ -186,15 +177,11 @@ echo "<table id=\"pause_approvement_table\" border=0>";
     echo "</td>";
   echo "</tr>";
 echo "</table>";
-
 ?>
 
 <script type="text/javascript" src="js/tory.js"></script> 
 
-<?
-
+<?php
 echo "</body>";
 echo "</html>";  
 ?>
-
-                                                                         

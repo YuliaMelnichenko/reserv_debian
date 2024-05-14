@@ -1,6 +1,7 @@
-<?
+<?php
 ob_start();
 ?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>                                                                                                                   
 <head>
@@ -13,26 +14,25 @@ ob_start();
 <body bgcolor="#ffffff">
 <div align="left">
 
-<?
-
+<?php
 session_start();
 
 $err = array(); 
 	
-include_once"../php_tori/connect.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
 if (isset( $_POST['r_button']) )    
 {
 
-  $query = mysql_query("SELECT COUNT(id) FROM employees WHERE login='".mysql_real_escape_string($_POST['r_login'])."'"); 
-  $merr=mysql_error();
+  $query = mysqli_query($link, "SELECT COUNT(id) FROM employees WHERE login='".mysqli_real_escape_string($link, $_POST['r_login'])."'"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
     echo "<br>mysql_error = $merr<br>";
   }
   else
   {
-    if(mysql_result($query, 0) > 0) 
+    if(mysqli_result($query, 0) > 0) 
     { 
       $err[] = "Пользователь с таким логином уже существует"; 
     }
@@ -103,33 +103,33 @@ if (isset( $_POST['r_button']) )
 
     if(count($err) == 0) 
     { 
-      $login = mysql_real_escape_string($_POST['r_login']);   	       
-      $passwd = md5(md5(trim(mysql_real_escape_string($_POST['r_passwd'])))); 
+      $login = mysqli_real_escape_string($link, $_POST['r_login']);   	       
+      $passwd = md5(md5(trim(mysqli_real_escape_string($link, $_POST['r_passwd'])))); 
 
       $surname = $_POST['r_surname'];
       $first_name = $_POST['r_first_name'];
       $second_name = $_POST['r_second_name'];
     
-      $query = mysql_query("select max(id) FROM employees");
-      $merr=mysql_error();
+      $query = mysqli_query($link, "select max(id) FROM employees");
+      $merr=mysqli_error($link);
       if (!$query){ $err[] = $merr; die(); }
       else
       {
-        $newuserid = mysql_result($query, 0) + 1;
-        $res=mysql_query("BEGIN");
-        mysql_query( 'SET NAMES utf8' );
+        $newuserid = mysqli_result($query, 0) + 1;
+        $res=mysqli_query($link, "BEGIN");
+        mysqli_set_charset($link, "utf8");
           
-        $res=mysql_query("insert into employees values ('$newuserid','$login','$passwd','$first_name','$second_name','$surname','','','-1')");
-        $merr=mysql_error();
+        $res=mysqli_query($link, "insert into employees values ('$newuserid','$login','$passwd','$first_name','$second_name','$surname','','','-1')");
+        $merr=mysqli_error($link);
         if (!$res)
         { 
 	  echo $merr;
 	  $err[] = $merr; 
-	  mysql_query("ROLLBACK");	
+	  mysqli_query($link, "ROLLBACK");	
         }
         else
         {
-          mysql_query("COMMIT");
+          mysqli_query($link, "COMMIT");
         }
       }
 
@@ -179,9 +179,9 @@ echo "<td class=\"rg\"><input name=\"r_second_name\" style=\"width:255px;\" type
 echo "</tr>";
 echo "</table>";
 echo "<input type=\"submit\" name=\"r_button\" value=\"Зарегистрироваться\"/><br>";
-
 echo "<br><a href=\"index.php\" class=\"ml\" title=\"Вернуться на главную страницу\">На главную</a>";
 ?>
+
 </div>
 </body>
 </html> 

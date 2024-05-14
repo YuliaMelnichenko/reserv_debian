@@ -1,12 +1,11 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
 
-include_once"../../php_tori/connect.php";
-include_once "../funcs.php";
+include_once "/var/www/tori/funcs.php";
 
 $userID_ = $_SESSION['ss_id']; 
 
@@ -22,8 +21,7 @@ $color1 = "#ddffff";
 $color2 = "#ddeedd";
 $color3 = "#ffffff";
 
-function get_postfix( $newType, &$startMode, &$messStr )
-{    
+function get_postfix( $newType, &$startMode, &$messStr ){
   if ( $newType == 11 OR $newType == 12 ){ $startMode = 0; $messStr = "Забыл отметить время ухода на обед"; return "не отмечено время ухода на обед. Рабочее время не учтено!"; }
   if ( $newType == 13 ){ $startMode = 1; $messStr = "Забыл отметить время прихода с обеда"; return "не отмечено время прихода с обеда. Учтено время от начала рабочего дня до начала обеда!"; }
   if ( $newType == 14 ){ $startMode = 2; $messStr = "Забыл отметить время ухода с рабочего места"; return "не отмечено время ухода с рабочего места. Учтено время от начала рабочего дня до начала обеда!"; } 
@@ -33,8 +31,7 @@ $stats = $_SESSION['ss_fails_stat'];
 
 $img = "go1.png";
 
-for( $idx = 0; $idx < count( $stats[0] ); $idx ++ )
-{
+for( $idx = 0; $idx < count( $stats[0] ); $idx ++ ){
   $date = $stats[0][$idx];
 
   $type = $stats[8][$idx];
@@ -47,8 +44,7 @@ for( $idx = 0; $idx < count( $stats[0] ); $idx ++ )
   $startMode = 0;
   $Sttime = ""; 
 
-  if ( $type >= 200 )
-  {
+  if ( $type >= 200 ){
     $newType = $type - 200;
     if ( $newType == 10 ){ continue; } 
     $prefix = "Внеочередно рабочий день";
@@ -57,19 +53,15 @@ for( $idx = 0; $idx < count( $stats[0] ); $idx ++ )
     else if ( $startMode == 1 ){ $Sttime = $eatStart; }
     else if ( $startMode == 2 ){ $Sttime = $eatStop; }  
   }
-  else if ( $type != 100 )
-  {
-    if ( isWeekEnd( $date ) == 0 )
-    {
-      if ( $type == "NDF" )
-      { 
+  else if ( $type != 100 ){
+    if ( isWeekEnd( $date ) == 0 ){
+      if ( $type == "NDF" ){
         $prefix = "Рабочий день";
         $postfix = "нет сведений";
         $messStr = "Забыл отметить время прихода на рабочее место";
         $Sttime = "10:00:00";
       }
-      else
-      {
+      else{
         $newType = $type;
         if ( $newType == 10 ){ continue; }
         $prefix = "Рабочий день";
@@ -83,19 +75,16 @@ for( $idx = 0; $idx < count( $stats[0] ); $idx ++ )
   }  
   else{ continue; }
 
-  if ( $colorMode == 0 )
-  {
+  if ( $colorMode == 0 ){
     $color = $color1;
     $colorMode = 1;
   }
-  else
-  {
+  else{
     $color = $color3;
     $colorMode = 0;
   }
 
-  if ( is_there_add_time_by_alert( $date, $userID_ ) == 1 )
-  {
+  if ( is_there_add_time_by_alert( $date, $userID_ ) == 1 ){
     continue;
   }
 
@@ -110,22 +99,19 @@ for( $idx = 0; $idx < count( $stats[0] ); $idx ++ )
   echo "</tr>";
 }
 
-include_once"../php_tori/connect.php";
+include "/var/www/tori/php_tori/connect.php";
 
 $currentDate = date('Y-m-d');           
 
-mysql_query( 'SET NAMES utf8' ); 
-$query = mysql_query("SELECT * FROM ALERTS where DATE = '$currentDate' and USERID = '$userID_' and VIEWED = '0'"); 
+mysqli_set_charset($link, "utf8");
+$query = mysqli_query($link, "SELECT * FROM ALERTS where DATE = '$currentDate' and USERID = '$userID_' and VIEWED = '0'"); 
 
-$merr=mysql_error();
-if ( !$query ) 
-{
+$merr=mysqli_error($link);
+if ( !$query ){
   echo "<br>mysql_error = $merr<br>";
 }
-else
-{
-  while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
-  {
+else{
+  while ( $row = mysqli_fetch_assoc($query) ){
     $date = $row["DATE"];
     $id = $row["ID"];
     $comments = $row["COMMENT"];
@@ -142,6 +128,3 @@ else
 
 echo "</table>";
 ?>
-
-
-                                                                         

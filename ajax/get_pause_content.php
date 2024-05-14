@@ -6,8 +6,8 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 session_start();
 $userID = $_SESSION['ss_id'];
 
-include_once"../../php_tori/connect.php";
-include_once "../funcs.php";
+include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
 echo "<table cellpadding=\"0\" cellspacing=\"0\" border=0 style=\"margin:0; padding:0; margin-left:0;\" >";  
   echo "<tr>";
@@ -48,6 +48,3 @@ echo "<table cellpadding=\"0\" cellspacing=\"0\" border=0 style=\"margin:0; padd
   echo "</tr>";
 echo "</table>"; 
 ?>
-
-
-                                                                         

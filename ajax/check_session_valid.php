@@ -1,4 +1,4 @@
-<?
+<?php
 session_start();
 
 if ( ! isset( $_SESSION['ss_sessid'] ) || ! isset( $_SESSION['ss_id'] ) || ! isset( $_SESSION['ss_startDTStr'] ) || ! isset( $_SESSION['ss_stopDTStr'] ) )
@@ -17,7 +17,7 @@ else
     $startDTStrVal = strtotime( $startDTStr );
     $stopDTStrVal = strtotime( $stopDTStr );
 
-    include_once "../funcs.php";
+    include_once "/var/www/tori/funcs.php";
 
     $timeArr = get_current_datetime_in_timezone();
 
@@ -88,9 +88,7 @@ else
     {
       if ( $_SESSION['ss_state'] !=0 && $_SESSION['ss_state'] !=1 )
       {
-        include_once "../funcs.php";
-
-//$sstate = $_SESSION['ss_state'];
+        include_once "/var/www/tori/funcs.php";
 
         $currentDateT = get_current_datetime_in_timezone_str( 1, 0 );
         $user_dayTransitionTime = $_SESSION['$ss_dayTransitionTime'];
@@ -100,10 +98,6 @@ else
         $differTimeSecStr = $timeArr[4];
 
         $differTimeSec = time_to_second( $differTimeSecStr );         
-
-
-      //echo "[[[".$sstate."---".$differTimeSec."]]]";
-
 
         if ( $differTimeSec < 3600 * 3 )
         {
@@ -125,6 +119,4 @@ else
   }  
 }
  	
-?>
-
-                                                                         
+?>                                                                      

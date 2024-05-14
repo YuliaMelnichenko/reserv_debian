@@ -1,12 +1,12 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
 
-include_once"../../php_tori/connect.php";
-include_once "../funcs.php";
+include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
 $_SESSION['delay_page_mode'] = 2;
 
@@ -201,6 +201,3 @@ echo "<table id=\"delay_approvement_table\" border=0>";
   echo "</tr>";
 echo "</table>";
 ?>
-
-
-                                                                         

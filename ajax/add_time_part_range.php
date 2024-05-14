@@ -1,4 +1,4 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -16,19 +16,16 @@ $add_time_part_base = $_POST['add_time_part_base'];
 $add_time_part_desk = $_POST['add_time_part_desk'];
 $exclude_weekend_holidays = $_POST['exclude_weekend_holidays'];
 
-$start_dt = 
-$stop_dt = 
+include_once "/var/www/tori/php_tori/connect.php";
 
-include_once"../../php_tori/connect.php";
-
-$query0 = mysql_query("SELECT max(ID) FROM ADD_TIME"); 
+$query0 = mysqli_query($link, "SELECT max(ID) FROM ADD_TIME"); 
 $newID = 0;
-$merr=mysql_error();
+$merr=mysqli_error($link);
 if ( !$query0 ) 
 {
   echo "<br>mysql_error = $merr<br>";
 }
-else if ( $row = mysql_fetch_array($query0) )
+else if ( $row = mysqli_fetch_array($query0) )
 {
   $newID = $row[0] + 1;
 }
@@ -39,7 +36,7 @@ if ( strtotime($add_time_part_start_date) > strtotime($add_time_part_stop_date) 
 }
 else
 {
-  include_once  "../funcs.php";
+  include_once  "/var/www/tori/funcs.php";
 
   $daysRange = get_days_range( $add_time_part_start_date, $add_time_part_stop_date );   
   $newDaysRange = array();
@@ -94,17 +91,15 @@ else
 
   $err = "";
 
-
-
   foreach( $newDaysRange as $rDay )
   {
     $start = $rDay." ".$startTimeStr;
     $stop = $rDay." ".$stopTimeStr;
   
-    mysql_query( 'SET NAMES utf8' ); 
-    $query = mysql_query("INSERT INTO ADD_TIME (ID, ADDDATE, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, APPROVED, PAUSE_MODE, BYALERT ) VALUES ('$newID','$currentDate','$userID_','$start','$stop','$add_time_part_base','$add_time_part_desk','0', '0', '$byAlert')");
+    mysqli_set_charset($link, "utf8"); 
+    $query = mysqli_query($link, "INSERT INTO ADD_TIME (ID, ADDDATE, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, APPROVED, PAUSE_MODE, BYALERT ) VALUES ('$newID','$currentDate','$userID_','$start','$stop','$add_time_part_base','$add_time_part_desk','0', '0', '$byAlert')");
 
-    $merr=mysql_error();
+    $merr=mysqli_error($link);
     if (!$query)
     {
       $err .= "mysql_error = $merr<br>";
@@ -125,6 +120,3 @@ else
   } 
 }
 ?>
-
-
-                                                                         

@@ -1,17 +1,10 @@
-<?
+<?php
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRate )
-{
+function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRate ){
   $userDayNorm = ( $userRate / 5 ) * 60 * 60;
 
-  include_once "../php_tori/connect.php";
-  include_once "funcs.php";
+  include "/var/www/tori/php_tori/connect.php";
+  include_once "/var/www/tori/funcs.php";
 
   $days_dates_set = array();
   $days_dates_start_set = array();
@@ -120,18 +113,7 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   unset($tempDates);
   $tempDates = array();   
 
-/*  $query = mysql_query("SELECT DISTINCT dayTransitionTime, user_id, state, in_dt, eat_start_dt, eat_stop_dt, out_dt, remoteWorkState, timeZoneSec, dayTransitionTime, 
-                        TIMESTAMP('$startDate', dayTransitionTime) as dt1, TIMESTAMP('$stopDate', dayTransitionTime) as dt2
-                        FROM visiting 
-                        where 
-                        in_dt >= TIMESTAMP('$startDate', dayTransitionTime) 
-                          and 
-                        out_dt <= TIMESTAMP('$stopDate', dayTransitionTime)
-                          and 
-                        user_id = '$userID'");       */
-
-
-  $query = mysql_query("SELECT DISTINCT dayTransitionTime, user_id, state, in_dt, eat_start_dt, eat_stop_dt, out_dt, remoteWorkState, timeZoneSec, dayTransitionTime, 
+  $query = mysqli_query($link, "SELECT DISTINCT dayTransitionTime, user_id, state, in_dt, eat_start_dt, eat_stop_dt, out_dt, remoteWorkState, timeZoneSec, dayTransitionTime, 
                         TIMESTAMP('$startDate', dayTransitionTime) as dt1, TIMESTAMP('$stopDate', dayTransitionTime) as dt2
                         FROM visiting 
                         where 
@@ -139,19 +121,14 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
                           and 
                         user_id = '$userID'"); 
 
-
-
-
-
-
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
     $days_errors[] = "MYSQL : $merr";
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $in_dt_temp = $row["in_dt"];
       $dayTransitionTime_temp = $row["dayTransitionTime"];
@@ -185,8 +162,6 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $temp_days_remoteWorkState[] = $row["remoteWorkState"];
       $temp_days_timeZoneSec[] = $row["timeZoneSec"];
       $temp_days_dayTransitionTime[] = $row["dayTransitionTime"];
-
-//      echo "[[$startDate || $stopDate || $dayTransitionTime_temp || $dt1 || $dt2 || $in_dt_temp]]]<br>";
 
     }
   }
@@ -294,18 +269,18 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   unset($tempDates);
   $tempDates = array();   
  
-  $query = mysql_query("SELECT distinct a.date, a.supervisorID, a.reason, b.duration 
+  $query = mysqli_query($link, "SELECT distinct a.date, a.supervisorID, a.reason, b.duration 
                         FROM Penalty a join Delays b on a.id = b.penaltyID 
                         where a.date >= '$startDate' and a.date <= '$stopDate' and a.userID = '$userID'"); 
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
     $days_errors[] = "MYSQL : $merr";
   }
   else
   {
-    while ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $date = $row["date"];
       $tempDates[] = $date;
@@ -349,8 +324,6 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
     }
   }
   
-  //echo count ( $stats );
-
   $stat_results = array();
   $stat_result_value = array();  // [0] - start date
                                  // [1] - stop date
@@ -437,18 +410,7 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   $PenaltiesDurationYear = 0;
   $PenaltiesCountYear = 0;
 
-/*$cnt1 = count( $days_work_start );
-$cnt2 = count( $days_day_state );
 
-echo "{{{ $cnt1 | $cnt2 }}}<br>";
-
-for ( $idx = 0; $idx < count( $days_work_start ); $idx ++ )
-{
-  $ee = $days_day_state[$idx];
-  echo "{{{{{{{{{{{{{{{ $idx $ee }}}}}}}}}}}}}}}}}<br>";
-}
-
-*/
   if ( count( $days_dates_set ) > 0 )
   {
     $firstPeriodDate = $days_dates_set[$idx];    
@@ -466,13 +428,10 @@ for ( $idx = 0; $idx < count( $days_work_start ); $idx ++ )
     {
       $day = DayIncDN( $day, 1 );
     } 
-
- // echo "{{{{{{{{{{{{{{{ $day }}}}}}}}}}}}}}}}}<br>";
-
          
     if ( $day != "NDF" )
     {
-      $day_day = $days_dates_set[$idx];
+      $day_day[] = $days_dates_set[$idx];
       $day_work_start = $days_work_start[$idx];
       $day_work_stop = $days_work_stop[$idx];
       $days_add_info = $days_add_infos[$idx];
@@ -482,44 +441,31 @@ for ( $idx = 0; $idx < count( $days_work_start ); $idx ++ )
       $day_penalties = $days_penalties[$idx];
       $day_penalty_duration = $days_penalty_durationVal[$idx];
 
-//echo "[[-----[[ $day_penalty_duration ]]---------]]<br>"; 
-
       $day_norm = $days_norm[$idx];
       $day_day_currday = $days_day_currday[$idx];
 
       $errorDur = 0; 
 
-//echo "[[[ $day_day | $day_work_start | $day_work_stop | $day_eat_start | $day_eat_stop | $day_day_state | $day_day_currday <br>]]] ";
-
-//      $durations = get_durations( $day_work_start, $day_work_stop, $day_eat_start, $day_eat_stop, $days_add_info, $user_defaultStartTime, $user_allowedDelay, 0, $errorDur );      
-      $durations = get_durations( $day_work_start, $day_work_stop, $day_eat_start, $day_eat_stop, $days_add_info, $day_day_state, $day_day_currday );      
-
-//echo "[[$day $durations[0]]]<br>";
+      $durations = get_durations( $day_work_start, $day_work_stop, $day_eat_start, $day_eat_stop, $days_add_info, $day_day_state, $day_day_currday );
 
       $resultPureDuration = $durations[3];
       $addTimeDuration = $durations[2];
       $pauseTimeDuration = $durations[5];
       $lunchDuration = $durations[1];  
       $dayNorm = $day_norm;
-
-//echo "<((((((((<<<<$temp_days_penalty_durationValue>>>>>>>))))))))))><br>";
-
   
       $PenaltiesDuration = 0;
       $PenaltiesCount = 0; 
-      if ( $day_penalties == 1 )
-      {
+      if ( $day_penalties == 1 ){
         $PenaltiesCount = 1; 
         $PenaltiesDuration = $day_penalty_duration;  
       }
     }
-    if ( $weekOpened == 0 AND is_first_week_day( $day ) )
-    {
+    if ( $weekOpened == 0 AND is_first_week_day( $day ) ){
       $weekOpened = 1;
       $periodOpened = -1;
 
-      if ( $day != $firstPeriodDate )
-      {
+      if ( $day != $firstPeriodDate ){
         $stat_result_value[0] = $firstPeriodDate;
         $stat_result_value[1] = $day;
         $stat_result_value[2] = $resultPureDurationPeriod; 
@@ -666,11 +612,6 @@ for ( $idx = 0; $idx < count( $days_work_start ); $idx ++ )
       $PenaltiesDurationPeriod += $PenaltiesDuration;
       $PenaltiesCountPeriod += $PenaltiesCount;
 
-/*if ( $userID == 101 )
-{
- echo "[[$PenaltiesCountPeriod]]<br>";
-}    */
-
     }
 
     if ( $weekOpened == 1 )
@@ -726,9 +667,6 @@ for ( $idx = 0; $idx < count( $days_work_start ); $idx ++ )
     $PenaltiesDurationWholePeriod += $PenaltiesDuration;
 
     $PenaltiesCountWholePeriod += $PenaltiesCount;
-
-     // echo $day." ".$dayNormWholePeriod."<br>";
-
   }
 
   $stat_result_value[0] = $firstPeriodDate;
@@ -742,13 +680,6 @@ for ( $idx = 0; $idx < count( $days_work_start ); $idx ++ )
   $stat_result_value[8] = $PenaltiesCountWholePeriod;
   $stat_result_value[9] = $pauseTimeDurationWholePeriod; 
   $stat_results[] = $stat_result_value;
-
-
-/*if ( $userID == 101 )
-{
- echo "[[$PenaltiesDurationWholePeriod]]<br>";
-} 
-  */
 
   foreach ( $stat_results as $resu )
   { 
@@ -785,22 +716,12 @@ for ( $idx = 0; $idx < count( $days_work_start ); $idx ++ )
   $stats[] = $days_timeZoneSec;         // 19
   $stats[] = $days_dayTransitionTime;   // 20
 
-
-//$fffgg = count( $days_penalty_durationVal );
-
- // echo "[[".$fffgg."]]";
-
   return $stats;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function get_report_body_row_contents( $usersInfo )
 {
-  include_once "funcs.php";
+  include_once "/var/www/tori/funcs.php";
 
   $currentDateArr = get_current_datetime_in_timezone();
   $currDate = $currentDateArr[2];
@@ -901,9 +822,4 @@ function get_report_body_row_contents( $usersInfo )
 
   return array( $rowsDTContent, $rowsContent );
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 ?>

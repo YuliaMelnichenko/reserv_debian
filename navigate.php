@@ -16,10 +16,10 @@ function show_alerts()
 
 </script>
 
-<?
-session_start();
+<?php
+// session_start();
 
-include_once "funcs.php";
+include_once "/var/www/tori/funcs.php";
 
 $needToShow = 1;
 
@@ -28,18 +28,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
   $needToShow = 0;
 }
 
-
-
-
-
-
-
-//if ( $_SESSION['ss_id'] != -1 && $_SESSION['ss_id'] != 500 && $_SESSION['ss_id'] != 501 )
 {
-
-
-
-
   if ( $needToShow == 0 ){ echo "<font size=\"2\" color=\"#000000\" face=\"Arial\">Режим доступа: директор</font>"; }
 
   $dtvalStr = get_current_datetime_in_timezone_str( 1, 0 );
@@ -73,10 +62,8 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       echo "</td>";
     echo "</tr>";
   echo "</table>";
-
   echo "</td></tr>";
 
-  
   echo "<tr align=\"left\" ><td bgcolor=\"#ddeeff\" valign=\"top\" align=\"left\" width = 370>";
 
   if ( $needToShow == 1 ){ echo "<tr height=50 valign=\"bottom\"><td><button style=\" cursor: pointer; font-size: 80%; text-align: left; padding: 5px 27px 5px 5px; width:230px; height:40px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='index.php'\"><h5 class=\"bigger\">Текущий день</h5></button></td></tr>"; }
@@ -110,58 +97,5 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
   echo "<tr><td height = 3px></td></tr>";
   
   echo "</table>";
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
-
-
-
-/*
-if ( $_SESSION['ss_id'] == 500 )
-{
-
-  echo "<font size=\"2\" color=\"#000000\" face=\"Arial\">Режим доступа: директор</font>";
-
-  echo "<table cellpadding=\"5\" cellspacing=\"0\" border=0 width = 190>";
-  echo "<tr><td style=\"margin:0; padding:0; margin-left:0;\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 160>";
-  echo "<table cellpadding=\"0\" cellspacing=\"0\" border=0><tr>";
-  echo "<td style=\"margin:0; padding:0; margin-left:0;\" width = 160>";
-    echo "<a class=\"nounder\" href=\"index.php\">";
-      echo "<font size=\"5\" color=\"#ffffff\" face=\"Arial Black\">В</font>";
-      echo "<font size=\"5\" color=\"#4a6e97\" face=\"Arial Black\"> ТОРИ</font>";
-      echo "<font size=\"1\" color=\"#4a6e97\" face=\"Arial Black\"> beta</font>";
-    echo "</a>";
-  echo "</td>";
-
-  echo "<td width=30 align=\"right\" style=\"margin:0; padding:0; margin-left:0;\">";
-
-  echo "</td>";
-  echo "</tr></table>";
-  echo "</td></tr>";
-
-  
-  echo "<tr align=\"left\" ><td bgcolor=\"#ddeeff\" valign=\"top\" align=\"left\" width = 150>";
-
-  echo "<tr height=40 valign=\"bottom\"><td><button style=\"font-size: 80%; text-align: left; padding: 5px 5px 5px 5px; width:190px; height:30px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='my_report.php'\"><h5>Временной отчет</h5></button></td></tr>";
-  echo "<tr><td height=8px></td></tr>";
-  echo "<tr><td height=8px></td></tr>";
-
-  echo "<tr><td><button style=\"text-align: left; padding: 5px 25px 5px 10px; width:190px; height:30px; background-color:#f79398; border:1px solid #888888;\" onclick=\"window.open('http://192.168.100.17/redmine') \"><h5>Переход в RedMine</h5></button></td></tr>";
-  
-  echo "</table>";
-      echo "<br><br><br><br><br><br><br>";	
-
-} */
-
 ?>

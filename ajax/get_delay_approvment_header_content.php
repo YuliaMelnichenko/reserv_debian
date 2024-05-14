@@ -1,12 +1,12 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
 
-include"../../php_tori/connect.php";
-include "../funcs.php";
+include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
 $wholeWidth = $_POST['width'];
 $widthOffs = $_POST['offs'];
@@ -28,6 +28,3 @@ echo "<table>";
   echo "</tr>";
 echo "</table>";
 ?>
-
-
-                                                                         

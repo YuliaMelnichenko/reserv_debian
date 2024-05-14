@@ -1,18 +1,18 @@
 <?php
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+$link = mysqli_connect("localhost", "tori", "toriadmin", "TORI");
 
-// $link = mysqli_connect("localhost", "tori", "toriadmin");
+mysqli_set_charset($link, "utf8");
 
-// if ($link == false) {
-//     echo("Ошибка: Невозможно подключиться к MySQL " . mysqli_connect_error());
-// }
-// else {
-//     echo("Соединение установлено");
-// }
-
-$mysqli = new mysqli("localhost", "tori", "toriadmin") or die ("Could not connect to database");
-
-$db_selected = $mysqli -> select_db('TORI' , $mysqli);
-if (!$db_selected) {
-echo "<br>Cant use intec DB: $mysql_error()<br>";
+if ($link == false) {
+    echo "Ошибка: Невозможно подключиться к MySQL " . mysqli_connect_error();
 }
+// else {
+//     echo "Соединение установлено";
+// }
+return $link;
+// $db_selected = mysqli_select_db($link, 'TORI');
+// if (!$db_selected) {
+// echo "<br>Cant use intec DB: $mysql_error()<br>";
+// }
 ?>

@@ -1,4 +1,4 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -16,41 +16,41 @@ else
 
 $ss_delay_duration = $_SESSION['ss_delay_duration'];
 
-include_once "../funcs.php";
-include_once"../../php_tori/connect.php";
+include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
 $currentDateArr = get_current_datetime_in_timezone();
 $currentDate = $currentDateArr[2];
 
-mysql_query( 'SET NAMES utf8' ); 
+mysqli_set_charset($link, "utf8");
 
-$query = mysql_query("select * from Delays where userID = '$userId' and date = '$currentDate'");
-$merr=mysql_error();
+$query = mysqli_query($link, "select * from Delays where userID = '$userId' and date = '$currentDate'");
+$merr=mysqli_error($link);
 if ( !$query ) 
 {
   echo "<br>mysql_error = $merr<br>";
   $errorThere = 1;
 }
 
-$vn=mysql_num_rows($query);
+$vn=mysqli_num_rows($query);
 
 if ( $vn == 0 )
 {
   $newID = 0;
 
-  $query = mysql_query("SELECT max(ID) FROM Delays"); 
-  $merr=mysql_error();
+  $query = mysqli_query($link, "SELECT max(ID) FROM Delays"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
     echo "<br>mysql_error = $merr<br>";
   }
-  else if ( $row = mysql_fetch_array($query) )
+  else if ( $row = mysqli_fetch_array($query) )
   {
     $newID = $row[0] + 1;
   }
 
-  $query = mysql_query("insert into Delays VALUES ('$newID', '$currentDate', '$ss_delay_duration', '$userId', '-1', 'Без объяснения', '-1', '-1', '', '0')");
-  $merr=mysql_error();
+  $query = mysqli_query($link, "insert into Delays VALUES ('$newID', '$currentDate', '$ss_delay_duration', '$userId', '-1', 'Без объяснения', '-1', '-1', '', '0')");
+  $merr=mysqli_error($link);
   if (!$query)
   {
     echo "<br>mysql_error = $merr<br>";
@@ -65,6 +65,4 @@ else
 {
   echo "exist";
 }
-?> 
-                   
-                                                                         
+?>

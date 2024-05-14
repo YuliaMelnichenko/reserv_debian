@@ -1,6 +1,7 @@
-<?
+<?php
 ob_start();
 ?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>                                                                                                                   
 <head>
@@ -13,8 +14,7 @@ ob_start();
 <body bgcolor="#ffffff">
 <div align="left">
 
-<?
-
+<?php
 $report_start_date = "2013-01-01";
 $report_stop_date = "2013-08-01";
 
@@ -24,7 +24,6 @@ $ip=$_SERVER['REMOTE_ADDR'];
 
 $read_mode = 0;
 
-//if ( $ip == "192.168.100.51" OR $ip == "192.168.100.54" OR $ip == "192.168.100.52" OR $ip == "192.168.100.55" OR "192.100.100.51" OR $ip == "192.100.100.54" OR $ip == "192.100.100.52" OR $ip == "192.100.100.55" )
 if ( $ip == "192.168.100.50" OR $ip == "192.168.100.52" OR $ip == "192.168.100.54" OR $ip == "192.168.100.55" OR $ip == "192.100.100.55" )
   $read_mode = 1;
 else
@@ -39,9 +38,7 @@ else
   }
 }
 
-
-include_once "funcs.php";
-
+include_once "/var/www/tori/funcs.php";
 
 $err = array();
 $dates = array();
@@ -54,25 +51,24 @@ $month_dur = array();
 $work_day = array();
 $day_off = array();
 
-
 $cont_key = 0; 
 	
-include_once"../php_tori/connect.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
   
-  $query = mysql_query("SELECT * FROM work_dayoff order by date asc"); 
-  $merr=mysql_error();
+  $query = mysqli_query($link, "SELECT * FROM work_dayoff order by date asc"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
     echo "<br>mysql_error = $merr<br>";
   }
   else
   {
-    $vn=mysql_num_rows($query);
+    $vn=mysqli_num_rows($query);
     if ( $vn > 0 )
     {
       $cont_key = 1;
-      while($row = mysql_fetch_array($query, MYSQL_ASSOC))
+      while($row = mysqli_fetch_array($query, MYSQLI_ASSOC))
       {
 	if ( $row["type"] == 1 )
         {
@@ -86,7 +82,6 @@ include_once"../php_tori/connect.php";
     }    
   } 
   
-
   $cur_date = strtotime( $report_start_date );
   $report_stop_date_time = DayInc( strtotime( $report_stop_date ) );
 
@@ -101,27 +96,23 @@ include_once"../php_tori/connect.php";
       break;
   }  
  
-
-  #if ( $cont_key == 0)
-  #  die();
-
   if ( $read_mode == 1 )
   {
-    mysql_query( 'SET NAMES utf8' );
+    mysqli_set_charset($link, "utf8");
 
-    $query2 = mysql_query("SELECT * FROM employees"); 
-    $merr=mysql_error();
+    $query2 = mysqli_query($link, "SELECT * FROM employees"); 
+    $merr=mysqli_error($link);
     if ( !$query2 ) 
     {
       echo "<br>mysql_error = $merr<br>";
     }
     else
     {
-      $vn2=mysql_num_rows($query2);
+      $vn2=mysqli_num_rows($query2);
       if ( $vn2 > 0 )
       {
         $cont_key = 1;
-        while($row2 = mysql_fetch_array($query2, MYSQL_ASSOC))
+        while($row2 = mysqli_fetch_array($query2, MYSQLI_ASSOC))
         {
 	  $ids[] = $row2["ID"];
 	  $surn[] = $row2["SURNAME"];
@@ -135,21 +126,21 @@ include_once"../php_tori/connect.php";
   {
     $temp_id = $_SESSION['ss_id'];
 
-    mysql_query( 'SET NAMES utf8' );
+    mysqli_set_charset($link, "utf8");
 
-    $query2 = mysql_query("SELECT * FROM employees where ID = '$temp_id'"); 
-    $merr=mysql_error();
+    $query2 = mysqli_query($link, "SELECT * FROM employees where ID = '$temp_id'"); 
+    $merr=mysqli_error($link);
     if ( !$query2 ) 
     {
       echo "<br>mysql_error = $merr<br>";
     }
     else
     {
-      $vn2=mysql_num_rows($query2);
+      $vn2=mysqli_num_rows($query2);
       if ( $vn2 > 0 )
       {
         $cont_key = 1;
-        while($row2 = mysql_fetch_array($query2, MYSQL_ASSOC))
+        while($row2 = mysqli_fetch_array($query2, MYSQLI_ASSOC))
         {
 	  $ids[] = $row2["ID"];
 	  $surn[] = $row2["SURNAME"];
@@ -159,7 +150,6 @@ include_once"../php_tori/connect.php";
       }    
     }
   }
-
 
   if ( $cont_key == 0)
     die();
@@ -248,8 +238,6 @@ include_once"../php_tori/connect.php";
         else if ( (int)$hour < $norm )
           echo "<td align = \"center\" style=\"background-color:#ff8888\" ><h5 class=\"total_week_month\">".$hour_min."<br>норма = ".$norm." ч. <br>Недоработка = $dur_differ</h5>";
 
-#        else if ( (int)$hour > $norm )
-#          echo "<td align = \"center\" style=\"background-color:#88ff88\" ><h5 class=\"total_week_month\">".$hour_min."<br>норма = ".$norm." ч.</h5>";
          
         echo "</td>";
 
@@ -276,16 +264,10 @@ include_once"../php_tori/connect.php";
 
 	$m_dur_differ = format_time_differs_from_norm_hour_min( $month_dur[$i], $m_norm ); 
 
-	#echo "<td align = \"center\" style=\"background-color:#9999ff\" >";
-
         if ( (int)$m_hour >= $m_norm )
           echo "<td align = \"center\" style=\"background-color:#99ff99\" ><h5 class=\"total_week_month\">".$m_hour_min."<br>норма месяца = ".$m_norm." ч. <br>Переработка = $m_dur_differ</h5>";
         else if ( (int)$m_hour < $m_norm )
           echo "<td align = \"center\" style=\"background-color:#ff7777\" ><h5 class=\"total_week_month\">".$m_hour_min."<br>норма месяца = ".$m_norm." ч. <br>Недоработка = $m_dur_differ</h5>";
-
-        #echo "</td>";
-        
-	#echo "<h5 class=\"total_week_month\">".format_time_hour_min( $month_dur[$i] )."</h5> ". $m_norm."  ".$month_day_cnt;
 
         $month_dur[$i] = 0;
       }  	
@@ -308,8 +290,8 @@ include_once"../php_tori/connect.php";
       {
         
 
-        $query3 = mysql_query("SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = '$date_one' and user_id = '$ids[$i]' "); 
-        $merr=mysql_error();
+        $query3 = mysqli_query($link, "SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = '$date_one' and user_id = '$ids[$i]' "); 
+        $merr=mysqli_error($link);
         if ( !$query3 ) 
         {
           echo "<br>mysql_error = $merr<br>";
@@ -317,14 +299,12 @@ include_once"../php_tori/connect.php";
         else
         {
 
-          $vn3=mysql_num_rows($query3);
-          #echo $ids[$i];
+          $vn3=mysqli_num_rows($query3);
         
           if ( $vn3 == 0 )
             $color_code = -1;
 
-             
-          $row3 = mysql_fetch_array($query3, MYSQL_ASSOC);
+          $row3 = mysqli_fetch_array($query3, MYSQLI_ASSOC);
 
           $in_time = $row3["in_time"];
           $out_time = $row3["out_time"];
@@ -334,48 +314,31 @@ include_once"../php_tori/connect.php";
  
           $miss_rec = 0;
  
-          /*if ( $row3["state"] == 2 )
-            $miss_rec = 3; 
-          else if ( $row3["state"] == 3 )
-            $miss_rec = 2; 
-          else if ( $row3["state"] == 4 )
-            $miss_rec = 1;*/ 
-
           if ( $now_date_time != strtotime( $date_one ) )
           {
             if ( $in_time == '00:00:00' AND $out_time == '00:00:00' )
             {
-              #$out_time = '00:00:00';
-              #$in_time = '00:00:00';
               $color_code = -1;
             }
 	    else if ( $in_time == "00:00:00" )
             {
-              #$in_time = "10:00:00";
               $color_code = -1;
             }
             else if ( $out_time == "00:00:00" )
             {
-              #$out_time = "19:00:00";
               $color_code = -1;
             }
           
-            #if ( $color_code != -1 )
-	    #{
             if ( $eat_start == '00:00:00' AND $eat_stop == '00:00:00' )
             { 
-              #$eat_start = '00:00:00';
-              #$eat_stop = '00:00:00';
               $color_code = -1;            
             } 
             else if ( $eat_start == "00:00:00" )
             {
-              #$eat_start = "13:00:00";
               $color_code = -1;
             }
             else if ( $eat_stop == "00:00:00" )
             {
-              #$eat_stop = "14:00:00";
               $color_code = -1;
             }
           } 
@@ -404,7 +367,6 @@ include_once"../php_tori/connect.php";
 	      {  
                 $work_day_duration_time = strtotime( date("H:i:s") ) - strtotime( $in_time ) - ( strtotime($eat_stop) - strtotime($eat_start) );
                 $work_eat_duration = format_time_( strtotime($eat_stop) - strtotime($eat_start) );
-#echo $work_day_duration_time." ".$eat_start." ".$eat_stop ;
 
               }
               else if ( $eat_start != "00:00:00" AND $eat_stop == "00:00:00" )
@@ -413,7 +375,6 @@ include_once"../php_tori/connect.php";
                 $work_eat_duration = "??:??:??";
               } 
               $work_day_duration = format_time_( $work_day_duration_time );
-	      #$work_eat_duration = format_time_( $work_day_duration_time );
 
 	      $week_dur[$i] += $work_day_duration_time;
               $month_dur[$i] += $work_day_duration_time;
@@ -425,7 +386,6 @@ include_once"../php_tori/connect.php";
             }
           }
                          
-	  
 	  if ( $now_date_time != strtotime( $date_one ) )
 	  {
             if ( $color_code == 0 )
@@ -448,7 +408,6 @@ include_once"../php_tori/connect.php";
               else
 	        $is_day_off = 0;
 
-
 	      for ( $j=0; $j< count( $work_day ); $j++ )
 	      {
                 if ( $date_one == $work_day[$j] )
@@ -467,14 +426,12 @@ include_once"../php_tori/connect.php";
                 }
               }
 
-
               if ( $is_day_off == 1 )
 	      {
   	        echo "ffffff\" align = \"center\" valign = \"middle\">"; 
 
                 echo "<h5 class=\"lite\">";
                 echo "выходной";
-		#$week_day_cnt--;
               }
               else
 	      {
@@ -519,8 +476,6 @@ include_once"../php_tori/connect.php";
                 $eat_stop = "??:??:??";
 		$state = -1;
               }
-               
-
               echo "Текущий рабочий день:<br>";
 	      echo "Раб. вр. с ";
 	      if ( $in_time != "??:??:??" )
@@ -569,12 +524,8 @@ include_once"../php_tori/connect.php";
 	      {
                 echo "<font color=\"#ff0000\">";
                 echo " (??:??:??)";
-#echo " (".$work_eat_duration.")";
                 echo "<font color=\"#000000\">";
               }
-
-              #echo "Текущий рабочий день:<br>Раб. вр. с ".$in_time." до: ".$out_time."<br>";
-              #echo "Обед с ".$eat_start." до ".$eat_stop." (".$work_eat_duration.")";
     
               if ( $state == 0 )
 		echo "<br><br>День закрыт. Раб. вр. - обед: ".$work_day_duration; 
@@ -595,7 +546,6 @@ include_once"../php_tori/connect.php";
             echo "</h5></td>";
 
             $color_code = 0;    
-          
         }
       }
       else
@@ -605,7 +555,6 @@ include_once"../php_tori/connect.php";
 	  $is_day_off = 1;
         else
 	  $is_day_off = 0;
-
 
 	for ( $j=0; $j< count( $work_day ); $j++ )
 	{
@@ -638,11 +587,7 @@ include_once"../php_tori/connect.php";
     echo "</tr>";
   }
   echo "</table>";
-
-	 
-
-
 ?>
 </div>
 </body>
-</html> 
+</html>

@@ -1,4 +1,4 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -14,11 +14,11 @@ $currDate = date('Y-m-d');
 $_SESSION['rep_stop_date'] = $currDate;
 $_SESSION['rep_start_stop_date_set'] = 0; //0 - not set, 1 - one border have been set, 2 - two borders have been set
 
-include_once "../funcs.php";
+include_once "/var/www/tori/funcs.php";
 
 $_SESSION['rep_start_stop_date_mode'] = $report_type;
 
-if ( $report_type == 1 )//С начала недели
+if ( $report_type == 1 )
 {
   $week_day = GetWeekDayD( $currDate );
 
@@ -27,7 +27,7 @@ if ( $report_type == 1 )//С начала недели
   $_SESSION['rep_start_date'] = DayDecDN( $currDate, $offset );
   $_SESSION['rep_start_stop_date_set'] = 2;
 }
-else if ( $report_type == 2 )//С начала месяца
+else if ( $report_type == 2 )
 {
   $month_day = GetMonthDayD( $currDate );
   $offset = $month_day - 1;
@@ -35,7 +35,7 @@ else if ( $report_type == 2 )//С начала месяца
   $_SESSION['rep_start_stop_date_set'] = 2;
 }  
 
-else if ( $report_type == 3 )//С начала предыдущего месяца
+else if ( $report_type == 3 )
 {
   $month_day = GetMonthDayD( $currDate );
   $offset = $month_day - 1;
@@ -45,7 +45,7 @@ else if ( $report_type == 3 )//С начала предыдущего месяца
   $_SESSION['rep_start_stop_date_set'] = 2;
 }  
 
-else if ( $report_type == 4 )//С начала квартала
+else if ( $report_type == 4 )
 {
   $month = GetMonthD( $currDate );
   $startMonth = 1;
@@ -78,7 +78,7 @@ else if ( $report_type == 4 )//С начала квартала
   $_SESSION['rep_start_stop_date_set'] = 2;
 }  
 
-else if ( $report_type == 5 )//Предыдущий квартал
+else if ( $report_type == 5 )
 {
   $month = GetMonthD( $currDate );
   $startMonth = 1;
@@ -118,14 +118,13 @@ else if ( $report_type == 5 )//Предыдущий квартал
   $_SESSION['rep_start_stop_date_set'] = 2;
 }  
 
-
-else if ( $report_type == 6 )//С начала года
+else if ( $report_type == 6 )
 { 
   $_SESSION['rep_start_date'] = GetFirstYearDay( GetCurrentYearD( $currDate ) );
   $_SESSION['rep_start_stop_date_set'] = 2;
 }
 
-else if ( $report_type == 7 )//вручную заданный период
+else if ( $report_type == 7 )
 { 
   $_SESSION['rep_start_date'] = $start_report_date;
   $_SESSION['rep_stop_date'] = $stop_report_date;
@@ -136,5 +135,3 @@ echo $report_type."_";
 
 echo "star = ".$_SESSION['rep_start_date']." stop = ".$_SESSION['rep_stop_date'];
 ?>
-
-                                                                         

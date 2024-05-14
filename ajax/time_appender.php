@@ -1,4 +1,4 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -18,30 +18,28 @@ $ta_stop_date = substr( $ta_stop_date_time, 0, 10 );
 $ta_start_time = substr( $ta_start_date_time, 11, 8 );
 $ta_stop_time = substr( $ta_stop_date_time, 11, 8 );
 
-include_once"../../php_tori/connect.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
-$query0 = mysql_query("SELECT * FROM ADD_TIME"); 
+$query0 = mysqli_query($link, "SELECT * FROM ADD_TIME"); 
 
 $newID = 0;
 
-$merr=mysql_error();
+$merr=mysqli_error($link);
 if ( !$query0 ) 
 {
   echo "<br>mysql_error = $merr<br>";
 }
 else
 {
-  $vn=mysql_num_rows($query0);
+  $vn=mysqli_num_rows($query0);
   $newID = $vn + 1;
 }
 
-mysql_query( 'SET NAMES utf8' ); 
-$query = mysql_query("insert into ADD_TIME (ID, USERID, STARTDATE, STOPDATE, STARTTIME, STOPTIME, REASON, DESCRIPTION, APPROVED) VALUES ('$newID','$userID_','$ta_start_date','$ta_stop_date','$ta_start_time','$ta_stop_time','$ta_base','$ta_desc','0')");
-$merr=mysql_error();
+mysqli_set_charset($link, "utf8");
+$query = mysqli_query($link, "insert into ADD_TIME (ID, USERID, STARTDATE, STOPDATE, STARTTIME, STOPTIME, REASON, DESCRIPTION, APPROVED) VALUES ('$newID','$userID_','$ta_start_date','$ta_stop_date','$ta_start_time','$ta_stop_time','$ta_base','$ta_desc','0')");
+$merr=mysqli_error($link);
 if (!$query)
 {
   echo "<br>mysql_error = $merr<br>";
 }
 ?>
-
-                                                                         

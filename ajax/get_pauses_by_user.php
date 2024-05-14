@@ -1,12 +1,12 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
 
-include_once"../../php_tori/connect.php";
-include_once "../funcs.php";
+include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/php_tori/connect.php";
 
 $_SESSION['pause_page_mode'] = 2;
 
@@ -54,7 +54,7 @@ echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
       $color2 = "#ddeedd";
       $color3 = "#ffffff";
 
-      $tempAddTimes = get_all_add_work_info_by_user( $userID );
+      $tempAddTimes = get_all_add_work_info_by_user( $userID, 0 );
 
       $addTimes = Array();
 
@@ -104,6 +104,3 @@ echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
   echo "</tr>";
 echo "</table>";
 ?>
-
-
-                                                                         

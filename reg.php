@@ -1,4 +1,4 @@
-<?
+<?php
 ob_start();
 
 echo "<html>";
@@ -13,20 +13,18 @@ session_start();
 
 if ( isset($_SESSION['ss_id']) )
 {
-//echo "ss ".$_SESSION['ss_state'];
-  include_once"../php_tori/connect.php";
+  include_once "/var/www/tori/php_tori/connect.php";
 
   $time =  date("H:i:s");
   $date_ = date('Y-m-d');
   $id_ = $_SESSION['ss_id'];
 
-  mysql_query( 'SET NAMES utf8' );
+  mysqli_set_charset($link, "utf8");
   
   if ( $_SESSION['ss_state'] == 1 )
   {  
-//    echo "fffffffff";
-    $res=mysql_query("INSERT INTO visiting (user_id, date, in_time, state) VALUES ('$id_', '$date_', '$time', '2')");
-    $merr=mysql_error();
+    $res=mysqli_query($link, "INSERT INTO visiting (user_id, date, in_time, state) VALUES ('$id_', '$date_', '$time', '2')");
+    $merr=mysqli_error($link);
     if (!$res)
     { 
       echo $merr; 
@@ -36,9 +34,9 @@ if ( isset($_SESSION['ss_id']) )
   }
   else if ( $_SESSION['ss_state'] == 2 )
   {  
-    $res=mysql_query("UPDATE visiting set eat_start = '$time' where user_id = '$id_' and date = '$date_' ");
-    $res=mysql_query("UPDATE visiting set state = 3 where user_id = '$id_' and date = '$date_' ");
-    $merr=mysql_error();
+    $res=mysqli_query($link, "UPDATE visiting set eat_start = '$time' where user_id = '$id_' and date = '$date_' ");
+    $res=mysqli_query($link, "UPDATE visiting set state = 3 where user_id = '$id_' and date = '$date_' ");
+    $merr=mysqli_error($lin);
     if (!$res)
     { 
       echo $merr; 
@@ -48,10 +46,9 @@ if ( isset($_SESSION['ss_id']) )
   }
   else if ( $_SESSION['ss_state'] == 3 )
   { 
-//echo "dd"; 
-    $res=mysql_query("UPDATE visiting set eat_stop = '$time' where user_id = '$id_' and date = '$date_' ");
-    $res=mysql_query("UPDATE visiting set state = 4 where user_id = '$id_' and date = '$date_' ");
-    $merr=mysql_error();
+    $res=mysqli_query($link, "UPDATE visiting set eat_stop = '$time' where user_id = '$id_' and date = '$date_' ");
+    $res=mysqli_query($link, "UPDATE visiting set state = 4 where user_id = '$id_' and date = '$date_' ");
+    $merr=mysqli_error($link);
     if (!$res)
     { 
       echo $merr; 
@@ -61,9 +58,9 @@ if ( isset($_SESSION['ss_id']) )
   }
   else if ( $_SESSION['ss_state'] == 4 )
   {  
-    $res=mysql_query("UPDATE visiting set out_time = '$time' where user_id = '$id_' and date = '$date_' ");
-    $res=mysql_query("UPDATE visiting set state = 0 where user_id = '$id_' and date = '$date_' ");
-    $merr=mysql_error();
+    $res=mysqli_query($link, "UPDATE visiting set out_time = '$time' where user_id = '$id_' and date = '$date_' ");
+    $res=mysqli_query($link, "UPDATE visiting set state = 0 where user_id = '$id_' and date = '$date_' ");
+    $merr=mysqli_error($link);
     if (!$res)
     { 
       echo $merr; 
@@ -78,5 +75,3 @@ if ( isset($_SESSION['ss_id']) )
 echo "</body>";
 echo "</html>";  
 ?>
-
-                                                                         

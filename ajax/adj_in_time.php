@@ -1,4 +1,4 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -15,18 +15,18 @@ if ( isset($_POST['userID']) AND isset($_POST['inTime']) )
   $newEatStartTime = "";
   $newEatStopTime = "";
 
-  include_once "../php_tori/connect.php";
-  include_once "../funcs.php";
+  include_once "/var/www/tori/funcs.php";
+  include_once "/var/www/tori/php_tori/connect.php";
 
-  $query = mysql_query("SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = '$currentDate' and user_id = '$userID'"); 
-  $merr=mysql_error();
+  $query = mysqli_query($link, "SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = '$currentDate' and user_id = '$userID'"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
     $days_errors[] = "MYSQL : $merr";
   }
   else
   {
-    if ( $row = mysql_fetch_array($query, MYSQL_ASSOC) )
+    if ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
       $inTime = $row["in_time"];
       $outTime = $row["out_time"];
@@ -66,8 +66,8 @@ if ( isset($_POST['userID']) AND isset($_POST['inTime']) )
             $newEatStopTime = $eatStop;
             $newOutTime = $outTime;             
           }
-          $query = mysql_query("UPDATE visiting set in_time='$newStartTime', out_time='$newOutTime', eat_start='$newEatStartTime', eat_stop='$newEatStopTime', adj='1' where date = '$currentDate' and user_id = '$userID'");
-          $merr=mysql_error();
+          $query = mysqli_query($link, "UPDATE visiting set in_time='$newStartTime', out_time='$newOutTime', eat_start='$newEatStartTime', eat_stop='$newEatStopTime', adj='1' where date = '$currentDate' and user_id = '$userID'");
+          $merr=mysqli_error($link);
           if ( !$query ) 
           {
             $days_errors[] = "MYSQL : $merr";
@@ -102,8 +102,8 @@ if ( isset($_POST['userID']) AND isset($_POST['inTime']) )
             $newOutTime = $outTime;             
           }
           
-          $query = mysql_query("UPDATE visiting set in_time='$newStartTime', out_time='$newOutTime', eat_start='$newEatStartTime', eat_stop='$newEatStopTime', adj='1' where date = '$currentDate' and user_id = '$userID'");
-          $merr=mysql_error();
+          $query = mysqli_query($link, "UPDATE visiting set in_time='$newStartTime', out_time='$newOutTime', eat_start='$newEatStartTime', eat_stop='$newEatStopTime', adj='1' where date = '$currentDate' and user_id = '$userID'");
+          $merr=mysqli_error($link);
           if ( !$query ) 
           {
             $days_errors[] = "MYSQL : $merr";
@@ -140,8 +140,8 @@ if ( isset($_POST['userID']) AND isset($_POST['inTime']) )
             $newOutTime = $outTime;             
           }
           
-          $query = mysql_query("UPDATE visiting set in_time='$newStartTime', out_time='$newOutTime', eat_start='$newEatStartTime', eat_stop='$newEatStopTime', adj='1' where date = '$currentDate' and user_id = '$userID'");
-          $merr=mysql_error();
+          $query = mysqli_query($link, "UPDATE visiting set in_time='$newStartTime', out_time='$newOutTime', eat_start='$newEatStartTime', eat_stop='$newEatStopTime', adj='1' where date = '$currentDate' and user_id = '$userID'");
+          $merr=mysqli_error($link);
           if ( !$query ) 
           {
             $days_errors[] = "MYSQL : $merr";
@@ -156,8 +156,8 @@ if ( isset($_POST['userID']) AND isset($_POST['inTime']) )
         $newEatStopTime = $eatStop;
         $newOutTime = $outTime;             
         
-        $query = mysql_query("UPDATE visiting set in_time='$newStartTime', out_time='$newOutTime', eat_start='$newEatStartTime', eat_stop='$newEatStopTime', adj='1' where date = '$currentDate' and user_id = '$userID'");
-        $merr=mysql_error();
+        $query = mysqli_query($link, "UPDATE visiting set in_time='$newStartTime', out_time='$newOutTime', eat_start='$newEatStartTime', eat_stop='$newEatStopTime', adj='1' where date = '$currentDate' and user_id = '$userID'");
+        $merr=mysqli_error($link);
         if ( !$query ) 
         {
           $days_errors[] = "MYSQL : $merr";
@@ -169,6 +169,4 @@ if ( isset($_POST['userID']) AND isset($_POST['inTime']) )
   }  
 }
 echo "0";
-
-?>    
-                                                                         
+?>

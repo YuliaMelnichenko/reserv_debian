@@ -1,4 +1,4 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -7,8 +7,8 @@ session_start();
 
 if ( isset($_POST['userID']) AND isset($_POST['messageMode']) )
 {
-  include_once "../php_tori/connect.php";
-  include_once "../funcs.php";
+  include_once "/var/www/tori/funcs.php";
+  include_once "/var/www/tori/php_tori/connect.php";
 
   $userID = (int)($_POST['userID']);
   $messageMode = (int)($_POST['messageMode']);
@@ -26,23 +26,24 @@ if ( isset($_POST['userID']) AND isset($_POST['messageMode']) )
   $newEatStopTime = "";
 
 
-  $query0 = mysql_query("SELECT max(ID) FROM ALERTS"); 
+  $query0 = mysqli_query($link, "SELECT max(ID) FROM ALERTS"); 
  
   $newID = 0;
 
-  $merr=mysql_error();
+  $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
     echo "<br>mysql_error = $merr<br>";
   }
-  else if ( $row = mysql_fetch_array($query0) )
+  else if ( $row = mysqli_fetch_array($query0) )
   {
     $newID = $row[0] + 1;
   }
 
-  mysql_query( 'SET NAMES utf8' ); 
-  $query = mysql_query("INSERT into ALERTS values ( '$newID', '$currentDate', '$userID', '$superUserID', '$messageModeStr', '0')"); 
-  $merr=mysql_error();
+  mysqli_set_charset($link, "utf8"); 
+  
+  $query = mysqli_query($link, "INSERT into ALERTS values ( '$newID', '$currentDate', '$userID', '$superUserID', '$messageModeStr', '0')"); 
+  $merr=mysqli_error($link);
   if ( !$query ) 
   {
     echo "MYSQL : $merr";
@@ -58,5 +59,4 @@ echo $_POST['userID']."  ".$_POST['messageMode']."  ";
 
 echo "0";
 
-?>    
-                                                                         
+?>

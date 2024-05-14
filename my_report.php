@@ -1,9 +1,8 @@
-<?
+<?php
 ob_start();
-
-include_once "start.php";
-
+include_once "/var/www/tori/start.php";
 ?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>                                                                                                                   
 <head>
@@ -11,7 +10,7 @@ include_once "start.php";
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META NAME="Author" CONTENT="InTec">
-<link rel="stylesheet" type="text/css" href="style/style.css" />
+<link rel="stylesheet" type="text/css" href="style/style.css"/>
 <link rel="stylesheet" type="text/css" href="style/main.css" />
 </head>
 <body onload="show_selectors()" bgcolor="#ffffff">
@@ -20,27 +19,11 @@ include_once "start.php";
 
 <script type="text/javascript" charset="utf-8"> 
 
-/*var timerIdSessValid=setInterval( "check_sess()", 10000 );
-
-function check_sess()
-{
-  $.post('ajax/check_session_valid.php', RetSWT);                           
-  function RetSWT(dat) 
-  {
-    if ( dat == 0 )
-    {
-      window.location=self.location;
-    }
-  } 
-}     */
-
 function set_period()
 {	
   var report_type = document.getElementById('report_type').value;
   var start_report_date = document.getElementById('report_start_date').value;
   var stop_report_date = document.getElementById('report_stop_date').value;
-
-//alert( report_type );
 
   if ( report_type == 7 )
   {
@@ -122,7 +105,7 @@ function close_pause_time_list()
 function show_penalties_info( startDate, stopDate, userID )
 {
   document.getElementById('penalty_list_header').style.display='none';
-  $.post('ajax/get_penalties_info.php', {startDate: startDate, stopDate: stopDate, userID: userID}, RetSWT);                           
+  $.post('ajax/get_penalties_info.php', {startDate: startDate, stopDate: stopDate, userID: userID}, RetSWT);                          
   function RetSWT(dat) 
   {
      document.getElementById('penalty_list_header').innerHTML = dat; 
@@ -135,20 +118,15 @@ function close_penalties_list()
   document.getElementById('penalty_list_header').style.display='none';
 }
 
-///////////////////////
-
-function show_selectors()
-{
+function show_selectors(){
   var report_type = document.getElementById('report_type').value;
 
-    console.log(report_type);
+  console.log(report_type);
 
-  if ( report_type == 7 )
-  {
+  if ( report_type == 7 ){
     document.getElementById('manual_rep').style.display='block';
   } 
-  else
-  {
+  else {
     document.getElementById('manual_rep').style.display='none';
   } 
 }
@@ -158,7 +136,6 @@ function RetSWT4(dat4)
 {
   if ( document.getElementById('report_body') )
   { 
-    //document.getElementById('report_body_data').innerHTML = dat4; 
     document.getElementById('report_body').innerHTML = dat4; 
     
     if ( document.getElementById('time_report_table_head') && document.getElementById('time_report_table_body') )
@@ -172,8 +149,6 @@ function RetSWT4(dat4)
       {
         tableWidthBody = 340;
       } 
-      
-//      alert(tableWidthBody); 
 
       tableAllHeight = tableHeightHead + tableHeightBody;
 
@@ -182,33 +157,26 @@ function RetSWT4(dat4)
       if ( tableAllHeight > win_h ){ tableAllHeight = win_h; }
       else{ tableAllHeight = tableAllHeight - 35; }
 
-     // document.getElementById('report_body_data').style.height = tableAllHeight + "px";
       document.getElementById('report_body').style.height = tableAllHeight + "px";
       document.getElementById('report_body').style.width = tableWidthBody + "px";
       document.getElementById('report_head').style.width = tableWidthBody + "px";
     }
   }
 } 
-
 </script>
-<?
+
+<?php
 session_start();
 
 ////////////////////////////////////////////////////////
-include_once "funcs.php";
-include_once "funcs_rep.php";
+include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/funcs_rep.php";
 
 save_last_location( "my_report.php" );
 
-//if ( !isset( $_SESSION['full_report'] ) )
-//{
   auth();
-//}
-////////////////////////////////////////////////////////
 $dateArr = get_current_datetime_in_timezone();
 $currDate = $dateArr[2];
-////////////////////////////////////////////////////////
-
 
 echo "<div id=\"adds_list_header\">"; 
 echo "</div>"; 
@@ -235,7 +203,7 @@ echo "<div align=\"left\">";
       if ( $directorView == 0 )
       {
       	echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
-        include_once "navigate.php";
+        include_once "/var/www/tori/navigate.php";
       }
       else
       {
@@ -248,9 +216,6 @@ echo "<div align=\"left\">";
 
       echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
 
-        // echo "<h5 class=\"dark\"><br>/отчет посещаемости<br><br></h5>";
-        
-///***
         if ( !isset($_SESSION['rep_start_stop_date_set']) )
         {
           $month_day = GetMonthDayD( $currDate );
@@ -270,7 +235,6 @@ $rep_start_stop_date_mode = $_SESSION['rep_start_stop_date_mode'];
         {
           $selected = $_SESSION['rep_start_stop_date_mode'] - 1;
         }
-
 
         $selectedArr = array();
 
@@ -312,11 +276,10 @@ $rep_start_stop_date_mode = $_SESSION['rep_start_stop_date_mode'];
 
                 echo "<input id=\"report_start_date\" align=\"center\" style=\"width:70px;\" type=\"text\" value=\"$manRepStart\">";
                 echo " - <input id=\"report_stop_date\" align=\"center\" style=\"width:70px;\" type=\"text\" value=\"$manRepStop\">";
-                echo "  <button class=\"$button_style\" style=\"font-size: 90%; width:100px; height:21px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"manual_report_set();\" name=\"nextBtn\">Показать</button>";
+                echo "  <button class=\"button_style\" style=\"font-size: 90%; width:100px; height:21px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"manual_report_set();\" name=\"nextBtn\">Показать</button>";
               echo "</div>";
               echo "</td>";
           echo "</td>";
-            // echo "<td class=\"nopadding\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\" width = 320>";                                                                                                                                         
             echo "</td>";                                                                                                                                       
           echo "</tr>";
         echo "</table>";
@@ -329,14 +292,11 @@ $rep_start_stop_date_mode = $_SESSION['rep_start_stop_date_mode'];
         $rep_start_date = $_SESSION['rep_start_date'];
         $rep_stop_date = $_SESSION['rep_stop_date'];
 
-//echo "{{{{{{{{{{{{{ $rep_stop_date}}}}}}}}}}}}}}}}<br>";
-
         $userIDs = array();
 
         if ( !isset( $_SESSION['full_report'] ) )
         {
           $usersInfo = get_group_user_info_by_svID_for_report_ex( $svID );
-          //$userIDs =   get_group_user_IDs_by_svID_for_report( $svID );
         }
         else
         {
@@ -344,8 +304,6 @@ $rep_start_stop_date_mode = $_SESSION['rep_start_stop_date_mode'];
         }
 
         $userCnt = count($usersInfo[0]);
-
-//echo "{{{{{{{{{{{{{ $userCnt}}}}}}}}}}}}}}}}<br>";
 
         for ( $userNum = 0; $userNum < $userCnt; $userNum ++ )
         {
@@ -382,7 +340,6 @@ $rep_start_stop_date_mode = $_SESSION['rep_start_stop_date_mode'];
             echo "</td>";
           echo "</tr>";
         echo "</table>";
-
 
       echo "<div class=\"report_window_main1\" id=\"report_window_main1\">"; 
 
@@ -430,11 +387,7 @@ $rep_start_stop_date_mode = $_SESSION['rep_start_stop_date_mode'];
 
           echo "</tr>";
 
-
-
-
           echo "<tr>";
-
             echo "<td class=\"report_no_padding_no_border\">";    
               echo "<div class=\"report_window_left\" id=\"report_window_left\">";          
                 echo "<table class = \"no_padding\">";
@@ -451,8 +404,7 @@ $rep_start_stop_date_mode = $_SESSION['rep_start_stop_date_mode'];
                       echo "<div class=\"report_head_stub_left\">";             
                       echo "</div>";
                     echo "</td>";       
-                  echo "</tr>";       
-
+                  echo "</tr>";
                 echo "</table>";
               echo "</div>";    
             echo "</td>";    
@@ -475,37 +427,22 @@ $rep_start_stop_date_mode = $_SESSION['rep_start_stop_date_mode'];
                     echo "</tr>";
                   }
 
-
-                 /* echo "<tr>";
-                  for ( $idx = count( $rowsContent ); $idx >= 0; $idx -- )
-                  {
-                    echo "<td class=\"report_no_padding\" bgcolor=\"#ffffff\" valign=\"middle\" align=\"center\">";
-                      echo "<div class=\"report_head_stub\">";             
-                      echo "</div>";
-                    echo "</td>";
-                  }       
-                  echo "</tr>";  */ 
-
                 echo "</table>"; 
               echo "</div>";
             echo "</td>";
-    
           echo "</tr>";
         echo "</table>";
-
       echo "</div>"; 
-
-
       echo "</td>";
     echo "</tr>";
   echo "</table>";
 
   echo "<font size=\"2\" color=\"#444444\" face=\"Arial\">";
-  include_once "end.php";
+  include_once "/var/www/tori/end.php";
   echo "</font>"; 
-
 echo "</div>";
 ?>
+
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
@@ -526,4 +463,4 @@ var timerId=setInterval( "update_clock()", 10000 );
 </script>
 <script type="text/javascript" src="js/tory.js"></script>
 </body>
-</html> 
+</html>
