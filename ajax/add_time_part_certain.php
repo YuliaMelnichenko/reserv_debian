@@ -1,0 +1,74 @@
+<?
+header("Content-type: text/plain; charset=utf-8");
+header("Cache-Control: no-store, no-cache, must-revalidate");
+header("Cache-Control: post-check=0, pre-check=0", false);
+
+session_start();
+
+include_once "../funcs.php";
+include_once"../../php_tori/connect.php";
+
+$userID = $_SESSION['ss_id']; 
+
+$currentDate = get_current_datetime_in_timezone_str( 1, 0 );
+
+$start_time = $_POST['add_time_part_start_dt'];
+$stop_time = $_POST['add_time_part_stop_dt'];
+$base = $_POST['add_time_part_base'];
+$desk = $_POST['add_time_part_desk'];
+
+if ( isset( $_POST['byAlert'] ) AND $_POST['byAlert'] == 1 )
+{
+  $byAlert = 1;
+}
+else
+{
+  $byAlert = 0;
+}
+
+
+$start_time = $start_time.":00";
+$stop_time = $stop_time.":00";
+  
+mysql_query( 'SET NAMES utf8' ); 
+                                            
+$query = mysql_query("insert into ADD_TIME (ADDDATE,        USERID,   START_DT,     STOP_DT,     REASON, DESCRIPTION, APPROVED, PAUSE_MODE, BYALERT ) 
+                      VALUES              ('$currentDate','$userID','$start_time','$stop_time','$base','$desk',      '0',      '0',         '$byAlert')");
+$merr=mysql_error();
+if (!$query)
+{
+  echo "<br>mysql_error = $merr<br>";
+}
+else
+{
+  if ( isset($_SESSION['ss_ch_delay_ID']) )
+  {
+    mysql_query( 'SET NAMES utf8' ); 
+
+    $addTimeDescID = $_SESSION['ss_ch_delay_ID'];
+
+    $descDel = "<font color=\"#FF0000\">Из доп. времени:</font> ".$desk;
+
+    $query1 = mysql_query("update Delays set explaneDesk = '$descDel' where id = '$addTimeDescID'");
+
+    unset($_SESSION['ss_ch_delay_ID']);
+                                        
+    $merr1=mysql_error();
+    if (!$query1)
+    {
+      echo "<br>mysql_error = $merr<br>";
+    }    
+    else
+    {
+      echo "1";
+    }
+  }
+  else
+  {
+    echo "1";
+  }
+}
+?>
+
+
+                                                                         
