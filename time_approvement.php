@@ -65,7 +65,7 @@ $SUID = $_SESSION['ss_id'];
 
 echo "<div align=\"left\">";
 
-include_once "/var/www/tori/php_tori/connect.php";
+include "/var/www/tori/php_tori/connect.php";
 
   mysqli_set_charset($link, "utf8");
 

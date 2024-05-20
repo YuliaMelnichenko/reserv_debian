@@ -1,20 +1,18 @@
 <?php
-
 session_start();
 ob_start();
 include_once "/var/www/tori/start.php";
-
 ?>
 
-<!DOCTYPE HTML>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
 <script type="text/javascript" src="js/tory.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
 var timerIdSessValid=setInterval( "check_sess()", 3000 );
 
-function check_sess() {
-  $.post('ajax/check_session_valid.php', RetSWT);                           
+function check_sess(){
+  $.post('ajax/check_session_valid.php', RetSWT);
   function RetSWT(dat) {
     if ( dat == 0 ){
       window.location=self.location;
@@ -22,38 +20,67 @@ function check_sess() {
   }
 }
 
-function check_day_change() {
+function check_day_change(){
   document.getElementById('layer_div').style.display='none';
   document.getElementById('layer_question_div').style.display='none';
 
-  $.post('ajax/check_day_change.php', RetSWT);                           
-  function RetSWT(dat) {
-
+  $.post('ajax/check_day_change.php', RetSWT);
+  function RetSWT(dat){
     if ( dat == 1 ){
       clearInterval( timerIdDayChange );   
-      document.getElementById('layer_div').style.display='block';
-      document.getElementById('layer_question_div').style.display='block';
+      document.getElementById('layer_div').style.display='none';
+      document.getElementById('layer_question_div').style.display='none';
     }
   }
 }
 
 var timerIdDayChange=setInterval( "check_day_change()", 3000 );
 
-$(document).ready(function() {
+function day_continue_confirm()
+{
+  $.post('ajax/day_continue_confirm.php', RetSWT);                           
+  function RetSWT(dat) 
+  {
+    document.getElementById('layer_div').style.display='none';
+    document.getElementById('layer_question_div').style.display='none';
+
+    window.location=self.location;
+  }   
+}
+
+function day_continue_reject()
+{
+  $.post('ajax/day_continue_reject.php', RetSWT);                           
+  function RetSWT(dat) 
+  {
+    document.getElementById('layer_div').style.display='none';
+    document.getElementById('layer_question_div').style.display='none';
+
+    window.location=self.location;
+  }   
+}
+
+$(document).ready(function() 
+{
   var hidden, visibilityState, visibilityChange;
 
-  if (typeof document.hidden !== "undefined") {
+  if (typeof document.hidden !== "undefined") 
+  {
     hidden = "hidden", visibilityChange = "visibilitychange", visibilityState = "visibilityState";
   } 
-  else if (typeof document.msHidden !== "undefined") {
+  else if (typeof document.msHidden !== "undefined") 
+  {
     hidden = "msHidden", visibilityChange = "msvisibilitychange", visibilityState = "msVisibilityState";
   }
 
   var document_hidden = document[hidden];
 
-  document.addEventListener(visibilityChange, function() {
-    if(document_hidden != document[hidden]) {
-      if(document[hidden]) {
+  document.addEventListener(visibilityChange, function() 
+  {
+    if(document_hidden != document[hidden]) 
+    {
+      if(document[hidden]) 
+      {
         //alert('hidden');
       } 
       else 
@@ -68,141 +95,199 @@ $(document).ready(function() {
 
 check_pause_state();
 
-function st_month_inc() {
+function st_month_inc()
+{	
   $.post('ajax/stat_month_inc.php', RetSWT);                           
-  function RetSWT(dat) {
-    window.location=self.location;
-  }
+  function RetSWT(dat) 
+    {  
+      window.location=self.location;
+    }
 }
 
-function st_month_dec() {
+function st_month_dec()
+{	
   $.post('ajax/stat_month_dec.php', RetSWT);                           
-  function RetSWT(dat) {
+  function RetSWT(dat) 
+  {  
     window.location=self.location;
   }
 }
 
-function st_month_def() {	
+function st_month_def()
+{	
   $.post('ajax/stat_month_def.php', RetSWT);                           
-  function RetSWT(dat) {
+  function RetSWT(dat) 
+  {  
     window.location=self.location;
   }
 }
 
-function get_time_registration_div_content() {
+function get_time_registration_div_content()
+{
   $.post('ajax/get_time_registration_div.php', RetSWT6 );
-  function RetSWT6(dat6) {
+  function RetSWT6(dat6)
+  {    
     if ( document.getElementById('time_registration_div') ){ document.getElementById('time_registration_div').innerHTML = dat6; }
   }
-}
+} 
 
-function switch_day_state( next ) {
+function switch_day_state( next )
+{
   $.post('ajax/switch_day_state.php', { next: next }, RetSWT);                           
-  function RetSWT(dat) {
-    if ( dat == 1 ) {
+  function RetSWT(dat) 
+  { 
+    if ( dat == 1 )
+    {
       get_time_registration_div_content();
     }
-    else {
+    else
+    {
       alert( dat );
     }
   }
   build_in_delay_expl();
 }
 
-function rollback_state() {
+function rollback_state()
+{
   var perform=confirm('будет осуществлен возврат к предыдущему состоянию регистрации времени. Продолжить?')
-  if ( perform == true ) {
+  if ( perform == true )
+  {
     switch_day_state( 0 );
   }
 }
 
-function reg_in_work_with_delay() {
+function reg_in_work_with_delay()
+{
   reg_in_work();
 
   set_delay();
 }
 
-function reg_in_work() {
+function reg_in_work()
+{
   switch_day_state( 1 );
 }
 
-function reg_out_work() {
+function reg_out_work()
+{
   switch_day_state( 1 );
 }
 
-function reg_eat_start() {
+function reg_eat_start()
+{
   switch_day_state( 1 );
 }
 
-function reg_eat_stop() {
+function reg_eat_stop()
+{
   switch_day_state( 1 );
-}
+}   
 
-function add_expl() {
+function add_expl()
+{
   $.post('ajax/get_add_time_notif_count.php', RetSWT2);
-  function RetSWT2(dat2) {
-    if ( document.getElementById('notifBtn') ){
+  function RetSWT2(dat2) 
+  { 
+    if ( document.getElementById('notifBtn') )
+    { 
       document.getElementById('notifBtn').innerHTML = dat2; 
     }
   }
   $.post('ajax/get_delay_notif_count.php', RetSWT2);
-  function RetSWT2(dat2) {
-    if ( document.getElementById('notifDelayBtn') ){
+  function RetSWT2(dat2) 
+  { 
+    if ( document.getElementById('notifDelayBtn') )
+    { 
       document.getElementById('notifDelayBtn').innerHTML = dat2; 
     }
   }
     
   $.post('ajax/get_explanation_head.php', RetSWT1);
-  function RetSWT1(dat1) {
-    if ( document.getElementById('delay_explanation_head') ) {
+  function RetSWT1(dat1) 
+  {
+    if ( document.getElementById('delay_explanation_head') )
+    {
       document.getElementById('delay_explanation_head').innerHTML=dat1;
       document.getElementById('delay_explanation_head').style.display='block';
     }
   }
 }
 
-function enter_out_time() {
+function add_training_time()
+{
+  $.post('ajax/get_add_gym_time.php', RetSWT1);
+  function RetSWT1(dat1) 
+  { 
+    if ( document.getElementById('delay_explanation_sport_time') )
+    {
+      document.getElementById('delay_explanation_sport_time').innerHTML = dat1;
+      document.getElementById('delay_explanation_sport_time').style.display='block';
+    }
+  }
+}
+
+function close_add_sport_time()
+{
+  if ( document.getElementById('delay_explanation_sport_time') ){ document.getElementById('delay_explanation_sport_time').style.display='none'; }
+}
+
+function enter_out_time()
+{
     $.post('ajax/get_out_time.php', RetSWT1);
-  function RetSWT1(dat1) {
-    if ( document.getElementById('delay_out_time') ) {
+  function RetSWT1(dat1) 
+  {
+    if ( document.getElementById('delay_out_time') )
+    {
       document.getElementById('delay_out_time').innerHTML=dat1;
       document.getElementById('delay_out_time').style.display='flex';
     }
   }
 }
 
-function enter_stop_eat_time() {
+function enter_stop_eat_time()
+{
     $.post('ajax/get_eat_stop.php', RetSWT1);
-  function RetSWT1(dat1) {
-    if ( document.getElementById('delay_out_time') ) {
+  function RetSWT1(dat1) 
+  {
+    if ( document.getElementById('delay_out_time') )
+    {
       document.getElementById('delay_out_time').innerHTML=dat1;
       document.getElementById('delay_out_time').style.display='flex';
     }
   }
 }
 
-function close_out_time() {
+function close_out_time()
+{
   if ( document.getElementById('delay_out_time') ){ document.getElementById('delay_out_time').style.display='none'; }
 }
 
-function as_add_time() {
+function as_add_time()
+{
   $.post('ajax/get_add_times.php', RetSWT1);
-  function RetSWT1(dat1) {
+  function RetSWT1(dat1) 
+  { 
     if ( document.getElementById('delay_explanation_head') ){ document.getElementById('delay_explanation_head').style.display='none'; }
-    if ( document.getElementById('delay_explanation_add_time') ) {
+    if ( document.getElementById('delay_explanation_add_time') )
+    {
       document.getElementById('delay_explanation_add_time').innerHTML = dat1;
       document.getElementById('delay_explanation_add_time').style.display='block';
     }
 
     $.post('ajax/get_add_time_notif_count.php', RetSWT2);
-    function RetSWT2(dat2) {
-      if ( document.getElementById('notifBtn') ) {
+    function RetSWT2(dat2) 
+    { 
+      if ( document.getElementById('notifBtn') )
+      { 
         document.getElementById('notifBtn').innerHTML = dat2; 
       }
     }
     $.post('ajax/get_delay_notif_count.php', RetSWT2);
-    function RetSWT2(dat2) {
-      if ( document.getElementById('notifDelayBtn') ) {
+    function RetSWT2(dat2) 
+    { 
+      if ( document.getElementById('notifDelayBtn') )
+      { 
         document.getElementById('notifDelayBtn').innerHTML = dat2; 
       }
     }
@@ -211,19 +296,22 @@ function as_add_time() {
   if ( document.getElementById('delay_explanation_add_time') ){ document.getElementById('delay_explanation_add_time').style.display='block'; }
 }
 
-function close_explanation_head() {
+function close_explanation_head()
+{
   if ( document.getElementById('delay_explanation_head') ){ document.getElementById('delay_explanation_head').style.display='none'; }
 }
 
-function build_in_delay_expl() {
+function build_in_delay_expl()
+{
   $.post('ajax/get_delay_explanation_build_in.php', RetSWT2 );
-  function RetSWT2(dat2) {
+  function RetSWT2(dat2)
+  {
     if ( document.getElementById('delay_explanation_buildin') ){ document.getElementById('delay_explanation_buildin').innerHTML = dat2; }
     if ( document.getElementById('delay_explanation_delay') ){ document.getElementById('delay_explanation_delay').style.display='none'; }
   }
 }
-
-function build_in_add_work() {
+function build_in_add_work()
+{
 /*  $.post('ajax/get_add_time_build_in.php', RetSWT2 );
   function RetSWT2(dat2)
   { 
@@ -231,15 +319,19 @@ function build_in_add_work() {
   }*/ 
 }
 
-function as_delay() {
+function as_delay()
+{
   if ( document.getElementById('delay_explanation_head') ){ document.getElementById('delay_explanation_head').style.display='none'; }
   if ( document.getElementById('delay_explanation_delay') ){ document.getElementById('delay_explanation_delay').style.display='block'; }
 
   $.post('ajax/get_delay_explanation.php', {}, RetSWT2 );
-  function RetSWT2(dat2) {
-    if ( document.getElementById('delay_explanation_delay') ) {
+  function RetSWT2(dat2)
+  {
+    if ( document.getElementById('delay_explanation_delay') )
+    { 
       document.getElementById('delay_explanation_delay').innerHTML = dat2; 
-      if ( document.getElementById('explAddInfo') ) {
+      if ( document.getElementById('explAddInfo') )
+      {
         var blockHeight = document.getElementById('delay_explanation_delay').offsetHeight - 15;
         var addHeight = document.getElementById('explAddInfo').offsetHeight;
    
@@ -261,9 +353,10 @@ echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 echo "<body onload=\"check_day_change();\" bgcolor=\"#ffffff\" >";
 
+// session_start();
 
 include_once "/var/www/tori/funcs.php";
-include_once "/var/www/tori/php_tori/connect.php";
+include "/var/www/tori/php_tori/connect.php";
 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 $user_dayTransitionTime = $_SESSION['$ss_dayTransitionTime'];
@@ -275,7 +368,7 @@ $stopDTOuter = $timeArr[1];
 $transTimeBefore = $timeArr[2];
 $transTimeAfter = $timeArr[3];
 
-echo "<div id=\"layer_div\" class=\"layer_div\" style=\"display:none;\">";
+echo "<div id=\"layer_div\" class=\"layer_div\">";
 echo "</div>";
 
 echo "<div id=\"layer_question_div\" class=\"layer_question_div_2\" style=\"display:none;\">";
@@ -294,10 +387,10 @@ echo "<table>";
             echo "<table>";
               echo "<tr>";
                 echo "<td class=\"report_no_padding_no_border_no_bg\" bordercolor=\"#888888\" valign=\"middle\" align=\"center\" width = 198px>";
-                  echo "<button style=\"font-size: 80%; width:180px; height:30px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"day_continue_confirm();\">Ok</button>";                   
+                  echo "<button style=\"cursor: pointer; font-size: 80%; width:180px; height:30px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"day_continue_confirm();\">Ok</button>";                   
                 echo "</td>";
                 echo "<td class=\"report_no_padding_no_border_no_bg\" bordercolor=\"#888888\" valign=\"middle\" align=\"center\" width = 198px>";
-                  echo "<button style=\"font-size: 80%; width:180px; height:30px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"day_continue_reject();\">Oтмена</button>";                   
+                  echo "<button style=\"cursor: pointer; font-size: 80%; width:180px; height:30px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"day_continue_reject();\">Oтмена</button>";                   
                 echo "</td>";
               echo "</tr>";
             echo "</table>";
@@ -310,9 +403,13 @@ echo "<table>";
   echo "</tr>";
 echo "</table>";
 
+// 
 echo "</div>";
 
 echo "<div id=\"pause_result_head\">";
+echo "</div>";
+
+echo "<div id=\"sport_pause\">";
 echo "</div>";
 
 echo "<div id=\"pause_head\">";
@@ -335,17 +432,23 @@ echo "</div>";
                                                               
 echo "<div align=\"left\">";
 
+////////////////////////////////////////////////////////
+include_once  "/var/www/tori/funcs.php";
+
 $ip = $_SERVER['REMOTE_ADDR'];
-
-
 auth();
 
-if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ) {
+if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
+{
   header("Location: my_report.php");
   exit(); 
 }
- 
-  if ( isset( $_SESSION['ss_id'] ) ) {
+
+////////////////////////////////////////////////////////
+
+  include "/var/www/tori/php_tori/connect.php";
+  if ( isset( $_SESSION['ss_id'] ) )
+  { 
     $user_id = $_SESSION['ss_id'];
     $user_rate = $_SESSION['ss_rate'];
     $user_defaultStartTime = $_SESSION['ss_defaultStartTime'];
@@ -372,16 +475,16 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ) {
 
     mysqli_set_charset($link, "utf8");
     $query0 = mysqli_query($link, "SELECT * FROM employees WHERE id = '$user_id'");
-    $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC); 
+    $row0 = mysqli_fetch_assoc($query0); 
     $vn0=mysqli_num_rows($query0);
 
     echo "<table>";
     echo "<tr>";
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
 
-    include_once "/var/www/tori/navigate.php";
+    include_once  "/var/www/tori/navigate.php";
 
-    echo "</td>";
+    echo "</td>";               
 
     $wholeWidth = 625;
 
@@ -389,7 +492,8 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ) {
 
     echo "<h5 class=\"dark\"><br>/текущий день<br><br></h5>";
         
-    if ( $vn0 == 1 ) {
+    if ( $vn0 == 1 )
+    {
       $empl_state = $row0["state"];                                                  
             
       $sv_name = get_sv_name_by_userid( $user_id );
@@ -399,6 +503,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ) {
       $query01 = mysqli_query($link, "SELECT * FROM DEPARTMENTS WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = '$user_id')"); 
 
       $row01 = mysqli_fetch_assoc($query01);
+
       $depName = $row01["NAME"];
 
       $room = $row01["ROOM"];     
@@ -409,7 +514,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ) {
 
       $width00 = 600;  
       $width11 = 320; 
-      $width22 = $width00 - $width11;
+      $width22 = $width00 - $width11; 
 
       echo "<table>";
         echo "<tr>";
@@ -453,10 +558,12 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ) {
             echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>Начало рабочего дня c допустимым опозданием</b></font>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"middle\" align=\"center\">";
-            if ( $user_RemoteWork == 1 ) {
+            if ( $user_RemoteWork == 1 )
+            {
               echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>---</b></font><br>";
             }
-            else {
+            else
+            { 
               echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>".$user_defaultStartTime." >> ".$user_defaultStartTimeWithDelay." (+".$user_allowedDelay." мин.)</b></font><br>";
             }
           echo "</td>";  
@@ -505,11 +612,13 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ) {
       if ( isset( $_SESSION['ss_state'] ) )
       {
       }
-      else {
-	      $_SESSION['ss_state'] = 1;
-      }
-    }
+      else
+      { 
+	 $_SESSION['ss_state'] = 1;
+      }   
 
+    } 
+      
     echo "<div id=\"time_registration_div\">";
     echo "<h5 class=\"dark1\">Ожидание данных от сервера MySQL...</h5>";
     echo "</div>";
@@ -520,22 +629,33 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ) {
     echo "</td>";
  
     echo "<td bgcolor=\"#f0f7fb\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 500>";
-    echo "<h5 class=\"dark0\"><br>/обновления кнопки к 21.12.2023г.:<br><br></h5>";
-
+    echo "<h5 class=\"dark0\"><br>/обновления кнопки 10.04.2024г.:<br><br></h5>";
     echo "<h5 class=\"dark1\">1. Возможность изменить время ухода за предыдущий рабочий день при незакрытом рабочем дне в период с 9:00 до 11:30.<br></h5>";
     echo "<h5 class=\"dark1\">2. Настроено отображение времени прихода/ухода на рабочее место и начало/конца обеденного времени, при наведении курсора на время во временном отчете.<br></h5>";
     echo "<h5 class=\"dark1\">3. Настроено отображение присутствия сотрудников на рабочем месте иконкой <img title=\"еще на работе\" src=\"img/inwork.png\"><br></h5>";
     echo "<h5 class=\"dark1\">4. Возможность менять время прихода с обеда за предыдущий рабочий день, если время прихода с обеда не зафиксировано.<br></h5>";
+    echo "<h5 class=\"dark1\">5. Добавлена кнопка регистрации ухода в тренажерный зал. (функционал приостановки времени).<br></h5>";
+    echo "<h5 class=\"dark1\">6. Добавлена кнопка \"Тренажерный зал\" в панели навигации. В данной вкладке отображается список сотрудников, присутствующих в данный момент в спортивном зале. <br></h5>";
+    echo "<h5 class=\"dark1\">7. Добавлена возможность записаться в спортзал во вкладке \"Тренажерный зал\".<br></h5>";
+    // echo "<h5 class=\"dark2\">-реализован автомасштаб блока отображения отчета<br></h5>";
+    // echo "<h5 class=\"dark1\">7. оптимизация интерфейса<br></h5>";
+    // echo "<h5 class=\"dark1\">8. при незакрытом рабочем дне и при смене отчетного периода (по-умолчанию, суток) в течение 3-х часов и при подтверждении пользователем имеется возможность закрыть предудущий день окончанием предыдущего периода и начать новый рабочий день началом нового периода</h5>";
+    // echo "<h5 class=\"dark1\"><br><br> для настройки смещения начала суток, часового пояса, режима работы и др. обращайтесь к администратору системы<br></h5>";
+//    echo "<h5 class=\"red3\"><br><br>предыдущая версия системы (без возможности регистрации времени присутствия) доступна по адресу <a href=\"http://192.168.100.6/tmp/my_report.php\" class=\"mlbig\">http://192.168.100.6/tmp/my_report.php</a><br></h5>";
+                                   
     echo "</td>";
 
-    if ( $_SESSION['ss_id'] == 3000 ) {
+    if ( $_SESSION['ss_id'] == 3000 )
+    {
+
       $dateMonth = date('Y-m-d');
 
       $dateMonth = set_to_first_month_day( $dateMonth );
 
-      if ( ! isset( $_SESSION['stat_month_count'] ) ){
+      if ( ! isset( $_SESSION['stat_month_count'] ) )
+      { 
         $_SESSION['stat_month_count'] = 2;
-      }
+      }		
 
       $monthCnt = $_SESSION['stat_month_count'];
 
@@ -553,14 +673,17 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ) {
 
           $monthNumBase = date('m');
 
-	  for ( $monthNum = 0; $monthNum  < $_SESSION['stat_month_count']; $monthNum ++ ) {
+	  for ( $monthNum = 0; $monthNum  < $_SESSION['stat_month_count']; $monthNum ++ )
+          {
 	    echo "<tr align=\"left\">";
-        echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" width = 40>";
-          $dateMonth = MonthDecDN( $dateMonth, $monthNum );
-          show_month_stat( $dateMonth, $user_id, $user_rate, $user_defaultStartTime, $user_defaultStartHour, $user_defaultStartMinute, $user_allowedDelay );
-        echo "</td>";
-      echo "</tr>";
-    }
+              echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" width = 40>";
+
+                $dateMonth = MonthDecDN( $dateMonth, $monthNum );
+
+                show_month_stat( $dateMonth, $user_id, $user_rate, $user_defaultStartTime, $user_defaultStartHour, $user_defaultStartMinute, $user_allowedDelay );
+              echo "</td>";
+            echo "</tr>";
+          }
         echo "</table>";
       echo "</td>";                                                                                     	
     }
@@ -570,9 +693,8 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ) {
     echo "</table>";
 
   }
-
   echo "<font size=\"2\" color=\"#444444\" face=\"Arial\">";
-    include_once "/var/www/tori/end.php";
+    include_once  "/var/www/tori/end.php";
   echo "</font>";
 echo "</div>";
 
@@ -585,10 +707,13 @@ build_in_delay_expl();
 build_in_add_work();
 get_time_registration_div_content();   
 
-function update_clock() {
+function update_clock()
+{
   $.post('ajax/get_current_day_time.php', RetSWT);                           
-  function RetSWT(dat) {
-    if ( document.getElementById('dateTimeFieldNav') ) {
+  function RetSWT(dat) 
+  {
+    if ( document.getElementById('dateTimeFieldNav') )
+    {
       document.getElementById('dateTimeFieldNav').innerHTML = dat;
     }
   }
@@ -596,7 +721,7 @@ function update_clock() {
 
 var timerId=setInterval( "update_clock()", 10000 );
 
-</script>
+</script> 
 
 <?php
 echo "</body>";

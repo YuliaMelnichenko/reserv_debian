@@ -1,52 +1,45 @@
 <?php
 
-function get_current_datetime_in_timezone()
-{
-    // session_start();
+function get_current_datetime_in_timezone(){
+  // session_start();
+  $valid = 0;
 
-    $valid = 0;
+  $dateStr = "";
+  $timeStr = "";
 
+  if( isset($_SESSION['ss_sessid']) ){
+    $timeZoneMinsSrc = $_SESSION['ss_UserTimeZoneMins'];
+    $timeZoneSign = "+";            
+    if ( $timeZoneMinsSrc < 0 ){
+      $timeZoneSign = "-";
+    }
+        
+    $timeZoneHours = floor( abs( $timeZoneMinsSrc ) / 60 );
+    $timeZoneMins = abs( $timeZoneMinsSrc ) - $timeZoneHours * 60;
+
+    $timeZoneHoursStr = (string)$timeZoneHours;
+    $timeZoneMinsStr = (string)$timeZoneMins;
+
+    if ( $timeZoneHours < 10 ) $timeZoneHoursStr = "0".$timeZoneHoursStr;
+    if ( $timeZoneMins < 10 ) $timeZoneMinsStr = "0".$timeZoneMinsStr;
+
+    $timeZoneStr = "UTC".$timeZoneSign.$timeZoneHoursStr.":".$timeZoneMinsStr;
+
+    $datetime = gmdate("Y-m-d H:i:s");
+
+    $datetime = date("Y-m-d H:i:s", strtotime($datetime."+ $timeZoneHours hour + $timeZoneMins minute"));
+
+    $dateStr = substr($datetime, 0, 10);    
+    $timeStr = substr($datetime, 11, 8);    
+
+    $valid = 1;
+  }
+  else{
+    session_destroy();
     $dateStr = "";
     $timeStr = "";
-
-    if( isset($_SESSION['ss_sessid']) )
-    {
-        $timeZoneMinsSrc = $_SESSION['ss_UserTimeZoneMins'];
-        $timeZoneSign = "+";            
-        if ( $timeZoneMinsSrc < 0 )
-        {
-            $timeZoneSign = "-";
-        }
-        
-        $timeZoneHours = floor( abs( $timeZoneMinsSrc ) / 60 );
-        $timeZoneMins = abs( $timeZoneMinsSrc ) - $timeZoneHours * 60;
-
-        $timeZoneHoursStr = (string)$timeZoneHours;
-        $timeZoneMinsStr = (string)$timeZoneMins;
-
-        if ( $timeZoneHours < 10 ) $timeZoneHoursStr = "0".$timeZoneHoursStr;
-        if ( $timeZoneMins < 10 ) $timeZoneMinsStr = "0".$timeZoneMinsStr;
-
-        $timeZoneStr = "UTC".$timeZoneSign.$timeZoneHoursStr.":".$timeZoneMinsStr;
-
-        $datetime = gmdate("Y-m-d H:i:s");
-
-        $datetime = date("Y-m-d H:i:s", strtotime($datetime."+ $timeZoneHours hour + $timeZoneMins minute"));
-
-                                                                                                                                        
-        $dateStr = substr($datetime, 0, 10);    
-        $timeStr = substr($datetime, 11, 8);    
-
-        $valid = 1;
-    }
-    else
-    {
-      session_destroy();
-      $dateStr = "";
-      $timeStr = "";
-    }
-
-    return array($valid, $datetime, $dateStr, $timeStr, $timeZoneMinsSrc, $timeZoneStr);
+  }
+  return array($valid, $datetime, $dateStr, $timeStr, $timeZoneMinsSrc, $timeZoneStr);
 }
 
 function get_splited_current_date_time_in_timezone()
@@ -96,37 +89,37 @@ function get_current_datetime_in_timezone_str( $showDate, $showTimeZone )
     return $retStr;
 }
 
-function timezone_min_to_str( $timeZoneMinSrc )
-{
-    $sign = "+";
+// function timezone_min_to_str( $timeZoneMinSrc )
+// {
+//     $sign = "+";
 
-    if ( $timeZoneMinSrc < 0 )
-    {
-      $sign = "-";
-    }
+//     if ( $timeZoneMinSrc < 0 )
+//     {
+//       $sign = "-";
+//     }
 
-    $timeZoneMinSrc = abs($timeZoneMinSrc);
+//     $timeZoneMinSrc = abs($timeZoneMinSrc);
 
-    $timeZoneHour = round($timeZoneMinSrc / 60);
-    $timeZoneMin = $timeZoneMinSrc - $timeZoneHour * 60;
+//     $timeZoneHour = round($timeZoneMinSrc / 60);
+//     $timeZoneMin = $timeZoneMinSrc - $timeZoneHour * 60;
 
-    $timeZoneHourStr = (string)$timeZoneHour;
-    $timeZoneMinStr = (string)$timeZoneMin;
+//     $timeZoneHourStr = (string)$timeZoneHour;
+//     $timeZoneMinStr = (string)$timeZoneMin;
 
-    if ( $timeZoneHour < 10 )
-    {
-      $timeZoneHourStr = "0".$timeZoneHourStr;
-    }
+//     if ( $timeZoneHour < 10 )
+//     {
+//       $timeZoneHourStr = "0".$timeZoneHourStr;
+//     }
 
-    if ( $$timeZoneMin < 10 )
-    {
-      $timeZoneMinStr = "0".$timeZoneMinStr;
-    }
+//     if ( $$timeZoneMin < 10 )
+//     {
+//       $timeZoneMinStr = "0".$timeZoneMinStr;
+//     }
 
-    $timeZoneRes = "UTC".$sign.$timeZoneHour.":".$timeZoneMinStr;
+//     $timeZoneRes = "UTC".$sign.$timeZoneHour.":".$timeZoneMinStr;
 
-    return $timeZoneRes;
-}
+//     return $timeZoneRes;
+// }
 
 function split_data_and_time_by_nl_str( $indatetime )
 {
@@ -1098,7 +1091,7 @@ function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNot
   
   $paramInt = (-1)*$paramArr[1];
   
-  $query = mysqli_query($link, "SELECT APPROVED from add_time where PAUSE_MODE=0 and USERID='$user_id' and STOP_DT > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )"); 
+  $query = mysqli_query($link, "SELECT APPROVED FROM ADD_TIME WHERE PAUSE_MODE=0 AND USERID='$user_id' AND STOP_DT > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )"); 
 
   $merr=mysqli_error($link);
   if ( !$query ) 
@@ -3628,7 +3621,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
   $days_timeZoneSec = $stats[19][$index];
   $days_dayTransitionTime = $stats[20][$index];
 
-  $days_timeZoneStr = timezone_min_to_str( $days_timeZoneSec );
+  // $days_timeZoneStr = timezone_min_to_str( $days_timeZoneSec );
 
   $isCurrentDay = 0;
   $notCurrentDay = 1;
@@ -3866,7 +3859,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
     $tableContent .=       "</div>"; 
     if ($prefix == "<h5 class=\"middleBold\">Текущий день"){
       $tableContent .=       "<div class = \"report_no_padding_rep\">";
-      $tableContent .=         "<h5 class=\"middleSmall\">$days_timeZoneStr</h5>";
+      // $tableContent .=         "<h5 class=\"middleSmall\">$days_timeZoneStr</h5>";
       $outTimeEmpty = $days_work_stop;
       $tableContent .=       "</div>"; 
     }
@@ -4412,9 +4405,8 @@ $dcc = 0;
 }
   
 
-function get_cell_content( $procDate, $userID, $currentDate )
-{
-  $userID = $userID;
+function get_cell_content( $procDate, $userID, $currentDate ){
+  $userId = $userID;
 
   include "/var/www/tori/php_tori/connect.php";
 
@@ -4426,17 +4418,14 @@ function get_cell_content( $procDate, $userID, $currentDate )
 
   $add_time_duration = 0;
 
-  $query1 = mysqli_query($link, "SELECT STARTTIME, STOPTIME FROM ADD_TIME where STARTDATE = '$procDate' and USERID = '$userID' and APPROVED = 1"); 
+  $query1 = mysqli_query($link, "SELECT STARTTIME, STOPTIME FROM ADD_TIME where STARTDATE = '$procDate' and USERID = '$userId' and APPROVED = 1"); 
 
   $merr=mysqli_error($link);
-  if ( !$query1 ) 
-  {
+  if ( !$query1 ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
-    while ( $row1 = mysqli_fetch_array($query1, MYSQLI_ASSOC) )
-    {
+  else{
+    while ( $row1 = mysqli_fetch_assoc($query1) ){
       $add_start_time = $row1["STARTTIME"];
       $add_stop_time = $row1["STOPTIME"];
 
@@ -4445,148 +4434,106 @@ function get_cell_content( $procDate, $userID, $currentDate )
     $add_time_duration_str = format_time_d( $add_time_duration );
   }
 
-  $query = mysqli_query($link, "SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = '$procDate' and user_id = '$userID'"); 
+  $query = mysqli_query($link, "SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = '$procDate' and user_id = '$userId'"); 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
-    if ( $currentDate == 1 )
-    {
+  else{
+    if ( $currentDate == 1 ){
       $cellContent  = "<font size=\"2\" color=\"#000000\" face=\"Arial\">Текущий рабочий день:</font><br>";
 
-      if ( mysqli_num_rows($query) == 0 AND $add_time_duration_str == 0 )
-      {
+      if ( mysqli_num_rows($query) == 0 AND $add_time_duration_str == 0 ){
 
-        if ( is_weakend( $procDate ) )
-        {
-          if ( is_workday( $procDate ) )
-          {
+        if ( is_weakend( $procDate ) ){
+          if ( is_workday( $procDate ) ){
             $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br><br>Нет сведений!</font>";
-            $cellTextColor = "ff0000";
             $cellAlign = "center";              
           }
-          else
-          {
+          else{
             $cellContent .= "<font size=\"4\" color=\"#000000\" face=\"Arial\"><br><br>Выходной</font>";
-            $cellTextColor = "000000";
             $cellColor = "dddddd";
             $cellAlign = "center";
             $cellValign = "middle";
           }        
         }
-        else
-        {
-          if ( !is_holiday( $procDate ) )
-          {
+        else{
+          if ( !is_holiday( $procDate ) ){
             $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br><br>Нет сведений!</font>";
-            $cellTextColor = "ff0000";
             $cellAlign = "center";              
           }
-          else
-          {
+          else{
             $cellContent .= "<font size=\"4\" color=\"#000000\" face=\"Arial\"><br><br>Праздничный день!</font>";
-            $cellTextColor = "000000";
             $cellColor = "dddddd";
             $cellAlign = "center"; 
             $cellValign = "middle";             
           }        
         }
       }
-      else
-      {
-        if ( mysqli_num_rows($query) != 0 )
-        {
-	  $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
+      else{
+        if ( mysqli_num_rows($query) != 0 ){
+	        $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
           $in_time = $row["in_time"];
           $out_time = $row["out_time"];
           $eat_start = $row["eat_start"];
           $eat_stop = $row["eat_stop"]; 
-          $state = $row["state"];
         }
-        else
-        {
+        else{
           $in_time = "00:00:00";
           $out_time = $row["out_time"];
           $eat_start = $row["eat_start"];
           $eat_stop = $row["eat_stop"]; 
-          $state = $row["state"];
         }
-
-        {
 
           $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Раб.в.</font>[".represent_time( $in_time )." - ".represent_time( $out_time )."]<br>";
           $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Обед </font>[".represent_time( $eat_start )." - ".represent_time( $eat_stop )."]<br>";
           if ( $add_time_duration != 0 ) $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Работа вне офиса: </font> ".$add_time_duration_str."<br>";
           else $cellContent .= "<br>";
 
-
           $cellContent .= "<br><font size=\"2\" color=\"#444444\" face=\"Arial black\">Итог: </font>".work_day_duration_current_date( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration )."<br>";
-        }
       }
     }
-    else
-    {
-      if ( mysqli_num_rows($query) == 0 AND $add_time_duration == 0 )
-      {
-        if ( is_weakend( $procDate ) )
-        {
-          if ( is_workday( $procDate ) )
-          {
+    else{
+      if ( mysqli_num_rows($query) == 0 AND $add_time_duration == 0 ){
+        if ( is_weakend( $procDate ) ){
+          if ( is_workday( $procDate ) ){
             $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br><br>Нет сведений!</font>";
-            $cellTextColor = "ff0000";
             $cellAlign = "center";              
           }
-          else
-          {
+          else{
             $cellContent .= "<font size=\"4\" color=\"#000000\" face=\"Arial\"><br><br>Выходной</font>";
-            $cellTextColor = "000000";
             $cellColor = "dddddd";
             $cellAlign = "center";  
             $cellValign = "middle";            
           }        
         }
-        else
-        {
-          if ( !is_holiday( $procDate ) )
-          {
+        else{
+          if ( !is_holiday( $procDate ) ){
             $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br><br>Нет сведений!</font>";
-            $cellTextColor = "ff0000";
             $cellAlign = "center";              
           }
-          else
-          {
+          else{
             $cellContent .= "<font size=\"4\" color=\"#000000\" face=\"Arial\"><br><br>Праздничный день!</font>";
-            $cellTextColor = "000000";
             $cellColor = "dddddd";
             $cellAlign = "center";    
             $cellValign = "middle";          
           }        
         }
       }
-      else
-      {
-        if ( mysqli_num_rows($query) != 0 )
-        {
-	  $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
+      else{
+        if ( mysqli_num_rows($query) != 0 ){
+	        $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
           $in_time = $row["in_time"];
           $out_time = $row["out_time"];
           $eat_start = $row["eat_start"];
           $eat_stop = $row["eat_stop"]; 
-          $state = $row["state"];
         }
-        else
-        {
+        else{
           $in_time = "00:00:00";
           $out_time = "00:00:00";
           $eat_start = "00:00:00";
           $eat_stop = "00:00:00"; 
-          $state = 0;
         }
-        {
-
           $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Раб.в.</font>[".represent_time( $in_time )." - ".represent_time( $out_time )."]<br>";
           $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Обед </font>[".represent_time( $eat_start )." - ".represent_time( $eat_stop )."]<br>";
           
@@ -4597,17 +4544,14 @@ function get_cell_content( $procDate, $userID, $currentDate )
 
           $wdDuration = work_day_duration( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration );
            
-          if ( $wdDuration != "-1" )
-          {
+          if ( $wdDuration != "-1" ){
             $cellColor = "99ff99";
             if ( $offs == 1 )  $cellContent .= "<br>";
             $cellContent .= "<br><font size=\"2\" color=\"#444444\" face=\"Arial black\">Итог: </font>".$wdDuration."<br>";
           }
-          else
-          {
+          else{
             $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br>Недостаточно сведений!</font>";
             $cellColor = "ffccccc";
-          }
         }
       }
     }

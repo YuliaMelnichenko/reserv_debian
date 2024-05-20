@@ -16,7 +16,21 @@ $add_time_part_base = $_POST['add_time_part_base'];
 $add_time_part_desk = $_POST['add_time_part_desk'];
 $exclude_weekend_holidays = $_POST['exclude_weekend_holidays'];
 
-include_once "/var/www/tori/php_tori/connect.php";
+if ( isset( $_POST['byAlert'] ) AND $_POST['byAlert'] == 1 ){
+  $byAlert = 1;
+}
+else{
+  $byAlert = 0;
+}
+
+include "/var/www/tori/php_tori/connect.php";
+
+mysqli_set_charset($link, "utf8");
+
+$supervisor_query = mysqli_query($link,"SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 AND USERID = '$userID_'");
+$row = mysqli_fetch_array($supervisor_query);
+
+$sv_ID = $row["SUPERVISORID"];
 
 $query0 = mysqli_query($link, "SELECT max(ID) FROM ADD_TIME"); 
 $newID = 0;
@@ -97,7 +111,7 @@ else
     $stop = $rDay." ".$stopTimeStr;
   
     mysqli_set_charset($link, "utf8"); 
-    $query = mysqli_query($link, "INSERT INTO ADD_TIME (ID, ADDDATE, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, APPROVED, PAUSE_MODE, BYALERT ) VALUES ('$newID','$currentDate','$userID_','$start','$stop','$add_time_part_base','$add_time_part_desk','0', '0', '$byAlert')");
+    $query = mysqli_query($link, "INSERT INTO ADD_TIME (ID, ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE, BYALERT ) VALUES ('$newID','$currentDate', '$sv_ID','$userID_','$start','$stop','$add_time_part_base','$add_time_part_desk', '', '0', '0', '$byAlert')");
 
     $merr=mysqli_error($link);
     if (!$query)

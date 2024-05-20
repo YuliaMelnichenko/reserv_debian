@@ -1,6 +1,7 @@
 <?php
 ob_start();
 ?>
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
 <script type="text/javascript" src="js/tory.js"></script> 
@@ -8,61 +9,47 @@ ob_start();
 
 check_pause_state();
 
-function update_clock()
-{
+function update_clock(){
   $.post('ajax/get_current_day_time.php', RetSWT);                           
-  function RetSWT(dat) 
-  {
-    if ( document.getElementById('dateTimeField') )
-    {
+  function RetSWT(dat) {
+    if ( document.getElementById('dateTimeField') ){
       document.getElementById('dateTimeField').innerHTML = dat;
     }
   }
 }
 
-function st_month_inc()
-{	
+function st_month_inc(){	
   $.post('ajax/stat_month_inc.php', RetSWT);                           
-  function RetSWT(dat) 
-    {  
-      window.location=self.location;
-    }
+  function RetSWT(dat) {
+    window.location=self.location;
+  }
 }
 
-function st_month_dec()
-{	
+function st_month_dec(){
   $.post('ajax/stat_month_dec.php', RetSWT);                           
-  function RetSWT(dat) 
-  {  
+  function RetSWT(dat) {
     window.location=self.location;
   }
 }
 
-function st_month_def()
-{	
+function st_month_def(){
   $.post('ajax/stat_month_def.php', RetSWT);                           
-  function RetSWT(dat) 
-  {  
+  function RetSWT(dat) {
     window.location=self.location;
   }
 }
 
-function get_time_registration_div_content()
-{
+function get_time_registration_div_content(){
   $.post('ajax/get_time_registration_div.php', RetSWT6 );
-  function RetSWT6(dat6)
-  {    
+  function RetSWT6(dat6){
     if ( document.getElementById('time_registration_div') ){ document.getElementById('time_registration_div').innerHTML = dat6; }
   }
 } 
 
-function switch_day_state( next )
-{
+function switch_day_state( next ){
   $.post('ajax/switch_day_state.php', { next: next }, RetSWT);                           
-  function RetSWT(dat) 
-  {  
-    if ( dat == 1 )
-    {
+  function RetSWT(dat) {
+    if ( dat == 1 ){
       get_time_registration_div_content();
     }
     else
@@ -104,39 +91,55 @@ function reg_eat_start()
   switch_day_state( 1 );
 }
 
-function reg_eat_stop()
-{
+function reg_eat_stop(){
   switch_day_state( 1 );
 }   
 
-function add_expl()
-{
+function add_expl(){
   $.post('ajax/get_explanation_head.php', RetSWT1);
-  function RetSWT1(dat1) 
-  {
-    if ( document.getElementById('delay_explanation_head') )
-    {
+  function RetSWT1(dat1) {
+    if ( document.getElementById('delay_explanation_head') ){
       document.getElementById('delay_explanation_head').innerHTML=dat1;
       document.getElementById('delay_explanation_head').style.display='block';
     }
   }
 }
 
-function as_add_time()
-{
+function add_training_time(){
+  $.post('ajax/get_add_gym_time.php', RetSWT1);
+  function RetSWT1(dat1) { 
+    if ( document.getElementById('delay_explanation_sport_time') ){
+      document.getElementById('delay_explanation_sport_time').innerHTML = dat1;
+      document.getElementById('delay_explanation_sport_time').style.display='block';
+    }
+  }
+}
+
+function close_add_sport_time(){
+  if ( document.getElementById('delay_explanation_sport_time') ){ document.getElementById('delay_explanation_sport_time').style.display='none'; }
+}
+
+function enter_out_time(){
+  $.post('ajax/get_out_time.php', RetSWT1);
+  function RetSWT1(dat1) {
+    if ( document.getElementById('delay_out_time') ){
+      document.getElementById('delay_out_time').innerHTML=dat1;
+      document.getElementById('delay_out_time').style.display='flex';
+    }
+  }
+}
+
+function as_add_time(){
   $.post('ajax/get_add_times.php', RetSWT1);
-  function RetSWT1(dat1) 
-  { 
+  function RetSWT1(dat1) { 
     if ( document.getElementById('delay_explanation_head') ){ document.getElementById('delay_explanation_head').style.display='none'; }
-    if ( document.getElementById('delay_explanation_add_time') )
-    {
+    if ( document.getElementById('delay_explanation_add_time') ){
       document.getElementById('delay_explanation_add_time').innerHTML = dat1;
       document.getElementById('delay_explanation_add_time').style.display='block';
     }
 
     $.post('ajax/get_add_time_notif_count.php', RetSWT2);
-    function RetSWT2(dat2) 
-    { 
+    function RetSWT2(dat2) { 
       if ( document.getElementById('notifBtn') ){ document.getElementById('notifBtn').innerHTML = dat2; }
     }
   }
@@ -144,43 +147,34 @@ function as_add_time()
   if ( document.getElementById('delay_explanation_add_time') ){ document.getElementById('delay_explanation_add_time').style.display='block'; }
 }
 
-function close_explanation_head()
-{
+function close_explanation_head(){
   if ( document.getElementById('delay_explanation_head') ){ document.getElementById('delay_explanation_head').style.display='none'; }
 }
 
-function build_in_delay_expl()
-{
+function build_in_delay_expl(){
   $.post('ajax/get_delay_explanation_build_in.php', RetSWT2 );
-  function RetSWT2(dat2)
-  {
+  function RetSWT2(dat2){
     if ( document.getElementById('delay_explanation_buildin') ){ document.getElementById('delay_explanation_buildin').innerHTML = dat2; }
     if ( document.getElementById('delay_explanation_delay') ){ document.getElementById('delay_explanation_delay').style.display='none'; }
   }
 }
 
-function build_in_add_work()
-{
+function build_in_add_work(){
   $.post('ajax/get_add_time_build_in.php', RetSWT2 );
-  function RetSWT2(dat2)
-  { 
+  function RetSWT2(dat2){ 
     if ( document.getElementById('add_work_buildin') ){ document.getElementById('add_work_buildin').innerHTML = dat2; }
   }
 }
 
-function as_delay()
-{
+function as_delay(){
   if ( document.getElementById('delay_explanation_head') ){ document.getElementById('delay_explanation_head').style.display='none'; }
   if ( document.getElementById('delay_explanation_delay') ){ document.getElementById('delay_explanation_delay').style.display='block'; }
 
   $.post('ajax/get_delay_explanation.php', {}, RetSWT2 );
-  function RetSWT2(dat2)
-  {
-    if ( document.getElementById('delay_explanation_delay') )
-    { 
+  function RetSWT2(dat2){
+    if ( document.getElementById('delay_explanation_delay') ){ 
       document.getElementById('delay_explanation_delay').innerHTML = dat2; 
-      if ( document.getElementById('explAddInfo') )
-      {
+      if ( document.getElementById('explAddInfo') ){
         var blockHeight = document.getElementById('delay_explanation_delay').offsetHeight - 15;
         var addHeight = document.getElementById('explAddInfo').offsetHeight;
    
@@ -191,7 +185,7 @@ function as_delay()
 }
 
 </script>
-<?
+<?php
 echo "<html>";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";
@@ -214,6 +208,9 @@ echo "<font size=\"0\" color=\"#EEEEEE\" face=\"Arial\">2) В условиях �
 echo "<div id=\"pause_result_head\">";
 echo "</div>";
 
+echo "<div id=\"sport_pause\">";
+echo "</div>";
+
 echo "<div id=\"pause_head\">";
 echo "</div>";
 
@@ -223,6 +220,7 @@ echo "</div>";
 echo "<div id=\"delay_explanation_add_time_part\">";                     
 echo "</div>"; 
 
+
 echo "<div id=\"delay_explanation_add_time\" >";
 echo "</div>";
 
@@ -231,28 +229,29 @@ echo "</div>";
                                                               
 echo "<div align=\"left\">";
 
-include_once "/var/www/tori/funcs.php";
-include_once "/var/www/tori/short_stat.php";
+////////////////////////////////////////////////////////
+include_once  "/var/www/tori/funcs.php";
+include  "/var/www/tori/short_stat.php";
 
 $ip = $_SERVER['REMOTE_ADDR'];
 
-// if ( $ip == "192.168.100.50" or $ip == "192.168.100.69" )
-// { 
-//     $_SESSION['rep_start_stop_date_mode'] = 2;	
-//     save_last_location( "my_report_scr.php" );
-// }
-// else
-// {
-//     save_last_location( "index.php" );
-// }
+if ( $ip == "192.168.100.50" or $ip == "192.168.100.69" ){
+  $_SESSION['rep_start_stop_date_mode'] = 2;	
+  save_last_location( "my_report_scr.php" );
+}
+else{
+  save_last_location( "index.php" );
+}
 
 auth();
 
-  include_once "/var/www/tori/start.php";
+////////////////////////////////////////////////////////
 
-  include_once "/var/www/tori/php_tori/connect.php";
-  if ( isset( $_SESSION['ss_id'] ) )
-  { 
+  include_once  "/var/www/tori/start.php";
+
+
+  include "/var/www/tori/php_tori/connect.php";
+  if ( isset( $_SESSION['ss_id'] ) ){ 
     $user_id = $_SESSION['ss_id'];
     $user_rate = $_SESSION['ss_rate'];
     $user_defaultStartTime = $_SESSION['ss_defaultStartTime'];
@@ -263,13 +262,13 @@ auth();
 
     mysqli_set_charset($link, "utf8");
     $query0 = mysqli_query($link, "SELECT * FROM employees WHERE id = '$user_id'"); 
-    $vn0=mysqli_num_rows($query0);
+    $vn0 = mysqli_num_rows($query0);
 
     echo "<table cellpadding=\"10\" cellspacing=\"0\" border=1>";
     echo "<tr>";
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 120>";
 
-    include_once "/var/www/tori/navigate.php";
+    include_once  "/var/www/tori/navigate.php";
 
     echo "</td>";               
 
@@ -277,9 +276,10 @@ auth();
 
     echo "<h5 class=\"dark\">/текущий день</h5>";
  
-    if ( $vn0 == 1 )
-    {
-      $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC);
+    //-----------------------------------------------------------------------------------------------------------------
+    
+    if ( $vn0 == 1 ){
+      $row0 = mysqli_fetch_assoc($query0);
 
       $empl_state = $row0["STATE"];
 
@@ -289,7 +289,7 @@ auth();
     
       $query01 = mysqli_query($link, "SELECT * FROM DEPARTMENTS WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = '$user_id')"); 
 
-      $row01 = mysqli_fetch_array($query01, MYSQLI_ASSOC);
+      $row01 = mysqli_fetch_assoc($query01);
 
       $depName = $row01["NAME"];
 
@@ -386,8 +386,7 @@ auth();
       if ( isset( $_SESSION['ss_state'] ) )
       {
       }
-      else
-      { 
+      else{ 
 	 $_SESSION['ss_state'] = 1;
       }   
 
@@ -398,15 +397,13 @@ auth();
 
     echo "</td>";
 
-    if ( $_SESSION['ss_id'] == 3000 )
-    {
+    if ( $_SESSION['ss_id'] == 3000 ){
 
       $dateMonth = date('Y-m-d');
 
       $dateMonth = set_to_first_month_day( $dateMonth );
 
-      if ( ! isset( $_SESSION['stat_month_count'] ) )
-      { 
+      if ( ! isset( $_SESSION['stat_month_count'] ) ){
         $_SESSION['stat_month_count'] = 2;
       }		
 
@@ -426,8 +423,7 @@ auth();
 
           $monthNumBase = date('m');
 
-	  for ( $monthNum = 0; $monthNum  < $_SESSION['stat_month_count']; $monthNum ++ )
-          {
+	  for ( $monthNum = 0; $monthNum  < $_SESSION['stat_month_count']; $monthNum ++ ){
 	    echo "<tr align=\"left\">";
               echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" width = 40>";
 
@@ -445,9 +441,7 @@ auth();
     echo "</table>";
   }
   echo "<font size=\"2\" color=\"#444444\" face=\"Arial\">";
-
-  include_once "/var/www/tori/end.php";
-
+    include_once  "/var/www/tori/end.php";
   echo "</font>";
 echo "</div>";
 ?>

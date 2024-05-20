@@ -87,7 +87,6 @@ function set_explanation( mode, delayID )
 
 function set_add_times_height()
 {
-
   $.post('ajax/get_add_times_block_height.php', {},RetSWT1);
   function RetSWT1(dat3) 
   { 
@@ -162,7 +161,6 @@ function save_changes_time ( userID, currentDayNumber ) {
   }
   if ( document.getElementById('delay_out_time') ){ document.getElementById('delay_out_time').style.display='none'; }
 }
-
 
 function show_entrance_page()
 {   
@@ -324,7 +322,6 @@ function set_alert_viewed( alertID )
   }
 } 
 
-
 function update_alerts_page()
 {
   $.post('ajax/get_alerts_count.php', RetSWT1);                           
@@ -340,7 +337,6 @@ function update_alerts_page()
     }
   }   	
 }
-
 
 function pause_set_start()
 {
@@ -651,19 +647,6 @@ function mark_as_undeleted_delay_for_user( addID )
   }   	
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 function show_add_times_by_user( user )
 {  
   if ( document.getElementById('add_time_content') )
@@ -699,11 +682,6 @@ function show_add_times_by_user( user )
   }   	
 }
 
-
-
-
-
-
 function show_add_time_notification()
 {  
   $.post('ajax/get_add_times_notification_table.php', RetSWT1);                           
@@ -729,11 +707,6 @@ function show_add_time_notification()
     }
   }
 }   	
-
-
-
-
-
 
 function show_add_time_notification()
 {  
@@ -784,8 +757,6 @@ function add_time_set_start()
     show_add_time_page();
   }  	
 }
-
-
 
 function accept_refuse_add_time_for_user_final( addID, suDesc, accept )
 {
@@ -867,6 +838,19 @@ function show_pause_table()
   }   	
 }
 
+function show_pause_sport_table()
+{
+  if ( document.getElementById('pause_sport_times_table') )
+  {
+    $.post('ajax/get_pause_sport_table.php', RetSWT1);  
+        
+    function RetSWT1(dat1) 
+    {
+      document.getElementById('pause_sport_times_table').innerHTML = dat1;              
+    }
+  }   	
+}
+
 function show_delay_table()
 {
   if ( document.getElementById('delay_table') )
@@ -923,6 +907,25 @@ function cancel_part_time_add()
       document.getElementById('delay_explanation_add_time').style.display='block';
     }
   }
+}
+
+function add_training_time()
+{
+  $.post('ajax/get_add_gym_time.php', RetSWT1);
+  function RetSWT1(dat1) 
+  { 
+    if ( document.getElementById('delay_explanation_sport_time') )
+    {
+      document.getElementById('delay_explanation_sport_time').innerHTML = dat1;
+      document.getElementById('delay_explanation_sport_time').style.display='flex';
+    }
+  }
+}
+
+function close_add_sport_time()
+{
+  location.reload();
+  if ( document.getElementById('delay_explanation_sport_time') ){ document.getElementById('delay_explanation_sport_time').style.display='none'; }
 }
 
 function part_time_add( byAlert )
@@ -1005,6 +1008,68 @@ function part_time_add( byAlert )
   }
 }
 
+function save_entry (currentDay, startTime) {
+  if ( document.getElementById('enter_training_date') && document.getElementById('enter_training_start_time') &&  document.getElementById('enter_training_stop_time')){
+    var training_date = document.getElementById('enter_training_date').value;
+    var training_start_time = document.getElementById('enter_training_start_time').value;
+    var training_stop_time = document.getElementById('enter_training_stop_time').value;
+
+    switch (true) {
+      case currentDay > training_date:
+        alert( "Дата тренировки некорректная!" );
+        break;
+      case startTime > training_start_time && currentDay === training_date:
+        alert( "Время начала тренировки в прошлом" );
+        break;
+      case training_stop_time < training_start_time:
+        alert("Время окончания тренировки меньше времени начала");
+        break;
+      default:
+        $.post('ajax/change_sum_people.php', {training_date: training_date, training_start_time: training_start_time, training_stop_time: training_stop_time}, RetSWT1);
+        function RetSWT1(dat1) {  
+          if ( dat1 == 1 ) {
+            alert( "На данное время превышен лимит записи! Выберите другую дату/время." );
+          }
+          else {
+            $.post('ajax/gym_add_time.php', {training_date: training_date, training_start_time: training_start_time, training_stop_time: training_stop_time}, RetSWT2);
+            function RetSWT2(dat2) {  
+            if ( dat2 == 2 ) {
+              alert( "Тренировка запланирована!" );
+              location.reload();
+            }
+            else {
+              alert( "Ошибка" );
+            }
+          }                       
+        }
+      }
+    }
+  }
+}
+
+function delete_training_schedule () {
+  $.post('ajax/delete_gym_schedule_window.php', RetSWT1);
+  function RetSWT1(dat1) { 
+    if ( document.getElementById('delete_gym_schedule_window') ){
+      document.getElementById('delete_gym_schedule_window').innerHTML = dat1;
+      document.getElementById('delete_gym_schedule_window').style.display='flex';
+    }
+  }
+}
+
+function delete_gym_schedule(date_train, start_time, stop_time) {
+  $.post('ajax/delete_training_schedule.php', {date_train: date_train, start_time: start_time, stop_time: stop_time}, RetSWT1);
+  function RetSWT1(dat1) {
+    if ( dat1 == 2 ) {
+      alert( "Тренировка удалена." );
+      location.reload();
+   }
+   else {
+     alert( "Ошибка" );
+   }
+  }
+}
+
 function part_time_show()
 {
   if ( document.getElementById('add_time_part_date') && document.getElementById('add_time_part_start_time') && document.getElementById('add_time_part_stop_time') && document.getElementById('add_time_part_base') && document.getElementById('add_time_part_desc') )
@@ -1052,7 +1117,6 @@ function set_pause_full_screen()
 {
   if ( document.getElementById('pauseFullScreen') )
   {
-
     win_w = $(window).width();
     win_h = $(window).height();
    
@@ -1080,9 +1144,6 @@ function check_pause_state( force )
     } 
     else if ( dat == 1 )
     {
-//alert(dat);
-
-
       $.post('ajax/get_pause_stop_content.php', RetSWT1);
       function RetSWT1(dat1) 
       { 
@@ -1124,16 +1185,11 @@ function check_pause_state( force )
   }                       
 }
 
-
-
-
-
 function check_pause_state1( force )
 {
   $.post('ajax/is_there_pause.php', RetSWT);
   function RetSWT(dat) 
-  { 
-
+  {
 	alert(dat);
 
     if ( dat == 0 )
@@ -1190,9 +1246,6 @@ function check_pause_state1( force )
   }                       
 }
 
-
-
-
 function set_pause_header()
 {
   if ( document.getElementById('pause_head') )
@@ -1206,16 +1259,24 @@ function set_pause_header()
   }
 }
 
+function set_sport_pause()
+{
+  if ( document.getElementById('sport_pause') )
+  { 
+    document.getElementById('sport_pause').style.display='block'; 
+    $.post('ajax/get_pause_sport_content.php', RetSWT);
+    function RetSWT(dat) 
+    { 
+      document.getElementById('sport_pause').innerHTML = dat;    
+    }
+  }
+}
+
 function resume_from_pause( pauseID )
 {
-
-
   $.post('ajax/resume_from_pause.php', { pauseID: pauseID }, RetSWT );
   function RetSWT(dat) 
   {
-
-//     alert(dat);
-
     window.location=self.location;
   }
 }
@@ -1253,45 +1314,46 @@ function set_pause_state()
   }
 }
 
+function set_pause_sport_state()
+{
+  if ( document.getElementById('pause_desk') )
+  { 
+    var desk = document.getElementById('pause_desk').value;
+
+    $.post('ajax/set_pause_sport.php', { desk: desk }, RetSWT );
+    function RetSWT(dat) 
+    {
+      if ( dat == 1 )
+      { 
+        close_sport_pause(); 
+        check_pause_state();
+      }
+      else
+      { 
+        alert( dat );
+      } 
+    }
+  }
+}
+
+function disclamer (state) {
+  if (state == "3") {
+    alert("Кнопка недоступна. Нажмите кнопку прихода с обеда!");
+  }
+  if (state === "0") {
+    alert("Кнопка недоступна. Ваш рабочий день окончен!");
+  }
+}
+
 function close_pause()
 {
   if ( document.getElementById('pause_head') ){ document.getElementById('pause_head').style.display='none'; }
 }
- 
 
-
-
-
- /*
-
-function scrollBlock (el) 
-{ 
-alert('sdfs');
-  var these, other, multiple; 
-
-  if ( el.hasClass('report_window_head-2') ) 
-  { 
-    these = el; 
-    other = $('.report_window_head-1'); 
-    multiple = 0.38; 
-  } 
-  
-  other.scrollTop( these.scrollTop() * multiple ); 
-} 
-
-$('.report_window_head-1, .report_window_head-2').mouseover( function () 
-{ 
-    var these = $(this); 
-    these.scroll( function () 
-    { 
-      scrollBlock( $(this) ); 
-    }); 
-    these.mouseleave( function () 
-    { 
-      these.unbind('scroll'); 
-    }); 
-});
-          */
+function close_sport_pause()
+{
+  if ( document.getElementById('sport_pause') ){ document.getElementById('sport_pause').style.display='none'; }
+}
 
 function make_div_scroll()
 {
@@ -1306,47 +1368,16 @@ function make_div_scroll_single()
 {                        
   var vertScrollVal = document.getElementById('report_window_single').scrollTop;
   document.getElementById('report_window_left').scrollTop = vertScrollVal;
+}  
+
+function make_div_scroll_sport() {
+  var vertScrollVal = document.getElementById('delete_button_cont').scrollTop;
+  document.getElementById('delete_button_cont').scrollTop = vertScrollVal;
 }
-
-
-/*var element1 = document.getElementById('report_window_head');
-var positionInfo1 = element1.getBoundingClientRect();
-var width1 = positionInfo1.width;
-
-var element2 = document.getElementById('report_window');
-var positionInfo2 = element2.getBoundingClientRect();
-var width2 = positionInfo2.width;
-
-var element3 = document.getElementById('report_window');
-var positionInfo3 = element3.getBoundingClientRect();
-var width3 = positionInfo3.height;
-
-var element4 = document.getElementById('report_window_left');
-var positionInfo4 = element4.getBoundingClientRect();
-var width4 = positionInfo4.height;
-
-//alert(horizScrollVal);
-alert(width1);
-alert(width2);
-alert(width3);
-alert(width4); */
-/*     
-if ( horizScrollVal > width1 + 20 )
-{
-  document.getElementById('report_window').scrollLeft = width1 + 20;
-}
-else
-{
-  //alert( horizScrollVal );
-}
- */     //alert(document.getElementById('report_window_head-1'));
-  
-//}     
 
 $.post('funcs.php', RetSWT);
 function RetSWT () {
   var inf = document.getElementsByClassName('inf');
-  var time = document.getElementById('time');
   for (let i = 0; i < inf.length; ++i) {
     inf[i].addEventListener('mouseover', showTime);
     inf[i].addEventListener('mouseout', hideTime);
@@ -1368,5 +1399,4 @@ function RetSWT () {
   function hideTime() {
     $('.' + this.id).css("display", "none");
   }
-
 }

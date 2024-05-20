@@ -1,11 +1,11 @@
 <?php
 
 function Log_In( $_login, $_passwd ) {
-  include_once "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/php_tori/connect.php";
   $login_ = mysqli_real_escape_string( $link, $_login );
   $passwd_ = mysqli_real_escape_string( $link, $_passwd );
 
-  $query = mysqli_query($link, "select passwd FROM employee WHERE login='$login_'"); 
+  $query = mysqli_query($link, "SELECT * FROM employees WHERE login='$login_'"); 
   $merr=mysqli_error($link);
   
   if (!$query) {
@@ -26,13 +26,13 @@ function Log_In( $_login, $_passwd ) {
 $_SESSION['ss_login'] = (string)$_POST['login'];
 $_SESSION['ss_passwd'] = (string)$data['passwd'];
 $_SESSION['ss_sid'] = session_id();
-$_SESSION['ss_userid'] = 	(string)$data['userid'];
+$_SESSION['ss_id'] = 	(string)$data['id'];
 $_SESSION['ss_role'] = (int)$data['role'];
 $_SESSION['ss_ip'] = $_SERVER['REMOTE_ADDR'];
 
 mysqli_set_charset($link, "utf8");
 
-$query1 = mysqli_query($link, "select fio, company, email, web, phone, fax, cladr_subj, cladr_distr, cladr_settl, comments FROM eco_uai WHERE userid='".$data['userid']."' LIMIT 1"); 
+$query1 = mysqli_query($link, "SELECT fio, company, email, web, phone, fax, cladr_subj, cladr_distr, cladr_settl, comments FROM eco_uai WHERE userid='".$data['userid']."' LIMIT 1"); 
 $merr=mysqli_error($link);
 if (!$query1) {
 	echo "<br>mysql_error = $merr<br>";

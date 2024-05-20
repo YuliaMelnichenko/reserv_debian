@@ -1,19 +1,17 @@
+<script type="text/javascript" src="lib/jquery/jquery.js"></script>
+<script type="text/javascript" src="js/tory.js"></script>
 <script type="text/javascript" charset="utf-8"> 
-function log_out()
-{
+function log_out(){
   var perform=confirm('Выйти из системы?')
-  if ( perform == true )
-  {
+  if ( perform == true ){
     unset_cookie();
     location.href='exit.php';   
   }
 }
 
-function show_alerts()
-{
+function show_alerts(){
   location.href='alerts.php';   
 }
-
 </script>
 
 <?php
@@ -23,8 +21,7 @@ include_once "/var/www/tori/funcs.php";
 
 $needToShow = 1;
 
-if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
-{
+if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
   $needToShow = 0;
 }
 
@@ -34,17 +31,19 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
   $dtvalStr = get_current_datetime_in_timezone_str( 1, 0 );
   echo "<table cellpadding=\"5\" cellspacing=\"0\" border=1>";
     echo "<tr>";
-      echo "<td style=\"margin:0; padding:0;\" height = 1>";
+      echo "<td style=\"margin:0; padding:0; border:0\" height = 1>";
     echo "</tr>";
     echo "<tr>";
       echo "</td>";
-      echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"center\" width = 225>";
+      echo "<td style=\"border-color: #fdf2b5\" bgcolor=\"#ddeeff\" valign=\"top\" align=\"center\" width = 225>";
         echo "<div id=\"dateTimeFieldNav\">";
           echo "<h1 class=\"clock\">".$dtvalStr."</h1>";
         echo "</div>";
       echo "</td>";
     echo "</tr>";
   echo "</table>";
+
+  echo "";
 
   echo "<table cellpadding=\"5\" cellspacing=\"0\" border=0 width = 190>";
   echo "<tr><td style=\"margin:0; padding:0; margin-left:0;\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 160>";
@@ -54,7 +53,6 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
         echo "<a class=\"nounder\" href=\"index.php\">";
           echo "<font size=\"5\" color=\"#ffffff\" face=\"Arial Black\">В</font>";
           echo "<font size=\"5\" color=\"#4a6e97\" face=\"Arial Black\"> ТОРИ 2.0</font>";
-          echo "<font size=\"1\" color=\"#4a6e97\" face=\"Arial Black\"> beta</font>";
         echo "</a>";
       echo "</td>";
       echo "<td width=30 align=\"right\" style=\"margin:0; padding:0; margin-left:0;\">";
@@ -62,8 +60,9 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       echo "</td>";
     echo "</tr>";
   echo "</table>";
-  echo "</td></tr>";
 
+  echo "</td></tr>";
+  
   echo "<tr align=\"left\" ><td bgcolor=\"#ddeeff\" valign=\"top\" align=\"left\" width = 370>";
 
   if ( $needToShow == 1 ){ echo "<tr height=50 valign=\"bottom\"><td><button style=\" cursor: pointer; font-size: 80%; text-align: left; padding: 5px 27px 5px 5px; width:230px; height:40px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='index.php'\"><h5 class=\"bigger\">Текущий день</h5></button></td></tr>"; }
@@ -71,10 +70,9 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
   if ( $needToShow == 1 ){ echo "<tr><td><button style=\"cursor: pointer; font-size: 80%; text-align: left; padding: 5px 0px 5px 5px; width:230px; height:40px; background-color:#a8fd88; border:1px solid #888888;\" onclick=\"location.href='time_add.php'\"><h5 class=\"bigger\">Работа вне офиса</h5></button></td></tr>"; }
   if ( $needToShow == 1 ){ echo "<tr><td><button style=\"cursor: pointer; font-size: 80%; text-align: left; padding: 5px 0px 5px 5px; width:230px; height:40px; background-color:#a8fd88; border:1px solid #888888;\" onclick=\"location.href='delay.php'\"><h5 class=\"bigger\">Опоздания</h5></button></td></tr>"; }
   if ( $needToShow == 1 ){ echo "<tr><td><button style=\"cursor: pointer; font-size: 80%; text-align: left; padding: 5px 0px 5px 5px; width:230px; height:40px; background-color:#a8fd88; border:1px solid #888888;\" onclick=\"location.href='pause.php'\"><h5 class=\"bigger\">Приостановки учета времени</h5></button></td></tr>"; }
-  echo "<tr><td height=8px></td></tr>";
+  if ( $needToShow == 1 ){ echo "<tr><td><button style=\"cursor: pointer; font-size: 80%; text-align: left; padding: 5px 0px 5px 5px; width:230px; height:40px; background-color:#a8fd88; border:1px solid #888888;\" onclick=\"location.href='sport_pause.php'\"><h5 class=\"bigger\">Тренажерный зал</h5></button></td></tr>"; }
   
-  if ( am_i_superuser( $_SESSION['ss_id'] ) == 1 )
-  {           
+  if ( am_i_superuser( $_SESSION['ss_id'] ) == 1 ){           
     $sv_id = $_SESSION['ss_id'];
 
     $notifCount = get_notification_count( $sv_id );
@@ -91,7 +89,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     echo "<tr><td><button id=\"notifDelayBtn\" style=\"cursor: pointer; font-size: 70%; text-align: left; padding: 5px 5px 5px 5px; width:230px; height:60px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"delay_set_start(); location.href='delay_approvement.php'\"><h5 class=\"biggersmall\">По опозданиям $delayNotifCountStr</h5></button></td></tr>";
     if ( $needToShow == 1 ){ echo "<tr><td><button id=\"notifPauseBtn\" style=\"cursor: pointer; font-size: 70%; text-align: left; padding: 5px 5px 5px 5px; width:230px; height:60px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"pause_set_start(); location.href='pause_view.php'\"><h5 class=\"biggersmall\">По приостановкам учета времени $pauseNotifCountStr</h5></button></td></tr>"; }
   } 
-  echo "<tr><td height=8px></td></tr>";
+  echo "<tr><td style=\"padding: 2px\" height=8px></td></tr>";
 
   echo "<tr><td><button style=\"cursor: pointer; text-align: left; padding: 5px 25px 5px 10px; width:230px; height:40px; background-color:#f79398; border:1px solid #888888;\" onclick=\"window.open('http://192.168.100.17/my') \"><h5 class=\"bigger\">RedMine</h5></button></td></tr>";
   echo "<tr><td height = 3px></td></tr>";

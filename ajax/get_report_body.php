@@ -1,10 +1,10 @@
-<?php
+<!-- 
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
-$usersInfo = $_SESSION["ss_user_info"];
+// $usersInfo = $_SESSION["ss_user_info"];
 
 // $userID = $usersInfo[1][$userNum];	
 // $userRate = $usersInfo[2][$userNum];	
@@ -13,7 +13,7 @@ $usersInfo = $_SESSION["ss_user_info"];
 // $userDefaultStartMinute = $usersInfo[5][$userNum];
 // $userAllowedDelay = $usersInfo[6][$userNum];
 
-$userID = $_SESSION['ss_userid'];	
+$userID = $_SESSION['ss_id'];
 $userRate = $_SESSION['ss_rate'];	
 $userDefaultStartTime = $_SESSION['ss_defaultStartTime'];
 $userDefaultStartHour = $_SESSION['ss_defaultStartHour'];
@@ -131,5 +131,4 @@ for ( $idx = count( $rowsContent ); $idx >= 0; $idx -- ) {
   echo "</tr>";
 }
 
-echo "</table>";
-?>
+echo "</table>"; -->

@@ -17,7 +17,7 @@ if ( isset( $_POST['mode'] ) ){
 }
 
 include "/var/www/tori/php_tori/connect.php";
-include "/var/www/tori/funcs.php";
+include_once "/var/www/tori/funcs.php";
 
 mysqli_set_charset($link, "utf8");
 

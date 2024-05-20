@@ -6,7 +6,7 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 session_start();
                 
 include "/var/www/tori/php_tori/connect.php";
-include "/var/www/tori/funcs.php";
+include_once "/var/www/tori/funcs.php";
 
 $__login = mysqli_real_escape_string($link, $_POST['login']);
 $__passwd = md5(md5(trim(mysqli_real_escape_string($link, $_POST['passwd']))));
