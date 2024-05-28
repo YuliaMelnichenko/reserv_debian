@@ -111,35 +111,6 @@ function show_selectors(){
     document.getElementById('manual_rep').style.display='none';
   } 
 }
-
-$.post('ajax/get_report_body.php', RetSWT4 );
-function RetSWT4(dat4){
-  if ( document.getElementById('report_body') ){
-    document.getElementById('report_body').innerHTML = dat4;
-    
-    if ( document.getElementById('time_report_table_head') && document.getElementById('time_report_table_body') ){
-      tableHeightHead = document.getElementById('time_report_table_head').offsetHeight;
-      tableHeightBody = document.getElementById('time_report_table_body').offsetHeight;
-
-      tableWidthBody = document.getElementById('time_report_table_body').offsetWidth + 40;
-
-      if ( tableWidthBody < 340 ){
-        tableWidthBody = 340;
-      } 
-      
-      tableAllHeight = tableHeightHead + tableHeightBody;
-
-      win_h = $(window).height() - 170;
-
-      if ( tableAllHeight > win_h ){ tableAllHeight = win_h; }
-      else{ tableAllHeight = tableAllHeight - 35; }
-
-      document.getElementById('report_body').style.height = tableAllHeight + "px";
-      document.getElementById('report_body').style.width = tableWidthBody + "px";
-      document.getElementById('report_head').style.width = tableWidthBody + "px";
-    }
-  }
-} 
 </script>
 
 <?php
@@ -219,42 +190,6 @@ $rep_start_stop_date_mode = $_SESSION['rep_start_stop_date_mode'];
 
   $selectedArr[$selected] = "selected";
 
-// echo "<table cellpadding=\"0\" cellspacing=\"0\" border=0>";
-//   echo "<tr>";
-//     echo "<th>";
-//       echo "<h5 class=\"dark\">ОТЧЕТ ПОСЕЩАЕМОСТИ</h5>";
-//     echo "</th>";
-//     echo "<td class=\"nopadding\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\">";
-//       echo "<h4 class=\"small\">Отчетный период: </h4>";
-//     echo "</td>";
-//     echo "<td valign=\"top\" align=\"left\" width = 140>";
-//       echo "<select onchange=\"set_period();\" class=\"flat\" id=\"report_type\" bgcolor=\"#888888\" width = 70 >";
-//         echo "<option value=\"1\" $selectedArr[0]>С начала недели</option>";
-//         echo "<option value=\"2\" $selectedArr[1]>С начала месяца</option>";
-//         echo "<option value=\"3\" $selectedArr[2]>С начала предыдущего месяца</option>";
-//         echo "<option value=\"4\" $selectedArr[3]>С начала квартала</option>";
-//         echo "<option value=\"5\" $selectedArr[4]>Предыдущий квартал</option>";
-// //      echo "<option value=\"6\" $selectedArr[5]>С начала года</option>";
-//         echo "<option value=\"7\" $selectedArr[6]>Задать вручную</option>";
-//       echo "</select>"; 
-//     echo "</td>";
-//     echo "<td class=\"nopadding\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\">";
-//       echo "<h4 class=\"small\">Выбранный отчетный период: ".$_SESSION['rep_start_date']." - ".$_SESSION['rep_stop_date'];
-//         echo "<td>";
-//           echo "<div id=\"manual_rep\" style=\"display:none;\">"; 
-
-//             if ( isset( $_SESSION['rep_start_date'] ) ){ $manRepStart = $_SESSION['rep_start_date']; } else { $manRepStart = $currDate; }
-//             if ( isset( $_SESSION['rep_stop_date'] ) ){ $manRepStop = $_SESSION['rep_stop_date']; } else { $manRepStop = $currDate; }
-
-//             echo "<input id=\"report_start_date\" align=\"center\" style=\"width:70px;\" type=\"text\" value=\"$manRepStart\">";
-//             echo " - <input id=\"report_stop_date\" align=\"center\" style=\"width:70px;\" type=\"text\" value=\"$manRepStop\">";
-//             echo "  <button class=\"$button_style\" style=\"font-size: 90%; width:100px; height:21px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"manual_report_set();\" name=\"nextBtn\">Показать</button>";
-//           echo "</div>";
-//         echo "</td>";
-//       echo "</td>";
-//     echo "</td>";
-//   echo "</tr>";
-// echo "</table>";
 
 echo "<div id=\"report_container\">";
   echo "<div>";

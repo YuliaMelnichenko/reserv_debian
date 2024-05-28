@@ -37,9 +37,10 @@ function change_time ($user) {
     $out_value = $row2["out_dt"];
     $eat_start_value = $row2["eat_start_dt"];
     $eat_stop_value = $row2["eat_stop_dt"];
-  
+    
+    $content = "";
+    
     if ( $eat_start_value !== "0000-00-00 00:00:00" && $eat_stop_value == "0000-00-00 00:00:00" ){
-      $content = "";
       $content .= change_out_time ( $out_value, $currentTime );
       $content .= change_eat_stop_time ( $currentTime);
     }
@@ -53,37 +54,38 @@ function change_time ($user) {
 
 function change_out_time ( $out_value, $currentTime ) {
   $bgcolor = "#AAFFAA";
+  $content = "<tr>";
   if ( $out_value == "0000-00-00 00:00:00" ) {
-    if ( $currentTime >= "09:00:00" AND $currentTime < "11:30:00" ) {
-      $content = "<tr>";
+    if ( $currentTime >= "09:00:00" && $currentTime < "11:30:00" ) {
       $content .= "<td class=\"nopadding_s\">";
       $content .= "<h5 class=\"change_time\">Добавить время ухода?</h5>";
       $content .= "</td>";
       $content .= "<td class=\"nopadding_s\" bgcolor=\"$bgcolor\" width=80 align = \"center\">";
       $content .= "<button id = \"add_out_time\" title = \"Добавить время.\" style=\"font-size: 80%; padding: 0px 0px 0px 0px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"enter_out_time();\"><img src=\"img/red.png\"></button>";
       $content .= "</td>";
-      $content .= "</tr>";
     }
   }
+  $content .= "</tr>";
   return $content;
 }
 
 function change_eat_stop_time ( $currentTime ) {
   $bgcolor = "#AAFFAA";
-  if ( $currentTime >= "09:00:00" AND $currentTime < "11:30:00" ) {
-    $content = "<tr>"; 
+  $content = "<tr>"; 
+  if ( $currentTime >= "09:00:00" && $currentTime < "11:30:00" ) {
     $content .= "<td class=\"nopadding_s\">";
     $content .= "<h5 class=\"change_time\">Добавить время прихода с обеда?</h5>";
     $content .= "</td>";
     $content .= "<td class=\"nopadding_s\" bgcolor=\"$bgcolor\" width=80 align = \"center\">";
     $content .= "<button id = \"add_stop_eat\" title = \"Добавить время.\" style=\"font-size: 80%; padding: 0px 0px 0px 0px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"enter_stop_eat_time();\"><img src=\"img/din.png\"></button>";
     $content .= "</td>";
-    $content .= "</tr>";
   }
+  $content .= "</tr>";
   return $content;
 }
 
 function in_time_part( $datetime, $crossDay, $isThereDelay, $timeRestributionDescWidth, $timeRestributionValWidth ) {
+  $bgcolor = "";
   $content = "";
   $content .= "<tr>";
     $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionDescWidth\">";
@@ -91,10 +93,10 @@ function in_time_part( $datetime, $crossDay, $isThereDelay, $timeRestributionDes
     $content .= "</td>";
 
     if ( $isThereDelay == 1 ) {
-      $bgcolor = "#FFFFAA";  
+      $bgcolor = '#FFFFAA';  
     }
     if ( $isThereDelay == 2 ) {
-      $bgcolor = "#FFAAAA";  
+      $bgcolor = '#FFAAAA';
     }
 
     $content .= "<td class=\"nopadding_s\" bgcolor=\"$bgcolor\" width = \"$timeRestributionValWidth\" align = \"center\">";
@@ -196,6 +198,7 @@ function empty_line() {
 
 function pure_work_day_duration_part( $time, $norm, $check, $timeRestributionDescWidth, $timeRestributionValWidth, $msg, $rightAlign, $showRMTime ) {
   $bgcolor = "";
+  $addonStr = "";
 
   if ( $showRMTime == 1 ) {
     $tms = time_to_second( $time ); 
@@ -313,6 +316,7 @@ $user_defaultStartTimeWithDelayVal = $_SESSION['ss_defaultStartTimeWithDelayVal'
 $user_dayTransitionTime = $_SESSION['$ss_dayTransitionTime'];
 $user_remoteWork = $_SESSION['ss_RemoteWork'];
 $visiting_id = $_SESSION['ss_visiting_ID'];
+$isThereDelayVal = $_SESSION['ss_there_is_delay'];
 
 $dateArr = datetimestr_to_day_start_stop_DT_ex_str( $currentDate, $user_dayTransitionTime );  
                                                                                                                                          
@@ -387,7 +391,7 @@ else {
   $changeEatStop = $changesArr[2];
   $changeOut = $changesArr[3];
 
-  $currentTimeHHMMSS = strtotime( $day_work_start ); 
+  // $currentTimeHHMMSS = strtotime( $day_work_start ); 
 
   echo "<table border=0>";
   echo "<tr><td>";
@@ -422,7 +426,7 @@ else {
   $eatDurationStr = format_time_d_hhmmss_pure( $lunchDuration );
 
   $delayRets = get_delay_info_by_user_and_day( $userID, $currentDate, $user_defaultStartTime, $user_allowedDelay );
-  $delayStr = format_time_d_hhmmss_pure( $delayRets[7] );  
+  $delayStr = format_time_d_hhmmss_pure( $delayRets[7] ); 
 
   $timeRestribution = "";
   $timeManagement = "";
@@ -454,7 +458,7 @@ else {
   $timeRestributionValWidth = $timeRestributionWholeWidth - $timeRestributionDescWidth;
  
   $timeRestribution .= "<table width=$timeRestributionWholeWidth  bordercolor=\"#888888\"  border=1>";
-  $timeRestributionStat .= "<table width=$timeRestributionWholeWidth  bordercolor=\"#888888\"  border=1>";
+  $timeRestributionStat = "<table width=$timeRestributionWholeWidth  bordercolor=\"#888888\"  border=1>";
 
 
   if ( $state == 0 ) {
@@ -519,7 +523,7 @@ else {
     $timeManagement .= "</td>";
 
     $timeRestribution .= change_time( $userID );
-    $timeRestribution .= in_time_part( $in_dt, $changeIn, $_SESSION['ss_there_is_delay'], $timeRestributionDescWidth, $timeRestributionValWidth );
+    $timeRestribution .= in_time_part( $in_dt, $changeIn, $isThereDelayVal, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestribution .= eat_start_part( $eat_start_dt, $changeEatStart, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestribution .= eat_stop_part( $eat_stop_dt, $changeEatStop, $timeRestributionDescWidth, $timeRestributionValWidth );
 

@@ -771,22 +771,8 @@ h6.small_help_2 {
 
 #add_time_approvement_desc {
   position: absolute;
-  width: 310px;
-  height: 100px;
-  left: 50%;                                                                                                                                   
-  top: 50%;
-  margin-left: -190px;
-  margin-top: -85px;
-  background: #f8d188;
-  border: solid 3px #888888;
-  overflow: hidden;
-  display: none;
-}
-
-#delay_approvement_desc {
-  position: absolute;
-  width: 310px;
-  height: 100px;
+  width: 320px;
+  height: 145px;
   left: 50%;
   top: 50%;
   margin-left: -190px;
@@ -795,6 +781,39 @@ h6.small_help_2 {
   border: solid 3px #888888;
   overflow: hidden;
   display: none;
+  flex-direction: column;
+}
+
+.delay_approvement_desc {
+  position: absolute;
+  width: 320px;
+  height: 145px;
+  left: 50%;
+  top: 50%;
+  margin-left: -190px;
+  margin-top: -85px;
+  background: #f8d888;
+  border: solid 3px #888888;
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+}
+
+.box_btn {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 15px;
+}
+
+.text_box {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 15px;
+}
+
+.comment {
+  display: flex;
+  justify-content: space-around;
 }
 
 #alert_approvement {

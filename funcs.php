@@ -1,5 +1,6 @@
 <?php
 
+include_once "/var/www/tori/funcs.php";
 function get_current_datetime_in_timezone(){
   // session_start();
   $valid = 0;
@@ -89,37 +90,37 @@ function get_current_datetime_in_timezone_str( $showDate, $showTimeZone )
     return $retStr;
 }
 
-// function timezone_min_to_str( $timeZoneMinSrc )
-// {
-//     $sign = "+";
+function timezone_min_to_str( $timeZoneMinSrc )
+{
+    $sign = "+";
 
-//     if ( $timeZoneMinSrc < 0 )
-//     {
-//       $sign = "-";
-//     }
+    if ( $timeZoneMinSrc < 0 )
+    {
+      $sign = "-";
+    }
 
-//     $timeZoneMinSrc = abs($timeZoneMinSrc);
+    $timeZoneMinSrc = (int)$timeZoneMinSrc;
 
-//     $timeZoneHour = round($timeZoneMinSrc / 60);
-//     $timeZoneMin = $timeZoneMinSrc - $timeZoneHour * 60;
+    $timeZoneHour = round($timeZoneMinSrc / 60);
+    $timeZoneMin = $timeZoneMinSrc - $timeZoneHour * 60;
 
-//     $timeZoneHourStr = (string)$timeZoneHour;
-//     $timeZoneMinStr = (string)$timeZoneMin;
+    $timeZoneHourStr = (string)$timeZoneHour;
+    $timeZoneMinStr = (string)$timeZoneMin;
 
-//     if ( $timeZoneHour < 10 )
-//     {
-//       $timeZoneHourStr = "0".$timeZoneHourStr;
-//     }
+    if ( $timeZoneHour < 10 )
+    {
+      $timeZoneHourStr = "0".$timeZoneHourStr;
+    }
 
-//     if ( $$timeZoneMin < 10 )
-//     {
-//       $timeZoneMinStr = "0".$timeZoneMinStr;
-//     }
+    if ( $timeZoneMin < 10 )
+    {
+      $timeZoneMinStr = "0".$timeZoneMinStr;
+    }
 
-//     $timeZoneRes = "UTC".$sign.$timeZoneHour.":".$timeZoneMinStr;
+    $timeZoneRes = "UTC".$sign.$timeZoneHour.":".$timeZoneMinStr;
 
-//     return $timeZoneRes;
-// }
+    return $timeZoneRes;
+}
 
 function split_data_and_time_by_nl_str( $indatetime )
 {
@@ -2775,7 +2776,7 @@ function get_day_duration_by_times( $inTime, $outTime, $eatStartTime, $currentDa
 }
 
 function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime, $allowedDelay ){
-  include "/var/www/tori/php_tori/connect.php";  
+  include "/var/www/tori/php_tori/connect.php";
   mysqli_set_charset($link, "utf8"); 
 
   $rets = Array();
@@ -2792,17 +2793,13 @@ function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime
     $penaltyReply = $row0["penaltyReply"];
     $status = $row0["status"];
     
-    $query1 = mysqli_query($link, "SELECT in_time FROM visiting where user_id = '$userID_' and date = '$date' in_dt > ADDDATE( '$currentDate', INTERVAL -1 DAY )                      "); 
- 
-    if ( !$query1 ) 
-    {
-    }
+    $query1 = mysqli_query($link, "SELECT in_dt FROM visiting where user_id = '$userID_' and date = '$currentDate' in_dt > ADDDATE( '$currentDate', INTERVAL -1 DAY )"); 
  
     $in_time_def = strtotime( $defauiltInTime );
     $in_time = 0;
 
-    if ( $row1 = mysqli_fetch_array($query1, MYSQLI_ASSOC) ){
-      $in_time = $row1["in_time"];
+    if ( $row1 = mysqli_fetch_assoc($query1) ){
+      $in_time = $row1["in_dt"];
     }
 
     $delayVal = 0; 
@@ -3206,7 +3203,7 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
     $result[6] = 0;
     $result[7] = $row["PAUSE_MODE"];
     $result[8] = $row["ID"];  
-    $result[9] = $row["STARTDATE"];  
+    $result[9] = $row["START_DT"];  
     $result[10]= $row["SUPERVISORDESC"];  
     $result[11] = $row["REASONDESCRIPTION"];
     if ( strtotime( $result[1] ) > strtotime( $result[0] ) )
@@ -3262,7 +3259,7 @@ function get_all_add_work_info_by_user( $userID, $pauseMode )
     $result[6] = 0;
     $result[7] = $row["PAUSE_MODE"];
     $result[8] = $row["ID"];  
-    $result[9] = $row["STARTDATE"];  
+    // $result[9] = $row["STARTDATE"];  
     $result[10]= $row["SUPERVISORDESC"];  
     $result[11] = $row["REASONDESCRIPTION"];
 
@@ -3304,7 +3301,7 @@ function get_add_work_info_by_user_and_day_range( $userID_, $startDate, $stopDat
     $result[6] = 0;
     $result[7] = $row0["PAUSE_MODE"];  
     $result[8] = $row0["ID"];  
-    $result[9] = $row0["STARTDATE"];  
+    // $result[9] = $row0["STARTDATE"];  
     $result[10]= $row0["SUPERVISORDESC"];  
     if ( strtotime( $result[1] ) > strtotime( $result[0] ) ){ $result[6] = strtotime( $result[1] ) - strtotime( $result[0] ); }
 
@@ -3580,7 +3577,8 @@ function is_there_day_change_betw( $in_dt, $eat_start_dt, $eat_stop_dt, $out_dt,
 }
 
 function take_changes_time ($userID) {
-  include "/var/www/tori/php_tori/connect.php";  
+  include "/var/www/tori/php_tori/connect.php";
+  $res = ""; 
   mysqli_set_charset($link, "utf8");
   $changes = mysqli_query($link, "SELECT changes FROM visiting WHERE user_id = '$userID'");
   $row2 = mysqli_fetch_array( $changes, MYSQLI_ASSOC );
@@ -3592,6 +3590,8 @@ function take_changes_time ($userID) {
 }
 
 function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $defaultStartTimeStr, $user_allowedDelay ){
+  include_once "/var/www/tori/funcs.php";
+
   $userID = $_SESSION['ss_id'];
   $change = take_changes_time ($userID); 
 
@@ -3605,13 +3605,9 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
   $days_add_info = $stats[3][$index];
   $days_eat_start = $stats[5][$index];
   $days_eat_stop = $stats[6][$index];
-  $days_is_there_work_time = $stats[7][$index];
   $days_day_type = $stats[8][$index];
-  $days_errors = $stats[9][$index];
 
   $days_penalties = $stats[10][$index];
-  $days_penalty_reasons = $stats[11][$index];
-  $days_penalty_supervisor = $stats[12][$index];
 
   $days_day_state = $stats[15][$index];
   $days_day_currday = $stats[16][$index];
@@ -3621,7 +3617,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
   $days_timeZoneSec = $stats[19][$index];
   $days_dayTransitionTime = $stats[20][$index];
 
-  // $days_timeZoneStr = timezone_min_to_str( $days_timeZoneSec );
+  $days_timeZoneStr = timezone_min_to_str( $days_timeZoneSec );
 
   $isCurrentDay = 0;
   $notCurrentDay = 1;
@@ -3808,6 +3804,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
     $noDataStyle = "middleBoldGreen";
   }
 
+  $prefix = "";
 
   if ( $days_dates_set == $currentDate )
   {
@@ -3841,6 +3838,8 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
       $isThereData = 0;
     }
   }
+
+  $outTimeEmpty = "";
   
   $workPureContent = "<h5 class=\"bigbig\">$resultPureTimeStr ($resultPureTimePartStr)</h5>";
   
@@ -3859,9 +3858,9 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
     $tableContent .=       "</div>"; 
     if ($prefix == "<h5 class=\"middleBold\">Текущий день"){
       $tableContent .=       "<div class = \"report_no_padding_rep\">";
-      // $tableContent .=         "<h5 class=\"middleSmall\">$days_timeZoneStr</h5>";
+      $tableContent .=         "<h5 class=\"middleSmall\">$days_timeZoneStr</h5>";
       $outTimeEmpty = $days_work_stop;
-      $tableContent .=       "</div>"; 
+      $tableContent .=       "</div>";
     }
     $tableContent .=      "</div>"; 
 

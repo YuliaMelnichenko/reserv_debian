@@ -19,13 +19,10 @@ echo "<body bgcolor=\"#ffffff\" >";
 <script type="text/javascript" src="js/tory.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
-function update_clock()
-{
+function update_clock(){
   $.post('ajax/get_current_day_time.php', RetSWT);                           
-  function RetSWT(dat) 
-  {
-    if ( document.getElementById('dateTimeFieldNav') )
-    {
+  function RetSWT(dat) {
+    if ( document.getElementById('dateTimeFieldNav') ){
       document.getElementById('dateTimeFieldNav').innerHTML = dat;
     }
   }
@@ -51,8 +48,7 @@ $resArr = extractUidFromMaskedUID( $mid );
 $uidValid = $resArr[0];
 $userID = $resArr[1];
 
-if ( $uidValid == 0 )
-{
+if ( $uidValid == 0 ){
   header('Location: '.'time_approvement.php');
 }
 
@@ -92,17 +88,15 @@ $delayTimes = Array();
 
 $delayTimes = get_all_delay_info_by_user( $userID, $user_defaultStartTime, $allowedDelay );
 
-      if ( count( $delayTimes ) == 0 )
-      {
-
-echo "<table id=\"add_time_approvement_table\" border=0>";
-  echo "<tr>";
-     echo "<td valign=\"middle\" width=1000 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";                                                                                
-     echo "<td width=262 valign=\"middle\" align=\"right\">";
-       echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='delay_approvement.php';\"><h5>Назад</h5></button>";
-     echo "</td>";
-  echo "</tr>";
-echo "</table>";
+      if ( count( $delayTimes ) == 0 ){
+        echo "<table id=\"add_time_approvement_table\" border=0>";
+          echo "<tr>";
+            echo "<td valign=\"middle\" width=1000 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";                                                                                
+            echo "<td width=262 valign=\"middle\" align=\"right\">";
+              echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='delay_approvement.php';\"><h5>Назад</h5></button>";
+            echo "</td>";
+          echo "</tr>";
+        echo "</table>";
 
         echo "<h5><br>Нет сведений!</h5>";
         echo "</td>";               
@@ -148,8 +142,7 @@ echo "<table id=\"delay_approvement_table\" border=0>";
       $color2 = "#ddeedd";
       $color3 = "#ffffff";
 
-      foreach( $delayTimes as $delayTime )
-      {
+      foreach( $delayTimes as $delayTime ){
         $retDelay_id = $delayTime[0];
         $retDelay_superuserID = $delayTime[1];
         $retDelay_agreed = $delayTime[2];
@@ -169,46 +162,39 @@ echo "<table id=\"delay_approvement_table\" border=0>";
         $accBtnDisabled = "";
         $refBtnDisabled = "";
 
-        if ( $retDelay_agreed == 0 )
-        { 
-          if ( $superUserName == "" )
-          {
+        if ( $retDelay_agreed == 0 ){
+          if ( $superUserName == "" ){
             $superUserName = "Ни с кем!";
           }
           $bgcolor1 = "#FFAAAA";
         }
-        else if ( $retDelay_agreed == 1 )
-        { 
+        else if ( $retDelay_agreed == 1 ){
           $bgcolor1 = "";
         }   
 
         $accBtnImg = "accept_small.bmp";
         $refBtnImg = "refuse_small.bmp";
 
-        if ( $retDelay_approved == 0 )
-        { 
+        if ( $retDelay_approved == 0 ){
           $content1 = "<h5 class=\"middleBold_r\">на рассмотрении</h5>";
           $bgcolor = $bkColor; 
           $delRestore = "1";  
         }
-        else if ( $retDelay_approved == 1 )
-        { 
+        else if ( $retDelay_approved == 1 ){
           $content1 = "<h5 class=\"middleBold_r\">принято</h5>";
           $bgcolor = "#AAFFAA";
           $accBtnDisabled = "disabled";
           $accBtnImg = "acceptDis_small.bmp";
           $delRestore = "1";
-        }   
-        else if ( $retDelay_approved == -1 )
-        { 
+        }
+        else if ( $retDelay_approved == -1 ){ 
           $content1 = "<h5 class=\"middleBold_r\">отклонено</h5>";
           $bgcolor = "#FFAAAA";
           $refBtnDisabled = "disabled";
           $refBtnImg = "refuseDis_small.bmp";
           $delRestore = "1";
         }
-        else if ( $retDelay_approved == 99 OR $retDelay_approved == 100 OR $retDelay_approved == 101 )
-        { 
+        else if ( $retDelay_approved == 99 OR $retDelay_approved == 100 OR $retDelay_approved == 101 ){
           $content1 = "<h5 class=\"big\">отклонено</h5>";
           $bgcolor = "#DDDDDD";
           $accBtnDisabled = "disabled";
@@ -220,13 +206,11 @@ echo "<table id=\"delay_approvement_table\" border=0>";
 
         $time_duration = format_time_d_hhmmss_pure( $retDelay_duration );
   	
-        if ( $colorMode == 0 )
-        {
+        if ( $colorMode == 0 ){
           $color = $color1;
           $colorMode = 1;
         }
-        else
-        {
+        else{
           $color = $color3;
           $colorMode = 0;
         }
@@ -258,14 +242,12 @@ echo "<table id=\"delay_approvement_table\" border=0>";
                   echo "<td width=\"2\">";
                   echo "</td>";
                 echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
-                  if ( $delRestore == 1 )
-                  { 
+                  if ( $delRestore == 1 ){ 
                     echo "<button onclick=\"mark_as_deleted_delay_for_user( '$retDelay_id' ); location.reload();\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
                       echo "<img title=\"Удалить\" src=\"img/delete_small.bmp\">";                   
                     echo "</button>";
                   }
-                  else
-                  {
+                  else{
                     echo "<button onclick=\"mark_as_undeleted_delay_for_user( '$retDelay_id' ); location.reload();\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
                       echo "<img title=\"Восстановить\" src=\"img/restore_small.bmp\">";                   
                     echo "</button>";
@@ -280,35 +262,23 @@ echo "<table id=\"delay_approvement_table\" border=0>";
     echo "</td>";
   echo "</tr>";
 echo "</table>";
-
-      echo "<div id=\"delay_approvement_desc\">";
-        echo "<table class=\"add_time\"  border=0>";
-          echo "<tr>";
-            echo "<td>";
-              echo "<h5 class=\"bigbig\">Комментарий</h5>";
-            echo "</td>";    
-          echo "</tr>";
-          echo "<tr>";
-            echo "<td valign=\"top\" align=\"left\" width = 250>";
-              echo "<textarea id=\"delay_part_desc_2\" style=\"width:250px; resize: none;\" cols=\"43\" rows=\"3\"></textarea>";
-            echo "</td>"; 
-          echo "</tr>";
-          echo "<tr>";
-            echo "<td valign=\"top\" align=\"left\" width = 120>";
-              echo "<table cellpadding=\"0\" cellspacing=\"0\" border=0>";
-                echo "<tr>";
-                  echo "<td width = 125 align=\"left\">";
-                    echo "<button style=\"font-size: 100%; width:119px; height:20px; background-color:#ff8888; border:1px solid #888888;\" onclick=\"document.getElementById('delay_approvement_desc').style.display='none'; location.reload();\">Отмена</button><br>";
-                  echo "</td>";    
-                  echo "<td width = 130 align=\"right\">";
-                    echo "<button style=\"font-size: 100%; width:119px; height:20px; background-color:#88ff88; border:1px solid #888888;\" onclick=\"accept_refuse_delay_for_user_final( document.getElementById('recIDTempVal').value, document.getElementById('delay_part_desc_2').value, document.getElementById('acceptTempVal').value, document.getElementById('penIDTempVal').value, document.getElementById('penDateTempVal').value, document.getElementById('penUserIDTempVal').value ); location.reload();\">Сохранить</button><br>";
-                  echo "</td>";    
-                echo "</tr>";
-              echo "</table>";
-            echo "</td>"; 
-          echo "</tr>";
-        echo "</table>";
-      echo "</div>";                
+      
+      echo "<div class=\"delay_approvement_desc\">";
+        echo "<div class=\"comment\">";
+          echo "<h5 class=\"bigbig\">Комментарий</h5>";
+        echo "</div>";
+        echo "<div class=\"text_box\">";
+          echo "<textarea id=\"delay_part_desc_2\" style=\"width:250px; resize: none;\" cols=\"43\" rows=\"3\"></textarea>";
+        echo "</div>";
+        echo "<div class=\"box_btn\">";
+          echo "<div>";
+            echo "<button style=\"font-size: 100%; width:119px; height:20px; background-color:#ff8888; border:1px solid #888888;\" onclick=\"document.getElementById('delay_approvement_desc').style.display='none'; location.reload();\">Отмена</button>";
+          echo "</div>";
+          echo "<div>";
+            echo "<button style=\"font-size: 100%; width:119px; height:20px; background-color:#88ff88; border:1px solid #888888;\" onclick=\"accept_refuse_delay_for_user_final( document.getElementById('recIDTempVal').value, document.getElementById('delay_part_desc_2').value, document.getElementById('acceptTempVal').value, document.getElementById('penIDTempVal').value, document.getElementById('penDateTempVal').value, document.getElementById('penUserIDTempVal').value ); location.reload();\">Сохранить</button>";
+          echo "</div>";
+        echo "</div>";
+      echo "</div>";
 
     echo "</td>"; 
   echo "</tr>";
@@ -316,7 +286,7 @@ echo "</table>";
 echo "</div>";
 ?>
 
-<script type="text/javascript" src="js/tory.js"></script> 
+<script type="text/javascript" src="js/tory.js"></script>
 
 <?php
 echo "</body>";

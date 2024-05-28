@@ -519,80 +519,80 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       echo "<table>";
         echo "<tr>";
           echo "<td class=\"brd\" valign=\"top\" align=\"left\" width = $width11>";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>Сотрудник</b></font>";
+            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Сотрудник</span>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"top\" align=\"center\" width = $width22>";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>".$row0["surname"]." ".$row0["firstname"]." ".$row0["lastname"]."</b></font><br>";
+            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$row0["surname"]." ".$row0["firstname"]." ".$row0["lastname"]."</span>";  
           echo "</td>";  
         echo "</tr>";     
 
         echo "<tr>";
           echo "<td class=\"brd\" valign=\"top\" align=\"left\">";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>Подразделение</b></font>";
+            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Подразделение</span>"; 
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"middle\" align=\"center\">";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>".$depName." (".$room." к.)"."</b></font><br>";
+            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$depName." (".$room." к.)"."</span>";
           echo "</td>";  
         echo "</tr>";
 
         echo "<tr>";
           echo "<td class=\"brd\" valign=\"top\" align=\"left\">";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>Ответственный</b></font>";
+          echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Ответственный</span>";  
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"middle\" align=\"center\">";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>".$sv_name."</b></font><br>";
+            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$sv_name."</span>";
           echo "</td>";  
         echo "</tr>";     
 
         echo "<tr>";
           echo "<td class=\"brd\" valign=\"top\" align=\"left\">";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>Длительность рабочей недели</b></font>";
+            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Длительность рабочей недели</span>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"middle\" align=\"center\">";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>".$user_rate." ч.</b></font><br>";
+            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$user_rate." ч.</span>";
           echo "</td>";  
         echo "</tr>";
 
         echo "<tr>";
           echo "<td class=\"brd\" valign=\"top\" align=\"left\">";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>Начало рабочего дня c допустимым опозданием</b></font>";
+            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Начало рабочего дня c допустимым опозданием</span>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"middle\" align=\"center\">";
             if ( $user_RemoteWork == 1 )
             {
-              echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>---</b></font><br>";
+              echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">---</span>";
             }
             else
-            { 
-              echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>".$user_defaultStartTime." >> ".$user_defaultStartTimeWithDelay." (+".$user_allowedDelay." мин.)</b></font><br>";
+            {
+              echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$user_defaultStartTime." >> ".$user_defaultStartTimeWithDelay." (+".$user_allowedDelay." мин.)</span>";
             }
           echo "</td>";  
         echo "</tr>";
 
         echo "<tr>";
           echo "<td class=\"brd\" valign=\"top\" align=\"left\">";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>Часовой пояс</b></font>";
+            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Часовой пояс</span>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"middle\" align=\"center\">";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>".$user_timeZone."</b></font><br>";
+            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$user_timeZone."</span>";
           echo "</td>";  
         echo "</tr>";
 
         echo "<tr>";
           echo "<td class=\"brd\" valign=\"top\" align=\"left\">";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>Текущий отчетный период</b></font>";
+            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Текущий отчетный период</span>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"middle\" align=\"center\">";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>".$startDTStr." - ".$stopDTStr."</b></font><br>";
+            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$startDTStr." - ".$stopDTStr."</span>";
           echo "</td>";  
         echo "</tr>";
 
         echo "<tr>";
           echo "<td class=\"brd\" valign=\"top\" align=\"left\">";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>Режим работы</b></font>";
+            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Режим работы</span>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"middle\" align=\"center\">";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>".$user_RemoteWorkStr."</b></font><br>";
+            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$user_RemoteWorkStr."</span>";
           echo "</td>";  
         echo "</tr>";
       echo "</table>";

@@ -125,7 +125,7 @@ foreach( $delays as $delay )
   echo "<td width=120 valign=\"middle\" align=\"left\">"."<h5 class=\"small\">$delAcceptorReply</h5>"."</td>";
   echo "<td width=130 bgcolor=\"$cellColor\" valign=\"middle\" align=\"center\">"."<h5>$approvedStr</h5>"."</td>";
   echo "<td width=160 valign=\"middle\" align=\"center\">";
-    echo "<button class=\"$button_style_1\" style=\"font-size: 80%; width:140px; height:20px; background-color:#f8d888; border:1px solid #888888;\" $buttonAdd1 $buttonAdd2 $buttonAdd3 name=\"nextBtn\">Внести объяснение</button>";
+    echo "<button style=\"font-size: 80%; width:140px; height:20px; background-color:#f8d888; border:1px solid #888888;\" $buttonAdd1 $buttonAdd2 $buttonAdd3 name=\"nextBtn\">Внести объяснение</button>";
   echo "</td>";
   echo "</tr>";
 }

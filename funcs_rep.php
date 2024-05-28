@@ -177,7 +177,7 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
         $days_work_stop[] = $temp_days_work_stop[$idx];
         $days_eat_start[] = $temp_days_eat_start[$idx];
         $days_eat_stop[] = $temp_days_eat_stop[$idx];
-	$days_is_there_work_time[] = 1;
+	      $days_is_there_work_time[] = 1;
         $days_day_type[] = $temp_days_day_type[$idx]; 
         $day_st = $temp_days_day_state[$idx];
         $days_day_state[] = $day_st;
@@ -444,8 +444,6 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $day_norm = $days_norm[$idx];
       $day_day_currday = $days_day_currday[$idx];
 
-      $errorDur = 0; 
-
       $durations = get_durations( $day_work_start, $day_work_stop, $day_eat_start, $day_eat_stop, $days_add_info, $day_day_state, $day_day_currday );
 
       $resultPureDuration = $durations[3];
@@ -461,7 +459,7 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
         $PenaltiesDuration = $day_penalty_duration;  
       }
     }
-    if ( $weekOpened == 0 AND is_first_week_day( $day ) ){
+    if ( $weekOpened == 0 && is_first_week_day( $day ) ){
       $weekOpened = 1;
       $periodOpened = -1;
 
@@ -479,7 +477,7 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
         $stat_results[] = $stat_result_value;
       }
     } 
-    else if ( $weekOpened == 1 AND is_first_week_day( $day ) )
+    else if ( $weekOpened == 1 && is_first_week_day( $day ) )
     {
       $startDate22 = DayIncDN( $day, -7 );
       $stopDate22 = DayIncDN( $day, 0 );
@@ -505,7 +503,7 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $PenaltiesCountWeek = 0;
     }
               
-    if ( $monthOpened == 0 AND is_first_month_day( $day ) )
+    if ( $monthOpened == 0 && is_first_month_day( $day ) )
     {
       $monthOpened = 1;  
     }                   
@@ -719,8 +717,7 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   return $stats;
 }
 
-function get_report_body_row_contents( $usersInfo )
-{
+function get_report_body_row_contents( $usersInfo ){
   include_once "/var/www/tori/funcs.php";
 
   $currentDateArr = get_current_datetime_in_timezone();
@@ -733,7 +730,6 @@ function get_report_body_row_contents( $usersInfo )
 
   $userCount = count($usersInfo[1]);
 
-  $dateWidth = 101;
   $cellWidth = 165;
 
   $rowContent = "";
@@ -741,8 +737,6 @@ function get_report_body_row_contents( $usersInfo )
 
   foreach ( $usersInfo[7][0][0] as $currentMonthDate )
   {
-    $userCounter = 1;
-
     $currentDayName = GetWeekDayNameD( $currentMonthDate );
 
     $sufix = "";
@@ -791,21 +785,18 @@ function get_report_body_row_contents( $usersInfo )
     $rowsContent[] = $rowContent;
     $rowsDTContent[] = $rowDTContent;
 
-    $areThereShowedResult = 0;
     $headContent = "";
-    $enlarge = 0;
 
     for ( $resType = 1; $resType <= 6; $resType ++ )
     {
       $rowResContent = "";
       $typeShowed = 0;
-      $userCounter = 1;
 
       for ( $userNum = 0; $userNum < $userCount; $userNum ++ )
       {
         $userID = $usersInfo[1][$userNum];
     
-        $rowResContent .= get_results_cell_content_by_stat( $usersInfo[7][$userNum], $index, $cellWidth, $userID, $user_defaultStartTimeStr, $user_allowedDelay, $resType, $typeShowed, $headContent );
+        $rowResContent .= get_results_cell_content_by_stat( $usersInfo[7][$userNum], $index, $cellWidth, $userID, $userDefaultStartTime, $userAllowedDelay, $resType, $typeShowed, $headContent );
       }
 
       if ( $rowResContent != "" )
@@ -814,7 +805,6 @@ function get_report_body_row_contents( $usersInfo )
                               
         $rowsDTContent[] = $headContent;
 
-        $areThereShowedResult = 1; 
       }
     }                                
     $index ++;  

@@ -66,7 +66,6 @@ for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
   if ( $ta_approved == 0 )
   { 
     $approvedStr = "<h5 class=\"middleBold_r\">на рассмотрении</h5>";
-    $cellColor = $bkColor; 
   }
   else if ( $ta_approved == -1 )
   { 

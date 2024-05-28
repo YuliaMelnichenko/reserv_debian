@@ -602,7 +602,7 @@ function accept_delay_for_user( addID, suDesc, penaltyID, penDate, userID )
 {
   if ( document.getElementById('delay_approvement_desc') )
   {
-    document.getElementById('delay_approvement_desc').style.display='block';
+    document.getElementById('delay_approvement_desc').style.display='flex';
     document.getElementById('delay_part_desc_2').value = suDesc;
     document.getElementById('recIDTempVal').value = addID;
     document.getElementById('penIDTempVal').value = penaltyID;
@@ -616,7 +616,7 @@ function refuse_delay_for_user( addID, suDesc, penaltyID, penDate, userID )
 { 
   if ( document.getElementById('delay_approvement_desc') )
   {
-    document.getElementById('delay_approvement_desc').style.display='block';
+    document.getElementById('delay_approvement_desc').style.display='flex';
     document.getElementById('delay_part_desc_2').value = suDesc;
     document.getElementById('recIDTempVal').value = addID;
     document.getElementById('penIDTempVal').value = penaltyID;
