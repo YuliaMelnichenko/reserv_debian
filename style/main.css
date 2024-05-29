@@ -912,7 +912,7 @@ div.report_head_stub_left {
 
 #delay_out_time {
   position: fixed;
-  width: 400px;
+  width: 325px;
   height: 150px;
   left: 50%;
   top: 35%;
@@ -952,11 +952,12 @@ div.report_head_stub_left {
 .reg_out_time_body {
   display: flex;
   margin-left: 15px;
+  justify-content: center;
 }
   
 .reg_out_time_button_save {
   font-size: 120%;
-  width: 130px;
+  width: 110px;
   height: 30px;
   background-color: #91f591;
   border: 1px solid #888888;
@@ -966,7 +967,7 @@ div.report_head_stub_left {
   
 .reg_out_time_button_close {
   font-size: 120%;
-  width: 130px;
+  width: 110px;
   height: 30px;
   background-color: #f79398;
   border: 1px solid #888888; 

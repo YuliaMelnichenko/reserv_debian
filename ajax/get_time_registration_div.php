@@ -1,5 +1,5 @@
 <?php
-
+date_default_timezone_set("Asia/Novosibirsk");
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -8,45 +8,50 @@ include_once  "/var/www/tori/funcs.php";
 include  "/var/www/tori/php_tori/connect.php";
 
 function change_time ($user) {
-  include  "/var/www/tori/php_tori/connect.php";  
+  include  "/var/www/tori/php_tori/connect.php";
+  include_once  "/var/www/tori/funcs.php";
+  
   mysqli_set_charset($link, "utf8");
 
   $currentTime = date("H:i:s");
   $currentDayNumber = GetWeekDayD(date("Y-m-d"));
 
-  if ($currentDayNumber == "1") {
-    $yesterday = mysqli_query($link, "SELECT out_dt, in_dt, eat_start_dt, eat_stop_dt FROM visiting WHERE user_id = '$user' and DATE(in_dt) = DATE(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY))");
-    $row2 = mysqli_fetch_assoc( $yesterday );
-    $out_value = $row2["out_dt"];
-    $eat_start_value = $row2["eat_start_dt"];
-    $eat_stop_value = $row2["eat_stop_dt"];
+  $content = "";
 
-    if ( $eat_start_value !== "0000-00-00 00:00:00" && $eat_stop_value == "0000-00-00 00:00:00" ){
-      $content = "";
-      $content .= change_out_time ( $out_value, $currentTime );
+  if ($currentDayNumber == "1") {
+    $threeDaysAgo = mysqli_query($link, "SELECT out_dt, eat_start_dt, eat_stop_dt FROM visiting WHERE user_id = '$user' and DATE(in_dt) = DATE(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY))");
+    $row2 = mysqli_fetch_assoc( $threeDaysAgo );
+    $out_value1 = $row2["out_dt"];
+    $eat_start_value1 = $row2["eat_start_dt"];
+    $eat_stop_value1 = $row2["eat_stop_dt"];
+
+    if ( $eat_start_value1 !== "0000-00-00 00:00:00" && $eat_stop_value1 == "0000-00-00 00:00:00" ){
+      $content .= change_out_time ( $out_value1, $currentTime );
       $content .= change_eat_stop_time ( $currentTime);
     }
     else {
-      $content = "";
-      $content .= change_out_time ( $out_value, $currentTime );
+      $content .= change_out_time ( $out_value1, $currentTime );
     }
   }
   else {
-    $yesterday = mysqli_query($link, "SELECT out_dt, in_dt, eat_start_dt, eat_stop_dt FROM visiting WHERE user_id = '$user' and DATE(in_dt) = DATE(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY))");
-    $row2 = mysqli_fetch_assoc( $yesterday );
-    $out_value = $row2["out_dt"];
-    $eat_start_value = $row2["eat_start_dt"];
-    $eat_stop_value = $row2["eat_stop_dt"];
-    
-    $content = "";
-    
+    $yesterday = mysqli_query($link, "SELECT out_dt, eat_start_dt, eat_stop_dt FROM visiting WHERE user_id = '$user' and DATE(in_dt) = DATE(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY))");
+    $row9 = mysqli_fetch_assoc( $yesterday );
+    $out_value = $row9["out_dt"];
+    $eat_start_value = $row9["eat_start_dt"];
+    $eat_stop_value = $row9["eat_stop_dt"];
+        
     if ( $eat_start_value !== "0000-00-00 00:00:00" && $eat_stop_value == "0000-00-00 00:00:00" ){
-      $content .= change_out_time ( $out_value, $currentTime );
-      $content .= change_eat_stop_time ( $currentTime);
+      $content .= "<tr>";
+      $content .= change_out_time( $out_value, $currentTime );
+      $content .= "</tr>";
+      $content .= "<tr>";
+      $content .= change_eat_stop_time( $currentTime);
+      $content .= "</tr>";
     }
     else {
-      $content = "";
-      $content .= change_out_time ( $out_value, $currentTime );
+      $content .= "<tr>";
+      $content .= change_out_time( $out_value, $currentTime );
+      $content .= "</tr>";
     }
   }
   return $content;
@@ -54,7 +59,8 @@ function change_time ($user) {
 
 function change_out_time ( $out_value, $currentTime ) {
   $bgcolor = "#AAFFAA";
-  $content = "<tr>";
+  $content = "";
+
   if ( $out_value == "0000-00-00 00:00:00" ) {
     if ( $currentTime >= "09:00:00" && $currentTime < "11:30:00" ) {
       $content .= "<td class=\"nopadding_s\">";
@@ -65,13 +71,13 @@ function change_out_time ( $out_value, $currentTime ) {
       $content .= "</td>";
     }
   }
-  $content .= "</tr>";
   return $content;
 }
 
 function change_eat_stop_time ( $currentTime ) {
   $bgcolor = "#AAFFAA";
-  $content = "<tr>"; 
+  $content = "";
+
   if ( $currentTime >= "09:00:00" && $currentTime < "11:30:00" ) {
     $content .= "<td class=\"nopadding_s\">";
     $content .= "<h5 class=\"change_time\">Добавить время прихода с обеда?</h5>";
@@ -80,7 +86,6 @@ function change_eat_stop_time ( $currentTime ) {
     $content .= "<button id = \"add_stop_eat\" title = \"Добавить время.\" style=\"font-size: 80%; padding: 0px 0px 0px 0px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"enter_stop_eat_time();\"><img src=\"img/din.png\"></button>";
     $content .= "</td>";
   }
-  $content .= "</tr>";
   return $content;
 }
 

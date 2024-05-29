@@ -27,7 +27,7 @@ echo "<div class = \"reg_out_time\">";
       echo "<h5 class=\"big\">Введите дату и время прихода с обеда.</h5>";
     echo "</div>";
     echo "<div class = \"reg_out_time_close\">";
-      echo "<img onclick=\"close_out_time();\" src=\"img/close.png\">";
+      echo "<img onclick=\"close_out_time();\" src=\"img/closeSmall.png\">";
     echo "</div>";
   echo "</div>";
 

@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set("Asia/Novosibirsk");
 session_start();
 ob_start();
 include_once "/var/www/tori/start.php";
