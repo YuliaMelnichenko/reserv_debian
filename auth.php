@@ -135,7 +135,7 @@ if ( !isset($_SESSION['ss_id']) )
   echo "</table>";
 
   echo "<input type=\"hidden\" value=\"$summ_\" name=\"check\" style=\"width:30px;\" />";
-  echo "<button id=\"auth_btn\" class=\"$button_style_1\" style=\"font-size: 150%; width:420px; height:50px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"auth();\" name=\"nextBtn\">Авторизоваться</button>";
+  echo "<button id=\"auth_btn\" style=\"font-size: 150%; width:420px; height:50px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"auth();\" name=\"nextBtn\">Авторизоваться</button>";
 
   echo "</td>";
   echo "</tr>";

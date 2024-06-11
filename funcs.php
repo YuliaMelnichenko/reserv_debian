@@ -7,6 +7,9 @@ function get_current_datetime_in_timezone(){
 
   $dateStr = "";
   $timeStr = "";
+  $datetime = "";
+  $timeZoneMinsSrc = "";
+  $timeZoneStr = "";
 
   if( isset($_SESSION['ss_sessid']) ){
     $timeZoneMinsSrc = $_SESSION['ss_UserTimeZoneMins'];
@@ -307,7 +310,7 @@ function save_last_location( $location ){
 }  
 
 function move_to_last_location(){
-  session_start();
+  // session_start();
   if ( isset( $_SESSION['ss_last_location'] ) ){
     $lastLoc = $_SESSION['ss_last_location'];
 

@@ -44,8 +44,7 @@ if ( isset($_SESSION['ss_id']) )
           $newID = $row["ID"] + 1;
         }
         
-        $res=mysqli_query($link, "INSERT INTO visiting (ID, user_id, in_dt, state, remoteWorkState, dayTransitionTime) 
-                                SELECT distinct '$newID', '$id', '$dateTimeStr', '2', b.RemoteWork, b.dayTransitionTime FROM employees b WHERE b.ID = '$id'");
+        $res=mysqli_query($link, "INSERT INTO visiting (ID, user_id, in_dt, state, remoteWorkState, dayTransitionTime) SELECT distinct '$newID', '$id', '$dateTimeStr', '2', b.RemoteWork, b.dayTransitionTime FROM employees b WHERE b.ID = '$id'");
         $merr=mysqli_error($link);
         if (!$res)
         { 

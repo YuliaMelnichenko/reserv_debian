@@ -8,26 +8,29 @@ session_start();
 include "/var/www/tori/php_tori/connect.php";
 include_once "/var/www/tori/funcs.php";
 
-$__login = mysqli_real_escape_string($link, $_POST['login']);
-$__passwd = md5(md5(trim(mysqli_real_escape_string($link, $_POST['passwd']))));
+$__login = mysqli_real_escape_string($link, $_POST['login']);   	       
+$__passwd = md5(md5(trim(mysqli_real_escape_string($link, $_POST['passwd'])))); 
 
-$query = mysqli_query($link, "SELECT id, rate, defaultStartTime, allowedDelayMinutes, userTimeZoneMins, dayTransitionTime, remoteWork FROM employees WHERE login='$__login' AND passwd='$__passwd'");
+$query = mysqli_query($link, "SELECT id, rate, defaultStartTime, allowedDelayMinutes, userTimeZoneMins, dayTransitionTime, remoteWork FROM employees WHERE login='$__login' and passwd = '$__passwd'"); 
+$merr = mysqli_error($link);
+
 if ( !$query ) {
   echo "<br>mysqli_error = $merr<br>";
 }
 else{
   $vn = mysqli_num_rows($query);
-  if ( $vn == 1 ){
+
+  if ( $vn == 1 ){ 
     $row = mysqli_fetch_assoc($query);
-    
     $_SESSION['ss_id'] = $row["id"];
     $_SESSION['ss_rate'] = $row["rate"];
-    $_SESSION['ss_defaultStartTime'] = $row["defaultStartTime"];     
-    $_SESSION['ss_allowedDelay'] = $row["allowedDelayMinutes"];
-
-    $ss_defaultStartTimeWithDelay = date("H:i:s", strtotime($ss_defaultStartTime." + ".$ss_allowedDelay." minute"));
+    $ss_defaultStartTime = $row["defaultStartTime"];	
+    $_SESSION['ss_defaultStartTime'] = $ss_defaultStartTime;
     $defaultStartHour = (int)(date("H", strtotime($ss_defaultStartTime)));
-    $defaultStartMinute = (int)(date("i", strtotime($ss_defaultStartTime))); 
+    $defaultStartMinute = (int)(date("i", strtotime($ss_defaultStartTime)));      
+    $ss_allowedDelay = $row["allowedDelayMinutes"];
+    $_SESSION['ss_allowedDelay'] = $ss_allowedDelay;
+    $ss_defaultStartTimeWithDelay = date("H:i:s", strtotime($ss_defaultStartTime." + ".$ss_allowedDelay." minute"));
 
     $_SESSION['ss_defaultStartTimeWithDelay'] = $ss_defaultStartTimeWithDelay;
     $_SESSION['ss_defaultStartTimeWithDelayVal'] = strtotime($ss_defaultStartTimeWithDelay);
@@ -36,15 +39,17 @@ else{
     $_SESSION['ss_mode'] = 1;
     $_SESSION['ss_delay_show_save'] = 0;
     $_SESSION['ss_UserTimeZoneMins'] = $row["userTimeZoneMins"];
+    $ss_dayTransitionTime = $row["dayTransitionTime"];
+    $_SESSION['$ss_dayTransitionTime'] = $ss_dayTransitionTime;
     session_regenerate_id();
     $_SESSION['ss_sessid'] = session_id();
     $retArr = get_current_datetime_in_timezone();
     $_SESSION['ss_UserTimeZoneStr'] = $retArr[5];
-    $_SESSION['$ss_dayTransitionTime'] = $row["dayTransitionTime"];
     
     $ss_RemoteWork = $row["remoteWork"];
     $_SESSION['ss_RemoteWorkStr'] = "В ОФИСЕ";
     $_SESSION['ss_RemoteWork'] = 0;
+
     if ( $ss_RemoteWork == 1 ){
       $_SESSION['ss_RemoteWork'] = 1;
       $_SESSION['ss_RemoteWorkStr'] = "УДАЛЕННЫЙ";
@@ -76,5 +81,7 @@ else{
     unset($_SESSION['ss_visiting_ID']);
     session_destroy();
   }
-} 	
+//header("Location: index.php");
+//exit(); 
+}
 ?>

@@ -20,18 +20,16 @@ $report_stop_date = "2013-08-01";
 
 session_start();
 
-$ip=$_SERVER['REMOTE_ADDR'];
+$ip = $_SERVER['REMOTE_ADDR'];
 
 $read_mode = 0;
 
 if ( $ip == "192.168.100.50" OR $ip == "192.168.100.52" OR $ip == "192.168.100.54" OR $ip == "192.168.100.55" OR $ip == "192.100.100.55" )
   $read_mode = 1;
-else
-{
+else{
   if ( isset($_SESSION['ss_id']) )
     $read_mode = 2;
-  else
-  {
+  else{
     echo "Доступ запрещен!<br><br>";
     echo "Для продолжения необходима авторизация на <a href=\"index.php\" class=\"ml\">на главной странице</a>";
     die();                                                   
@@ -58,26 +56,20 @@ include_once "/var/www/tori/php_tori/connect.php";
   
   $query = mysqli_query($link, "SELECT * FROM work_dayoff order by date asc"); 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  if ( !$query ) {
     echo "<br>mysql_error = $merr<br>";
   }
-  else
-  {
+  else{
     $vn=mysqli_num_rows($query);
-    if ( $vn > 0 )
-    {
+    if ( $vn > 0 ){
       $cont_key = 1;
-      while($row = mysqli_fetch_array($query, MYSQLI_ASSOC))
-      {
-	if ( $row["type"] == 1 )
-        {
+      while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
+	if ( $row["type"] == 1 ){
 	  $work_day[] = $row["date"];
-        }
-	if ( $row["type"] == 0 )
-        {
+  }
+	if ( $row["type"] == 0 ){
 	  $day_off[] = $row["date"];
-        }
+  }
       } 
     }    
   } 
@@ -101,51 +93,43 @@ include_once "/var/www/tori/php_tori/connect.php";
     mysqli_set_charset($link, "utf8");
 
     $query2 = mysqli_query($link, "SELECT * FROM employees"); 
-    $merr=mysqli_error($link);
-    if ( !$query2 ) 
-    {
+    $merr = mysqli_error($link);
+
+    if ( !$query2 ) {
       echo "<br>mysql_error = $merr<br>";
     }
-    else
-    {
+    else{
       $vn2=mysqli_num_rows($query2);
-      if ( $vn2 > 0 )
-      {
+      if ( $vn2 > 0 ){
         $cont_key = 1;
-        while($row2 = mysqli_fetch_array($query2, MYSQLI_ASSOC))
-        {
-	  $ids[] = $row2["ID"];
-	  $surn[] = $row2["SURNAME"];
+        while($row2 = mysqli_fetch_array($query2, MYSQLI_ASSOC)){
+	        $ids[] = $row2["ID"];
+	        $surn[] = $row2["SURNAME"];
           $fname[] = $row2["FIRSTNAME"];
-	  $lname[] = $row2["LASTNAME"];
+	        $lname[] = $row2["LASTNAME"];
         } 
       }    
     }
   }
-  if ( $read_mode == 2 )
-  {
+  if ( $read_mode == 2 ){
     $temp_id = $_SESSION['ss_id'];
 
     mysqli_set_charset($link, "utf8");
 
     $query2 = mysqli_query($link, "SELECT * FROM employees where ID = '$temp_id'"); 
     $merr=mysqli_error($link);
-    if ( !$query2 ) 
-    {
+    if ( !$query2 ) {
       echo "<br>mysql_error = $merr<br>";
     }
-    else
-    {
+    else{
       $vn2=mysqli_num_rows($query2);
-      if ( $vn2 > 0 )
-      {
+      if ( $vn2 > 0 ){
         $cont_key = 1;
-        while($row2 = mysqli_fetch_array($query2, MYSQLI_ASSOC))
-        {
-	  $ids[] = $row2["ID"];
-	  $surn[] = $row2["SURNAME"];
+        while($row2 = mysqli_fetch_array($query2, MYSQLI_ASSOC)){
+	        $ids[] = $row2["ID"];
+	        $surn[] = $row2["SURNAME"];
           $fname[] = $row2["FIRSTNAME"];
-	  $lname[] = $row2["LASTNAME"];
+	        $lname[] = $row2["LASTNAME"];
         } 
       }    
     }
@@ -161,8 +145,7 @@ include_once "/var/www/tori/php_tori/connect.php";
   echo "<tr align = \"center\">";
   echo "<td><h5 class=\"fio\">Дата</h5></td>";
   
-  for ( $i = 0; $i < count($ids); $i++ )
-  {
+  for ( $i = 0; $i < count($ids); $i++ ){
     echo "<td><h5 class=\"fio\">".$surn[$i]." ".$fname[$i]." ".$lname[$i]."</h5></td>";
   }
   echo "</tr>";
@@ -178,8 +161,7 @@ include_once "/var/www/tori/php_tori/connect.php";
   $week_day_cnt = -1;
   $month_day_cnt = -1;
   
-  foreach ($dates as $date_one)
-  {
+  foreach ($dates as $date_one){
 
     $week_day = GetWeekDay( $date_one );
     $month_day = GetMonthDay( $date_one );
@@ -190,48 +172,38 @@ include_once "/var/www/tori/php_tori/connect.php";
     else
       $is_day_off = 0;
 
-
-    for ( $j=0; $j< count( $work_day ); $j++ )
-    {
-      if ( $date_one == $work_day[$j] )
-      {
+    for ( $j=0; $j< count( $work_day ); $j++ ){
+      if ( $date_one == $work_day[$j] ){
          $is_day_off = 0;
          break;
       }
     }
         
-    for ( $j=0; $j< count( $day_off ); $j++ )
-    {
-      if ( $date_one == $day_off[$j] )
-      {
+    for ( $j=0; $j< count( $day_off ); $j++ ){
+      if ( $date_one == $day_off[$j] ){
         $is_day_off = 1;
         break;
       }
     }
 
-    if ( $is_day_off != 1 )
-    {
+    if ( $is_day_off != 1 ){
       $week_day_cnt++;
       $month_day_cnt++;
     }
  
 
-    if ( $week_day == 1 )
-    {
-      
+    if ( $week_day == 1 ){
       echo "<tr>";
       echo "<td style=\"background-color:#dddddd\"><h5 class=\"total_week_month\">Итого часов<br>за неделю</h5></td>";
 
       $norm = $week_day_cnt * $day_norm;
 
-      for ( $i = 0; $i < count($ids); $i++ )
-      {
-        
-	$hour_min = format_time_hour_min( $week_dur[$i] );
+      for ( $i = 0; $i < count($ids); $i++ ){    
+	      $hour_min = format_time_hour_min( $week_dur[$i] );
  
         $hour = substr( $hour_min, 0, 2 );
 
-	$dur_differ = format_time_differs_from_norm_hour_min( $week_dur[$i], $norm ); 
+	      $dur_differ = format_time_differs_from_norm_hour_min( $week_dur[$i], $norm ); 
 
         if ( (int)$hour >= $norm )
           echo "<td align = \"center\" style=\"background-color:#88ff88\" ><h5 class=\"total_week_month\">".$hour_min."<br>норма = ".$norm." ч. <br>Переработка = $dur_differ</h5>";
@@ -248,21 +220,18 @@ include_once "/var/www/tori/php_tori/connect.php";
       echo "</tr>";
     }
  
-    if ( $month_day == 1 )
-    {
+    if ( $month_day == 1 ){
       echo "<tr>";
       echo "<td height = \"100\" style=\"background-color:#9999ff\"><h5 class=\"total_week_month\">Итого часов<br>за месяц</h5></td>";
 
       $m_norm = $month_day_cnt * $day_norm;
       
-      for ( $i = 0; $i < count($ids); $i++ )
-      {
-
-	$m_hour_min = format_time_hour_min( $month_dur[$i] );
+      for ( $i = 0; $i < count($ids); $i++ ){
+	      $m_hour_min = format_time_hour_min( $month_dur[$i] );
  
         $m_hour = substr( $m_hour_min, 0, 3 );
 
-	$m_dur_differ = format_time_differs_from_norm_hour_min( $month_dur[$i], $m_norm ); 
+	      $m_dur_differ = format_time_differs_from_norm_hour_min( $month_dur[$i], $m_norm ); 
 
         if ( (int)$m_hour >= $m_norm )
           echo "<td align = \"center\" style=\"background-color:#99ff99\" ><h5 class=\"total_week_month\">".$m_hour_min."<br>норма месяца = ".$m_norm." ч. <br>Переработка = $m_dur_differ</h5>";
@@ -284,21 +253,14 @@ include_once "/var/www/tori/php_tori/connect.php";
     echo "<h5 class=\"fio\">".$date_one."<br>( ".$week_day_name." )</h5>";
     echo "</td>";
 
-    for ( $i = 0; $i < count($ids); $i++ )
-    {
-      if ( strtotime( $date_one ) <= $now_date_time )
-      {
-        
-
+    for ( $i = 0; $i < count($ids); $i++ ){
+      if ( strtotime( $date_one ) <= $now_date_time ){
         $query3 = mysqli_query($link, "SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = '$date_one' and user_id = '$ids[$i]' "); 
         $merr=mysqli_error($link);
-        if ( !$query3 ) 
-        {
+        if ( !$query3 ) {
           echo "<br>mysql_error = $merr<br>";
         }
-        else
-        {
-
+        else{
           $vn3=mysqli_num_rows($query3);
         
           if ( $vn3 == 0 )
@@ -310,276 +272,233 @@ include_once "/var/www/tori/php_tori/connect.php";
           $out_time = $row3["out_time"];
           $eat_start = $row3["eat_start"];
           $eat_stop = $row3["eat_stop"]; 
-	  $state = $row3["state"];
+	        $state = $row3["state"];
  
           $miss_rec = 0;
  
-          if ( $now_date_time != strtotime( $date_one ) )
-          {
-            if ( $in_time == '00:00:00' AND $out_time == '00:00:00' )
-            {
+          if ( $now_date_time != strtotime( $date_one ) ){
+            if ( $in_time == '00:00:00' AND $out_time == '00:00:00' ){
               $color_code = -1;
             }
-	    else if ( $in_time == "00:00:00" )
-            {
+	          else if ( $in_time == "00:00:00" ){
               $color_code = -1;
             }
-            else if ( $out_time == "00:00:00" )
-            {
+            else if ( $out_time == "00:00:00" ){
               $color_code = -1;
             }
           
-            if ( $eat_start == '00:00:00' AND $eat_stop == '00:00:00' )
-            { 
+            if ( $eat_start == '00:00:00' AND $eat_stop == '00:00:00' ){ 
               $color_code = -1;            
             } 
-            else if ( $eat_start == "00:00:00" )
-            {
+            else if ( $eat_start == "00:00:00" ){
               $color_code = -1;
             }
-            else if ( $eat_stop == "00:00:00" )
-            {
+            else if ( $eat_stop == "00:00:00" ){
               $color_code = -1;
             }
           } 
           else
             $color_code = 0;
 
-          if ( $state == 0 )
-          {  
-	    $work_day_duration = format_time_( strtotime($out_time) - strtotime($in_time) - ( strtotime($eat_stop) - strtotime($eat_start) ) );
-  	    $work_day_duration_time = strtotime($out_time) - strtotime($in_time) - ( strtotime($eat_stop) - strtotime($eat_start) );
-	    $work_eat_duration = format_time_( strtotime($eat_stop) - strtotime($eat_start) );
+          if ( $state == 0 ){  
+	          $work_day_duration = format_time_( strtotime($out_time) - strtotime($in_time) - ( strtotime($eat_stop) - strtotime($eat_start) ) );
+  	        $work_day_duration_time = strtotime($out_time) - strtotime($in_time) - ( strtotime($eat_stop) - strtotime($eat_start) );
+	          $work_eat_duration = format_time_( strtotime($eat_stop) - strtotime($eat_start) );
 
             $week_dur[$i] += $work_day_duration_time;
             $month_dur[$i] += $work_day_duration_time;
           }
-          else
-          { 
-	    if ( strtotime($in_time) != "00:00:00"  AND $now_date_time == strtotime( $date_one ) )         if ( $color_code == 0 )
-            {
-	      if ( $eat_start == "00:00:00" AND $eat_stop == "00:00:00" )
-     	      {
+          else{ 
+	          if ( strtotime($in_time) != "00:00:00"  AND $now_date_time == strtotime( $date_one ) )         if ( $color_code == 0 ){
+	            if ( $eat_start == "00:00:00" AND $eat_stop == "00:00:00" ){
                 $work_day_duration_time = strtotime( date("H:i:s") ) - strtotime( $in_time );
                 $work_eat_duration = "00:00:00";
               }
-              else if ( $eat_start != "00:00:00" AND $eat_stop != "00:00:00" )
-	      {  
+              else if ( $eat_start != "00:00:00" AND $eat_stop != "00:00:00" ){  
                 $work_day_duration_time = strtotime( date("H:i:s") ) - strtotime( $in_time ) - ( strtotime($eat_stop) - strtotime($eat_start) );
                 $work_eat_duration = format_time_( strtotime($eat_stop) - strtotime($eat_start) );
 
               }
-              else if ( $eat_start != "00:00:00" AND $eat_stop == "00:00:00" )
-	      {
+              else if ( $eat_start != "00:00:00" AND $eat_stop == "00:00:00" ){
                 $work_day_duration_time = strtotime( $eat_start ) - strtotime( $in_time );
                 $work_eat_duration = "??:??:??";
               } 
               $work_day_duration = format_time_( $work_day_duration_time );
 
-	      $week_dur[$i] += $work_day_duration_time;
+	            $week_dur[$i] += $work_day_duration_time;
               $month_dur[$i] += $work_day_duration_time;
             }
-	    else
-            {
+	          else{
               $work_day_duration = "??:??:??";   
               $work_eat_duration = "??:??:??";   
             }
           }
                          
-	  if ( $now_date_time != strtotime( $date_one ) )
-	  {
-            if ( $color_code == 0 )
-	    {
-              echo "<td style=\"background-color:#00ff00\" >";
+	  if ( $now_date_time != strtotime( $date_one ) ){
+      if ( $color_code == 0 ){
+        echo "<td style=\"background-color:#00ff00\" >";
 
 	      echo "<h5 class=\"info\">";
 
-              echo "Раб. вр. с ".$in_time." до ".$out_time."<br>";
-              echo "Обед с ".$eat_start." до ".$eat_stop." (".$work_eat_duration.")";
+        echo "Раб. вр. с ".$in_time." до ".$out_time."<br>";
+        echo "Обед с ".$eat_start." до ".$eat_stop." (".$work_eat_duration.")";
 
-              echo "<br><br>Раб. вр. - обед: ".$work_day_duration;
+        echo "<br><br>Раб. вр. - обед: ".$work_day_duration;
 	    }
-	    else
-	    {  
-              echo "<td style=\"background-color:#";
+	    else{  
+        echo "<td style=\"background-color:#";
 
-              if ( $week_day == 6 OR $week_day == 0 )
-	        $is_day_off = 1;
-              else
-	        $is_day_off = 0;
-
-	      for ( $j=0; $j< count( $work_day ); $j++ )
-	      {
-                if ( $date_one == $work_day[$j] )
-                {
-                  $is_day_off = 0;
-                  break;
-                }
-              }
-
-	      for ( $j=0; $j< count( $day_off ); $j++ )
-	      {
-                if ( $date_one == $day_off[$j] )
-                {
-                  $is_day_off = 1;
-                  break;
-                }
-              }
-
-              if ( $is_day_off == 1 )
-	      {
-  	        echo "ffffff\" align = \"center\" valign = \"middle\">"; 
-
-                echo "<h5 class=\"lite\">";
-                echo "выходной";
-              }
-              else
-	      {
-                echo "ff0000\" align = \"center\" valign = \"middle\">"; 
-                echo "<h5 class=\"alarm\">";
-                echo "Недостаточно<br>сведений!";                
-              }
-	    }
-          }
+          if ( $week_day == 6 OR $week_day == 0 )
+	          $is_day_off = 1;
           else
-	  {
-              if ( isset( $state ) AND $state == 0 )
-	        echo "<td valign = \"middle\" style=\"background-color:#00ff00\" >";
-	      else
-                echo "<td valign = \"middle\" style=\"background-color:#ffffff\" >";
+	          $is_day_off = 0;
 
-	      echo "<h5 class=\"info\">";
-
-              if ( isset( $state ) )
-	      {
-		if ( $state == 4 )
-                {
-                  $out_time = "??:??:??";
-                }
-		if ( $state == 3 )
-                {
-                  $out_time = "??:??:??";
-                  $eat_stop = "??:??:??";
-                }
-		if ( $state == 2 )
-                {
-                  $out_time = "??:??:??";
-                  $eat_start = "??:??:??";
-                  $eat_stop = "??:??:??";
-                }
-              }
-              else
-	      {
-                $in_time = "??:??:??";
-                $out_time = "??:??:??";
-                $eat_start = "??:??:??";
-                $eat_stop = "??:??:??";
-		$state = -1;
-              }
-              echo "Текущий рабочий день:<br>";
-	      echo "Раб. вр. с ";
-	      if ( $in_time != "??:??:??" )
-                echo $in_time;
-	      else
-	      {
-                echo "<font color=\"#ff0000\">";
-                echo "??:??:??";
-                echo "<font color=\"#000000\">";
-              }
-
-              echo " до ";
-
-	      if ( $out_time != "??:??:??" )
-                echo $out_time."<br>";
-	      else
-	      {
-                echo "<font color=\"#ff0000\">";
-                echo "??:??:??<br>";
-                echo "<font color=\"#000000\">";
-              }
-
-              echo "Обед с ";
-	      if ( $eat_start != "??:??:??" )
-                echo $eat_start;
-	      else
-	      {
-                echo "<font color=\"#ff0000\">";
-                echo "??:??:??";
-                echo "<font color=\"#000000\">";
-              }
-              
-              echo " до ";
-	      if ( $eat_stop != "??:??:??" )
-                echo $eat_stop;
-	      else
-	      {
-                echo "<font color=\"#ff0000\">";
-                echo "??:??:??";
-                echo "<font color=\"#000000\">";
-              }
-
-              if ( strtotime( $work_eat_duration ) > 0 AND $work_eat_duration != "00:00:00" )
-                echo " (".$work_eat_duration.")";
-	      else
-	      {
-                echo "<font color=\"#ff0000\">";
-                echo " (??:??:??)";
-                echo "<font color=\"#000000\">";
-              }
-    
-              if ( $state == 0 )
-		echo "<br><br>День закрыт. Раб. вр. - обед: ".$work_day_duration; 
-
-              if ( $state != 0 )
-	      {
-		if ( $work_day_duration_time != 0 ) 
-		  echo "<br><br>Раб. вр. - обед: ".$work_day_duration; 
-		if ( $work_day_duration_time == 0 ) 
-		{
-                  echo "<br><br>Раб. вр. - обед: ";
-                  echo "<font color=\"#ff0000\">";
-                  echo " (??:??:??)";
-                  echo "<font color=\"#000000\">";
-                }
-              }
-          }
-            echo "</h5></td>";
-
-            $color_code = 0;    
-        }
-      }
-      else
-      {
-
-        if ( $week_day == 6 OR $week_day == 0 )
-	  $is_day_off = 1;
-        else
-	  $is_day_off = 0;
-
-	for ( $j=0; $j< count( $work_day ); $j++ )
-	{
-          if ( $date_one == $work_day[$j] )
-          {
+	      for ( $j=0; $j< count( $work_day ); $j++ ){
+          if ( $date_one == $work_day[$j] ){
             $is_day_off = 0;
             break;
           }
-        }
-        
-        for ( $j=0; $j< count( $day_off ); $j++ )
-	{
-          if ( $date_one == $day_off[$j] )
-          {
-            $is_day_off = 1;
-            break;
-          }
-        }
+      }
 
-        if ( $is_day_off == 1 )
-	{ 
-          echo "<td style=\"background-color:#eeeeee\" align = \"center\" valign = \"middle\">"; 
-          echo "<h5 class=\"lite\">";
-          echo "выходной</td>";
+	    for ( $j=0; $j< count( $day_off ); $j++ ){
+        if ( $date_one == $day_off[$j] ){
+          $is_day_off = 1;
+          break;
         }
+      }
+
+      if ( $is_day_off == 1 ){
+  	    echo "ffffff\" align = \"center\" valign = \"middle\">"; 
+
+        echo "<h5 class=\"lite\">";
+        echo "выходной";
+      }
+      else{
+        echo "ff0000\" align = \"center\" valign = \"middle\">"; 
+        echo "<h5 class=\"alarm\">";
+        echo "Недостаточно<br>сведений!";                
+      }
+	  }
+  }
+  else{
+    if ( isset( $state ) AND $state == 0 )
+	    echo "<td valign = \"middle\" style=\"background-color:#00ff00\" >";
+	  else
+      echo "<td valign = \"middle\" style=\"background-color:#ffffff\" >";
+
+	    echo "<h5 class=\"info\">";
+
+    if ( isset( $state ) ){
+		  if ( $state == 4 ){
+        $out_time = "??:??:??";
+      }
+		if ( $state == 3 ){
+      $out_time = "??:??:??";
+      $eat_stop = "??:??:??";
+    }
+		if ( $state == 2 ){
+      $out_time = "??:??:??";
+      $eat_start = "??:??:??";
+      $eat_stop = "??:??:??";
+    }
+  }
+  else{
+    $in_time = "??:??:??";
+    $out_time = "??:??:??";
+    $eat_start = "??:??:??";
+    $eat_stop = "??:??:??";
+		$state = -1;
+  }
+  echo "Текущий рабочий день:<br>";
+	echo "Раб. вр. с ";
+  if ( $in_time != "??:??:??" )
+    echo $in_time;
+	else{
+    echo "<font color=\"#ff0000\">";
+    echo "??:??:??";
+    echo "<font color=\"#000000\">";
+  }
+
+  echo " до ";
+
+	if ( $out_time != "??:??:??" )
+    echo $out_time."<br>";
+  else{
+    echo "<font color=\"#ff0000\">";
+    echo "??:??:??<br>";
+    echo "<font color=\"#000000\">";
+  }
+
+  echo "Обед с ";
+	if ( $eat_start != "??:??:??" )
+    echo $eat_start;
+	else{
+    echo "<font color=\"#ff0000\">";
+    echo "??:??:??";
+    echo "<font color=\"#000000\">";
+  }
+              
+  echo " до ";
+	if ( $eat_stop != "??:??:??" )
+    echo $eat_stop;
+	else{
+    echo "<font color=\"#ff0000\">";
+    echo "??:??:??";
+    echo "<font color=\"#000000\">";
+  }
+
+  if ( strtotime( $work_eat_duration ) > 0 AND $work_eat_duration != "00:00:00" )
+    echo " (".$work_eat_duration.")";
+	else{
+    echo "<font color=\"#ff0000\">";
+    echo " (??:??:??)";
+    echo "<font color=\"#000000\">";
+  }
+    
+  if ( $state == 0 )
+		echo "<br><br>День закрыт. Раб. вр. - обед: ".$work_day_duration; 
+
+  if ( $state != 0 ){
+		if ( $work_day_duration_time != 0 ) 
+		  echo "<br><br>Раб. вр. - обед: ".$work_day_duration; 
+		  if ( $work_day_duration_time == 0 ) {
+        echo "<br><br>Раб. вр. - обед: ";
+        echo "<font color=\"#ff0000\">";
+        echo " (??:??:??)";
+        echo "<font color=\"#000000\">";
+      }
+    }
+  }
+  echo "</h5></td>";
+
+  $color_code = 0;    
+  }
+}
+else{
+  if ( $week_day == 6 OR $week_day == 0 )
+	  $is_day_off = 1;
+    else
+	  $is_day_off = 0;
+
+	for ( $j=0; $j< count( $work_day ); $j++ ){
+    if ( $date_one == $work_day[$j] ){
+      $is_day_off = 0;
+      break;
+    }
+  }
+        
+  for ( $j=0; $j< count( $day_off ); $j++ ){
+    if ( $date_one == $day_off[$j] ){
+      $is_day_off = 1;
+      break;
+    }
+  }
+
+  if ( $is_day_off == 1 ){ 
+    echo "<td style=\"background-color:#eeeeee\" align = \"center\" valign = \"middle\">"; 
+    echo "<h5 class=\"lite\">";
+    echo "выходной</td>";
+  }
 	else
 	  echo "<td></td>";
       }

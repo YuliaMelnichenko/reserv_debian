@@ -51,9 +51,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
     echo "<tr>";
       echo "<td style=\"margin:0; padding:0; margin-left:0;\" width = 205>";
         echo "<a class=\"nounder\" href=\"index.php\">";
-          //echo "<font size=\"5\" color=\"#ffffff\" face=\"Arial Black\">В</font>";
-          //echo "<font size=\"5\" color=\"#4a6e97\" face=\"Arial black\"> ТОРИ 3.0</font>";
-          echo "<p style=\"margin:0; padding:0\"><span style=\"font-size: 24px; color: #ffffff; font-family: 'Arial Black';\"> В </span> <span style=\"font-size: 24px; color: #4a6e97; font-family: 'Arial Black';\"> ТОРИ 3.0 </span></p>";
+          echo "<p style=\"margin:0; padding:0\"><span style=\"font-size: 24px; color: #ffffff; font-family: 'Arial Black';\"> В </span><span style=\"font-size: 24px; color: #4a6e97; font-family: 'Arial Black';\"> ТОРИ 3.0 </span></p>";
         echo "</a>";
       echo "</td>";
       echo "<td width=30 align=\"right\" style=\"margin:0; padding:0; margin-left:0;\">";

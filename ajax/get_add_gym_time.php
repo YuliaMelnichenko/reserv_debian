@@ -9,8 +9,8 @@ $example = date("Y-m-d", strtotime('today'));
 $time = get_current_datetime_in_timezone_str(1,0);
 $timestamp = strtotime($time);
 $allTime = date('H:i', $timestamp);
-$time_start = "13:00";
-$time_stop = "14:00";
+$time_start = "19:00";
+$time_stop = "20:00";
 $full_example = $example." ".$time_start ."-".$time_stop;
 
 $content = "<div id=\"gym_schedule\">";

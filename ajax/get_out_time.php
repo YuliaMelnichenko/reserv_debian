@@ -31,13 +31,13 @@ echo "<div class = \"reg_out_time\">";
   echo "</div>";
   if ($monday == "1") {
     echo "<div class = \"reg_out_time_body\">";
-      echo "<textarea id=\"add_stop_time\" cols=\"33\" rows=\"2\">$full_date</textarea>";
+      echo "<input id=\"add_stop_time\" align=\"middle\" style=\"width:175px;\" type=\"datetime-local\" name=\"trip-start\" value=$example min=$example max=\"2060-12-31\">";
     echo "</div>";
   }
 
   else {
     echo "<div class = \"reg_out_time_body\">";
-      echo "<textarea id=\"add_stop_time\" cols=\"33\" rows=\"2\">$full_last_date</textarea>";
+      echo "<input id=\"add_stop_time\" align=\"middle\" style=\"width:175px;\" type=\"datetime-local\" name=\"trip-start\" value=$example min=$example max=\"2060-12-31\">";
     echo "</div>";
   }
 
