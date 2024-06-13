@@ -589,39 +589,61 @@ function get_group_user_IDs_by_svID_for_report( $svID )
   return $userIDs;
 }  
 
-function get_group_user_info_by_svID_for_report_ex( $svID )
-{
+function get_group_user_info_by_svID_for_report_ex( $svID ){
   include "/var/www/tori/php_tori/connect.php";
 
   $userIDs=array();
 
   mysqli_set_charset($link, "utf8");
-  if ( $svID !=-1 )
-  {
-    $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID='$svID' and ( TYPE=0 or TYPE=-1 ) "); 
-  }
-  else
-  {
-    $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE TYPE=0 or TYPE=-1"); 
-  }
 
-  $merr=mysqli_error($link);
-  if ( !$query0 ) 
-  {
-    echo "<br>mysqli_error = $merr<br>";
-  }
-  else
-  {
-    $vn=mysqli_num_rows($query0);
-    if ($vn == 0)
-    {
-      $userIDs[] = $svID;
+  $dirID = 0;
+
+  if (isset($_SESSION["ss_id"])) {
+    $dirID = $_SESSION["ss_id"];
+    if ($dirID == 1) {
+      if ( $svID !=-1 ){
+        $query0 = mysqli_query($link, "SELECT e.id FROM GROUPS g INNER JOIN employees e ON g.USERID = e.id WHERE g.SUPERVISORID='$svID' AND ( g.TYPE=0 OR g.TYPE=-1 ) ORDER BY e.surname"); 
+      }
+      else{
+        $query0 = mysqli_query($link, "SELECT e.id FROM GROUPS g INNER JOIN employees e ON g.USERID = e.id WHERE g.TYPE=0 OR g.TYPE=-1 ORDER BY e.surname"); 
+      }
+      $merr=mysqli_error($link);
+      if ( !$query0 ) {
+        echo "<br>mysqli_error = $merr<br>";
+      }
+      else{
+        $vn=mysqli_num_rows($query0);
+        if ($vn == 0){
+          $userIDs[] = $svID;
+        }
+        else{
+          while($row = mysqli_fetch_array($query0, MYSQLI_ASSOC)){
+            $userIDs[] = $row["id"];  
+          }
+        }
+      }
     }
-    else
-    {
-      while($row = mysqli_fetch_array($query0, MYSQLI_ASSOC))
-      {
-        $userIDs[] = $row["USERID"];  
+    else{
+      if ( $svID !=-1 ){
+        $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID='$svID' AND ( TYPE=0 OR TYPE=-1 )"); 
+      }
+      else{
+        $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE TYPE=0 OR TYPE=-1"); 
+      }
+      $merr=mysqli_error($link);
+      if ( !$query0 ) {
+        echo "<br>mysqli_error = $merr<br>";
+      }
+      else{
+        $vn=mysqli_num_rows($query0);
+        if ($vn == 0){
+          $userIDs[] = $svID;
+        }
+        else{
+          while($row = mysqli_fetch_array($query0, MYSQLI_ASSOC)){
+            $userIDs[] = $row["USERID"];  
+          }
+        }
       }
     }
   }
