@@ -2680,9 +2680,38 @@ li:hover ul, li.over ul { display: block; }
   width: 373px;
   display: flex;
   justify-content: space-between;
-
 }
 
 #report_container {
   display: flex;
+}
+
+#employee_activity {
+  display: flex;
+  flex-direction: column;
+  padding: 0 3px;
+}
+
+.activity {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-bottom: 1px solid #777777;
+  margin-top: 1px;
+}
+
+h5.activ_text {
+  font-family: Arial, sans;
+  font-size: 12px;
+  color: #000;
+  line-height: 18pt;
+  width: 240px;
+}
+
+h5.activ_time {
+  font-family: Arial, sans;
+  font-size: 12px;
+  color: #000;
+  line-height: 18pt;
+  width: 90px;
 }

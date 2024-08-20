@@ -615,7 +615,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       }
       else
       { 
-	 $_SESSION['ss_state'] = 1;
+	      $_SESSION['ss_state'] = 1;
       }   
 
     } 
@@ -624,6 +624,106 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     echo "<h5 class=\"dark1\">Ожидание данных от сервера MySQL...</h5>";
     echo "</div>";
                    
+    echo "</td>";
+
+    echo "<td bgcolor=\"#ffffff\" valign=\"top\" align=\"left\" width = 10>";
+    echo "</td>";
+
+    mysqli_set_charset($link, "utf8");
+    include "/var/www/tori/php_tori/connect.php";
+    
+    $query6 = mysqli_query($link, "SELECT id, firstname, surname, lastname FROM employees WHERE relevance = 1 ORDER BY surname");
+
+    echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
+    echo "<h5 class=\"dark0\"><br>/присутствие сотрудников<br><br></h5>";
+    echo "<div id=\"employee_activity\">";
+
+    $employee_arr = array();
+
+    while ($row6 = mysqli_fetch_assoc($query6)) {
+      $id_empl = $row6["id"];
+      $surname = $row6["surname"];
+      $firstname = $row6["firstname"];
+      $lastname = $row6["lastname"];
+      $full_name = $surname." ".$firstname." ".$lastname;
+
+      $time = "0000-00-00 00:00:00";
+
+      mysqli_set_charset($link, "utf8");
+      $query5 = mysqli_query($link, "SELECT v.in_dt, v.eat_start_dt, v.eat_stop_dt, v.out_dt, e.surname FROM visiting v JOIN employees e ON v.user_id = e.id WHERE DATE(v.in_dt) = CURDATE() AND v.user_id = '$id_empl'");
+      $row5 = mysqli_fetch_assoc($query5);
+
+      $query7 = mysqli_query($link, "SELECT a.START_DT, a.STOP_DT, e.surname FROM ADD_TIME a JOIN employees e ON a.USERID = e.id WHERE DATE(a.START_DT) = CURDATE() AND a.USERID = '$id_empl'");
+      $row7 = mysqli_fetch_array($query7);
+
+      $in_dt = $row5["in_dt"];
+      $eat_start_dt = $row5["eat_start_dt"];
+      $eat_stop_dt = $row5["eat_stop_dt"];
+      $out_dt = $row5["out_dt"];
+      $start_dt_AT = $row7["START_DT"];
+      $stop_dt_AT = $row7["STOP_DT"];
+
+      $time_in = date("H:i", strtotime($in_dt));
+      $time_out = date("H:i", strtotime($out_dt));
+      
+      if (mysqli_num_rows($query5) === 0) {
+        $img = "<img title=\"на работу не приходил\" src=\"img/in_home.png\">";
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt));
+      }
+      elseif (($eat_start_dt != $time && $eat_stop_dt === $time) || ($start_dt_AT != $time && $stop_dt_AT === $time)) {
+        $img = "<img title=\"обед/приостановка времени\" src=\"img/pause_time.png\">";
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt));
+      }
+      elseif ($in_dt != $time && $out_dt != $time) {
+        $img = "<img title=\"ушел домой\" src=\"img/go_home.png\">";
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt));
+      }
+      else {
+        $img = "<img style=\"margin: 1px 0\" title=\"на рабочем месте\" src=\"img/in_work2.png\">";
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt));
+      }
+    }
+
+    function sort_employee ($a, $b) {
+      if (is_null($a[4]) && is_null($b[4])) {
+        return strnatcmp($a[0], $b[0]);
+      }
+      if ($a[3] === "<img style=\"margin: 1px 0\" title=\"на рабочем месте\" src=\"img/in_work2.png\">" && $b[3] === "<img style=\"margin: 1px 0\" title=\"на рабочем месте\" src=\"img/in_work2.png\">") {
+        return strnatcmp($a[0], $b[0]);
+      }
+      if ($a[3] === "<img title=\"ушел домой\" src=\"img/go_home.png\">" && $b[3] === "<img title=\"ушел домой\" src=\"img/go_home.png\">") {
+        return strnatcmp($a[0], $b[0]);
+      }
+      return strnatcmp($a[5], $b[5]);
+    }
+
+    usort($employee_arr, "sort_employee");
+
+    for ($i = 0; $i < count($employee_arr); $i++) {
+      $zero_time = "0000-00-00 00:00:00";
+      $name = $employee_arr[$i][0];
+      $start = $employee_arr[$i][1];
+      $stop = $employee_arr[$i][2];
+      $img = $employee_arr[$i][3];
+      $dat_in = $employee_arr[$i][4];
+      $dat_out = $employee_arr[$i][5];
+      echo "<div class=\"activity\">";
+      echo "<h5 class=\"activ_text\">$name</h5>";
+
+      if ($dat_in == "") {
+        echo "";
+      }
+      elseif ($dat_in != $zero_time && $dat_out === $zero_time) {
+        echo "<h5 class=\"activ_time\">$start</h5>";
+      }
+      else {
+        usort($employee_arr, "sort_employee");
+        echo "<h5 class=\"activ_time\">".$start." - ".$stop."</h5>";
+      }
+      echo $img;
+      echo "</div>";
+    }
+    echo "</div>";
     echo "</td>";
 
     echo "<td bgcolor=\"#ffffff\" valign=\"top\" align=\"left\" width = 10>";

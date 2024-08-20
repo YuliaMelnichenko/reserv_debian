@@ -602,10 +602,10 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
     $dirID = $_SESSION["ss_id"];
     if ($dirID == 1) {
       if ( $svID !=-1 ){
-        $query0 = mysqli_query($link, "SELECT e.id FROM GROUPS g INNER JOIN employees e ON g.USERID = e.id WHERE g.SUPERVISORID='$svID' AND ( g.TYPE=0 OR g.TYPE=-1 ) ORDER BY e.surname"); 
+        $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID='$svID' and ( TYPE=0 or TYPE=-1 )"); 
       }
       else{
-        $query0 = mysqli_query($link, "SELECT e.id FROM GROUPS g INNER JOIN employees e ON g.USERID = e.id WHERE g.TYPE=0 OR g.TYPE=-1 ORDER BY e.surname"); 
+        $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE TYPE=0 or TYPE=-1"); 
       }
       $merr=mysqli_error($link);
       if ( !$query0 ) {
@@ -625,10 +625,10 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
     }
     else{
       if ( $svID !=-1 ){
-        $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID='$svID' AND ( TYPE=0 OR TYPE=-1 )"); 
+        $query0 = mysqli_query($link, "SELECT e.id FROM GROUPS g INNER JOIN employees e ON g.USERID = e.id WHERE g.SUPERVISORID = '$svID' AND (g.TYPE = 0 OR TYPE=-1) ORDER BY e.surname"); 
       }
       else{
-        $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE TYPE=0 OR TYPE=-1"); 
+        $query0 = mysqli_query($link, "SELECT e.id FROM GROUPS g INNER JOIN employees e ON g.USERID = e.id WHERE g.TYPE = 0 OR TYPE=-1 ORDER BY e.surname"); 
       }
       $merr=mysqli_error($link);
       if ( !$query0 ) {
@@ -641,7 +641,7 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
         }
         else{
           while($row = mysqli_fetch_array($query0, MYSQLI_ASSOC)){
-            $userIDs[] = $row["USERID"];  
+            $userIDs[] = $row["USERID"];
           }
         }
       }
@@ -651,8 +651,6 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
   $newUserIDs=array();
 
   $ownUserID = -1;
-
-  // session_start();
 
   if ( isset( $_SESSION['ss_id'] ) )
   {
@@ -940,9 +938,7 @@ function GetMonthNameEx( $offset )
     return "Декабрь";
 }
 
-function GetHourNormByMonth( $date, $rate )
-{
-
+function GetHourNormByMonth( $date, $rate ){
   include "/var/www/tori/php_tori/connect.php";
 
   $duration = 0;
@@ -1582,7 +1578,6 @@ function hours_norm( $stop_date, $start_date, $use_start_date )
   return $validDays * 8;
 }
 
-
 function estimate_hours( $hoursMinutesNorm, $realSeconds )
 {
   $border = 0; //Percent  
@@ -1709,7 +1704,6 @@ function get_workdays_holidays_bay_range( $startDate, $stopDate )
   return $result;
 }
 
-
 function get_holidays()
 {
   $holidays = array();
@@ -1776,7 +1770,6 @@ function get_days_range( $startDate, $stopDate )
   return $daysRange;
 }
 
-
 function get_days_wo_weekends( $daysRange )
 {
   $days = array();
@@ -1822,9 +1815,7 @@ function get_days_wo_holidays( $daysRange )
   }
 
   return $days;
-}
-
-             
+}      
 
 function get_days_with_add_workdays( $daysRange )
 {
@@ -1969,7 +1960,6 @@ function get_users_current_day_in_time_by_superuser( $SUID )
 
   return $rets;           
 }
-
 
 function get_days_with_delay( $daysRange, $userID, $user_defaultStartTime, $user_allowedDelay, &$delays )
 {
@@ -2345,7 +2335,7 @@ function get_current_day_duration_sec( $userID, $defaultStartTime )
   }
 
   $result = strtotime(date("H:i:s")) - strtotime( $inTime );
-  $result = $result;
+  // $result = $result;
   $result = (int)$result;
 
   return $result;
@@ -4086,7 +4076,8 @@ function get_results_cell_content_by_stat( $stats, $index, $cellWidth, $userID, 
 
   $days_dates_results = $stats[13];
 
-  $new_days_dates_set = DayIncDN( $days_dates_set, 1 );
+
+  $new_days_dates_set = DayIncDN( $days_dates_set, 1 );  
 
   $contentDT = "";
   $content = "";

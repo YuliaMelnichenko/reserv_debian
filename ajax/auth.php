@@ -14,13 +14,17 @@ $__passwd = md5(md5(trim(mysqli_real_escape_string($link, $_POST['passwd']))));
 $query = mysqli_query($link, "SELECT id, rate, defaultStartTime, allowedDelayMinutes, userTimeZoneMins, dayTransitionTime, remoteWork FROM employees WHERE login='$__login' and passwd = '$__passwd'"); 
 $merr = mysqli_error($link);
 
-if ( !$query ) {
+if ( !$query ) 
+{
   echo "<br>mysqli_error = $merr<br>";
 }
-else{
+else
+{
   $vn = mysqli_num_rows($query);
 
-  if ( $vn == 1 ){ 
+  if ( $vn == 1 )
+  { 
+    //echo "Auth success";
     $row = mysqli_fetch_assoc($query);
     $_SESSION['ss_id'] = $row["id"];
     $_SESSION['ss_rate'] = $row["rate"];
@@ -39,18 +43,19 @@ else{
     $_SESSION['ss_mode'] = 1;
     $_SESSION['ss_delay_show_save'] = 0;
     $_SESSION['ss_UserTimeZoneMins'] = $row["userTimeZoneMins"];
-    $ss_dayTransitionTime = $row["dayTransitionTime"];
-    $_SESSION['$ss_dayTransitionTime'] = $ss_dayTransitionTime;
     session_regenerate_id();
     $_SESSION['ss_sessid'] = session_id();
     $retArr = get_current_datetime_in_timezone();
     $_SESSION['ss_UserTimeZoneStr'] = $retArr[5];
+    $ss_dayTransitionTime = $row["dayTransitionTime"];
+    $_SESSION['$ss_dayTransitionTime'] = $ss_dayTransitionTime;
     
+
     $ss_RemoteWork = $row["remoteWork"];
     $_SESSION['ss_RemoteWorkStr'] = "В ОФИСЕ";
     $_SESSION['ss_RemoteWork'] = 0;
-
-    if ( $ss_RemoteWork == 1 ){
+    if ( $ss_RemoteWork == 1 )
+    {
       $_SESSION['ss_RemoteWork'] = 1;
       $_SESSION['ss_RemoteWorkStr'] = "УДАЛЕННЫЙ";
     }
@@ -60,7 +65,8 @@ else{
 
     $_SESSION['ss_dayWasChanged'] = 0;
   }
-  else{
+  else
+  {
     echo "Ошибка авторизации! Неправильный логин/пароль";
     unset($_SESSION['ss_id']);
     unset($_SESSION['ss_rate']);
@@ -83,5 +89,7 @@ else{
   }
 //header("Location: index.php");
 //exit(); 
-}
+} 	
 ?>
+
+                                                                         

@@ -27,7 +27,7 @@ $stop = "0000-00-00 00:00:00";
 mysqli_set_charset($link, "utf8");
 
 $res = mysqli_query($link, "DELETE FROM gym_schedule WHERE USERID='$userID' AND DATE_TRAIN < CURDATE()");
-$merr=mysqli_error($link);
+$merr = mysqli_error($link);
 
 if ( !$res ) {
   echo "<br>mysql_error = $merr<br>";
