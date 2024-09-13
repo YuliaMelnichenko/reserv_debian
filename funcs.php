@@ -697,6 +697,7 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
   $usersInfo[0] = $newUserIDs;
   $usersInfo[1] = $usersFIO;
   $usersInfo[2] = $usersRate;
+
   return $usersInfo;
 }  
 
@@ -3874,7 +3875,6 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
     if ($prefix == "<h5 class=\"middleBold\">Текущий день"){
       $tableContent .=       "<div class = \"report_no_padding_rep\">";
       $tableContent .=         "<h5 class=\"middleSmall\">$days_timeZoneStr</h5>";
-      $outTimeEmpty = $days_work_stop;
       $tableContent .=       "</div>";
     }
     $tableContent .=      "</div>"; 
@@ -3886,22 +3886,14 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
     $tableContent .=             "<img title=\"рабочее время\" src=\"$timeSpendImg\"/>";
     $tableContent .=           "</div>"; 
     $uniqueId = uniqid('u'); 
-    if ($outTimeEmpty == '0000-00-00 00:00:00') {
-      $tableContent .=           "<div class = \"report_no_padding_rep inf\" id = \"$uniqueId\" style = \"color: blue\" valign = \"top\" align = \"left\" width = 50px>";
-      $tableContent .=             $workWOEatStr;
-      $tableContent .=           "</div>";
-      $tableContent .=           "<div class = \"inWork\">";
-      $tableContent .=             "<img title=\"еще на работе\" src=\"img/inwork.png\">";
-      $tableContent .=           "</div>";
-    }
-    else {
+
       $tableContent .=           "<div class = \"report_no_padding_rep inf workBlue\" id = \"$uniqueId\" valign = \"top\" align = \"left\" width = 50px>";
       $tableContent .=             $workWOEatStr;
       $tableContent .=           "</div>";
       $tableContent .=           "<div class = \"change_time\">";
       $tableContent .=            $change;
       $tableContent .=           "</div>";
-    }
+
 
     $tableContent .=           "<div class = \"report_no_padding_rep time $uniqueId\" align = \"center\" width = 230px>";
     $tableContent .=             $workDayRange;
@@ -4072,7 +4064,7 @@ $timeInSrc = $timeIn;
 function get_results_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $defaultStartTimeStr, $user_allowedDelay, $resType, &$typeShowed, &$headContent )
 {
   $days_dates_set = $stats[0][$index];
-
+  // echo $stats[0][0];
 
   $days_dates_results = $stats[13];
 
@@ -4110,11 +4102,10 @@ function get_results_cell_content_by_stat( $stats, $index, $cellWidth, $userID, 
           $contentDT .= "</td>"; 
           $headContent = $contentDT;
         }
-        else if ( $resType == 4 )
-        {
+        else if ( $resType == 4 ) {
           $monthName = GetMonthNameByDate( $days_dates_set );
           $contentDT  = "<td class=\"report_no_padding\" valign=\"middle\" align=\"center\">";
-          $contentDT .=   "<div class=\"report_head_left_date_rep_month\" id=\"report_head_left_date_cert\">"; 
+          $contentDT .=   "<div class=\"report_head_left_date_rep_month\" id=\"report_head_left_date_cert\">";
           $contentDT .=     "<h5 class=\"smallBlack\">Итог за<br>месяц:<br><h6 class=\"mism1\">".$monthName;
           $contentDT .=   "</div>"; 
           $contentDT .= "</td>"; 

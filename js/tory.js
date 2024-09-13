@@ -1347,12 +1347,22 @@ function disclamer (state) {
 
 function close_pause()
 {
-  if ( document.getElementById('pause_head') ){ document.getElementById('pause_head').style.display='none'; }
+  if ( document.getElementById('pause_head') ){ 
+    document.getElementById('pause_head').style.display='none'; 
+  }
 }
 
 function close_sport_pause()
 {
-  if ( document.getElementById('sport_pause') ){ document.getElementById('sport_pause').style.display='none'; }
+  if ( document.getElementById('sport_pause') ){ 
+    document.getElementById('sport_pause').style.display='none'; 
+  }
+}
+
+function close_birth_window () {
+  if (document.getElementsByClassName('birth_person')) {
+    document.getElementsByClassName('birth_person').style.display='none';
+  }
 }
 
 function make_div_scroll()
@@ -1398,5 +1408,22 @@ function RetSWT () {
   }
   function hideTime() {
     $('.' + this.id).css("display", "none");
+  }
+}
+
+document.addEventListener('keydown', function(event) {
+  if (event.code === 'Enter') {
+    event.preventDefault();
+    document.getElementById('auth_btn').click();
+  }
+});
+
+let count = 1;
+
+function show_information() {
+  count++;
+  document.getElementById('inform').style.display = "block";
+  if (count % 2 == 1) {
+    document.getElementById('inform').style.display = "none";
   }
 }

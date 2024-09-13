@@ -55,7 +55,10 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
         echo "</a>";
       echo "</td>";
       echo "<td width=30 align=\"right\" style=\"margin:0; padding:0; margin-left:0;\">";
-        echo "<img style=\"text-align: left; width:22px; height:22px;\"  title=\"Выйти из системы\" onclick=\"log_out();\" src=\"img/logout2.png\">";
+        echo "<img style=\"text-align: left; width:22px; height:22px; cursor: pointer;\"  title=\"Что нового?\" onclick=\"show_information();\" src=\"img/news.png\">";
+      echo "</td>";
+      echo "<td width=30 align=\"right\" style=\"margin:0; padding:0; margin-left:0;\">";
+        echo "<img style=\"text-align: left; width:22px; height:22px; cursor: pointer;\"  title=\"Выйти из системы\" onclick=\"log_out();\" src=\"img/logout3.png\">";
       echo "</td>";
     echo "</tr>";
   echo "</table>";

@@ -2715,3 +2715,31 @@ h5.activ_time {
   line-height: 18pt;
   width: 90px;
 }
+
+#inform {
+  background-color: #f0f7fb;
+  width: 500px;
+  display: none;
+}
+
+#index {
+  background-color: rgb(221, 238, 255);
+  padding: 0;
+}
+
+.birth_person {
+  width: 200px;
+  height: 50px;
+  display: flex;
+  flex-direction: column;
+
+}
+
+#close_birth_win {
+  font-size: 120%;
+  width: 110px;
+  height: 30px;
+  background-color: #f79398;
+  border: 1px solid #888888; 
+  cursor: pointer;
+}

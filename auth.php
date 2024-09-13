@@ -109,6 +109,20 @@ $ip = $_SERVER['REMOTE_ADDR'];
 
 //echo "userID = ".$_SESSION['ss_id'];
 
+// if (!isset($_SESSION['start_time'])) {
+//   $_SESSION['start_time'] = time();  
+// }
+
+// echo date('H:i:s', $_SESSION['start_time']);
+
+// if (time() - $_SESSION['start_time'] >= 440) {
+//   session_unset();
+//   session_destroy();
+
+//   session_start();
+//   $_SESSION['start_time'] = time();
+// }
+
 if ( !isset($_SESSION['ss_id']) )
 {
   $_SESSION['ss_mode'] = 0;

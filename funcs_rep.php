@@ -491,7 +491,7 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $stat_result_value[6] = $dayNormWeek;
       $stat_result_value[7] = $PenaltiesDurationWeek;
       $stat_result_value[8] = $PenaltiesCountWeek;
-      $stat_result_value[9] = $pauseTimeDurationWeek; 
+      $stat_result_value[9] = $pauseTimeDurationWeek;
       $stat_results[] = $stat_result_value;
 
       $resultPureDurationWeek = 0;
@@ -509,7 +509,7 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
     }                   
     else if ( $monthOpened == 1 AND is_first_month_day( $day ) )
     {
-      $stopDate22 = DayIncDN( $day, -1 );               
+      $stopDate22 = DayIncDN( $day, 0 );               
       $startDate22 = GetFirstMonthDayEx( $stopDate22 );
 
       $stat_result_value[0] = $startDate22;
@@ -539,7 +539,7 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
     }
     else if ( $quarterOpened == 1 AND is_first_quarter_day( $day ) )
     {
-      $stopDate22 = DayIncDN( $day, -1 );               
+      $stopDate22 = DayIncDN( $day, 0 );               
       $startDate22 = GetFirstQuarterDayEx( $stopDate22 );
 
       $stat_result_value[0] = $startDate22;

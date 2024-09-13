@@ -41,7 +41,7 @@ $wholeWidth = 700;
 
 echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
 
-echo "<h5 class=\"dark\"><br>/График отпусков сотрудников ООО НПФ \"ТОРИ\"<br><br></h5>";
+echo "<h5 class=\"dark\"><br>/График отпусков сотрудников <br><br></h5>";
 
 echo "<table id=\"\" border=1>";
 echo "<tr bgcolor=\"#DDDDDD\" bordercolor=\"#615959\" height=\"20px\">";
@@ -87,7 +87,6 @@ echo "</div>";
 
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
 <script type="text/javascript" charset="utf-8">
-
 
 function update_clock() {
   $.post('ajax/get_current_day_time.php', RetSWT);

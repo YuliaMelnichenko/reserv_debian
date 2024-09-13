@@ -256,7 +256,7 @@ for ( $userNum = 0; $userNum < $userCnt; $userNum ++ ){
    $stats = get_stat_set_by_range_full_ex( $rep_start_date, $rep_stop_date, $userID, $userRate );
 
   $usersInfo[7][$userNum] = $stats;
-}    
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 $rowsContents = get_report_body_row_contents( $usersInfo );
