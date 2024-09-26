@@ -62,7 +62,7 @@ function change_out_time ( $out_value, $currentTime ) {
   $content = "";
 
   if ( $out_value == "0000-00-00 00:00:00" ) {
-    if ( $currentTime >= "09:00:00" && $currentTime < "11:30:00" ) {
+    if ( $currentTime >= "09:00:00" && $currentTime < "19:30:00" ) {
       $content .= "<td class=\"nopadding_s\">";
       $content .= "<h5 class=\"change_time\">Добавить время ухода?</h5>";
       $content .= "</td>";

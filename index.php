@@ -12,16 +12,20 @@ include_once "/var/www/tori/start.php";
 
 var timerIdSessValid=setInterval( "check_sess()", 3000 );
 
+
 function check_sess(){
+
   $.post('ajax/check_session_valid.php', RetSWT);
   function RetSWT(dat) {
-    if ( dat == 0 ){
-      window.location=self.location;
-    }
+    // if ( dat == 0 ){
+      console.log(dat);
+      // window.location=self.location;
+    // }
   }
 }
 
 function check_day_change(){
+
   document.getElementById('layer_div').style.display='none';
   document.getElementById('layer_question_div').style.display='none';
 
@@ -33,6 +37,7 @@ function check_day_change(){
       document.getElementById('layer_question_div').style.display='none';
     }
   }
+
 }
 
 var timerIdDayChange=setInterval( "check_day_change()", 3000 );
@@ -598,6 +603,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
         echo "</tr>";
       echo "</table>";
 
+
       echo "<div id=\"delay_explanation_buildin\">";
       echo  "</div>";
 
@@ -804,6 +810,7 @@ get_time_registration_div_content();
 
 function update_clock()
 {
+
   $.post('ajax/get_current_day_time.php', RetSWT);                           
   function RetSWT(dat) 
   {
@@ -812,6 +819,7 @@ function update_clock()
       document.getElementById('dateTimeFieldNav').innerHTML = dat;
     }
   }
+
 }
 
 var timerId=setInterval( "update_clock()", 10000 );

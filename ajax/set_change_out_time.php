@@ -15,11 +15,13 @@ mysqli_set_charset($link, "utf8");
 
 if ($dayNumber == "1") {
   $res = mysqli_query($link, "UPDATE visiting SET out_dt = '$new_out_time', state = 0, changes = 1 WHERE user_id = '$userID' and DATE(in_dt) = DATE(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY))");
-  $merr=mysqli_error($link);
+  $log = mysqli_query($link, "INSERT INTO logging_changes (USER_ID, DATE_CHANGE, CHANGES) VALUES ('$userID', NOW(), '$new_out_time') ");
+  $merr = mysqli_error($link);
 }
 else {
   $res = mysqli_query($link, "UPDATE visiting SET out_dt = '$new_out_time', state = 0, changes = 1 WHERE user_id = '$userID' and DATE(in_dt) = DATE(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY))");
-  $merr=mysqli_error($link);
+  $log = mysqli_query($link, "INSERT INTO logging_changes (USER_ID, DATE_CHANGE, CHANGES) VALUES ('$userID', NOW(), '$new_out_time')");
+  $merr = mysqli_error($link);
 }
 
 if ( !$res ) 

@@ -84,6 +84,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
     
     $counterStr = "";
     $delayNotifCountStr = "";
+    $pauseNotifCountStr = "";
 
     if ( $notifCount > 0 ){ $counterStr = "($notifCount)"; }
     if ( $delayNotifCount > 0 ){ $delayNotifCountStr = "($delayNotifCount)"; }
