@@ -28,11 +28,11 @@ if ( isset( $_POST['mode'] ) AND $_POST['mode'] == 1 )
 
 if ( $mode == 0 )
 {
-  $query0 = mysqli_query($link, "SELECT ID, STATUS FROM Delays where date = '$currentDate' and userID = '$userID_'"); 
+  $query0 = mysqli_query($link, "SELECT ID, STATUS FROM Delays WHERE date = '$currentDate' AND userID = '$userID_'"); 
 }
 else
 {
-  $query0 = mysqli_query($link, "SELECT ID, STATUS FROM Delays where ID = '$delayID' and userID = '$userID_'"); 
+  $query0 = mysqli_query($link, "SELECT ID, STATUS FROM Delays WHERE ID = '$delayID' AND userID = '$userID_'"); 
 }
 
 $insertMode = 1;
@@ -66,7 +66,7 @@ if ( $insertMode == 1 )
 mysqli_set_charset($link, "utf8");
 if ( $insertMode == 1 )
 {
-  $query = mysqli_query($link, "insert into Delays VALUES ('$newID', '$currentDate', '$ss_delay_duration', '$userID_', '$superuserID', '$delayExplanation', '-1', '-1', '', '0')");
+  $query = mysqli_query($link, "INSERT INTO Delays VALUES ('$newID', '$currentDate', '$ss_delay_duration', '$userID_', '$superuserID', '$delayExplanation', '-1', '-1', '', '0')");
   $merr=mysqli_error($link);
   if (!$query)
   {
@@ -84,11 +84,11 @@ else
   {
     if ( $mode == 0 )
     { 
-      $query = mysqli_query($link, "update Delays set supervisorID = '$superuserID', explaneDesk = '$delayExplanation' where id = '$newID'");
+      $query = mysqli_query($link, "UPDATE Delays SET supervisorID = '$superuserID', explaneDesk = '$delayExplanation' WHERE id = '$newID'");
     }
     else
     {
-      $query = mysqli_query($link, "update Delays set supervisorID = '$superuserID', explaneDesk = '$delayExplanation' where ID = '$delayID' and userID = '$userID_'"); 
+      $query = mysqli_query($link, "UPDATE Delays SET supervisorID = '$superuserID', explaneDesk = '$delayExplanation' WHERE ID = '$delayID' AND userID = '$userID_'"); 
     }
 
     $merr=mysqli_error($link);

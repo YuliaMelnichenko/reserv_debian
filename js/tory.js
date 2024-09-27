@@ -610,6 +610,9 @@ function accept_delay_for_user( addID, suDesc, penaltyID, penDate, userID )
     document.getElementById('penUserIDTempVal').value = userID;
     document.getElementById('acceptTempVal').value = 1;  
   }
+  else {
+    alert("WArning");
+  }
 }
 
 function refuse_delay_for_user( addID, suDesc, penaltyID, penDate, userID )
@@ -623,6 +626,9 @@ function refuse_delay_for_user( addID, suDesc, penaltyID, penDate, userID )
     document.getElementById('penDateTempVal').value = penDate;
     document.getElementById('penUserIDTempVal').value = userID;
     document.getElementById('acceptTempVal').value = -1;
+  }
+  else {
+    alert("Warning");
   }
 }
 

@@ -26,7 +26,7 @@ if ( $ACCEPTMODE == -1 )
   if ( $PENALTYID == -1 )
   {
     $newPenID = get_penalty_id();  
-    $query = mysqli_query($link, "insert into Penalty values ( '$PENALTYDATE', '$newPenID', '$getUserID', '$acceptorID', '$DESC' )" );
+    $query = mysqli_query($link, "INSERT INTO Penalty VALUES ( '$PENALTYDATE', '$newPenID', '$getUserID', '$acceptorID', '$DESC' )" );
     $merr=mysqli_error($link);
     if ( !$query ) 
     {
@@ -36,7 +36,7 @@ if ( $ACCEPTMODE == -1 )
   }
   else
   {
-    $query = mysqli_query($link, "update Penalty set date = '$PENALTYDATE', supervisorID = '$acceptorID', reason = '$DESC' where ID = '$PENALTYID'" );
+    $query = mysqli_query($link, "UPDATE Penalty SET date = '$PENALTYDATE', supervisorID = '$acceptorID', reason = '$DESC' WHERE ID = '$PENALTYID'" );
     $merr=mysqli_error($link);
     if ( !$query ) 
     {
@@ -50,7 +50,7 @@ else
 {
   if ( $PENALTYID != -1 )
   {
-    $query = mysqli_query($link, "delete from Penalty where ID = '$PENALTYID' ");
+    $query = mysqli_query($link, "DELETE FROM Penalty WHERE ID = '$PENALTYID' ");
     $merr=mysqli_error($link);
     if ( !$query ) 
     {

@@ -271,7 +271,7 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
  
   $query = mysqli_query($link, "SELECT distinct a.date, a.supervisorID, a.reason, b.duration 
                         FROM Penalty a join Delays b on a.id = b.penaltyID 
-                        where a.date >= '$startDate' and a.date <= '$stopDate' and a.userID = '$userID'"); 
+                        WHERE a.date >= '$startDate' AND a.date <= '$stopDate' AND a.userID = '$userID'"); 
 
   $merr=mysqli_error($link);
   if ( !$query ) 

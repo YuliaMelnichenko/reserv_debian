@@ -784,7 +784,7 @@ h6.small_help_2 {
   flex-direction: column;
 }
 
-.delay_approvement_desc {
+#delay_approvement_desc {
   position: absolute;
   width: 320px;
   height: 145px;

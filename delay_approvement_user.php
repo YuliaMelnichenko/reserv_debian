@@ -38,6 +38,7 @@ session_start();
 
 ////////////////////////////////////////////////////////
 include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/php_tori/connect.php";
 save_last_location( "delay_approvement.php" );
 auth();
 ////////////////////////////////////////////////////////
@@ -86,7 +87,7 @@ $userName = get_user_name_by_id($userID);
 
 $delayTimes = Array();
 
-$delayTimes = get_all_delay_info_by_user( $userID, $user_defaultStartTime, $allowedDelay );
+$delayTimes = get_all_delay_info_by_user( $userID, $user_defaultStartTime, $user_allowedDelay );
 
       if ( count( $delayTimes ) == 0 ){
         echo "<table id=\"add_time_approvement_table\" border=0>";
@@ -263,7 +264,7 @@ echo "<table id=\"delay_approvement_table\" border=0>";
   echo "</tr>";
 echo "</table>";
       
-      echo "<div class=\"delay_approvement_desc\">";
+      echo "<div id=\"delay_approvement_desc\">";
         echo "<div class=\"comment\">";
           echo "<h5 class=\"bigbig\">Комментарий</h5>";
         echo "</div>";

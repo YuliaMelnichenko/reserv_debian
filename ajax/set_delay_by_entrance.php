@@ -24,7 +24,7 @@ $currentDate = $currentDateArr[2];
 
 mysqli_set_charset($link, "utf8");
 
-$query = mysqli_query($link, "select * from Delays where userID = '$userId' and date = '$currentDate'");
+$query = mysqli_query($link, "SELECT * FROM Delays WHERE userID = '$userId' AND date = '$currentDate'");
 $merr=mysqli_error($link);
 if ( !$query ) 
 {
@@ -49,7 +49,7 @@ if ( $vn == 0 )
     $newID = $row[0] + 1;
   }
 
-  $query = mysqli_query($link, "insert into Delays VALUES ('$newID', '$currentDate', '$ss_delay_duration', '$userId', '-1', 'Без объяснения', '-1', '-1', '', '0')");
+  $query = mysqli_query($link, "INSERT INTO Delays VALUES ('$newID', '$currentDate', '$ss_delay_duration', '$userId', '-1', 'Без объяснения', '-1', '-1', '', '0')");
   $merr=mysqli_error($link);
   if (!$query)
   {

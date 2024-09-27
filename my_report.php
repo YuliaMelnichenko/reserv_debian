@@ -211,7 +211,7 @@ echo "<div id=\"report_container\">";
         echo "<option value=\"7\" $selectedArr[6]>Задать вручную</option>";
       echo "</select>";
     echo "</div>";
-    echo "<div>";
+    echo "<div id=\"\">";
       echo "<h4 class=\"small\">Выбранный отчетный период: ".$_SESSION['rep_start_date']." - ".$_SESSION['rep_stop_date'];
         echo "<div id=\"manual_rep\" style=\"display:none;\">";
 
