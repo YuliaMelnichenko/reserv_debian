@@ -162,6 +162,7 @@ h4 {
 }
 
 h4.small {
+  margin: 0 0 3px 0;
   padding: 0 5px 0 10px;
   font-family: Arial, sans;
   font-size: 13px;
@@ -1486,6 +1487,7 @@ report_window_head_single {
 }
 
 #manual_rep {
+  justify-content: center;
   position: static;
   display: none;
 }
@@ -2742,4 +2744,9 @@ h5.activ_time {
   background-color: #f79398;
   border: 1px solid #888888; 
   cursor: pointer;
+}
+
+#select_reporting_period {
+  display: flex;
+  flex-direction: column;
 }

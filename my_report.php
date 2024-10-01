@@ -27,7 +27,7 @@ function set_period(){
   var stop_report_date = document.getElementById('report_stop_date').value;
 
   if ( report_type == 7 ){
-    document.getElementById('manual_rep').style.display='block';
+    document.getElementById('manual_rep').style.display='flex';
   }
   else{
     document.getElementById('manual_rep').style.display='none';
@@ -35,7 +35,7 @@ function set_period(){
     function RetSWT(dat) {
       window.location=self.location;
       if ( report_type == 7 ){
-        document.getElementById('manual_rep').style.display='block';
+        document.getElementById('manual_rep').style.display='flex';
       }
     }
   }
@@ -107,7 +107,7 @@ function show_selectors(){
   var report_type = document.getElementById('report_type').value;
 
   if ( report_type == 7 ){
-    document.getElementById('manual_rep').style.display='block';
+    document.getElementById('manual_rep').style.display='flex';
   }
   else{
     document.getElementById('manual_rep').style.display='none';
@@ -116,7 +116,7 @@ function show_selectors(){
 </script>
 
 <?php
-session_start();
+// session_start();
 
 ////////////////////////////////////////////////////////
 include_once "/var/www/tori/funcs.php";
@@ -211,8 +211,8 @@ echo "<div id=\"report_container\">";
         echo "<option value=\"7\" $selectedArr[6]>Задать вручную</option>";
       echo "</select>";
     echo "</div>";
-    echo "<div id=\"\">";
-      echo "<h4 class=\"small\">Выбранный отчетный период: ".$_SESSION['rep_start_date']." - ".$_SESSION['rep_stop_date'];
+    echo "<div id=\"select_reporting_period\">";
+      echo "<h4 class=\"small\">Выбранный отчетный период: ".$_SESSION['rep_start_date']." - ".$_SESSION['rep_stop_date'] ."</h4>";
         echo "<div id=\"manual_rep\" style=\"display:none;\">";
 
           if ( isset( $_SESSION['rep_start_date'] ) ){ 
@@ -228,9 +228,9 @@ echo "<div id=\"report_container\">";
             $manRepStop = $currDate; 
           }
 
-          echo "<input id=\"report_start_date\" align=\"center\" style=\"width:70px;\" type=\"text\" value=\"$manRepStart\">";
-          echo " - <input id=\"report_stop_date\" align=\"center\" style=\"width:70px;\" type=\"text\" value=\"$manRepStop\">";
-          echo "  <button class=\"button_style\" style=\"font-size: 90%; width:100px; height:21px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"manual_report_set();\" name=\"nextBtn\">Показать</button>";
+          echo "<input id=\"report_start_date\" align=\"center\" style=\"width:110px;\" type=\"date\" value=\"$manRepStart\" max=\"2060-12-31\">";
+          echo " - <input id=\"report_stop_date\" align=\"center\" style=\"width:110px;\" type=\"date\" value=\"$manRepStop\" max=\"2060-12-31\">";
+          echo "  <button class=\"button_style\" style=\"font-size: 90%; width:100px; height:21px; background-color:#f8d888; border:1px solid #888888; margin-left:3px\" onclick=\"manual_report_set();\" name=\"nextBtn\">Показать</button>";
         echo "</div>";
     echo "</div>";
 echo "</div>";

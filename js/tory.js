@@ -764,11 +764,9 @@ function add_time_set_start()
   }  	
 }
 
-function accept_refuse_add_time_for_user_final( addID, suDesc, accept )
-{
+function accept_refuse_add_time_for_user_final( addID, suDesc, accept ) {
   $.post('ajax/set_add_times_info.php', { addID: addID, suDesc: suDesc, accept: accept }, RetSWT1);                           
-  function RetSWT1(dat1) 
-  {
+  function RetSWT1(dat1) {
     show_add_times_by_user( -1 );
     document.getElementById('add_time_approvement_desc').style.display='none';
   }

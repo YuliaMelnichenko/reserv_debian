@@ -598,13 +598,13 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
 
   $dirID = 0;
 
-  session_start();
+  // session_start();
 
   if (isset($_SESSION["ss_id"])) {
     $dirID = $_SESSION["ss_id"];
     if ($dirID != 1) {
       if ( $svID !=-1 ){
-        $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID='$svID' and ( TYPE=0 or TYPE=-1 )"); 
+        $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID='$svID' and ( TYPE=0 or TYPE=-1 )");
       }
       else{
         $query0 = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE TYPE=0 or TYPE=-1"); 
@@ -627,10 +627,10 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
     }
     else{
       if ( $svID !=-1 ){
-        $query0 = mysqli_query($link, "SELECT e.id, FROM GROUPS g INNER JOIN employees e ON g.USERID = e.id WHERE g.SUPERVISORID = '$svID' AND (g.TYPE = 0 OR TYPE=-1) ORDER BY e.surname"); 
+        $query0 = mysqli_query($link, "SELECT e.id FROM GROUPS g INNER JOIN employees e ON g.USERID = e.id WHERE g.SUPERVISORID = '$svID' AND (g.TYPE = 0 OR TYPE=-1) ORDER BY e.surname");
       }
       else{
-        $query0 = mysqli_query($link, "SELECT e.id, FROM GROUPS g INNER JOIN employees e ON g.USERID = e.id WHERE g.TYPE = 0 OR TYPE=-1 ORDER BY e.surname"); 
+        $query0 = mysqli_query($link, "SELECT e.id FROM GROUPS g INNER JOIN employees e ON g.USERID = e.id WHERE g.TYPE = 0 OR TYPE=-1 ORDER BY e.surname");
       }
       $merr=mysqli_error($link);
       if ( !$query0 ) {
