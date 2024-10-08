@@ -17,8 +17,8 @@ if ( isset( $_POST['mode'] ) )
   $userID = $_POST['userId'];
 }
 
-include "/var/www/tori/php_tori/connect.php";
-include_once "/var/www/tori/funcs.php";
+include "/var/www/tori/nv/php_tori/connect.php";
+include_once "/var/www/tori/nv/funcs.php";
 
 mysqli_set_charset($link, "utf8");
 

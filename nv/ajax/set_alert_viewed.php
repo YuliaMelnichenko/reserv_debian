@@ -7,7 +7,7 @@ session_start();
                 
 $ID = $_POST['alertID'];
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/nv/php_tori/connect.php";
 
 $query = mysqli_query($link, "UPDATE ALERTS SET VIEWED = '1' WHERE ID = '$ID'"); 
 

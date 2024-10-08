@@ -15,8 +15,8 @@ if ( isset($_POST['userID']) AND isset($_POST['inTime']) )
   $newEatStartTime = "";
   $newEatStopTime = "";
 
-  include_once "/var/www/tori/funcs.php";
-  include_once "/var/www/tori/php_tori/connect.php";
+  include_once "/var/www/tori/nv/funcs.php";
+  include_once "/var/www/tori/nv/php_tori/connect.php";
 
   $query = mysqli_query($link, "SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = '$currentDate' and user_id = '$userID'"); 
   $merr=mysqli_error($link);

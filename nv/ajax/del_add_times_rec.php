@@ -7,7 +7,7 @@ session_start();
                 
 $delID = $_POST['addID'];
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/nv/php_tori/connect.php";
 
 $query = mysqli_query($link, "DELETE FROM ADD_TIME WHERE ID = '$delID'"); 
 

@@ -40,7 +40,7 @@ else
 }
 
 
-include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/nv/funcs.php";
 
 
 $err = array();
@@ -57,7 +57,7 @@ $day_off = array();
 
 $cont_key = 0; 
 	
-include_once "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/nv/php_tori/connect.php";
 
   
   $query = mysqli_query($link, "SELECT * FROM work_dayoff order by date asc"); 

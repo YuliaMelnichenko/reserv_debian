@@ -8,7 +8,7 @@ session_start();
 $userID = $_SESSION['ss_id']; 
 $ss_visiting_ID = $_SESSION['ss_visiting_ID'];
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/nv/php_tori/connect.php";
 
 $query = mysqli_query($link, "select take_pause from visiting where id = '$ss_visiting_ID' and user_id = '$userID'");
 $merr=mysqli_error($link);

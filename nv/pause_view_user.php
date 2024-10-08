@@ -44,7 +44,7 @@ session_start();
 
 ////////////////////////////////////////////////////////
 
-include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/nv/funcs.php";
 
 save_last_location( "delay_approvement.php" );
 auth();
@@ -63,14 +63,14 @@ if ( $uidValid == 0 )
 
 echo "<div align=\"left\">";
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/nv/php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
 
 echo "<table border=0>";
   echo "<tr>";
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
-      include_once "/var/www/tori/navigate.php";
+      include_once "/var/www/tori/nv/navigate.php";
     echo "</td>"; 
 
       $wholeWidth = 688;

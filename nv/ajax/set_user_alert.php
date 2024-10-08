@@ -7,8 +7,8 @@ session_start();
 
 if ( isset($_POST['userID']) AND isset($_POST['messageMode']) )
 {
-  include_once "/var/www/tori/funcs.php";
-  include_once "/var/www/tori/php_tori/connect.php";
+  include_once "/var/www/tori/nv/funcs.php";
+  include_once "/var/www/tori/nv/php_tori/connect.php";
 
   $userID = (int)($_POST['userID']);
   $messageMode = (int)($_POST['messageMode']);

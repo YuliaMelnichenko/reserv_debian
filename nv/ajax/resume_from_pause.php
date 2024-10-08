@@ -10,8 +10,8 @@ $ss_visiting_ID = $_SESSION['ss_visiting_ID'];
 
 $pauseID = $_POST['pauseID'];
 
-include_once "/var/www/tori/funcs.php";
-include_once "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/nv/funcs.php";
+include_once "/var/www/tori/nv/php_tori/connect.php";
 
 $dtResult = get_current_datetime_in_timezone();
 

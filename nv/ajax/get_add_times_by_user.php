@@ -5,8 +5,8 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
 
-include_once "/var/www/tori/funcs.php";
-include_once "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/nv/funcs.php";
+include_once "/var/www/tori/nv/php_tori/connect.php";
 
 $_SESSION['add_time_page_mode'] = 2;
 $add_time_journal_deep = $_SESSION['add_time_journal_deep'];

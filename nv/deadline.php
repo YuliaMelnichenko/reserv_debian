@@ -245,8 +245,8 @@ echo "<div align=\"left\">";
 
 
 ////////////////////////////////////////////////////////
-include_once  "/var/www/tori/funcs.php";
-include  "/var/www/tori/short_stat.php";
+include_once "/var/www/tori/nv/funcs.php";
+include "/var/www/tori/nv/short_stat.php";
 
 $ip = $_SERVER['REMOTE_ADDR'];
 
@@ -270,10 +270,10 @@ auth();
 
 ////////////////////////////////////////////////////////
 
-  include_once  "/var/www/tori/start.php";
+  include_once "/var/www/tori/nv/start.php";
 
 
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
   if ( isset( $_SESSION['ss_id'] ) )
   { 
     $user_id = $_SESSION['ss_id'];
@@ -292,7 +292,7 @@ auth();
     echo "<tr>";
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 120>";
 
-    include_once  "/var/www/tori/navigate.php";
+    include_once "/var/www/tori/nv/navigate.php";
 
     echo "</td>";               
 
@@ -480,7 +480,7 @@ auth();
     echo "</table>";
   }
   echo "<font size=\"2\" color=\"#444444\" face=\"Arial\">";
-    include_once  "/var/www/tori/end.php";
+    include_once "/var/www/tori/nv/end.php";
   echo "</font>";
 echo "</div>";
 ?>

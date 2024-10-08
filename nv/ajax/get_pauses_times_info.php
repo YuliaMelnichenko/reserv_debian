@@ -8,8 +8,8 @@ session_start();
 $userID_ = $_SESSION['ss_id']; 
 $currentDate = date('Y-m-d');
 
-include_once "/var/www/tori/funcs.php";
-include_once "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/nv/funcs.php";
+include_once "/var/www/tori/nv/php_tori/connect.php";
 
 $startDate = $_POST['startDate'];
 $stopDate = $_POST['stopDate'];

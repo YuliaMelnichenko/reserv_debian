@@ -59,7 +59,7 @@ function ta_delete( delID )
 session_start();
 
 ////////////////////////////////////////////////////////
-include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/nv/funcs.php";
 save_last_location( "time_approvement.php" );
 auth();
 ////////////////////////////////////////////////////////
@@ -68,14 +68,14 @@ $SUID = $_SESSION['ss_id'];
 
 echo "<div align=\"left\">";
 
-include "/var/www/tori/php_tori/connect.php";
+include "/var/www/tori/nv/php_tori/connect.php";
 
   mysqli_set_charset($link, "utf8");
 
   echo "<table>";
     echo "<tr>";
       echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
-        include_once "/var/www/tori/navigate.php";
+        include_once "/var/www/tori/nv/navigate.php";
       echo "</td>";               
 
       $wholeWidth = 835;

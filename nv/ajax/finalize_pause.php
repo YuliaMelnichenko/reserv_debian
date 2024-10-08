@@ -10,7 +10,7 @@ $currentDate = date('Y-m-d');
 $currentTime = date("H:i:s");
 $pauseID = $_POST['pauseID'];
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/nv/php_tori/connect.php";
 
 $query = mysqli_query($link, "UPDATE visiting SET take_pause = '0' WHERE date = '$currentDate' AND user_id = '$userID'");
 $merr=mysqli_error($link);

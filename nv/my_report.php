@@ -3,7 +3,7 @@ date_default_timezone_set("Asia/Novosibirsk");
 session_start();
 ob_start();
 
-include_once "/var/www/tori/start.php";
+include_once "/var/www/tori/nv/start.php";
 
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -197,8 +197,8 @@ function RetSWT4(dat4)
 // session_start();
 
 ////////////////////////////////////////////////////////
-include_once "/var/www/tori/funcs.php";
-include_once "/var/www/tori/funcs_rep.php";
+include_once "/var/www/tori/nv/funcs.php";
+include_once "/var/www/tori/nv/funcs_rep.php";
 
 save_last_location( "my_report.php" );
 
@@ -237,7 +237,7 @@ echo "<div align=\"left\">";
       if ( $directorView == 0 )
       {
       	echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
-      include_once  "/var/www/tori/navigate.php";
+      include_once "/var/www/tori/nv/navigate.php";
       }
       else
       {
@@ -506,7 +506,7 @@ $rep_start_stop_date_mode = $_SESSION['rep_start_stop_date_mode'];
   echo "</table>";
 
   echo "<font size=\"2\" color=\"#444444\" face=\"Arial\">";
-include_once "/var/www/tori/end.php";
+include_once "/var/www/tori/nv/end.php";
   echo "</font>"; 
 
 echo "</div>";

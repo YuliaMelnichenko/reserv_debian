@@ -11,7 +11,7 @@ $inTime = $_POST['inTime'];
 $user_defaultStartTime = 0;
 $user_allowedDelay = 0;
 
-include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/nv/funcs.php";
 
 get_user_defStartTime_and_allowedDelay( $userID, $user_defaultStartTime, $user_allowedDelay );
 

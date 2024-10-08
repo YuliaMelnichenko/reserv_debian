@@ -5,7 +5,7 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
 
-include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/nv/funcs.php";
 
 $userID_ = $_SESSION['ss_id']; 
 
@@ -109,7 +109,7 @@ for( $idx = 0; $idx < count( $stats[0] ); $idx ++ )
   echo "</tr>";
 }
 
-include "/var/www/tori/php_tori/connect.php";
+include "/var/www/tori/nv/php_tori/connect.php";
 
 $currentDate = date('Y-m-d');           
 

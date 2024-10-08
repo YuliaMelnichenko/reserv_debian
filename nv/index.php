@@ -3,7 +3,7 @@ date_default_timezone_set("Asia/Novosibirsk");
 session_start();
 ob_start();
 
-include_once "/var/www/tori/start.php";
+include_once "/var/www/tori/nv/start.php";
 
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -351,8 +351,8 @@ echo "<body onload=\"check_day_change();\" bgcolor=\"#ffffff\" >";
 
 // session_start();
 
-include_once "/var/www/tori/funcs.php";
-include "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/nv/funcs.php";
+include "/var/www/tori/nv/php_tori/connect.php";
 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 $user_dayTransitionTime = $_SESSION['$ss_dayTransitionTime'];
@@ -428,7 +428,7 @@ echo "<div align=\"left\">";
 
 
 ////////////////////////////////////////////////////////
-include_once  "/var/www/tori/funcs.php";
+include_once "/var/www/tori/nv/funcs.php";
 //include_once "short_stat.php";
 
 $ip = $_SERVER['REMOTE_ADDR'];
@@ -463,7 +463,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
   ///***include_once "start.php";
 
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
   if ( isset( $_SESSION['ss_id'] ) )
   { 
     $user_id = $_SESSION['ss_id'];
@@ -501,7 +501,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     echo "<tr>";
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
 
-    include_once  "/var/www/tori/navigate.php";
+    include_once "/var/www/tori/nv/navigate.php";
 
     echo "</td>";               
 
@@ -728,7 +728,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
   }
   echo "<font size=\"2\" color=\"#444444\" face=\"Arial\">";
-    include_once  "/var/www/tori/end.php";
+    include_once "/var/www/tori/nv/end.php";
   echo "</font>";
 echo "</div>";
 

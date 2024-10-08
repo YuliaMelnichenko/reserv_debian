@@ -5,8 +5,8 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
 
-include_once "/var/www/tori/funcs.php";
-include_once "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/nv/funcs.php";
+include_once "/var/www/tori/nv/php_tori/connect.php";
 $userID_ = $_SESSION['ss_id']; 
 
 $paramArr = get_dbsetup_param( 'add_time_journal_deep_day' );

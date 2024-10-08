@@ -10,8 +10,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
 {
   $userDayNorm = ( $userRate / 5 ) * 60 * 60;
 
-  include "/var/www/tori/php_tori/connect.php";
-  include_once "/var/www/tori/funcs.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
+  include_once "/var/www/tori/nv/funcs.php";
 
   $days_dates_set = array();
   $days_dates_start_set = array();
@@ -801,7 +801,7 @@ for ( $idx = 0; $idx < count( $days_work_start ); $idx ++ )
 
 function get_report_body_row_contents( $usersInfo )
 {
-  include_once "/var/www/tori/funcs.php";
+  include_once "/var/www/tori/nv/funcs.php";
 
   $currentDateArr = get_current_datetime_in_timezone();
   $currDate = $currentDateArr[2];

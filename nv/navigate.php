@@ -18,7 +18,7 @@ function show_alerts()
 
 <?php
 // session_start();
-include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/nv/funcs.php";
 
 $needToShow = 1;
 

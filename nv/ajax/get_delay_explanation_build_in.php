@@ -5,13 +5,13 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
 
-include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/nv/funcs.php";
 
 $userID_ = $_SESSION['ss_id']; 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
-include_once "/var/www/tori/php_tori/connect.php";
-include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/nv/php_tori/connect.php";
+include_once "/var/www/tori/nv/funcs.php";
 
 $newID = 0;
 

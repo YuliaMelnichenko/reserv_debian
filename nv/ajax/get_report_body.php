@@ -1,4 +1,4 @@
-<?
+<?php
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -14,7 +14,7 @@ $userDefaultStartHour = $usersInfo[4][$userNum];
 $userDefaultStartMinute = $usersInfo[5][$userNum];	
 $userAllowedDelay = $usersInfo[6][$userNum];
 
-include_once "../funcs.php";
+include_once "/var/www/tori/nv/funcs.php";
 
 $currDate = date('Y-m-d');
 
@@ -153,6 +153,3 @@ for ( $idx = count( $rowsContent ); $idx >= 0; $idx -- )
 echo "</table>";
 
 ?>
-
-
-                                                                         

@@ -1,6 +1,6 @@
 <?php
 
-include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/nv/funcs.php";
 function get_current_datetime_in_timezone()
 {
   // session_start();
@@ -360,7 +360,7 @@ function auth()
 
 function get_dbsetup_param( $paramName )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   mysqli_set_charset($link, "utf8");     
 
@@ -390,7 +390,7 @@ function get_dbsetup_param( $paramName )
 
 function get_sv_name_by_userid( $user_id )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $query0 = mysqli_query($link, "SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 and USERID='$user_id'"); 
 
@@ -437,7 +437,7 @@ function get_sv_name_by_userid( $user_id )
 
 function get_group_user_IDs_by_svID( $svID, $mode )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $userIDs=array();
 
@@ -476,7 +476,7 @@ function get_group_user_IDs_by_svID( $svID, $mode )
 
 function get_group_user_info_by_svID( $svID, $mode )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $userIDs=array();
 
@@ -584,7 +584,7 @@ function get_group_user_info_by_svID( $svID, $mode )
 
 function get_group_user_IDs_by_svID_for_report( $svID )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $userIDs=array();
 
@@ -623,7 +623,7 @@ function get_group_user_IDs_by_svID_for_report( $svID )
 
 function get_group_user_info_by_svID_for_report_ex( $svID )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $userIDs=array();
 
@@ -725,7 +725,7 @@ function get_group_user_info_by_svID_for_report_ex( $svID )
 
 function get_name_by_userid( $user_id )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
   $query = mysqli_query($link, "SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID='$user_id'"); 
   $merr=mysqli_error($link);
   if ( !$query ) 
@@ -964,7 +964,7 @@ function GetMonthNameEx( $offset )
 function GetHourNormByMonth( $date, $rate )
 {
 
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $duration = 0;
 
@@ -1013,7 +1013,7 @@ function DayDec( $day )
 
 function am_i_superuser( $userID )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
   $query = mysqli_query($link, "SELECT * FROM GROUPS WHERE SUPERVISORID='$userID' and TYPE <> -1"); 
   $merr = mysqli_error($link);
   if ( !$query ) 
@@ -1033,7 +1033,7 @@ function am_i_superuser( $userID )
 
 function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotificationCount, &$refusedNotificationCount, &$deletedNotificationCount, &$newNotificationCount )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $notificationCount = 0;
   $newNotificationCount = 0;
@@ -1098,7 +1098,7 @@ function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotifi
 
 function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNotificationCount )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
   $notificationCount = 0;
   $currentDayNotificationCount = 0;
   $currentDate = date('Y-m-d');
@@ -1130,7 +1130,7 @@ function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNoti
 
 function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNotificationCount, &$refusedNotificationCount, &$deletedNotificationCount, &$newNotificationCount )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
   
   $notificationCount = 0;
   $newNotificationCount = 0;
@@ -1181,7 +1181,7 @@ function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNot
 
 function get_notification_count( $user_id )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
@@ -1205,7 +1205,7 @@ function get_notification_count( $user_id )
 
 function get_delay_notification_count( $user_id )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
@@ -1240,7 +1240,7 @@ function get_delay_notification_count( $user_id )
 
 function get_penalty_id()
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $query0 = mysqli_query($link, "SELECT max(ID) FROM Penalty"); 
 
@@ -1674,7 +1674,7 @@ function is_weakend( $date )
 
 function is_workday( $date )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
     
   $query = mysqli_query($link, "SELECT * FROM work_dayoff where date = '$date' and type = 1"); 
   $merr=mysqli_error($link);
@@ -1709,7 +1709,7 @@ function currentWorcDayDurationHours()
 
 function is_holiday( $date )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $query = mysqli_query($link, "SELECT * FROM work_dayoff where date = '$date' and type = 0"); 
   $merr=mysqli_error($link);
@@ -1734,7 +1734,7 @@ function get_workdays_holidays_bay_range( $startDate, $stopDate )
 {
   $dates = array();
   $types = array();
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $query = mysqli_query($link, "SELECT distinct DATE, TYPE FROM work_dayoff where date >= '$startDate' and date <= '$stopDate'"); 
   $merr=mysqli_error($link);
@@ -1763,7 +1763,7 @@ function get_holidays()
 {
   $holidays = array();
   $index = 1;
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $query = mysqli_query($link, "SELECT DATE FROM work_dayoff where type = 0"); 
   $merr=mysqli_error($link);
@@ -1786,7 +1786,7 @@ function get_work_day()
 {
   $workDays = array();
   $index = 1;
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $query = mysqli_query($link, "SELECT DATE FROM work_dayoff where type = 1"); 
   $merr=mysqli_error($link);
@@ -1968,7 +1968,7 @@ function get_user_days( $daysRange, $userID )
   $newDaysRange = array();
   $idx = 1;
   
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
   $query = mysqli_query($link, "SELECT date FROM visiting where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
 
   $merr=mysqli_error($link);
@@ -1994,7 +1994,7 @@ function get_users_current_day_in_time_by_superuser( $SUID )
 
   $currentDate = Date("Y-m-d");
 
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $query = mysqli_query($link, "SELECT v.user_id, v.in_time, v.adj FROM visiting v inner join employees e on v.user_id = e.id where date = '$currentDate' order by e.SURNAME"); 
 
@@ -2040,7 +2040,7 @@ function get_days_with_delay( $daysRange, $userID, $user_defaultStartTime, $user
   $delayDaysRange = array();
   $idx = 1;
   
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
   $query = mysqli_query($link, "SELECT date, in_time FROM visiting where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
 
   $merr=mysqli_error($link);
@@ -2073,7 +2073,7 @@ function get_disease_days_by_user_id( $daysRange, $userID )
   $disease = array();
   $idx = 1;
   
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
   $query = mysqli_query($link, "SELECT date FROM Disease where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
 
   $merr=mysqli_error($link);
@@ -2101,7 +2101,7 @@ function get_business_trip_days_by_user_id( $daysRange, $userID )
   $businessTrip = array();
   $idx = 1;
   
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
   $query = mysqli_query($link, "SELECT date FROM Business_trip where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
 
   $merr=mysqli_error($link);
@@ -2182,7 +2182,7 @@ function get_delays_by_user_days( $userDays, $userID, $user_defaultStartTime, $u
   $Delays = array();
   $idx = 1;
   
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
   $query = mysqli_query($link, "SELECT date, in_time FROM visiting where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
 
   $merr=mysqli_error($link);
@@ -2250,7 +2250,7 @@ function get_penalties( $userDays, $userID )
 
   $penalties = array();
   $idx = 1;
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $query = mysqli_query($link, "SELECT date from Penalty where date >= '$minDate' and date <= '$maxDate' and userID = '$userID'"); 
   $merr=mysqli_error($link);
@@ -2395,7 +2395,7 @@ function get_penalties_by_range_and_user_id( $startDate, $stopDate, $userID, $us
 
 function get_user_rate( $userID )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $rate = 40;
 
@@ -2420,7 +2420,7 @@ function get_user_rate( $userID )
 
 function get_norm_by_range_sec( $startDate, $stopDate, $userID )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $rate = 40;
 
@@ -2453,7 +2453,7 @@ function get_norm_by_range_sec( $startDate, $stopDate, $userID )
 
 function get_current_day_duration_sec( $userID, $defaultStartTime )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $inTime = 0;
 
@@ -2493,7 +2493,7 @@ function get_norm_time_by_current_day_sec( $userID, $user_defaultStartHour, $use
 
 function is_there_add_time_by_alert( $Date, $userID )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $query = mysqli_query($link, "SELECT * from ADD_TIME where STARTDATE = '$Date' and USERID = '$userID' and BYALERT = 1"); 
   $merr=mysqli_error($link);
@@ -2514,7 +2514,7 @@ function is_there_add_time_by_alert( $Date, $userID )
 
 function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTime, $user_allowedDelay )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $statArr = array();
   $holidays = array();
@@ -2686,7 +2686,7 @@ function is_there_additional_alerts( $userID )
 {
   $currentDate = date('Y-m-d');           
 
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $query = mysqli_query($link, "SELECT * FROM ALERTS where DATE = '$currentDate' and USERID = '$userID' and VIEWED = '0'"); 
 
@@ -2978,7 +2978,7 @@ function get_day_duration_by_times( $inTime, $outTime, $eatStartTime, $defaultSt
 
 function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime, $allowedDelay )
 {
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
   mysqli_set_charset($link, "utf8"); 
 
   $rets = Array();
@@ -3039,7 +3039,7 @@ function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime
 
 function get_superuser_names_by_user_id( $ID )
 {
-  include "/var/www/tori/php_tori/connect.php";  
+  include "/var/www/tori/nv/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
 
   $ret = Array();
@@ -3071,7 +3071,7 @@ function get_superuser_name_by_id( $suID )
 
 function get_user_name_by_id( $suID )
 {
-  include "/var/www/tori/php_tori/connect.php";  
+  include "/var/www/tori/nv/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
 
   $query = mysqli_query($link, "SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID='$suID'"); 
@@ -3098,7 +3098,7 @@ function get_user_name_by_id( $suID )
 
 function get_pause_agree_able_superusers_by_userID( $userID )
 {
-  include "/var/www/tori/php_tori/connect.php";  
+  include "/var/www/tori/nv/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
 
   $query0 = mysqli_query($link, "SELECT SUPERVISORID FROM GROUPS where USERID = '$userID' and type = '3'"); 
@@ -3123,7 +3123,7 @@ function get_pause_agree_able_superusers_by_userID( $userID )
 
 function get_users_by_superusers_and_type( $SUID, $type )
 {
-  include "/var/www/tori/php_tori/connect.php";  
+  include "/var/www/tori/nv/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8"); 
 
   $query0 = mysqli_query($link, "SELECT g.USERID FROM GROUPS g inner join employees e on g.userid = e.id where g.SUPERVISORID = '$SUID' and g.type = '$type' order by e.SURNAME asc"); 
@@ -3142,7 +3142,7 @@ function get_users_by_superusers_and_type( $SUID, $type )
 
 function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $defauiltInTime, $allowedDelay )
 {
-  include "/var/www/tori/php_tori/connect.php";  
+  include "/var/www/tori/nv/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
 
   $query0 = mysqli_query($link, "SELECT distinct id, date, supervisorID, explaneDesk, acceptorID, penaltyID, penaltyReply, status FROM Delays where date >= '$startDate' and date <= '$stopDate' and userID = '$userID' order by date desc"); 
@@ -3242,7 +3242,7 @@ function get_delay_value( $in_dt, $defauiltInTime, $allowedDelay )
 function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
 {
 
-  include "/var/www/tori/php_tori/connect.php";  
+  include "/var/www/tori/nv/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
 
   $currentDateArr = get_current_datetime_in_timezone();
@@ -3321,7 +3321,7 @@ function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
 
 function get_reasons()
 {
-  include "/var/www/tori/php_tori/connect.php";  
+  include "/var/www/tori/nv/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8"); 
 
   $sqlQuery = "SELECT DISTINCT a.ID, a.DESCRIPTION FROM REASONS a where a.ID > 0";
@@ -3352,7 +3352,7 @@ function get_reasons()
  
 function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr, $restrictDTRangeToCurrentDay )
 {
-  include "/var/www/tori/php_tori/connect.php";  
+  include "/var/www/tori/nv/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8"); 
 
   $sqlQuery = "SELECT DISTINCT a.ID, a.START_DT, a.STOP_DT, a.SUIR, a.REASON, b.DESCRIPTION as REASONDESCRIPTION, a.DESCRIPTION, a.SUPERVISORDESC, a.APPROVED, a.PAUSE_MODE 
@@ -3440,7 +3440,7 @@ function get_all_add_work_info_by_user( $userID, $pauseMode )
   
   $paramInt = (-1)*$paramArr[1];
   
-  include "/var/www/tori/php_tori/connect.php";  
+  include "/var/www/tori/nv/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
 
   $query = mysqli_query($link, "SELECT DISTINCT a.ID, a.START_DT, a.STOP_DT, a.SUIR, a.REASON, b.DESCRIPTION as REASONDESCRIPTION, a.DESCRIPTION, a.SUPERVISORDESC, 
@@ -3491,7 +3491,7 @@ if ( !$query )
 
 function get_add_work_info_by_user_and_day_range( $userID_, $startDate, $stopDate )
 {
-  include "/var/www/tori/php_tori/connect.php";  
+  include "/var/www/tori/nv/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8"); 
 
   $query0 = mysqli_query($link, "SELECT DISTINCT ID, STARTDATE, SUIR, STARTTIME, STOPTIME, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE FROM ADD_TIME where STARTDATE >= '$startDate' and STARTDATE <= '$stopDate' and USERID = '$userID_' order by STARTDATE desc, STARTTIME desc"); 
@@ -4666,7 +4666,7 @@ $Val = $Val2 + $Val4 - $Val3 + $Val9;
 
 function get_user_defStartTime_and_allowedDelay( $USERiD, &$user_defaultStartTime, &$user_allowedDelay )
 {
-  include "/var/www/tori/php_tori/connect.php";  
+  include "/var/www/tori/nv/php_tori/connect.php";  
 
   $query = mysqli_query($link, "SELECT defaultStartTime, AllowedDelayMinutes FROM employees where ID = '$USERiD' "); 
 
@@ -4691,7 +4691,7 @@ function get_user_defStartTime_and_allowedDelay( $USERiD, &$user_defaultStartTim
 
 function get_cell_content_result( $startDate, $stopDate, $userID, $currentDate, $month = 0 )
 {
-  include "/var/www/tori/php_tori/connect.php";  
+  include "/var/www/tori/nv/php_tori/connect.php";  
 
   $hoursNorm = 0;
   $minutesNorm = 0;
@@ -4860,7 +4860,7 @@ function get_cell_content_new( $procDate, $userID, $currentDate )
 
   $userID = $userID;
 
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $cellContenAr = array();
   $cellContent = "";
@@ -5126,7 +5126,7 @@ function get_cell_content( $procDate, $userID, $currentDate )
 
   $userID = $userID;
 
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $cellContenAr = array();
   $cellContent = "";
@@ -5783,7 +5783,7 @@ function get_and_update_start_time_status( $userID )
 {
   // session_start();
                 
-  include "/var/www/tori/php_tori/connect.php";
+  include "/var/www/tori/nv/php_tori/connect.php";
 
   $dtArr = get_splited_current_date_time_in_timezone();
 

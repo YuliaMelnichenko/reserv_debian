@@ -28,7 +28,7 @@ $content .= "</td>";
 $content .= "</tr>";
 $content .= "</table><br>";  
 
-include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/nv/funcs.php";
 // include_once "../php_tori/connect.php";
 
 session_start();

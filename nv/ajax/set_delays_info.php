@@ -10,7 +10,7 @@ $DESC = $_POST['suDesc'];
 $ACCEPTMODE = $_POST['accept'];
 $userID = $_SESSION['ss_id']; 
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/nv/php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
 $query = mysqli_query($link, "UPDATE Delays SET acceptorID = '$userID', penaltyReply = '$DESC', status='$ACCEPTMODE' WHERE ID = '$ID'"); 

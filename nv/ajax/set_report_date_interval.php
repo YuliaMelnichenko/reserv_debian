@@ -14,7 +14,7 @@ $currDate = date('Y-m-d');
 $_SESSION['rep_stop_date'] = $currDate;
 $_SESSION['rep_start_stop_date_set'] = 0; //0 - not set, 1 - one border have been set, 2 - two borders have been set
 
-include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/nv/funcs.php";
 
 $_SESSION['rep_start_stop_date_mode'] = $report_type;
 

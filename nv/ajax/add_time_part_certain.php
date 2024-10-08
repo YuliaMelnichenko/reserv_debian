@@ -5,8 +5,8 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 
 session_start();
 
-include_once  "/var/www/tori/funcs.php";
-include  "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/nv/funcs.php";
+include "/var/www/tori/nv/php_tori/connect.php";
 
 $userID = $_SESSION['ss_id']; 
 

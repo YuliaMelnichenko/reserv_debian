@@ -14,7 +14,7 @@ session_start();
 if ( isset($_SESSION['ss_id']) )
 {
 //echo "ss ".$_SESSION['ss_state'];
-  include_once "/var/www/tori/php_tori/connect.php";
+  include_once "/var/www/tori/nv/php_tori/connect.php";
 
   $time =  date("H:i:s");
   $date_ = date('Y-m-d');

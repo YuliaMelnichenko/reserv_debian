@@ -27,21 +27,21 @@ echo "<body bgcolor=\"#ffffff\" >";
 session_start();
 
 ////////////////////////////////////////////////////////
-include_once "/var/www/tori/funcs.php";
+include_once "/var/www/tori/nv/funcs.php";
 save_last_location( "delay_approvement.php" );
 auth();
 ////////////////////////////////////////////////////////
 
 echo "<div align=\"left\">";
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/nv/php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
 
 echo "<table border=1>";
   echo "<tr>";
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 120>";
-      include_once "/var/www/tori/navigate.php";
+      include_once "/var/www/tori/nv/navigate.php";
     echo "</td>";    
     echo "<td class=\"nopadding_s\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 120>";
       echo "<h5 class=\"dark\">/уведомления по учету времени за текущий квартал</h5>";

@@ -16,7 +16,7 @@ $add_time_part_base = $_POST['add_time_part_base'];
 $add_time_part_desk = $_POST['add_time_part_desk'];
 $exclude_weekend_holidays = $_POST['exclude_weekend_holidays'];
 
-include "/var/www/tori/php_tori/connect.php";
+include "/var/www/tori/nv/php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
 
@@ -38,7 +38,7 @@ if ( strtotime($add_time_part_start_date) > strtotime($add_time_part_stop_date) 
 }
 else
 {
-  include_once  "/var/www/tori/funcs.php";
+  include_once "/var/www/tori/nv/funcs.php";
 
   $daysRange = get_days_range( $add_time_part_start_date, $add_time_part_stop_date );   
   $newDaysRange = array();

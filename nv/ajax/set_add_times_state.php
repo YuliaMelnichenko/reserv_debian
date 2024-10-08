@@ -8,7 +8,7 @@ session_start();
 $ID = $_POST['addID'];
 $mode = $_POST['mode'];
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/nv/php_tori/connect.php";
 
 if ( $mode == 100 )
 {

@@ -7,7 +7,7 @@ session_start();
                 
 $ID = $_POST['recID'];
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once "/var/www/tori/nv/php_tori/connect.php";
 
 $query = mysqli_query($link, "UPDATE ADD_TIME SET APPROVED=-1 WHERE ID = '$ID'"); 
 
