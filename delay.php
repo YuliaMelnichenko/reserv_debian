@@ -61,7 +61,7 @@ echo "</div>";
 
 function as_add_time()
 {
-  show_delay_table()
+  show_delay_table();
 }  
 show_delay_table();
 

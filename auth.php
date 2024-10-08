@@ -145,8 +145,8 @@ if ( !isset($_SESSION['ss_id']) )
   echo "<h4>Для продолжения необходима авторизация</h4><br><br>";
 
 //  echo "<form>";
-  echo "<font size=\"3\" color=\"#222222\" face=\"Arial\">Логин: </font><input type=\"text\" value=\"\" id=\"login\" style=\"width:120px;\" />";
-  echo "<font size=\"3\" color=\"#222222\" face=\"Arial\"> Пароль: </font><input type=\"password\" value=\"\" id=\"passwd\" style=\"width:170px;\" /><br />";
+  echo "<font size=\"3\" color=\"#222222\" face=\"Arial\">Логин: </font><input type=\"text\" id=\"login\" style=\"width:120px;\" />";
+  echo "<font size=\"3\" color=\"#222222\" face=\"Arial\"> Пароль: </font><input type=\"password\" id=\"passwd\" style=\"width:170px;\" /><br />";
 
   echo "<table border=0>";
     echo "<tr>";

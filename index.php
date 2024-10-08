@@ -361,6 +361,8 @@ echo "<body onload=\"check_day_change();\" bgcolor=\"#ffffff\" >";
 
 // session_start();
 
+// print_r($_COOKIE);
+
 include_once "/var/www/tori/funcs.php";
 include "/var/www/tori/php_tori/connect.php";
 
@@ -467,6 +469,8 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     $user_RemoteWorkStr = $_SESSION['ss_RemoteWorkStr'];
     $user_dayTransitionTime = $_SESSION['$ss_dayTransitionTime'];
 
+
+
     $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
     $dateArr = datetimestr_to_day_start_stop_DT_ex_str_idx( $currentDate, $user_dayTransitionTime );  
@@ -503,6 +507,8 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $empl_state = $row0["state"];                                                  
             
       $sv_name = get_sv_name_by_userid( $user_id );
+
+      include "/var/www/tori/php_tori/connect.php";
 
       mysqli_set_charset($link, "utf8");
     

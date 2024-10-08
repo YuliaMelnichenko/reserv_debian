@@ -328,7 +328,7 @@ $dateArr = datetimestr_to_day_start_stop_DT_ex_str( $currentDate, $user_dayTrans
 $startDTStr = $dateArr[0];
 $stopDTStr = $dateArr[1];    
 
-$query = mysqli_query($link, "SELECT * FROM visiting a where a.user_id = '$userID' and a.in_dt >= '$startDTStr' and a.in_dt < '$stopDTStr'");
+$query = mysqli_query($link, "SELECT * FROM visiting WHERE user_id = '$userID' AND in_dt >= '$startDTStr' AND in_dt < '$stopDTStr'");
  
 $btnWidth = 616;
 $btnHeight = 40;

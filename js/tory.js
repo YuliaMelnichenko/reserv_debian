@@ -1431,3 +1431,12 @@ function show_information() {
     document.getElementById('inform').style.display = "none";
   }
 }
+
+// let elem = document.querySelector('body');
+
+// elem.addEventListener('mousemove', function(event) {
+//   const x = event.clientX;
+//   const y = event.clientY;
+
+//   console.log(`Координаты мыши: x=${x}, y=${y}`);
+// });

@@ -207,7 +207,7 @@ echo "<div id=\"report_container\">";
         echo "<option value=\"3\" $selectedArr[2]>С начала предыдущего месяца</option>";
         echo "<option value=\"4\" $selectedArr[3]>С начала квартала</option>";
         // echo "<option value=\"5\" $selectedArr[4]>Предыдущий квартал</option>";
-//      echo "<option value=\"6\" $selectedArr[5]>С начала года</option>";
+    //  echo "<option value=\"6\" $selectedArr[5]>С начала года</option>";
         echo "<option value=\"7\" $selectedArr[6]>Задать вручную</option>";
       echo "</select>";
     echo "</div>";

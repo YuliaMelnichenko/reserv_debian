@@ -24,8 +24,8 @@ else{
   $byAlert = 0;
 }
 
-$start_time = $start_time.":00";
-$stop_time = $stop_time.":00";
+// $start_time = $start_time.":00";
+// $stop_time = $stop_time.":00";
   
 mysqli_set_charset($link, "utf8");
 

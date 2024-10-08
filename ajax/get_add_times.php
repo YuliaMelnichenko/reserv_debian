@@ -31,7 +31,7 @@ $content .= "</table><br>";
 include_once "/var/www/tori/funcs.php";
 // include_once "../php_tori/connect.php";
 
-session_start();
+// session_start();
 
 $userID = $_SESSION['ss_id']; 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );

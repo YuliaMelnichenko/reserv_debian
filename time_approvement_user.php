@@ -132,7 +132,7 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
         $ta_id = $addInf[8];
         $ta_start_dt = $addInf[0];
         $ta_stop_dt = $addInf[1];
-        $ta_duration = $addTime[6];
+        $ta_duration = $addInf[6];
 
         $ta_reason_description = $addInf[11];
         $ta_description = $addInf[3];
@@ -146,7 +146,7 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
 
         if ( $ta_approved == 0 ){
           $approvedStr = "<h5 class=\"middleBold_r\">на рассмотрении</h5>";
-          $cellColor = $bkColor;
+          $cellColor = '#ffffff';
         }
         else if ( $ta_approved == 1 ){
           $approvedStr = "<h5 class=\"middleBold_r\">принято</h5>";

@@ -178,7 +178,7 @@ echo "<table id=\"delay_approvement_table\" border=0>";
 
         if ( $retDelay_approved == 0 ){
           $content1 = "<h5 class=\"middleBold_r\">на рассмотрении</h5>";
-          $bgcolor = $bkColor; 
+          $bgcolor = '#ffffff'; 
           $delRestore = "1";  
         }
         else if ( $retDelay_approved == 1 ){
