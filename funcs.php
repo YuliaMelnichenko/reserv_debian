@@ -1,6 +1,6 @@
 <?php
 
-include_once "/var/www/tori/funcs.php";
+// include_once "/var/www/tori/funcs.php";
 function get_current_datetime_in_timezone(){
   // session_start();
   $valid = 0;
@@ -3919,13 +3919,24 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
     $tableContent .=           "<div class = \"report_no_padding_rep\" align = \"center\" width = 10px>";
     $tableContent .=             "<img title=\"обеденное время\" src=\"$lunchImg\"/>";
     $tableContent .=           "</div>"; 
-    $uniqueId = uniqid('u');
-    $tableContent .=           "<div class = \"report_no_padding_rep inf\" id = \"$uniqueId\" align = \"left\" width = 50px>";
+
+    if ($_SESSION['ss_id'] == 148) {
+    $tableContent .=           "<div class = \"report_no_padding_rep\" align = \"left\" width = 50px>";
     $tableContent .=             $lunchDurationStr;
     $tableContent .=           "</div>"; 
-    $tableContent .=           "<div class = \"report_no_padding_rep time $uniqueId\" id = \"time\" align = \"center\" width = 230px>";
+    $tableContent .=           "<div class = \"report_no_padding_rep time\" id = \"time\" align = \"center\" width = 230px>";
     $tableContent .=             $eatRange;
-    $tableContent .=           "</div>"; 
+    $tableContent .=           "</div>";
+    }
+    else {
+      $uniqueId = uniqid('u');
+      $tableContent .=           "<div class = \"report_no_padding_rep inf\" id = \"$uniqueId\" align = \"left\" width = 50px>";
+      $tableContent .=             $lunchDurationStr;
+      $tableContent .=           "</div>"; 
+      $tableContent .=           "<div class = \"report_no_padding_rep time $uniqueId\" id = \"time\" align = \"center\" width = 230px>";
+      $tableContent .=             $eatRange;
+      $tableContent .=           "</div>";
+    }
     $tableContent .=      "</div>"; 
     $tableContent .=   "</div>";
 
