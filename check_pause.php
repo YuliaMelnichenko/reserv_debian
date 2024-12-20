@@ -3,9 +3,10 @@ ob_start();
 
 session_start();
 echo "<div id=\"pause_div\">";
-
 ?>
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
 <?php
 echo "<html>";
 echo "<head>";
@@ -15,6 +16,7 @@ echo "<link rel=\"stylesheet\" href=\"style/style.css\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 ?>
+
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
@@ -39,6 +41,7 @@ function set_focus()
 	document.getElementById("auth_btn").focus();
 }
 </script>
+
 <?php
 echo "<body bgcolor=\"#ffffff\" onload=\"set_focus();\">";                                                              
 echo "<div align=\"center\">";
@@ -75,7 +78,7 @@ if ( !isset($_SESSION['ss_id']) )
   echo "<font size=\"3\" color=\"#222222\" face=\"Arial\">Логин: </font><input type=\"text\" value=\"\" id=\"login\" style=\"width:120px;\" />";
   echo "<font size=\"3\" color=\"#222222\" face=\"Arial\"> Пароль: </font><input type=\"password\" value=\"\" id=\"passwd\" style=\"width:120px;\" /><br />";
   echo "<input type=\"hidden\" value=\"$summ_\" name=\"check\" style=\"width:30px;\" /><br />";
-  echo "<button id=\"auth_btn\" class=\"$button_style_1\" style=\"font-size: 150%; width:420px; height:50px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"auth();\" name=\"nextBtn\">Авторизоваться</button>";
+  echo "<button id=\"auth_btn\" style=\"font-size: 150%; width:420px; height:50px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"auth();\" name=\"nextBtn\">Авторизоваться</button>";
   
   echo "</td>";
   echo "</tr>";

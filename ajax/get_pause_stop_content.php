@@ -1,9 +1,9 @@
 <?php
+session_start();
+
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
-
-session_start();
 
 $userID = $_SESSION['ss_id']; 
 
@@ -20,7 +20,7 @@ mysqli_set_charset($link, "utf8");
 error_reporting(E_ALL | E_STRICT) ;
 ini_set('display_errors', 'On');
 
-$query = mysqli_query($link, "select ID, SUIR, START_DT, DESCRIPTION from ADD_TIME where ADDDATE = '$currentDate' and USERID = '$userID' and PAUSE_MODE = 1 order by ADDDATE desc, START_DT desc limit 1");
+$query = mysqli_query($link, "SELECT ID, SUIR, START_DT, DESCRIPTION FROM ADD_TIME WHERE ADDDATE = '$currentDate' AND USERID = '$userID' AND PAUSE_MODE = 1 ORDER BY ADDDATE DESC, START_DT DESC LIMIT 1");
 
 
 $merr=mysqli_error($link);

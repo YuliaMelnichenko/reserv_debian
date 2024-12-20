@@ -1,9 +1,9 @@
 <?php
+session_start();
+
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
-
-session_start();
 
 $nextState = (int)($_POST['next']);
 
@@ -26,7 +26,7 @@ if ( isset($_SESSION['ss_id']) )
   {
     if ( $_SESSION['ss_state'] == 1 )
     { 
-      $query=mysqli_query($link, "SELECT a.ID from visiting a where a.ID = (SELECT max(ID) from visiting)");
+      $query=mysqli_query($link, "SELECT a.ID FROM visiting a WHERE a.ID = (SELECT max(ID) FROM visiting)");
 
       $merr=mysqli_error($link);
       if (!$query)
@@ -60,7 +60,7 @@ if ( isset($_SESSION['ss_id']) )
     }
     else if ( $_SESSION['ss_state'] == 2 )
     {  
-      $res=mysqli_query($link, "UPDATE visiting set eat_start_dt = '$dateTimeStr', state = 3 where user_id = '$id' and ID = '$ss_visiting_ID'");
+      $res=mysqli_query($link, "UPDATE visiting SET eat_start_dt = '$dateTimeStr', state = 3 WHERE user_id = '$id' AND ID = '$ss_visiting_ID'");
       $merr=mysqli_error($link);
       if (!$res)
       { 
@@ -74,7 +74,7 @@ if ( isset($_SESSION['ss_id']) )
     }
     else if ( $_SESSION['ss_state'] == 3 )
     { 
-      $res=mysqli_query($link, "UPDATE visiting set eat_stop_dt = '$dateTimeStr', state = 4 where user_id = '$id' and ID = '$ss_visiting_ID'");
+      $res=mysqli_query($link, "UPDATE visiting SET eat_stop_dt = '$dateTimeStr', state = 4 WHERE user_id = '$id' AND ID = '$ss_visiting_ID'");
       $merr=mysqli_error($link);
       if (!$res)
       { 
@@ -88,7 +88,7 @@ if ( isset($_SESSION['ss_id']) )
     }
     else if ( $_SESSION['ss_state'] == 4 )
     {  
-      $res=mysqli_query($link, "UPDATE visiting set out_dt = '$dateTimeStr', state = 0 where user_id = '$id' and ID = '$ss_visiting_ID'");
+      $res=mysqli_query($link, "UPDATE visiting SET out_dt = '$dateTimeStr', state = 0 WHERE user_id = '$id' AND ID = '$ss_visiting_ID'");
       $merr=mysqli_error($link);
       if (!$res)
       { 
@@ -106,7 +106,7 @@ if ( isset($_SESSION['ss_id']) )
   {
     if ( $_SESSION['ss_state'] == 4 )
     {  
-      $res=mysqli_query($link, "UPDATE visiting set eat_stop_dt = '0000-00-00 00:00:00', out_dt = '0000-00-00 00:00:00', state = 3 where user_id = '$id' and ID = '$ss_visiting_ID'");
+      $res=mysqli_query($link, "UPDATE visiting SET eat_stop_dt = '0000-00-00 00:00:00', out_dt = '0000-00-00 00:00:00', state = 3 WHERE user_id = '$id' AND ID = '$ss_visiting_ID'");
       $merr=mysqli_error($link);
       if (!$res)
       { 
@@ -120,8 +120,8 @@ if ( isset($_SESSION['ss_id']) )
     }
     else if ( $_SESSION['ss_state'] == 3 )
     { 
-      $res=mysqli_query($link, "UPDATE visiting set eat_start_dt = '0000-00-00 00:00:00', eat_stop_dt = '0000-00-00 00:00:00', state = 2 
-                        where user_id = '$id' and ID = '$ss_visiting_ID'");
+      $res=mysqli_query($link, "UPDATE visiting SET eat_start_dt = '0000-00-00 00:00:00', eat_stop_dt = '0000-00-00 00:00:00', state = 2 
+                        WHERE user_id = '$id' AND ID = '$ss_visiting_ID'");
       $merr=mysqli_error($link);
       if (!$res)
       { 
@@ -135,7 +135,7 @@ if ( isset($_SESSION['ss_id']) )
     }
     else if ( $_SESSION['ss_state'] == 2 )
     {  
-      $res=mysqli_query($link, "DELETE FROM visiting where user_id = '$id' and ID = '$ss_visiting_ID'");
+      $res=mysqli_query($link, "DELETE FROM visiting WHERE user_id = '$id' AND ID = '$ss_visiting_ID'");
       $merr=mysqli_error($link);
       if (!$res)
       { 
@@ -149,7 +149,7 @@ if ( isset($_SESSION['ss_id']) )
     }
     else if ( $_SESSION['ss_state'] == 1 )
     {  
-      $res=mysqli_query($link, "DELETE FROM visiting where user_id = '$id' and ID = '$ss_visiting_ID'");
+      $res=mysqli_query($link, "DELETE FROM visiting WHERE user_id = '$id' AND ID = '$ss_visiting_ID'");
       $merr=mysqli_error($link);
       if (!$res)
       { 
@@ -163,7 +163,7 @@ if ( isset($_SESSION['ss_id']) )
     }
     else if ( $_SESSION['ss_state'] == 0 )
     {  
-      $res=mysqli_query($link, "UPDATE visiting set out_dt = '0000-00-00 00:00:00', state = 4 where ID = '$ss_visiting_ID'");
+      $res=mysqli_query($link, "UPDATE visiting SET out_dt = '0000-00-00 00:00:00', state = 4 WHERE ID = '$ss_visiting_ID'");
       $merr=mysqli_error($link);
       if (!$res)
       { 

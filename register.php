@@ -1,5 +1,6 @@
 <?php
 ob_start();
+session_start();
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -15,8 +16,6 @@ ob_start();
 <div align="left">
 
 <?php
-session_start();
-
 $err = array(); 
 	
 include_once "/var/www/tori/php_tori/connect.php";
@@ -132,8 +131,6 @@ if (isset( $_POST['r_button']) )
           mysqli_query($link, "COMMIT");
         }
       }
-
-      session_start();
 
       $_SESSION['ss_id'] = $newuserid;
 

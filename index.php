@@ -1,7 +1,7 @@
 <?php
 date_default_timezone_set("Asia/Novosibirsk");
-session_start();
 ob_start();
+session_start();
 include_once "/var/www/tori/start.php";
 ?>
 
@@ -10,17 +10,17 @@ include_once "/var/www/tori/start.php";
 <script type="text/javascript" src="js/tory.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
-var timerIdSessValid=setInterval( "check_sess()", 3000 );
+var timerIdSessValid=setInterval( "check_sess()", 10000 );
 
 
 function check_sess(){
 
   $.post('ajax/check_session_valid.php', RetSWT);
   function RetSWT(dat) {
-    // if ( dat == 0 ){
+    if ( dat == 0 ){
       console.log(dat);
-      // window.location=self.location;
-    // }
+      window.location=self.location;
+    }
   }
 }
 
@@ -350,7 +350,7 @@ function as_delay()
 </script>
 
 <?php
-echo "<html>";
+echo "<html lang=\"en\">";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";
 echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">";
@@ -359,12 +359,11 @@ echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 echo "<body onload=\"check_day_change();\" bgcolor=\"#ffffff\" >";
 
-// session_start();
-
 // print_r($_COOKIE);
 
 include_once "/var/www/tori/funcs.php";
 include "/var/www/tori/php_tori/connect.php";
+error_log(print_r($_SESSION, true));
 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 $user_dayTransitionTime = $_SESSION['$ss_dayTransitionTime'];
@@ -442,6 +441,7 @@ echo "<div align=\"left\">";
 
 ////////////////////////////////////////////////////////
 include_once  "/var/www/tori/funcs.php";
+include "/var/www/tori/php_tori/connect.php";
 
 $ip = $_SERVER['REMOTE_ADDR'];
 auth();

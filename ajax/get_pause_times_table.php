@@ -1,9 +1,9 @@
 <?php
+session_start();
+
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
-
-session_start();
 
 include_once "/var/www/tori/funcs.php";
 include_once "/var/www/tori/php_tori/connect.php";
@@ -40,9 +40,9 @@ mysqli_set_charset($link, "utf8");
 $query = mysqli_query($link, "SELECT * FROM ADD_TIME 
                       WHERE   
                       USERID='$userID_'
-                        and
+                        AND
                       STOP_DT > ADDDATE( '$currentDate', INTERVAL $paramIntSign DAY ) 
-                        and 
+                        AND 
                       pause_mode = 1
                       ORDER BY ID DESC"); 
 

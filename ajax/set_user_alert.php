@@ -1,9 +1,9 @@
 <?php
+session_start();
+
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
-
-session_start();
 
 if ( isset($_POST['userID']) AND isset($_POST['messageMode']) )
 {
@@ -42,7 +42,7 @@ if ( isset($_POST['userID']) AND isset($_POST['messageMode']) )
 
   mysqli_set_charset($link, "utf8"); 
   
-  $query = mysqli_query($link, "INSERT into ALERTS values ( '$newID', '$currentDate', '$userID', '$superUserID', '$messageModeStr', '0')"); 
+  $query = mysqli_query($link, "INSERT INTO ALERTS VALUES ( '$newID', '$currentDate', '$userID', '$superUserID', '$messageModeStr', '0')"); 
   $merr=mysqli_error($link);
   if ( !$query ) 
   {

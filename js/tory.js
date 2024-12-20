@@ -3,6 +3,7 @@ function unset_cookie()
   $.post('ajax/delete_cookie.php', RetSWT1 );
   function RetSWT1(dat1) 
   {
+    console.log(dat1);
   }    
 }
 

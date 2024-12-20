@@ -1,9 +1,9 @@
 <?php
+session_start();
+
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
-
-session_start();
 
 if ( isset($_POST['userID']) )
 {
@@ -17,8 +17,8 @@ if ( isset($_POST['userID']) )
   include_once "/var/www/tori/funcs.php";
   include_once "/var/www/tori/php_tori/connect.php";
 
-  $query = mysqli_query($link, "DELETE FROM visiting where date = '$currentDate' and user_id = '$userID'"); 
-  $merr=mysqli_error($link);
+  $query = mysqli_query($link, "DELETE FROM visiting WHERE date = '$currentDate' AND user_id = '$userID'"); 
+  $merr = mysqli_error($link);
   if ( !$query ) 
   {
     $days_errors[] = "MYSQL : $merr";

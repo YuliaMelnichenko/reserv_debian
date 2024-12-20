@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 date_default_timezone_set("Asia/Novosibirsk");
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
@@ -307,8 +309,6 @@ function delay_part( $time, $valid, $timeRestributionDescWidth, $timeRestributio
   }
   return $content;
 }
-
-session_start();
 
 $userID = $_SESSION['ss_id'];                       
 

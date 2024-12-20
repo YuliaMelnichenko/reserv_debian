@@ -1,6 +1,11 @@
+<?php
+session_start();
+?>
+
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
 <script type="text/javascript" src="js/tory.js"></script>
 <script type="text/javascript" charset="utf-8"> 
+
 function log_out(){
   var perform=confirm('Выйти из системы?')
   if ( perform == true ){
@@ -15,8 +20,6 @@ function show_alerts(){
 </script>
 
 <?php
-// session_start();
-
 include_once "/var/www/tori/funcs.php";
 
 $needToShow = 1;

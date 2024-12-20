@@ -1,9 +1,9 @@
 <?php
+session_start();
+
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
-
-session_start();
                 
 include "/var/www/tori/php_tori/connect.php";
 include_once "/var/www/tori/funcs.php";
@@ -11,7 +11,9 @@ include_once "/var/www/tori/funcs.php";
 $__login = mysqli_real_escape_string($link, $_POST['login']);   	       
 $__passwd = md5(md5(trim(mysqli_real_escape_string($link, $_POST['passwd'])))); 
 
-$query = mysqli_query($link, "SELECT id, rate, defaultStartTime, allowedDelayMinutes, userTimeZoneMins, dayTransitionTime, remoteWork FROM employees WHERE login='$__login' and passwd = '$__passwd'"); 
+mysqli_set_charset($link, "utf8");
+
+$query = mysqli_query($link, "SELECT id, rate, defaultStartTime, allowedDelayMinutes, userTimeZoneMins, dayTransitionTime, remoteWork FROM employees WHERE login = '$__login' AND passwd = '$__passwd'"); 
 $merr = mysqli_error($link);
 
 if ( !$query ) 

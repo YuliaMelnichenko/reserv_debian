@@ -1,9 +1,9 @@
 <?php
+session_start();
+
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
-
-session_start();
 
 $userID_ = $_SESSION['ss_id']; 
 $currentDate = date('Y-m-d');
@@ -22,10 +22,10 @@ include_once "/var/www/tori/funcs.php";
 mysqli_set_charset($link, "utf8");
 
 if ( $mode == 0 ){
-  $query0 = mysqli_query($link, "SELECT id, status, supervisorID, explaneDesk FROM Delays where date = '$currentDate' and userID = '$userID_'"); 
+  $query0 = mysqli_query($link, "SELECT id, status, supervisorID, explaneDesk FROM Delays WHERE date = '$currentDate' AND userID = '$userID_'"); 
 }
 else{
-  $query0 = mysqli_query($link, "SELECT status, supervisorID, explaneDesk FROM Delays where id = '$delayID' and userID = '$userID'"); 
+  $query0 = mysqli_query($link, "SELECT status, supervisorID, explaneDesk FROM Delays WHERE id = '$delayID' AND userID = '$userID'"); 
 }
 
 $found = 0;

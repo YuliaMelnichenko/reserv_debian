@@ -1,5 +1,6 @@
 <?php
 ob_start();
+session_start();
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -53,8 +54,6 @@ function ta_delete( delID )
 </script>
 
 <?php
-session_start();
-
 ////////////////////////////////////////////////////////
 include_once "/var/www/tori/funcs.php";
 save_last_location( "time_approvement.php" );

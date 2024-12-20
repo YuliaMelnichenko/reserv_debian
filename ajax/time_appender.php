@@ -1,9 +1,9 @@
 <?php
+session_start();
+
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
-
-session_start();
 
 $userID_ = $_SESSION['ss_id'];   
 
@@ -36,7 +36,7 @@ else
 }
 
 mysqli_set_charset($link, "utf8");
-$query = mysqli_query($link, "insert into ADD_TIME (ID, USERID, STARTDATE, STOPDATE, STARTTIME, STOPTIME, REASON, DESCRIPTION, APPROVED) VALUES ('$newID','$userID_','$ta_start_date','$ta_stop_date','$ta_start_time','$ta_stop_time','$ta_base','$ta_desc','0')");
+$query = mysqli_query($link, "INSERT INTO ADD_TIME (ID, USERID, STARTDATE, STOPDATE, STARTTIME, STOPTIME, REASON, DESCRIPTION, APPROVED) VALUES ('$newID','$userID_','$ta_start_date','$ta_stop_date','$ta_start_time','$ta_stop_time','$ta_base','$ta_desc','0')");
 $merr=mysqli_error($link);
 if (!$query)
 {

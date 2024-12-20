@@ -1,5 +1,6 @@
 <?php
 ob_start();
+session_start();
 
 echo "<html>";
 echo "<head>";
@@ -8,8 +9,6 @@ echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">";
 echo "<link rel=\"stylesheet\" href=\"style/style.css\">";
 echo "</head>";
 echo "<body bgcolor=\"#ffeeff\">";
-
-session_start();
 
 if ( isset($_SESSION['ss_id']) )
 {

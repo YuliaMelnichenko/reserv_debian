@@ -1,8 +1,7 @@
 <?php
+session_start();
 
-// include_once "/var/www/tori/funcs.php";
 function get_current_datetime_in_timezone(){
-  // session_start();
   $valid = 0;
 
   $dateStr = "";
@@ -300,17 +299,14 @@ function delete_cookie()
 
 function get_last_location()
 {
-  session_start();
   return $_SESSION['ss_last_location'];
 }  
 
 function save_last_location( $location ){
-  // session_start();
   $_SESSION['ss_last_location'] = $location;
 }  
 
 function move_to_last_location(){
-  // session_start();
   if ( isset( $_SESSION['ss_last_location'] ) ){
     $lastLoc = $_SESSION['ss_last_location'];
 
@@ -492,8 +488,6 @@ function get_group_user_info_by_svID( $svID, $mode )
 
   $ownUserID = -1;
 
-  session_start();
-
   if ( isset( $_SESSION['ss_id'] ) )
   {
     $ownUserID = $_SESSION['ss_id'];
@@ -597,8 +591,6 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
   mysqli_set_charset($link, "utf8");
 
   $dirID = 0;
-
-  // session_start();
 
   if (isset($_SESSION["ss_id"])) {
     $dirID = $_SESSION["ss_id"];
@@ -4970,9 +4962,7 @@ function shift_dt_by_transition_time( $dateTime, $transTime, $shiftDir )
   return $dateTime;
 }
 
-function get_and_update_start_time_status( $userID ){
-  // session_start();
-                
+function get_and_update_start_time_status( $userID ){                
   include "/var/www/tori/php_tori/connect.php";
 
   $dtArr = get_splited_current_date_time_in_timezone();
@@ -4982,7 +4972,7 @@ function get_and_update_start_time_status( $userID ){
   $isThereDelay = 0;
 
   $query = mysqli_query($link, "SELECT defaultStartTime, allowedDelayMinutes, remoteWork FROM employees WHERE id='$userID'"); 
-  $merr=mysqli_error($link);
+  $merr = mysqli_error($link);
 
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";

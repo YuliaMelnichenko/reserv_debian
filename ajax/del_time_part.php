@@ -7,8 +7,9 @@ $itemId = $_POST['itemId'];
 
 include_once "/var/www/tori/php_tori/connect.php";
 
-$query = mysqli_query($link, "delete from ADD_TIME where ID = '$itemId'");
-$merr=mysqli_error($link);
+$query = mysqli_query($link, "DELETE FROM ADD_TIME WHERE ID = '$itemId'");
+$merr = mysqli_error($link);
+
 if (!$query)
 {
   echo "<br>mysql_error = $merr<br>";

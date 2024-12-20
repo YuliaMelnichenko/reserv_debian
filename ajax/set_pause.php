@@ -1,9 +1,9 @@
 <?php
+session_start();
+
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
-
-session_start();
 
 include "/var/www/tori/php_tori/connect.php";
 include_once "/var/www/tori/funcs.php";
@@ -21,7 +21,7 @@ $dtResult = get_current_datetime_in_timezone();
 $currentDate = $dtResult[2];
 $currentDateTime = $dtResult[1];
 
-$query = mysqli_query($link, "update visiting set take_pause = '1' where id = '$ss_visiting_ID' and user_id = '$userID'");
+$query = mysqli_query($link, "UPDATE visiting SET take_pause = '1' WHERE id = '$ss_visiting_ID' AND user_id = '$userID'");
 $merr=mysqli_error($link);
 
 if (!$query){

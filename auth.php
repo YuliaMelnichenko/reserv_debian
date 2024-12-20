@@ -10,7 +10,9 @@ echo $ip;
 
 include_once "/var/www/tori/funcs.php";
 ?>
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
 <?php
 echo "<html>";
 echo "<head>";
@@ -20,6 +22,7 @@ echo "<link rel=\"stylesheet\" href=\"style/style.css\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 ?>
+
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
 <script type="text/javascript" src="js/tory.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
@@ -119,7 +122,6 @@ $ip = $_SERVER['REMOTE_ADDR'];
 //   session_unset();
 //   session_destroy();
 
-//   session_start();
 //   $_SESSION['start_time'] = time();
 // }
 
@@ -194,7 +196,6 @@ else
 }
 
 echo "</div>";
-
 ?>
 
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
@@ -206,7 +207,6 @@ check_cookie();
 </script> 
 
 <?php
-
 echo "</body>";
 echo "</html>";  
 ?>

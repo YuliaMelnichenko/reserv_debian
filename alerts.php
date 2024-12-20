@@ -1,8 +1,10 @@
 <?php
 ob_start();
-
+session_start();
 ?>
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
 <?php
 echo "<html>";
 echo "<head>";
@@ -21,8 +23,6 @@ echo "<body bgcolor=\"#ffffff\" >";
 </script>
 
 <?php
-session_start();
-
 ////////////////////////////////////////////////////////
 include_once "/var/www/tori/funcs.php";
 save_last_location( "delay_approvement.php" );
