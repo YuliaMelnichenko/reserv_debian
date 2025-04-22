@@ -356,7 +356,7 @@ if ( $vn == 0 ) {
     $_SESSION['ss_delay_duration'] = "00:00:00";
 
     echo "<td>";
-      echo "<button style=\"font-size: 110%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"reg_in_work();\">Зарегистрировать время прихода</button>";
+      echo "<button id=\"reg_in_work_button\" style=\"font-size: 110%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"reg_in_work();\">Зарегистрировать время прихода</button>";
     echo "</td>";
   }
   else {

@@ -1,3 +1,3 @@
 <?php
-echo md5(md5("bloshkin1!"));
+echo md5(md5("Tori1!"));
 ?>

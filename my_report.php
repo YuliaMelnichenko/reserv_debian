@@ -292,7 +292,7 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
           echo "<div class=\"report_window_head_single\" id=\"report_window_head_single\">";          
         }
         else{
-          echo "<div class=\"report_window_head\" id=\"report_window_head\">";          
+          echo "<div class=\"report_window_head\" id=\"report_window_head\">";        
         }          
             echo "<table>";
             //Заголовок

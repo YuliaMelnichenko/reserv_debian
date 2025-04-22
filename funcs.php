@@ -1,5 +1,5 @@
 <?php
-session_start();
+// session_start();
 
 function get_current_datetime_in_timezone(){
   $valid = 0;
@@ -3912,27 +3912,18 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
     $tableContent .=             "<img title=\"обеденное время\" src=\"$lunchImg\"/>";
     $tableContent .=           "</div>"; 
 
-    if ($_SESSION['ss_id'] == 148) {
-    $tableContent .=           "<div class = \"report_no_padding_rep\" align = \"left\" width = 50px>";
-    $tableContent .=             $lunchDurationStr;
-    $tableContent .=           "</div>"; 
-    $tableContent .=           "<div class = \"report_no_padding_rep time\" id = \"time\" align = \"center\" width = 230px>";
-    $tableContent .=             $eatRange;
-    $tableContent .=           "</div>";
-    }
-    else {
       $uniqueId = uniqid('u');
       $tableContent .=           "<div class = \"report_no_padding_rep inf\" id = \"$uniqueId\" align = \"left\" width = 50px>";
       $tableContent .=             $lunchDurationStr;
       $tableContent .=           "</div>"; 
-      $tableContent .=           "<div class = \"report_no_padding_rep time $uniqueId\" id = \"time\" align = \"center\" width = 230px>";
+      $tableContent .=           "<div class = \"report_no_padding_rep time $uniqueId\" align = \"center\" width = 230px>";
       $tableContent .=             $eatRange;
       $tableContent .=           "</div>";
-    }
+
     $tableContent .=      "</div>"; 
     $tableContent .=   "</div>";
 
-    $tableContent .=   "<div class = \"time_rep\">"; 
+    $tableContent .=   "<div class = \"time_rep\">";
 
     if ( $addTimeDuration != 0 )
     {

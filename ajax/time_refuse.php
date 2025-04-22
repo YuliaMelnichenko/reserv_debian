@@ -9,7 +9,7 @@ $ID = $_POST['recID'];
 
 include_once "/var/www/tori/php_tori/connect.php";
 
-$query = mysqli_query($link, "UPDATE ADD_TIME SET APPROVED=-1 WHERE ID = '$ID'"); 
+$query = mysqli_query($link, "UPDATE ADD_TIME SET APPROVED=-1 WHERE ID = '$ID'");
 
 $merr=mysqli_error($link);
 if ( !$query ) 

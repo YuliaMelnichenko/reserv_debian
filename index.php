@@ -10,7 +10,7 @@ include_once "/var/www/tori/start.php";
 <script type="text/javascript" src="js/tory.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
-var timerIdSessValid=setInterval( "check_sess()", 10000 );
+var timerIdSessValid=setInterval( "check_sess()", 20000 );
 
 
 function check_sess(){
@@ -644,7 +644,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     mysqli_set_charset($link, "utf8");
     include "/var/www/tori/php_tori/connect.php";
     
-    $query6 = mysqli_query($link, "SELECT id, firstname, surname, lastname FROM employees WHERE relevance = 1 ORDER BY surname");
+    $query6 = mysqli_query($link, "SELECT id, firstname, surname, lastname, phone, personal_phone, corporate_phone FROM employees WHERE relevance = 1 ORDER BY surname");
 
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
     echo "<h5 class=\"dark0\"><br>/присутствие сотрудников<br><br></h5>";
@@ -657,6 +657,9 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $surname = $row6["surname"];
       $firstname = $row6["firstname"];
       $lastname = $row6["lastname"];
+      $phone_number = $row6["phone"];
+      $personal_phone = $row6["personal_phone"];
+      $corporate_phone = $row6["corporate_phone"];
       $full_name = $surname." ".$firstname." ".$lastname;
 
       $time = "0000-00-00 00:00:00";
@@ -680,19 +683,19 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       
       if (mysqli_num_rows($query5) === 0) {
         $img = "<img title=\"на работу не приходил\" src=\"img/in_home.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone));
       }
       elseif (($eat_start_dt != $time && $eat_stop_dt === $time) || ($start_dt_AT != $time && $stop_dt_AT === $time)) {
         $img = "<img title=\"обед/приостановка времени\" src=\"img/pause_time.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone));
       }
       elseif ($in_dt != $time && $out_dt != $time) {
         $img = "<img title=\"ушел домой\" src=\"img/go_home.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone));
       }
       else {
         $img = "<img style=\"margin: 1px 0\" title=\"на рабочем месте\" src=\"img/in_work2.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone));
       }
     }
 
@@ -711,6 +714,26 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
     usort($employee_arr, "sort_employee");
 
+    function get_phone_info($phone, $personal_phone, $corporate_phone) {
+      $output = "Телефон внутренний: " . htmlspecialchars($phone);
+
+      switch (true) {
+        case (!empty($corporate_phone) && !empty($personal_phone)):
+          $output .= ", Мобильный: " . htmlspecialchars($personal_phone) .
+                     ", Служебный мобильный: " . htmlspecialchars($corporate_phone);
+          break;
+
+        case (!empty($corporate_phone)):
+          $output .= ", Служебный мобильный: " . htmlspecialchars($corporate_phone);
+          break;
+        
+        case (!empty($personal_phone)): 
+          $output .= ", Мобильный: " . htmlspecialchars($personal_phone);
+          break;
+      }
+      return $output;
+    }
+
     for ($i = 0; $i < count($employee_arr); $i++) {
       $zero_time = "0000-00-00 00:00:00";
       $name = $employee_arr[$i][0];
@@ -719,8 +742,14 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $img = $employee_arr[$i][3];
       $dat_in = $employee_arr[$i][4];
       $dat_out = $employee_arr[$i][5];
+      $phone = $employee_arr[$i][6];
+      $pers_phone = $employee_arr[$i][7];
+      $corp_phone = $employee_arr[$i][8];
       echo "<div class=\"activity\">";
-      echo "<h5 class=\"activ_text\">$name</h5>";
+      // echo "<h5 class=\"activ_text\">" . htmlspecialchars($name) . "<span class=\"tooltipe_phone\">" . get_phone_info($phone, $pers_phone, $corp_phone) . "</span></h5>";
+
+      echo "<h5 class=\"activ_text\" title=\"" . htmlspecialchars(get_phone_info($phone, $pers_phone, $corp_phone)) . "\">$name</h5>";
+      // echo "<h5 class=\"activ_text\">$name</h5>";
 
       if ($dat_in == "") {
         echo "";
@@ -750,6 +779,14 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     echo "<h5 class=\"dark1\">4. Добавлена возможность записаться в спортзал во вкладке \"Тренажерный зал\".<br></h5>";
     echo "<h5 class=\"dark1\">5. Скрыт информационный блок с обновлениями.<br></h5>";
     echo "</div>";                        
+    echo "</td>";
+    
+    echo "<td bgcolor=\"#ffffff\" valign=\"top\" align=\"left\" width = 10>";
+    echo "</td>";
+
+    echo "<td valign=\"top\" align=\"left\" style=\"padding: 0;\">";
+    echo "<div id=\"birthday_block\" style=\"display: none\">";
+    echo "</div>";
     echo "</td>";
 
     if ( $_SESSION['ss_id'] == 3000 )
@@ -829,6 +866,14 @@ function update_clock()
 }
 
 var timerId=setInterval( "update_clock()", 10000 );
+
+$(document).ready(function() {
+  $.post('ajax/get_birthdays.php', {}, function(data) {
+    if (data.trim() !== '') {
+      $('#birthday_block').html(data).show();
+    }
+  });
+});
 
 </script> 
 

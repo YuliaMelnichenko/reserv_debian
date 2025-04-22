@@ -2677,6 +2677,31 @@ li:hover ul, li.over ul { display: block; }
   cursor: pointer;
 }
 
+#birthday_block {
+  background-color: #f0f7fb;
+  width: 255px;
+  display: none;
+  font-family: Arial, sans;
+  font-size: 12px;
+  color: #000;
+  line-height: 18pt;
+  padding: 8px;
+}
+
+#hb_block {
+  display: flex;
+}
+
+#hb_window {
+  display: flex;
+  flex-direction: column;
+}
+
+#ul_hb_block {
+  display: flex;
+  flex-direction: column;
+}
+
 #buttonBox {
   margin-top: 10px;
   width: 373px;
@@ -2700,7 +2725,31 @@ li:hover ul, li.over ul { display: block; }
   justify-content: space-between;
   border-bottom: 1px solid #777777;
   margin-top: 1px;
+  cursor: default;
 }
+
+/* .tooltipe_phone {
+  visibility: inherit;
+  background-color: #333;
+  color: #fff;
+  text-align: left;
+  border-radius: 8px;
+  padding: 6px 12px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.activ_text .tooltipe_phone {
+  visibility: visible;
+  opacity: 1;
+} */
 
 h5.activ_text {
   font-family: Arial, sans;
@@ -2727,14 +2776,6 @@ h5.activ_time {
 #index {
   background-color: rgb(221, 238, 255);
   padding: 0;
-}
-
-.birth_person {
-  width: 200px;
-  height: 50px;
-  display: flex;
-  flex-direction: column;
-
 }
 
 #close_birth_win {

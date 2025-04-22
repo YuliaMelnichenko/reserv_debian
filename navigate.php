@@ -1,5 +1,5 @@
 <?php
-session_start();
+// session_start();
 ?>
 
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
