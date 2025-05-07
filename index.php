@@ -683,19 +683,19 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       
       if (mysqli_num_rows($query5) === 0) {
         $img = "<img title=\"на работу не приходил\" src=\"img/in_home.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl));
       }
       elseif (($eat_start_dt != $time && $eat_stop_dt === $time) || ($start_dt_AT != $time && $stop_dt_AT === $time)) {
         $img = "<img title=\"обед/приостановка времени\" src=\"img/pause_time.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl));
       }
       elseif ($in_dt != $time && $out_dt != $time) {
         $img = "<img title=\"ушел домой\" src=\"img/go_home.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl));
       }
       else {
         $img = "<img style=\"margin: 1px 0\" title=\"на рабочем месте\" src=\"img/in_work2.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl));
       }
     }
 
@@ -714,24 +714,48 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
     usort($employee_arr, "sort_employee");
 
-    function get_phone_info($phone, $personal_phone, $corporate_phone) {
-      $output = "Телефон внутренний: " . htmlspecialchars($phone);
+    function get_phone_info($id_empl, $phone, $personal_phone, $corporate_phone) {
+      // $output = "Телефон внутренний: " . htmlspecialchars($phone);
+
+      // switch (true) {
+      //   case (!empty($corporate_phone) && !empty($personal_phone)):
+      //     $output .= ", Мобильный: " . htmlspecialchars($personal_phone) .
+      //                ", Служебный мобильный: " . htmlspecialchars($corporate_phone);
+      //     break;
+
+      //   case (!empty($corporate_phone)):
+      //     $output .= ", Служебный мобильный: " . htmlspecialchars($corporate_phone);
+      //     break;
+        
+      //   case (!empty($personal_phone)): 
+      //     $output .= ", Мобильный: " . htmlspecialchars($personal_phone);
+      //     break;
+      // }
+      // return $output;
+      $tooltipId = 'u' . $id_empl . '-phones';
+      $phones = [];
+      $phones[] = "Телефон внутренний: " . htmlspecialchars($phone);
 
       switch (true) {
         case (!empty($corporate_phone) && !empty($personal_phone)):
-          $output .= ", Мобильный: " . htmlspecialchars($personal_phone) .
-                     ", Служебный мобильный: " . htmlspecialchars($corporate_phone);
+          $phones[] = "Мобильный: " . htmlspecialchars($personal_phone);
+          $phones[] = "Служебный мобильный: " . htmlspecialchars($corporate_phone);
           break;
 
         case (!empty($corporate_phone)):
-          $output .= ", Служебный мобильный: " . htmlspecialchars($corporate_phone);
+          $phones[] = "Служебный мобильный: " . htmlspecialchars($corporate_phone);
           break;
         
         case (!empty($personal_phone)): 
-          $output .= ", Мобильный: " . htmlspecialchars($personal_phone);
+          $phones[] = "Мобильный: " . htmlspecialchars($personal_phone);
           break;
       }
-      return $output;
+
+      if (!empty($phones)) {
+        echo '<div class="phone_tooltip" data-phone-tooltip-target="' . $tooltipId . '">';
+        echo implode('<br>', $phones);
+        echo '</div>';
+      }
     }
 
     for ($i = 0; $i < count($employee_arr); $i++) {
@@ -745,11 +769,10 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $phone = $employee_arr[$i][6];
       $pers_phone = $employee_arr[$i][7];
       $corp_phone = $employee_arr[$i][8];
+      $personal_id = $employee_arr[$i][9];
       echo "<div class=\"activity\">";
-      // echo "<h5 class=\"activ_text\">" . htmlspecialchars($name) . "<span class=\"tooltipe_phone\">" . get_phone_info($phone, $pers_phone, $corp_phone) . "</span></h5>";
-
-      echo "<h5 class=\"activ_text\" title=\"" . htmlspecialchars(get_phone_info($phone, $pers_phone, $corp_phone)) . "\">$name</h5>";
-      // echo "<h5 class=\"activ_text\">$name</h5>";
+      // echo "<h5 class=\"activ_text\" title=\"" . htmlspecialchars(get_phone_info($personal_id, $phone, $pers_phone, $corp_phone)) . "\">$name</h5>";
+      echo "<h5 class=\"activ_text\" data-phone-tooltip=\"u$personal_id-phones\">" . $name . "</h5>";
 
       if ($dat_in == "") {
         echo "";
@@ -763,6 +786,8 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       }
       echo $img;
       echo "</div>";
+      get_phone_info($personal_id, $phone, $pers_phone, $corp_phone);
+
     }
     echo "</div>";
     echo "</td>";

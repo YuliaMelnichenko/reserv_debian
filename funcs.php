@@ -3586,24 +3586,8 @@ function is_there_day_change_betw( $in_dt, $eat_start_dt, $eat_stop_dt, $out_dt,
   return array( $changeIn, $changeEatStart, $changeEatStop, $changeOut, $isThereChange );
 }
 
-function take_changes_time ($userID) {
-  include "/var/www/tori/php_tori/connect.php";
-  $res = ""; 
-  mysqli_set_charset($link, "utf8");
-  $changes = mysqli_query($link, "SELECT changes FROM visiting WHERE user_id = '$userID'");
-  $row2 = mysqli_fetch_array( $changes, MYSQLI_ASSOC );
-  $change_value = $row2["changes"];
-  if ($change_value == "1") {
-    $res = "<img title=\"время скорректировано\" src=\"img/red.png\">";
-  }
-  return $res;
-}
-
-function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $defaultStartTimeStr, $user_allowedDelay ){
+function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $defaultStartTimeStr, $user_allowedDelay ){
   include_once "/var/www/tori/funcs.php";
-
-  $userID = $_SESSION['ss_id'];
-  $change = take_changes_time ($userID); 
 
   // $dayTypes = get_workdays_holidays_bay_range( $startDate, $stopDate );
   $currentDateArr = get_current_datetime_in_timezone();
@@ -3786,9 +3770,6 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
   {
     $workDayRange = get_range_by_times_pair( $days_work_start, $days_work_stop, $isCurrentDay, $commonChechState, $defaultStartTimeStr, $user_allowedDelay, $crossDayPeriod );
   }
-  if ($days_work_stop == "0000-00-00 00:00:00") {
-    $styleClass = "workBlue";
-  }
 
   $eatRange = "";
   {
@@ -3849,6 +3830,9 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
     }
   }
 
+  $uidWork = 'u' . $userId . '-' . $days_dates_set . '-work';
+  $uidLunch= 'u' . $userId . '-' . $days_dates_set . '-lunch';
+
   $outTimeEmpty = "";
   
   $workPureContent = "<h5 class=\"bigbig\">$resultPureTimeStr ($resultPureTimePartStr)</h5>";
@@ -3879,19 +3863,14 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
     $tableContent .=           "<div class = \"report_no_padding_rep\" align = \"left\" width = 10px>";
     $tableContent .=             "<img title=\"рабочее время\" src=\"$timeSpendImg\"/>";
     $tableContent .=           "</div>"; 
-    $uniqueId = uniqid('u'); 
-
-      $tableContent .=           "<div class = \"report_no_padding_rep inf workBlue\" id = \"$uniqueId\" valign = \"top\" align = \"left\" width = 50px>";
-      $tableContent .=             $workWOEatStr;
-      $tableContent .=           "</div>";
-      $tableContent .=           "<div class = \"change_time\">";
-      $tableContent .=            $change;
-      $tableContent .=           "</div>";
-
-
-    $tableContent .=           "<div class = \"report_no_padding_rep time $uniqueId\" align = \"center\" width = 230px>";
-    $tableContent .=             $workDayRange;
-    $tableContent .=           "</div>"; 
+      $tableContent .=          "<div class = \"report_no_padding_rep inf\" data-tooltip=\"$uidWork\" valign = \"top\" align = \"left\" width = 50px>";
+      $tableContent .=            $workWOEatStr;
+      $tableContent .=          "</div>";
+    $tableContent .=        "</div>";
+    $tableContent .=        "<div class=\"divs_layer\">";
+    $tableContent .=          "<div class = \"report_no_padding_rep time\" data-tooltip-target=\"$uidWork\" align = \"center\" width = 230px>";
+    $tableContent .=            $workDayRange;
+    $tableContent .=          "</div>"; 
     $tableContent .=        "</div>";
     if ( $days_remoteWorkState != 0 ){
       $tableContent .=          "<div class = \"remote_work_time_rep\">";
@@ -3903,7 +3882,6 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
       $tableContent .=              "</div>";
       $tableContent .=           "</div>";
     }
- 
     $tableContent .=   "</div>"; 
  
     $tableContent .=   "<div class = \"time_rep\">"; 
@@ -3912,15 +3890,16 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $default
     $tableContent .=             "<img title=\"обеденное время\" src=\"$lunchImg\"/>";
     $tableContent .=           "</div>"; 
 
-      $uniqueId = uniqid('u');
-      $tableContent .=           "<div class = \"report_no_padding_rep inf\" id = \"$uniqueId\" align = \"left\" width = 50px>";
+      $tableContent .=           "<div class = \"report_no_padding_rep inf\" data-tooltip=\"$uidLunch\" align = \"left\" width = 50px>";
       $tableContent .=             $lunchDurationStr;
       $tableContent .=           "</div>"; 
-      $tableContent .=           "<div class = \"report_no_padding_rep time $uniqueId\" align = \"center\" width = 230px>";
-      $tableContent .=             $eatRange;
-      $tableContent .=           "</div>";
 
     $tableContent .=      "</div>"; 
+    $tableContent .=      "<div class=\"divs_layer\">";
+    $tableContent .=        "<div class = \"report_no_padding_rep time\" data-tooltip-target=\"$uidLunch\" align = \"center\" width = 230px>";
+    $tableContent .=          $eatRange;
+    $tableContent .=        "</div>";
+    $tableContent .=      "</div>";
     $tableContent .=   "</div>";
 
     $tableContent .=   "<div class = \"time_rep\">";

@@ -773,7 +773,7 @@ function get_report_body_row_contents( $usersInfo ){
 
     for ( $userNum = 0; $userNum < $userCount; $userNum ++ )
     {
-      $userID = $usersInfo[1][$userNum];
+      $userID = $usersInfo[0][$userNum];
       $userDefaultStartTime = $usersInfo[3][$userNum];
       $userAllowedDelay = $usersInfo[6][$userNum]; 
 
