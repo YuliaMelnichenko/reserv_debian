@@ -2849,3 +2849,9 @@ h5.activ_time {
   width: 272px;
   resize: none;
 }
+
+.img_container {
+  display: flex;
+  width: 45px;
+  justify-content: flex-end;
+}

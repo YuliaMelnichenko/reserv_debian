@@ -644,7 +644,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     mysqli_set_charset($link, "utf8");
     include "/var/www/tori/php_tori/connect.php";
     
-    $query6 = mysqli_query($link, "SELECT id, firstname, surname, lastname, phone, personal_phone, corporate_phone FROM employees WHERE relevance = 1 ORDER BY surname");
+    $query6 = mysqli_query($link, "SELECT id, firstname, surname, lastname, phone, personal_phone, corporate_phone, DATE_FORMAT(birthday, '%m-%d') FROM employees WHERE relevance = 1 ORDER BY surname");
 
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
     echo "<h5 class=\"dark0\"><br>/присутствие сотрудников<br><br></h5>";
@@ -660,6 +660,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $phone_number = $row6["phone"];
       $personal_phone = $row6["personal_phone"];
       $corporate_phone = $row6["corporate_phone"];
+      $birthday = $row6["DATE_FORMAT(birthday, '%m-%d')"];
       $full_name = $surname." ".$firstname." ".$lastname;
 
       $time = "0000-00-00 00:00:00";
@@ -668,7 +669,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $query5 = mysqli_query($link, "SELECT v.in_dt, v.eat_start_dt, v.eat_stop_dt, v.out_dt, e.surname FROM visiting v JOIN employees e ON v.user_id = e.id WHERE DATE(v.in_dt) = CURDATE() AND v.user_id = '$id_empl'");
       $row5 = mysqli_fetch_assoc($query5);
 
-      $query7 = mysqli_query($link, "SELECT a.START_DT, a.STOP_DT, e.surname FROM ADD_TIME a JOIN employees e ON a.USERID = e.id WHERE DATE(a.START_DT) = CURDATE() AND a.USERID = '$id_empl'");
+      $query7 = mysqli_query($link, "SELECT a.START_DT, a.STOP_DT, e.surname FROM ADD_TIME a JOIN employees e ON a.USERID = e.id WHERE DATE(a.START_DT) = CURDATE() AND a.USERID = '$id_empl' AND  a.STOP_DT IS NULL ORDER BY a.START_DT DESC LIMIT 1");
       $row7 = mysqli_fetch_array($query7);
 
       $in_dt = $row5["in_dt"];
@@ -683,19 +684,19 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       
       if (mysqli_num_rows($query5) === 0) {
         $img = "<img title=\"на работу не приходил\" src=\"img/in_home.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
       }
       elseif (($eat_start_dt != $time && $eat_stop_dt === $time) || ($start_dt_AT != $time && $stop_dt_AT === $time)) {
         $img = "<img title=\"обед/приостановка времени\" src=\"img/pause_time.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
       }
       elseif ($in_dt != $time && $out_dt != $time) {
         $img = "<img title=\"ушел домой\" src=\"img/go_home.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
       }
       else {
         $img = "<img style=\"margin: 1px 0\" title=\"на рабочем месте\" src=\"img/in_work2.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
       }
     }
 
@@ -715,23 +716,6 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     usort($employee_arr, "sort_employee");
 
     function get_phone_info($id_empl, $phone, $personal_phone, $corporate_phone) {
-      // $output = "Телефон внутренний: " . htmlspecialchars($phone);
-
-      // switch (true) {
-      //   case (!empty($corporate_phone) && !empty($personal_phone)):
-      //     $output .= ", Мобильный: " . htmlspecialchars($personal_phone) .
-      //                ", Служебный мобильный: " . htmlspecialchars($corporate_phone);
-      //     break;
-
-      //   case (!empty($corporate_phone)):
-      //     $output .= ", Служебный мобильный: " . htmlspecialchars($corporate_phone);
-      //     break;
-        
-      //   case (!empty($personal_phone)): 
-      //     $output .= ", Мобильный: " . htmlspecialchars($personal_phone);
-      //     break;
-      // }
-      // return $output;
       $tooltipId = 'u' . $id_empl . '-phones';
       $phones = [];
       $phones[] = "Телефон внутренний: " . htmlspecialchars($phone);
@@ -770,8 +754,11 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $pers_phone = $employee_arr[$i][7];
       $corp_phone = $employee_arr[$i][8];
       $personal_id = $employee_arr[$i][9];
+      $birth = $employee_arr[$i][10];
+
+      $today = date('m-d');
+
       echo "<div class=\"activity\">";
-      // echo "<h5 class=\"activ_text\" title=\"" . htmlspecialchars(get_phone_info($personal_id, $phone, $pers_phone, $corp_phone)) . "\">$name</h5>";
       echo "<h5 class=\"activ_text\" data-phone-tooltip=\"u$personal_id-phones\">" . $name . "</h5>";
 
       if ($dat_in == "") {
@@ -784,7 +771,15 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
         usort($employee_arr, "sort_employee");
         echo "<h5 class=\"activ_time\">".$start." - ".$stop."</h5>";
       }
-      echo $img;
+
+      echo "<div class=\"img_container\">";
+        if ($birth == $today) {
+          echo "<img style=\"margin: 1px 0\" title=\"у сотрудника день рождения\" src=\"img/birthday.png\">";
+          echo $img;
+        } else {
+          echo $img;
+        }
+      echo "</div>";
       echo "</div>";
       get_phone_info($personal_id, $phone, $pers_phone, $corp_phone);
 
