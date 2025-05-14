@@ -1,5 +1,6 @@
 <?php
 ob_start();
+session_start();
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -185,6 +186,7 @@ function as_delay(){
 }
 
 </script>
+
 <?php
 echo "<html>";
 echo "<head>";
@@ -194,8 +196,6 @@ echo "<link rel=\"stylesheet\" href=\"style/style.css\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 echo "<body bgcolor=\"#ffffff\" >";
-
-session_start();
 
 echo "<font size=\"0\" color=\"#DDDDDD\" face=\"Arial\"> !!! 2021.12.30 Опоздание может быть принято 'по уважительной причине', если тому виной стал транспортный коллапс значительного размера.</font><br><br>";
 echo "<font size=\"0\" color=\"#EEEEEE\" face=\"Arial\">Для этого необходимо:</font><br>";

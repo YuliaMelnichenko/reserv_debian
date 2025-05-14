@@ -1,7 +1,7 @@
 <?php
 date_default_timezone_set("Asia/Novosibirsk");
-session_start();
 ob_start();
+session_start();
 include_once "/var/www/tori/start.php";
 ?>
 
@@ -10,17 +10,17 @@ include_once "/var/www/tori/start.php";
 <script type="text/javascript" src="js/tory.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
-var timerIdSessValid=setInterval( "check_sess()", 3000 );
+var timerIdSessValid=setInterval( "check_sess()", 20000 );
 
 
 function check_sess(){
 
   $.post('ajax/check_session_valid.php', RetSWT);
   function RetSWT(dat) {
-    // if ( dat == 0 ){
+    if ( dat == 0 ){
       console.log(dat);
-      // window.location=self.location;
-    // }
+      window.location=self.location;
+    }
   }
 }
 
@@ -350,7 +350,7 @@ function as_delay()
 </script>
 
 <?php
-echo "<html>";
+echo "<html lang=\"en\">";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";
 echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">";
@@ -359,12 +359,11 @@ echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 echo "<body onload=\"check_day_change();\" bgcolor=\"#ffffff\" >";
 
-// session_start();
-
 // print_r($_COOKIE);
 
 include_once "/var/www/tori/funcs.php";
 include "/var/www/tori/php_tori/connect.php";
+error_log(print_r($_SESSION, true));
 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 $user_dayTransitionTime = $_SESSION['$ss_dayTransitionTime'];
@@ -442,6 +441,7 @@ echo "<div align=\"left\">";
 
 ////////////////////////////////////////////////////////
 include_once  "/var/www/tori/funcs.php";
+include "/var/www/tori/php_tori/connect.php";
 
 $ip = $_SERVER['REMOTE_ADDR'];
 auth();
@@ -644,7 +644,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     mysqli_set_charset($link, "utf8");
     include "/var/www/tori/php_tori/connect.php";
     
-    $query6 = mysqli_query($link, "SELECT id, firstname, surname, lastname FROM employees WHERE relevance = 1 ORDER BY surname");
+    $query6 = mysqli_query($link, "SELECT id, firstname, surname, lastname, phone, personal_phone, corporate_phone FROM employees WHERE relevance = 1 ORDER BY surname");
 
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
     echo "<h5 class=\"dark0\"><br>/присутствие сотрудников<br><br></h5>";
@@ -657,6 +657,9 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $surname = $row6["surname"];
       $firstname = $row6["firstname"];
       $lastname = $row6["lastname"];
+      $phone_number = $row6["phone"];
+      $personal_phone = $row6["personal_phone"];
+      $corporate_phone = $row6["corporate_phone"];
       $full_name = $surname." ".$firstname." ".$lastname;
 
       $time = "0000-00-00 00:00:00";
@@ -680,19 +683,19 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       
       if (mysqli_num_rows($query5) === 0) {
         $img = "<img title=\"на работу не приходил\" src=\"img/in_home.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl));
       }
       elseif (($eat_start_dt != $time && $eat_stop_dt === $time) || ($start_dt_AT != $time && $stop_dt_AT === $time)) {
         $img = "<img title=\"обед/приостановка времени\" src=\"img/pause_time.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl));
       }
       elseif ($in_dt != $time && $out_dt != $time) {
         $img = "<img title=\"ушел домой\" src=\"img/go_home.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl));
       }
       else {
         $img = "<img style=\"margin: 1px 0\" title=\"на рабочем месте\" src=\"img/in_work2.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl));
       }
     }
 
@@ -711,6 +714,50 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
     usort($employee_arr, "sort_employee");
 
+    function get_phone_info($id_empl, $phone, $personal_phone, $corporate_phone) {
+      // $output = "Телефон внутренний: " . htmlspecialchars($phone);
+
+      // switch (true) {
+      //   case (!empty($corporate_phone) && !empty($personal_phone)):
+      //     $output .= ", Мобильный: " . htmlspecialchars($personal_phone) .
+      //                ", Служебный мобильный: " . htmlspecialchars($corporate_phone);
+      //     break;
+
+      //   case (!empty($corporate_phone)):
+      //     $output .= ", Служебный мобильный: " . htmlspecialchars($corporate_phone);
+      //     break;
+        
+      //   case (!empty($personal_phone)): 
+      //     $output .= ", Мобильный: " . htmlspecialchars($personal_phone);
+      //     break;
+      // }
+      // return $output;
+      $tooltipId = 'u' . $id_empl . '-phones';
+      $phones = [];
+      $phones[] = "Телефон внутренний: " . htmlspecialchars($phone);
+
+      switch (true) {
+        case (!empty($corporate_phone) && !empty($personal_phone)):
+          $phones[] = "Мобильный: " . htmlspecialchars($personal_phone);
+          $phones[] = "Служебный мобильный: " . htmlspecialchars($corporate_phone);
+          break;
+
+        case (!empty($corporate_phone)):
+          $phones[] = "Служебный мобильный: " . htmlspecialchars($corporate_phone);
+          break;
+        
+        case (!empty($personal_phone)): 
+          $phones[] = "Мобильный: " . htmlspecialchars($personal_phone);
+          break;
+      }
+
+      if (!empty($phones)) {
+        echo '<div class="phone_tooltip" data-phone-tooltip-target="' . $tooltipId . '">';
+        echo implode('<br>', $phones);
+        echo '</div>';
+      }
+    }
+
     for ($i = 0; $i < count($employee_arr); $i++) {
       $zero_time = "0000-00-00 00:00:00";
       $name = $employee_arr[$i][0];
@@ -719,8 +766,13 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $img = $employee_arr[$i][3];
       $dat_in = $employee_arr[$i][4];
       $dat_out = $employee_arr[$i][5];
+      $phone = $employee_arr[$i][6];
+      $pers_phone = $employee_arr[$i][7];
+      $corp_phone = $employee_arr[$i][8];
+      $personal_id = $employee_arr[$i][9];
       echo "<div class=\"activity\">";
-      echo "<h5 class=\"activ_text\">$name</h5>";
+      // echo "<h5 class=\"activ_text\" title=\"" . htmlspecialchars(get_phone_info($personal_id, $phone, $pers_phone, $corp_phone)) . "\">$name</h5>";
+      echo "<h5 class=\"activ_text\" data-phone-tooltip=\"u$personal_id-phones\">" . $name . "</h5>";
 
       if ($dat_in == "") {
         echo "";
@@ -734,6 +786,8 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       }
       echo $img;
       echo "</div>";
+      get_phone_info($personal_id, $phone, $pers_phone, $corp_phone);
+
     }
     echo "</div>";
     echo "</td>";
@@ -750,6 +804,14 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     echo "<h5 class=\"dark1\">4. Добавлена возможность записаться в спортзал во вкладке \"Тренажерный зал\".<br></h5>";
     echo "<h5 class=\"dark1\">5. Скрыт информационный блок с обновлениями.<br></h5>";
     echo "</div>";                        
+    echo "</td>";
+    
+    echo "<td bgcolor=\"#ffffff\" valign=\"top\" align=\"left\" width = 10>";
+    echo "</td>";
+
+    echo "<td valign=\"top\" align=\"left\" style=\"padding: 0;\">";
+    echo "<div id=\"birthday_block\" style=\"display: none\">";
+    echo "</div>";
     echo "</td>";
 
     if ( $_SESSION['ss_id'] == 3000 )
@@ -829,6 +891,14 @@ function update_clock()
 }
 
 var timerId=setInterval( "update_clock()", 10000 );
+
+$(document).ready(function() {
+  $.post('ajax/get_birthdays.php', {}, function(data) {
+    if (data.trim() !== '') {
+      $('#birthday_block').html(data).show();
+    }
+  });
+});
 
 </script> 
 

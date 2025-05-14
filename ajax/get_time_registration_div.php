@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 date_default_timezone_set("Asia/Novosibirsk");
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
@@ -308,8 +310,6 @@ function delay_part( $time, $valid, $timeRestributionDescWidth, $timeRestributio
   return $content;
 }
 
-session_start();
-
 $userID = $_SESSION['ss_id'];                       
 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
@@ -356,7 +356,7 @@ if ( $vn == 0 ) {
     $_SESSION['ss_delay_duration'] = "00:00:00";
 
     echo "<td>";
-      echo "<button style=\"font-size: 110%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"reg_in_work();\">Зарегистрировать время прихода</button>";
+      echo "<button id=\"reg_in_work_button\" style=\"font-size: 110%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"reg_in_work();\">Зарегистрировать время прихода</button>";
     echo "</td>";
   }
   else {

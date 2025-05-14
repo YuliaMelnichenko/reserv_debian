@@ -1,5 +1,6 @@
 <?php
 ob_start();
+session_start();
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -17,8 +18,6 @@ ob_start();
 <?php
 $report_start_date = "2013-01-01";
 $report_stop_date = "2013-08-01";
-
-session_start();
 
 $ip = $_SERVER['REMOTE_ADDR'];
 
@@ -507,6 +506,7 @@ else{
   }
   echo "</table>";
 ?>
+
 </div>
 </body>
 </html>

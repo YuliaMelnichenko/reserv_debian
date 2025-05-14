@@ -3,6 +3,7 @@ function unset_cookie()
   $.post('ajax/delete_cookie.php', RetSWT1 );
   function RetSWT1(dat1) 
   {
+    console.log(dat1);
   }    
 }
 
@@ -1389,30 +1390,79 @@ function make_div_scroll_sport() {
   document.getElementById('delete_button_cont').scrollTop = vertScrollVal;
 }
 
-$.post('funcs.php', RetSWT);
-function RetSWT () {
-  var inf = document.getElementsByClassName('inf');
-  for (let i = 0; i < inf.length; ++i) {
-    inf[i].addEventListener('mouseover', showTime);
-    inf[i].addEventListener('mouseout', hideTime);
-  }
+document.addEventListener("DOMContentLoaded", () => {
+  attachTooltipListeners();
+});
 
-  function showTime() {
-    var coordsInf = this.getBoundingClientRect();
-    if (coordsInf.right < 1637) {
-      $('.' + this.id).css("display", "block");
-      $('.' + this.id).css("top", coordsInf.top);
-      $('.' + this.id).css("left", coordsInf.left + 60);
+function attachTooltipListeners() {
+  const infElements = document.querySelectorAll('.work_time_rep .inf[data-tooltip]');
+
+  infElements.forEach(el => {
+    const tooltipId = el.getAttribute('data-tooltip');
+    const tooltip = document.querySelector(`.time[data-tooltip-target="${tooltipId}"]`);
+
+    if (!tooltip) {
+      return;
     }
-    else if (coordsInf.right > 1637) {
-      $('.' + this.id).css("display", "block");
-      $('.' + this.id).css("top", coordsInf.top);
-      $('.' + this.id).css("left", coordsInf.left - 290);
-    }
+    el.addEventListener('mouseover', (event) => showTime(event, tooltip));
+    el.addEventListener('mouseout', () => hideTime(tooltip));
+    tooltip.addEventListener('mouseleave', () => hideTime(tooltip));
+  });
+}
+
+function showTime (event, tooltip) {
+  const el = event.currentTarget;
+  const elRect = el.getBoundingClientRect();
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+
+  const tooltipWidth = 270;
+  const spaceRight = window.innerWidth - elRect.right;
+
+  tooltip.style.display = 'block';
+  tooltip.style.position = 'absolute';
+  tooltip.style.maxWidth = '300px';
+  tooltip.style.top = `${elRect.top + scrollTop}px`;
+  
+  if (spaceRight > tooltipWidth + 20) {
+    tooltip.style.left = `${elRect.left + scrollLeft + 60}px`;
+  } else {
+    tooltip.style.left = `${Math.max(elRect.left + scrollLeft - tooltipWidth - 60, 0)}px`;
   }
-  function hideTime() {
-    $('.' + this.id).css("display", "none");
-  }
+}
+  
+function hideTime (tooltip) {
+  tooltip.style.display = 'none';
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  bindPhoneTooltips();
+});
+
+function bindPhoneTooltips() {
+  const phoneElems = document.querySelectorAll('.activ_text[data-phone-tooltip]');
+
+  phoneElems.forEach(el => {
+    const tooltipId = el.getAttribute('data-phone-tooltip');
+    const tooltip = document.querySelector(`.phone_tooltip[data-phone-tooltip-target="${tooltipId}"]`);
+
+    if (!tooltip) return;
+
+    el.addEventListener('mouseover', () => {
+      const rect = el.getBoundingClientRect();
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const scrollLeft = window.scrollY || document.documentElement.scrollLeft;
+
+      tooltip.style.display = 'block';
+      tooltip.style.position = 'absolute';
+      tooltip.style.top = `${rect.bottom + scrollTop + 5}px`;
+      tooltip.style.left = `${rect.left + scrollLeft}px`;
+    });
+
+    el.addEventListener('mouseout', () => {
+      tooltip.style.display = 'none';
+    });
+  });
 }
 
 document.addEventListener('keydown', function(event) {
@@ -1431,12 +1481,3 @@ function show_information() {
     document.getElementById('inform').style.display = "none";
   }
 }
-
-// let elem = document.querySelector('body');
-
-// elem.addEventListener('mousemove', function(event) {
-//   const x = event.clientX;
-//   const y = event.clientY;
-
-//   console.log(`Координаты мыши: x=${x}, y=${y}`);
-// });

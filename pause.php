@@ -1,5 +1,6 @@
 <?php
 ob_start();
+session_start();
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -19,8 +20,6 @@ echo "<body bgcolor=\"#ffffff\" >";
 <script type="text/javascript" src="js/tory.js"></script> 
 
 <?php
-session_start();
-
 ////////////////////////////////////////////////////////
 include_once "/var/www/tori/funcs.php";
 save_last_location( "time_add.php" );

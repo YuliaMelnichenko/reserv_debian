@@ -1,9 +1,10 @@
 <?php
+session_start();
+
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
-session_start();
 $userID = $_SESSION['ss_id'];
 
 include "/var/www/tori/php_tori/connect.php";
@@ -33,7 +34,7 @@ if ( !$res ) {
   echo "<br>mysql_error = $merr<br>";
 } 
 
-$query = mysqli_query($link, "SELECT USERID, START_DT FROM ADD_TIME WHERE DESCRIPTION = '$desc' and STOP_DT = '0000-00-00 00:00:00'");
+$query = mysqli_query($link, "SELECT USERID, START_DT FROM ADD_TIME WHERE DESCRIPTION = '$desc' AND STOP_DT = '0000-00-00 00:00:00'");
 $res = mysqli_num_rows($query);
 
 if ($res == 0) {

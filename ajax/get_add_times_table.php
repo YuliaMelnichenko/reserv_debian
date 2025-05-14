@@ -1,9 +1,9 @@
 <?php
+session_start();
+
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
-
-session_start();
 
 include_once "/var/www/tori/funcs.php";
 include_once "/var/www/tori/php_tori/connect.php";
@@ -125,7 +125,7 @@ for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
   echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_SUdescription."</h5></td>";
   echo "<td class=\"add_time\" width=115 bgcolor=\"$bgcolor\" valign=\"middle\" align=\"center\">$approvedStr</td>";
   echo "<td class=\"add_time\" width=105 valign=\"middle\" align=\"center\">";
-    echo "<button class=\"$button_style_1\" style=\"font-size: 80%; width:100px; height:25px; background-color:#f8d888; border:1px solid #888888;\" $buttonAdd1 $buttonAdd2 $buttonAdd3 name=\"nextBtn\">Удалить</button>";
+    echo "<button style=\"font-size: 80%; width:100px; height:25px; background-color:#f8d888; border:1px solid #888888;\" $buttonAdd1 $buttonAdd2 $buttonAdd3 name=\"nextBtn\">Удалить</button>";
   echo "</td>";
   echo "</tr>";
 }

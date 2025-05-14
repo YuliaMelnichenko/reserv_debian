@@ -1,9 +1,9 @@
 <?php
+session_start();
+
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
-
-session_start();
 
 $content = "<h5 class=\"big\">Работа вне офиса. Внесение сведений</h5><br>";
 
@@ -29,9 +29,6 @@ $content .= "</tr>";
 $content .= "</table><br>";  
 
 include_once "/var/www/tori/funcs.php";
-// include_once "../php_tori/connect.php";
-
-// session_start();
 
 $userID = $_SESSION['ss_id']; 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );

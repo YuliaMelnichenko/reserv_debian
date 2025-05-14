@@ -1,12 +1,12 @@
 <?php
 date_default_timezone_set("Asia/Novosibirsk");
-session_start();
 ob_start();
+session_start();
 include_once "/var/www/tori/start.php";
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>                                                                                                                   
+<html lang="en">                                                                                                                   
 <head>
 <title>Отчет посещаемости</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -116,8 +116,6 @@ function show_selectors(){
 </script>
 
 <?php
-// session_start();
-
 ////////////////////////////////////////////////////////
 include_once "/var/www/tori/funcs.php";
 include_once "/var/www/tori/funcs_rep.php";
@@ -286,15 +284,15 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
       echo "<td class=\"report_no_padding_no_border\">";    
         echo "<div class=\"report_window_head_left\" id=\"report_window_head_left\">"; 
           echo "<img src=\"/img/report_head_left.png\">";         
-        echo "</div>";    
-      echo "</td>";    
+        echo "</div>";
+      echo "</td>";
  
       echo "<td class=\"report_no_padding_no_border\">";    
         if ( $userCnt == 1 ){
           echo "<div class=\"report_window_head_single\" id=\"report_window_head_single\">";          
         }
         else{
-          echo "<div class=\"report_window_head\" id=\"report_window_head\">";          
+          echo "<div class=\"report_window_head\" id=\"report_window_head\">";        
         }          
             echo "<table>";
             //Заголовок
