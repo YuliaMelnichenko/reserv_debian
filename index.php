@@ -663,18 +663,20 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $full_name = $surname." ".$firstname." ".$lastname;
 
       $time = "0000-00-00 00:00:00";
+      $today = date('m-d');
 
       mysqli_set_charset($link, "utf8");
-      $query5 = mysqli_query($link, "SELECT v.in_dt, v.eat_start_dt, v.eat_stop_dt, v.out_dt, e.surname FROM visiting v JOIN employees e ON v.user_id = e.id WHERE DATE(v.in_dt) = CURDATE() AND v.user_id = '$id_empl'");
+      $query5 = mysqli_query($link, "SELECT v.in_dt, v.eat_start_dt, v.eat_stop_dt, v.out_dt, e.surname, DATE_FORMAT(e.birthday, '%m-%d') FROM visiting v JOIN employees e ON v.user_id = e.id WHERE DATE(v.in_dt) = CURDATE() AND v.user_id = '$id_empl'");
       $row5 = mysqli_fetch_assoc($query5);
 
-      $query7 = mysqli_query($link, "SELECT a.START_DT, a.STOP_DT, e.surname FROM ADD_TIME a JOIN employees e ON a.USERID = e.id WHERE DATE(a.START_DT) = CURDATE() AND a.USERID = '$id_empl'");
+      $query7 = mysqli_query($link, "SELECT a.START_DT, a.STOP_DT, e.surname FROM ADD_TIME a JOIN employees e ON a.USERID = e.id WHERE DATE(a.START_DT) = CURDATE() AND a.USERID = '$id_empl' AND a.STOP_DT IS NULL ORDER BY a.START_DT DESC LIMIT 1");
       $row7 = mysqli_fetch_array($query7);
 
       $in_dt = $row5["in_dt"];
       $eat_start_dt = $row5["eat_start_dt"];
       $eat_stop_dt = $row5["eat_stop_dt"];
       $out_dt = $row5["out_dt"];
+      $birthday = $row5["birthday"];
       $start_dt_AT = $row7["START_DT"];
       $stop_dt_AT = $row7["STOP_DT"];
 
@@ -696,6 +698,13 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       else {
         $img = "<img style=\"margin: 1px 0\" title=\"на рабочем месте\" src=\"img/in_work2.png\">";
         array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl));
+
+        // if ($birthday === $today) {
+        //   $img_2 = "<img style=\"margin: 1px 0\" title=\у сотрудника день рождения\" src=\"img/birthday.png\">";
+        //   array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $img_2));
+        // } else { 
+        //   array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl));
+        // }
       }
     }
 
@@ -715,23 +724,6 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     usort($employee_arr, "sort_employee");
 
     function get_phone_info($id_empl, $phone, $personal_phone, $corporate_phone) {
-      // $output = "Телефон внутренний: " . htmlspecialchars($phone);
-
-      // switch (true) {
-      //   case (!empty($corporate_phone) && !empty($personal_phone)):
-      //     $output .= ", Мобильный: " . htmlspecialchars($personal_phone) .
-      //                ", Служебный мобильный: " . htmlspecialchars($corporate_phone);
-      //     break;
-
-      //   case (!empty($corporate_phone)):
-      //     $output .= ", Служебный мобильный: " . htmlspecialchars($corporate_phone);
-      //     break;
-        
-      //   case (!empty($personal_phone)): 
-      //     $output .= ", Мобильный: " . htmlspecialchars($personal_phone);
-      //     break;
-      // }
-      // return $output;
       $tooltipId = 'u' . $id_empl . '-phones';
       $phones = [];
       $phones[] = "Телефон внутренний: " . htmlspecialchars($phone);
