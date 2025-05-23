@@ -7,7 +7,7 @@ header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
 include_once  "/var/www/tori/funcs.php";
-include  "/var/www/tori/php_tori/connect.php";
+include "/var/www/tori/php_tori/connect.php";
 
 function change_time ($user) {
   include  "/var/www/tori/php_tori/connect.php";

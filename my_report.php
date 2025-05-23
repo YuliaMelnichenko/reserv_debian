@@ -220,7 +220,7 @@ echo "<div id=\"report_container\">";
             $manRepStart = $currDate; 
           }
           if ( isset( $_SESSION['rep_stop_date'] ) ){ 
-            $manRepStop = $_SESSION['rep_stop_date']; 
+            $manRepStop = $_SESSION['rep_stop_date'];
           } 
           else { 
             $manRepStop = $currDate; 

@@ -2855,3 +2855,137 @@ h5.activ_time {
   width: 45px;
   justify-content: flex-end;
 }
+
+#btn_vacations {
+  cursor: pointer; 
+  font-size: 80%; 
+  width: 100px; 
+  height: 25px; 
+  background-color:#f8d888; 
+  border: 1px solid #888888
+}
+
+#btn_sick {
+  cursor: pointer; 
+  font-size: 80%; 
+  width: 100px; 
+  height: 25px; 
+  background-color:#f8d888; 
+  border: 1px solid #888888
+}
+
+#events {
+  display: flex;
+  justify-content: space-between;
+  width: 250px;
+}
+
+#event_buttons {
+  display: flex;
+  justify-content: space-between;
+  margin: 6px 0 40px 0;
+}
+
+#add_info_block {
+  display: flex;
+  justify-content: flex-end;
+  width: 350px;
+}
+
+#btn_add {
+  cursor: pointer; 
+  margin-right: 15px;
+  background: none;
+  border: none;
+}
+
+#btn_red {
+  cursor: pointer; 
+  background: none;
+  border: none;
+}
+
+#leave_table {
+  display: none;
+  border-collapse: collapse;
+  margin-top: 15px;
+  width: 690px;
+  margin: 0;
+  border:solid #d17125 1px;
+  background-color:#eeeeee;
+}
+
+#leave_table th,
+#leave_table td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  text-align: center;
+}
+
+#modal {
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  flex-direction: column;
+  position: fixed;
+  /* width: 650px;
+  height: 90px; */
+  left: 50%;
+  top: 35%;
+  margin-left: -425px;
+  margin-top: -185px;
+  background: #faefdd;
+  border: solid 3px #888888;
+  overflow: hidden;
+  display: none;
+  padding:10px;
+}
+
+#modalTitle {
+  margin-top: 0;
+  margin-bottom: 5px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+#addForm {
+  display: flex;
+  flex-direction: column;
+
+}
+
+#modal_form_block {
+  display: flex;
+}
+
+#modal_form_btn {
+  display: flex;
+  margin: 15px 0;
+  justify-content: space-evenly;
+}
+
+#employeeName {
+  font-family: Arial, sans;
+  font-size: 13px;
+  color: #333333;
+  margin: 0 0 5px 0;
+  font-weight: 600;
+}
+
+#toast {
+  display: none;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #4caf50;
+  color: white;
+  padding: 10px, 20px;
+  border-radius: 5px;
+  z-index: 9999;
+}
+
+.modal_labels {
+  display: flex;
+  flex-direction: column;
+  margin: 5px 20px;
+  align-items: center;
+}

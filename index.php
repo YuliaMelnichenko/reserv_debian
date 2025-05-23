@@ -744,6 +744,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
     for ($i = 0; $i < count($employee_arr); $i++) {
       $zero_time = "0000-00-00 00:00:00";
+      $today = date('m-d');
       $name = $employee_arr[$i][0];
       $start = $employee_arr[$i][1];
       $stop = $employee_arr[$i][2];
@@ -755,8 +756,6 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $corp_phone = $employee_arr[$i][8];
       $personal_id = $employee_arr[$i][9];
       $birth = $employee_arr[$i][10];
-
-      $today = date('m-d');
 
       echo "<div class=\"activity\">";
       echo "<h5 class=\"activ_text\" data-phone-tooltip=\"u$personal_id-phones\">" . $name . "</h5>";
@@ -774,7 +773,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
       echo "<div class=\"img_container\">";
         if ($birth == $today) {
-          echo "<img style=\"margin: 1px 0\" title=\"у сотрудника день рождения\" src=\"img/birthday.png\">";
+          echo "<img style=\"margin: 1px 0\" title=\"с днем рождения!\" src=\"img/birthday.png\">";
           echo $img;
         } else {
           echo $img;
