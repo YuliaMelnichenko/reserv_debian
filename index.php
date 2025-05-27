@@ -643,7 +643,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
     mysqli_set_charset($link, "utf8");
     include "/var/www/tori/php_tori/connect.php";
-    
+
     $query6 = mysqli_query($link, "SELECT id, firstname, surname, lastname, phone, personal_phone, corporate_phone, DATE_FORMAT(birthday, '%m-%d') FROM employees WHERE relevance = 1 ORDER BY surname");
 
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
@@ -742,9 +742,24 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       }
     }
 
+    $today = date('Y-m-d');
+    $eventsToday = [];
+
+    $query9 = "SELECT user_id, event, start_date, stop_date FROM staff_leaves WHERE (event = 'Больничный' AND '$today' BETWEEN start_date AND stop_date) OR (event = 'Отпуск' AND DATE_SUB(start_date, INTERVAL 3 DAY) <= '$today' AND '$today' <= stop_date)";
+    $result9 = mysqli_query($link, $query9);
+    while ($row9 = mysqli_fetch_assoc($result9)) {
+      $uid = $row9['user_id'];
+      $event = $row9['event'];
+
+      if (!isset($eventsToday[$uid])) $eventsToday[$uid] = [];
+
+      if (!in_array($event, $eventsToday[$uid])) {
+        $eventsToday[$uid][] = $event;
+      }
+    }
+    
     for ($i = 0; $i < count($employee_arr); $i++) {
       $zero_time = "0000-00-00 00:00:00";
-      $today = date('m-d');
       $name = $employee_arr[$i][0];
       $start = $employee_arr[$i][1];
       $stop = $employee_arr[$i][2];
@@ -772,12 +787,20 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       }
 
       echo "<div class=\"img_container\">";
+
+        // if (isset($eventsToday[$personal_id]) && in_array('Больничный', $eventsToday[$personal_id])) {
+        //   echo "<img src=\"img/sick.png\" alt=\"На больничном\" title=\"Больничный\" style=\"width: 23px; margin: 1px 0\">";
+        // } elseif (isset($eventsToday[$personal_id]) && in_array('Отпуск', $eventsToday[$personal_id])) {
+        //   echo "<img src=\"img/vacation.png\" alt=\"В отпуске\" title=\"Отпуск\" style=\"width: 23px; margin: 1px 0\">";
+        // }
+      
         if ($birth == $today) {
           echo "<img style=\"margin: 1px 0\" title=\"с днем рождения!\" src=\"img/birthday.png\">";
           echo $img;
         } else {
           echo $img;
         }
+
       echo "</div>";
       echo "</div>";
       get_phone_info($personal_id, $phone, $pers_phone, $corp_phone);
@@ -886,13 +909,13 @@ function update_clock()
 
 var timerId=setInterval( "update_clock()", 10000 );
 
-$(document).ready(function() {
-  $.post('ajax/get_birthdays.php', {}, function(data) {
-    if (data.trim() !== '') {
-      $('#birthday_block').html(data).show();
-    }
-  });
-});
+// $(document).ready(function() {
+//   $.post('ajax/get_birthdays.php', {}, function(data) {
+//     if (data.trim() !== '') {
+//       $('#birthday_block').html(data).show();
+//     }
+//   });
+// });
 
 </script> 
 

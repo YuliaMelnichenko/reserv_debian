@@ -159,6 +159,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'update') {
     }
     exit;
 }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'delete') {
+    header('Content-Type: application/json');
+
+    try {
+        $id = intval($_POST['record_id'] ?? 0);
+        if (!$id) throw new Exception('Некорректный ID');
+
+        $stmt = mysqli_prepare($link, "DELETE FROM staff_leaves WHERE id = ?");
+        if (!$stmt) {
+            throw new Exception('Ошибка подготовки запроса: ' . mysqli_error($link));
+        }
+
+        mysqli_stmt_bind_param($stmt, 'i', $id);
+        if (!mysqli_stmt_execute($stmt)) {
+            throw new Exception("Ошибка удаления: " . mysqli_error($link));
+        }
+
+        echo json_encode(['status' => 'success']);
+    } catch (Exception $e) {
+        error_log('Ошибка удаления: ' . $e->getMessage());
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    }
+
+    exit;
+}
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -192,8 +218,8 @@ echo "<h5 class=\"dark\"><br>/Отпуска и больничные сотру�
 
 echo "<div id=\"event_buttons\">";
     echo "<div id=\"events\">";
-        echo "<button id=\"btn_vacations\" onclick=\"\">Отпуска</button><br>";
-        echo "<button id=\"btn_sick\" onclick=\"\">Больничные</button><br>";
+        echo "<button id=\"btn_vacations\" class=\"event-switch\" onclick=\"\">Отпуска</button><br>";
+        echo "<button id=\"btn_sick\" class=\"event-switch\" onclick=\"\">Больничные</button><br>";
     echo "</div>";
     echo "<div id=\"add_info_block\">";
         echo "<button id=\"btn_add\" title=\"Добавить запись\">";
@@ -208,7 +234,7 @@ echo "</div>";
         <tr>
             <th>Сотрудник</th>
             <th>Дата начала</th>
-            <th>Дата конца</th>
+            <th>Дата окончания</th>
             <th>Кол-во дней</th>
             <th>Событие</th>
             <th></th>
@@ -239,10 +265,10 @@ echo "</div>";
                 <input type="date" name="start_date" required>
             </div>
             <div class="modal_labels">
-                <label style="font-family: Arial,sans; font-size: 13px; color: #333333; font-weight: 700; margin-bottom: 5px;">Дата конца:</label>
+                <label style="font-family: Arial,sans; font-size: 13px; color: #333333; font-weight: 700; margin-bottom: 5px;">Дата окончания:</label>
                 <input type="date" name="stop_date" required>
             </div>
-            <div class="modal_labels">
+            <div class="modal_labels" id="selectEventBlock">
                 <label style="font-family: Arial,sans; font-size: 13px; color: #333333; font-weight: 700; margin-bottom: 5px;">Событие:</label>
                 <select style="width: 110px;" name="event" required>
                     <option value="">Выберите...</option>
@@ -317,6 +343,16 @@ echo "</div>";
     });
 
     function loadLeaves (type) {
+        document.querySelectorAll('#event_buttons button.event-switch').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        if (type === 'Отпуск') {
+            document.getElementById('btn_vacations').classList.add('active');
+        } else if (type === 'Больничный') {
+            document.getElementById('btn_sick').classList.add('active');
+        }
+
         fetch('staff_leaves.php?action=load&type=' + encodeURIComponent(type))
             .then(res => res.text())
             .then(text => {
@@ -330,13 +366,16 @@ echo "</div>";
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
                             <td>${row.name}</td>
-                            <td>${row.start_date}</td>
-                            <td>${row.stop_date}</td>
+                            <td>${formatDate(row.start_date)}</td>
+                            <td>${formatDate(row.stop_date)}</td>
                             <td>${row.total_days}</td>
                             <td>${row.event}</td>
                             <td>
                                 <button id="btn_red" onclick='editLeave(${row.id})' title="Редактировать">
                                     <img src="img/red2.png" alt="Редактировать" width="20" height="20">
+                                </button>
+                                <button id="btn_del" onclick='confirmDelete(${row.id})' title="Удалить запись">
+                                    <img src="img/delete.png" alt="Удалить запись" width="20" height="20">
                                 </button>
                             </td>
                         `
@@ -369,6 +408,7 @@ echo "</div>";
         const recordIdInput = document.getElementById('record_id');
         const employeeSelect = document.querySelector('[name="employee_id"]');
         const employeeBlock = document.getElementById('selectEmployeeBlock');
+        const eventBlock = document.getElementById('selectEventBlock');
 
         document.getElementById('addForm').reset();
         recordIdInput.value = '';
@@ -378,7 +418,8 @@ echo "</div>";
             title.textContent = 'Добавление записи';
 
             employeeBlock.style.display = 'flex';
-            modal.style.width = '650px'
+            // eventBlock.style.display = 'flex';
+            modal.style.width = '655px'
             modal.style.height = '120px'
 
             employeeSelect.required = true;
@@ -386,7 +427,7 @@ echo "</div>";
             title.textContent = 'Внесите корректировки';
             recordIdInput.value = record.id;
 
-            modal.style.width = '460px'
+            modal.style.width = '450px'
             modal.style.height = '140px'
 
             employeeSelect.required = false;
@@ -397,8 +438,34 @@ echo "</div>";
             nameInfo.textContent = 'Сотрудник: ' + record.fio;
 
             employeeBlock.style.display = 'none';
+            // eventBlock.style.display = 'none';
         }
         modal.style.display = 'flex';
+    }
+
+    function confirmDelete (id) {
+        if (!confirm('Вы уверены, что хотите удалить запись?')) return;
+
+        fetch('staff_leaves.php', {
+            method: 'POST',
+            body: new URLSearchParams({
+                action: 'delete',
+                record_id: id
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showToast("✅ запись удалена");
+            } else {
+                alert('' + data.message);
+
+            }
+        })
+        .catch(err => {
+            console.error('Ошибка запроса: ', err);
+            alert('Сервер недоступен');
+        });
     }
 
     function closeModal() {
@@ -406,11 +473,18 @@ echo "</div>";
         document.getElementById('addForm').reset();
     }
 
+    function formatDate (dateStr) {
+        const date = new Date(dateStr);
+        const day = ('0' + date.getDate()).slice(-2);
+        const month = ('0' + (date.getMonth() + 1)).slice(-2);
+        const year = date.getFullYear();
+        return `${day}.${month}.${year}`;
+    }
+
     function showToast (message = "✅ успешно", delay = 1500) {
         const toast = document.getElementById('toast');
-
         toast.textContent = message;
-        
+
         toast.style.display = 'block';
 
         setTimeout(() => {

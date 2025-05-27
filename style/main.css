@@ -2704,15 +2704,12 @@ li:hover ul, li.over ul { display: block; }
   padding: 8px;
 }
 
-#hb_block {
+#hb_block,
+#report_container {
   display: flex;
 }
 
-#hb_window {
-  display: flex;
-  flex-direction: column;
-}
-
+#hb_window,
 #ul_hb_block {
   display: flex;
   flex-direction: column;
@@ -2723,10 +2720,6 @@ li:hover ul, li.over ul { display: block; }
   width: 373px;
   display: flex;
   justify-content: space-between;
-}
-
-#report_container {
-  display: flex;
 }
 
 #employee_activity {
@@ -2742,26 +2735,7 @@ li:hover ul, li.over ul { display: block; }
   border-bottom: 1px solid #777777;
   margin-top: 1px;
   cursor: default;
-  /* position: relative; */
 }
-
-/* .tooltipe_phone {
-  visibility: inherit;
-  background-color: #333;
-  color: #fff;
-  text-align: left;
-  border-radius: 8px;
-  padding: 6px 12px;
-  position: absolute;
-  z-index: 1;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  white-space: nowrap;
-  font-size: 14px;
-} */
 
 h5.activ_text {
   font-family: Arial, sans;
@@ -2804,11 +2778,7 @@ h5.activ_time {
   flex-direction: column;
 }
 
-#add_time_part_start_dateTime {
-  width: 170px;
-  margin: 0 5px;
-}
-
+#add_time_part_start_dateTime,
 #add_time_part_stop_dateTime {
   width: 170px;
   margin: 0 5px;
@@ -2824,11 +2794,7 @@ h5.activ_time {
   margin: 0 5px;
 }
 
-#add_time_part_start_date {
-  width: 120px;
-  margin: 0 5px;
-}
-
+#add_time_part_start_date,
 #add_time_part_stop_date {
   width: 120px;
   margin: 0 5px;
@@ -2856,22 +2822,33 @@ h5.activ_time {
   justify-content: flex-end;
 }
 
-#btn_vacations {
-  cursor: pointer; 
-  font-size: 80%; 
-  width: 100px; 
-  height: 25px; 
-  background-color:#f8d888; 
-  border: 1px solid #888888
-}
-
+#btn_vacations,
 #btn_sick {
   cursor: pointer; 
   font-size: 80%; 
   width: 100px; 
   height: 25px; 
   background-color:#f8d888; 
-  border: 1px solid #888888
+  border: 1px solid #888888;
+}
+
+#event_buttons button.active {
+  background-color: #ccc;
+  color: #000;
+  border: 1px solid #999;
+}
+
+#event_buttons button.event-switch {
+  cursor: pointer; 
+  font-size: 80%; 
+  width: 100px; 
+  height: 25px; 
+  background-color:#f8d888; 
+  border: 1px solid #888888;
+}
+
+#event_buttons button.event-switch:hover {
+  background-color: #ddd;
 }
 
 #events {
@@ -2903,6 +2880,13 @@ h5.activ_time {
   cursor: pointer; 
   background: none;
   border: none;
+  padding: 1px 4px;
+}
+
+#btn_del {
+  cursor: pointer; 
+  background: none;
+  border: none;
 }
 
 #leave_table {
@@ -2926,8 +2910,6 @@ h5.activ_time {
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
   flex-direction: column;
   position: fixed;
-  /* width: 650px;
-  height: 90px; */
   left: 50%;
   top: 35%;
   margin-left: -425px;
