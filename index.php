@@ -1,4 +1,6 @@
 <?php
+
+use morphos\test\English\FunctionsTest;
 date_default_timezone_set("Asia/Novosibirsk");
 ob_start();
 session_start();
@@ -683,19 +685,19 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $time_out = date("H:i", strtotime($out_dt));
       
       if (mysqli_num_rows($query5) === 0) {
-        $img = "<img title=\"на работу не приходил\" src=\"img/in_home.png\">";
+        $img = "<img title=\"На работу не приходил\" src=\"img/in_home.png\">";
         array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
       }
       elseif (($eat_start_dt != $time && $eat_stop_dt === $time) || ($start_dt_AT != $time && $stop_dt_AT === $time)) {
-        $img = "<img title=\"обед/приостановка времени\" src=\"img/pause_time.png\">";
+        $img = "<img title=\"Обед/приостановка времени\" src=\"img/pause_time.png\">";
         array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
       }
       elseif ($in_dt != $time && $out_dt != $time) {
-        $img = "<img title=\"ушел домой\" src=\"img/go_home.png\">";
+        $img = "<img title=\"Ушел домой\" src=\"img/go_home.png\">";
         array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
       }
       else {
-        $img = "<img style=\"margin: 1px 0\" title=\"на рабочем месте\" src=\"img/in_work2.png\">";
+        $img = "<img style=\"margin: 1px 0\" title=\"На рабочем месте\" src=\"img/in_work2.png\">";
         array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
       }
     }
@@ -704,10 +706,10 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       if (is_null($a[4]) && is_null($b[4])) {
         return strnatcmp($a[0], $b[0]);
       }
-      if ($a[3] === "<img style=\"margin: 1px 0\" title=\"на рабочем месте\" src=\"img/in_work2.png\">" && $b[3] === "<img style=\"margin: 1px 0\" title=\"на рабочем месте\" src=\"img/in_work2.png\">") {
+      if ($a[3] === "<img style=\"margin: 1px 0\" title=\"На рабочем месте\" src=\"img/in_work2.png\">" && $b[3] === "<img style=\"margin: 1px 0\" title=\"На рабочем месте\" src=\"img/in_work2.png\">") {
         return strnatcmp($a[0], $b[0]);
       }
-      if ($a[3] === "<img title=\"ушел домой\" src=\"img/go_home.png\">" && $b[3] === "<img title=\"ушел домой\" src=\"img/go_home.png\">") {
+      if ($a[3] === "<img title=\"Ушел домой\" src=\"img/go_home.png\">" && $b[3] === "<img title=\"Ушел домой\" src=\"img/go_home.png\">") {
         return strnatcmp($a[0], $b[0]);
       }
       return strnatcmp($a[5], $b[5]);
@@ -742,6 +744,60 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       }
     }
 
+    function getWorkingDaysUntil($start_date, $today = null) {
+      if ($today === null) {
+        $today = date('Y-m-d');
+      }
+
+      $start = new DateTime($today);
+      $end = new DateTime($start_date);
+
+      if ($start >= $end) {
+        return 0;
+      }
+
+      $interval = new DateInterval('P1D');
+      $period = new DatePeriod($start, $interval, $end);
+
+      $workingDays = 0;
+      foreach ($period as $date) {
+        $dayOfWeek = $date->format('N'); // 6=суббота, 7=воскресенье
+
+        if ($dayOfWeek < 6) {
+          $workingDays++;
+        }
+      }
+      return $workingDays;
+    }
+
+    function getDayWord ($number) {
+      $number = (int)$number;
+      $lastDate = $number % 10;
+      $lastTwo = $number % 100;
+
+      if ($lastTwo >= 11 && $lastTwo <= 14) {
+        return 'дней';
+      }
+
+      if ($lastDate === 1) return 'день';
+      if ($lastDate >= 2 && $lastDate <= 4) return 'дня';
+      
+      return 'дней';
+    }
+
+    function getDaysLeft($end_date, $today = null) {
+      if (!$today) {
+        $today = date("Y-m-d");
+      }
+
+      $todayDate = new DateTime($today);
+      $endDate = new DateTime($end_date);
+
+      $diff = $todayDate->diff($endDate)->days;
+
+      return max($diff, 0);
+    }
+
     $today = date('Y-m-d');
     $eventsToday = [];
 
@@ -750,11 +806,25 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     while ($row9 = mysqli_fetch_assoc($result9)) {
       $uid = $row9['user_id'];
       $event = $row9['event'];
+      $start = $row9['start_date'];
+      $stop = $row9['stop_date'];
 
       if (!isset($eventsToday[$uid])) $eventsToday[$uid] = [];
 
-      if (!in_array($event, $eventsToday[$uid])) {
-        $eventsToday[$uid][] = $event;
+      $alreadyExists = false;
+      foreach ($eventsToday[$uid] as $e) {
+        if ($e['event'] === $event && $e['start_date'] === $start && $e['stop_date'] === $stop) {
+          $alreadyExists = true;
+          break;
+        }
+      }
+
+      if (!$alreadyExists) {
+        $eventsToday[$uid][] = [
+          'event' => $event,
+          'start_date' => $start,
+          'stop_date' => $stop
+        ];
       }
     }
     
@@ -787,12 +857,44 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       }
 
       echo "<div class=\"img_container\">";
+      
+      $today = date('Y-m-d');
+      $vacationIcons = [
+        3 => 'vacation3.png',
+        2 => 'vacation2.png',
+        1 => 'vacation1.png'
+      ];
 
-        // if (isset($eventsToday[$personal_id]) && in_array('Больничный', $eventsToday[$personal_id])) {
-        //   echo "<img src=\"img/sick.png\" alt=\"На больничном\" title=\"Больничный\" style=\"width: 23px; margin: 1px 0\">";
-        // } elseif (isset($eventsToday[$personal_id]) && in_array('Отпуск', $eventsToday[$personal_id])) {
-        //   echo "<img src=\"img/vacation.png\" alt=\"В отпуске\" title=\"Отпуск\" style=\"width: 23px; margin: 1px 0\">";
-        // }
+      if (isset($eventsToday[$personal_id])){
+        foreach ($eventsToday[$personal_id] as $event) {
+          $start = $event['start_date'];
+          $stop = $event['stop_date'];
+
+          if ($event['event'] === 'Отпуск') {
+            $tooltipDate = "Отпуск: " . date("d.m.Y", strtotime($start)) . " - " . date("d.m.Y", strtotime($stop));
+            if ($today >= $start && $today <= $stop) {
+              $daysToEnd = getDaysLeft($stop, $today);
+              $tooltip = "До конца отпуска осталось: $daysToEnd " . getDayWord($daysToEnd) . "\nОтпуск: " . date("d.m.Y", strtotime($start)) . " - " . date("d.m.Y", strtotime($stop));
+              echo "<img src=\"img/vacation.png\" title=\"$tooltip\" style=\"width: 23px; margin: 1px 0\">";
+            } else {
+                $daysLeft = getWorkingDaysUntil($start, $today);
+                if (array_key_exists($daysLeft, $vacationIcons)) {
+                  $tooltip = "Осталось $daysLeft " . getDayWord($daysLeft) . " до отпуска. \n$tooltipDate";
+                  $icon = $vacationIcons[$daysLeft];
+                  echo "<img src=\"img/$icon\" title=\"$tooltip\" style=\"width: 23px; margin: 1px 0\">";
+                }
+              }
+          }
+
+          if ($event['event'] === 'Больничный') {
+            if ($today >= $start && $today <= $stop) {
+              $daysToEnd = getDaysLeft($stop, $today);
+              $tooltip = "До конца больничного осталось: $daysToEnd " . getDayWord($daysToEnd) . ". \nБольничный: " . date("d.m.Y", strtotime($start)) . " - " . date("d.m.Y", strtotime($stop));
+              echo "<img src=\"img/sick.png\" title=\"$tooltip\" style=\"width: 23px; margin: 1px 0\">";
+            }
+          }
+        }
+      }
       
         if ($birth == $today) {
           echo "<img style=\"margin: 1px 0\" title=\"с днем рождения!\" src=\"img/birthday.png\">";

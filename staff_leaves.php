@@ -1,8 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 ob_start();
 session_start();
 
@@ -13,6 +9,7 @@ mysqli_set_charset($link, "utf8");
 save_last_location( "time_add.php" );
 auth();
 ////////////////////////////////////////////////////////
+
 
 if (isset($_GET['action']) && $_GET['action'] === 'get' && isset($_GET['id'])) {
     header('Content-Type: application/json');
@@ -53,7 +50,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
 
     $type = $_GET['type'] ?? 'Отпуск';
 
-    $stmt = mysqli_prepare($link, "SELECT id, fio, start_date, stop_date, event FROM staff_leaves WHERE event = ? ORDER BY start_date DESC");
+    $stmt = mysqli_prepare($link, "SELECT * FROM staff_leaves WHERE event = ? AND stop_date >= CURDATE() ORDER BY stop_date DESC");
     mysqli_stmt_bind_param($stmt, 's', $type);
     mysqli_stmt_execute($stmt);
 
@@ -73,6 +70,40 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
             'stop_date' => $row['stop_date'],
             'event' => $row['event'],
             'total_days' => $days
+        ];
+    }
+    echo json_encode($rows);
+
+    exit;
+}
+
+if (isset($_GET['action']) && $_GET['action'] === 'archive') {
+    header('Content-Type: application/json');
+
+    $query = "SELECT * FROM staff_leaves WHERE stop_date < CURDATE() ORDER BY fio ASC, stop_date DESC";
+    $result = mysqli_query($link, $query);
+
+    if (!$result) {
+        echo json_encode(['error' => mysqli_error($link)]);
+        exit;
+    }
+
+    $rows = [];
+    $count = 0;
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        $count ++;
+        $start = strtotime($row['start_date']);
+        $stop = strtotime($row['stop_date']);
+        $days = round(($stop - $start) / 86400 + 1);
+
+        $rows[] = [
+            'id' => $row['id'],
+            'name' => $row['fio'],
+            'start_date' => $row['start_date'],
+            'stop_date' => $row['stop_date'],
+            'event' => $row['event'],
+            'total_days' => $days 
         ];
     }
     echo json_encode($rows);
@@ -185,6 +216,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'delete') {
 
     exit;
 }
+
+
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -210,38 +243,41 @@ include_once "/var/www/tori/navigate.php";
 
 echo "</td>";
    
-$wholeWidth = 700;
+$wholeWidth = 705;
 
 echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
 
-echo "<h5 class=\"dark\"><br>/Отпуска и больничные сотрудников <br></h5>";
+echo "<h5 class=\"dark\"><br>/Больничные и отпуска сотрудников <br></h5>";
 
 echo "<div id=\"event_buttons\">";
     echo "<div id=\"events\">";
-        echo "<button id=\"btn_vacations\" class=\"event-switch\" onclick=\"\">Отпуска</button><br>";
-        echo "<button id=\"btn_sick\" class=\"event-switch\" onclick=\"\">Больничные</button><br>";
+    echo "<button id=\"btn_sick\" class=\"event-switch\" onclick=\"\">Больничные</button>";
+    echo "<button id=\"btn_vacations\" class=\"event-switch\" onclick=\"\">Отпуска</button>";
+    echo "<button id=\"btn_archive\" class=\"event-switch\" onclick=\"loadArchive();\">Архив</button>";
     echo "</div>";
     echo "<div id=\"add_info_block\">";
         echo "<button id=\"btn_add\" title=\"Добавить запись\">";
-        echo "<img src=\"img/plus.png\" alt=\"Добавить запись\" height=\"24\">";
-        echo "</button><br>";
+            echo "<img src=\"img/plus.png\" alt=\"Добавить запись\" height=\"24\">";
+        echo "</button>";
     echo "</div>";
 echo "</div>";
 ?>
 
-<table id="leave_table">
-    <thead>
-        <tr>
-            <th>Сотрудник</th>
-            <th>Дата начала</th>
-            <th>Дата окончания</th>
-            <th>Кол-во дней</th>
-            <th>Событие</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+<div id="leave_table_wrapper">
+    <table id="leave_table">
+        <thead>
+            <tr>
+                <th>Сотрудник</th>
+                <th>Дата начала</th>
+                <th>Дата окончания</th>
+                <th>Кол-во дней</th>
+                <th>Событие</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
 
 <div id="toast"> ✅ Запись обновлена </div>
 
@@ -323,7 +359,6 @@ echo "</div>";
                     if (data.status === 'success') {
                         closeModal();
                         showToast("✅ Запись успешно обновлена");
-                        // if (currentType) loadLeaves(currentType);
                     } else {
                         alert('Ошибка: ' + data.message);
                     }
@@ -351,7 +386,7 @@ echo "</div>";
             document.getElementById('btn_vacations').classList.add('active');
         } else if (type === 'Больничный') {
             document.getElementById('btn_sick').classList.add('active');
-        }
+        } 
 
         fetch('staff_leaves.php?action=load&type=' + encodeURIComponent(type))
             .then(res => res.text())
@@ -466,6 +501,47 @@ echo "</div>";
             console.error('Ошибка запроса: ', err);
             alert('Сервер недоступен');
         });
+    }
+
+    function loadArchive() {
+        document.querySelectorAll('#event_buttons button.event-switch').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        document.getElementById('btn_archive').classList.add('active');
+
+        fetch('staff_leaves.php?action=archive')
+            .then(res => res.text())
+            .then(text => {
+                try {
+                    const data = JSON.parse(text);
+                    const table = document.getElementById('leave_table');
+                    const tbody = table.querySelector('tbody');
+                    tbody.innerHTML = "";
+
+                    data.forEach(row => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${row.name}</td>
+                            <td>${formatDate(row.start_date)}</td>
+                            <td>${formatDate(row.stop_date)}</td>
+                            <td>${row.total_days}</td>
+                            <td>${row.event}</td>
+                            <td>
+                                <button id="btn_red" onclick='editLeave(${row.id})' title="Редактировать">
+                                    <img src="img/red2.png" alt="Редактировать" width="20" height="20">
+                                </button>
+                            </td>
+                        `
+                        tbody.appendChild(tr);
+                    });
+
+                    table.style.display = 'table';
+                } catch (err) {
+                    console.error('Ошибка JSON: ', err);
+                    console.warn('Ответ сервера: ', text);
+                }
+            });
     }
 
     function closeModal() {

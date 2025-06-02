@@ -2832,7 +2832,7 @@ h5.activ_time {
   border: 1px solid #888888;
 }
 
-#event_buttons button.active {
+#event_buttons button.event-switch.active {
   background-color: #ccc;
   color: #000;
   border: 1px solid #999;
@@ -2854,13 +2854,13 @@ h5.activ_time {
 #events {
   display: flex;
   justify-content: space-between;
-  width: 250px;
+  width: 350px;
 }
 
 #event_buttons {
   display: flex;
   justify-content: space-between;
-  margin: 6px 0 40px 0;
+  margin: 6px 0 18px 0;
 }
 
 #add_info_block {
@@ -2887,6 +2887,10 @@ h5.activ_time {
   cursor: pointer; 
   background: none;
   border: none;
+}
+
+#btn_archive {
+  margin-left: 15px;
 }
 
 #leave_table {
@@ -2970,4 +2974,11 @@ h5.activ_time {
   flex-direction: column;
   margin: 5px 20px;
   align-items: center;
+}
+
+#leave_table_wrapper {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 10px;
+  /* border: 1px solid #ccc; */
 }
