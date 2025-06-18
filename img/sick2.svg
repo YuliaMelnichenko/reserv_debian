@@ -1,0 +1,8 @@
+<svg width="25" height="25" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg">
+  <!-- Круг с черной обводкой и прозрачной заливкой -->
+  <circle cx="12.5" cy="12.5" r="11.5" stroke="black" stroke-width="2" fill="none"></circle>
+  
+  <!-- Красный медицинский крест -->
+  <rect x="11" y="7" width="3" height="11" fill="red"></rect>
+  <rect x="7" y="11" width="11" height="3" fill="red"></rect>
+</svg>

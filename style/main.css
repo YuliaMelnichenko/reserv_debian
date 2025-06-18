@@ -2961,12 +2961,16 @@ h5.activ_time {
   display: none;
   position: fixed;
   top: 20px;
-  right: 20px;
-  background: #4caf50;
+  right: 50px;
+  background: #4caf50a8;
   color: white;
   padding: 10px, 20px;
   border-radius: 5px;
   z-index: 9999;
+  width: 200px;
+  height: 30px;
+  justify-content: center;
+  align-items: center;
 }
 
 .modal_labels {

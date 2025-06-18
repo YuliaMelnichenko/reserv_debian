@@ -168,17 +168,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'update') {
         $id = intval($_POST['record_id'] ?? 0);
         $start = $_POST['start_date'] ?? '';
         $stop = $_POST['stop_date'] ?? '';
+        $event = $_POST['event'] ?? '';
 
         if (!$id || !$start || !$stop) {
-            throw new Exception('Поля заполнены некорректно');   
+            throw new Exception('Поля заполнены некорректно');
         }
 
-        $stmt = mysqli_prepare($link, "UPDATE staff_leaves SET start_date = ?, stop_date = ? WHERE id = ? ");
+        $stmt = mysqli_prepare($link, "UPDATE staff_leaves SET start_date = ?, stop_date = ?, event = ? WHERE id = ? ");
         if (!$stmt) {
             throw new Exception("Ошибка подготовки запроса" . mysqli_error($link));
         }
 
-        mysqli_stmt_bind_param($stmt, 'ssi', $start, $stop, $id);
+        mysqli_stmt_bind_param($stmt, 'sssi', $start, $stop, $event, $id);
         if (!mysqli_stmt_execute($stmt)) {
             throw new Exception("Ошибка выполнения запроса: " . mysqli_error($link));
         }
@@ -321,7 +322,7 @@ echo "</div>";
 </div>
 
 <script>
-    let currentType = null;
+    let currentType = 'Отпуск';
 
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('btn_vacations').addEventListener('click', () => {
@@ -453,7 +454,6 @@ echo "</div>";
             title.textContent = 'Добавление записи';
 
             employeeBlock.style.display = 'flex';
-            // eventBlock.style.display = 'flex';
             modal.style.width = '655px'
             modal.style.height = '120px'
 
@@ -473,7 +473,6 @@ echo "</div>";
             nameInfo.textContent = 'Сотрудник: ' + record.fio;
 
             employeeBlock.style.display = 'none';
-            // eventBlock.style.display = 'none';
         }
         modal.style.display = 'flex';
     }
@@ -561,11 +560,16 @@ echo "</div>";
         const toast = document.getElementById('toast');
         toast.textContent = message;
 
-        toast.style.display = 'block';
+        toast.style.display = 'flex';
 
         setTimeout(() => {
             toast.style.display = 'none';
-            location.reload();
+
+            if (currentType === 'Архив') {
+                loadArchive();
+            } else {
+                loadLeaves(currentType || 'Отпуск');
+            }
         }, delay);
     }
 

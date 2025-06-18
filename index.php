@@ -744,11 +744,34 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       }
     }
 
-    function getWorkingDaysUntil($start_date, $today = null) {
-      if ($today === null) {
-        $today = date('Y-m-d');
+    $today = date('Y-m-d');
+
+    function getHolidayDates ($link, $form_date = null) {
+      if ($form_date === null) {
+        $form_date = date('Y-m-d');
       }
 
+      $holidays = [];
+
+      $query = "SELECT date FROM work_dayoff WHERE type = 0 AND date >= ?";
+      $stmt = mysqli_prepare($link, $query);
+      mysqli_stmt_bind_param($stmt, 's', $form_date);
+      mysqli_stmt_execute($stmt);
+      $result = mysqli_stmt_get_result($stmt);
+
+      while ($row = mysqli_fetch_assoc($result)) {
+        $holidays[] = $row['date'];
+      }
+
+      foreach ($holidays as $hd) {
+        echo "<!-- holiday: $hd -->";
+      }
+      return $holidays;
+    }
+
+    $holidayDates = getHolidayDates($link, $today);
+
+    function getWorkingDaysUntil($today, $start_date, $holidays = []) {
       $start = new DateTime($today);
       $end = new DateTime($start_date);
 
@@ -760,10 +783,17 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $period = new DatePeriod($start, $interval, $end);
 
       $workingDays = 0;
+
       foreach ($period as $date) {
         $dayOfWeek = $date->format('N'); // 6=суббота, 7=воскресенье
+        $dateStr = $date->format('Y-m-d');
 
-        if ($dayOfWeek < 6) {
+        $isWeekend = $dayOfWeek >= 6;
+        $isHoliday = in_array($dateStr, $holidays);
+
+        echo "<!-- Check $dateStr: weekend = " . ($isWeekend ? "yes" : "no") . ", holiday = " . ($isHoliday ? "yes" : "no") . "-->";
+
+        if (!$isWeekend && !$isHoliday) {
           $workingDays++;
         }
       }
@@ -785,23 +815,19 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       return 'дней';
     }
 
-    function getDaysLeft($end_date, $today = null) {
-      if (!$today) {
-        $today = date("Y-m-d");
-      }
-
+    function getDaysLeft($end_date, $today) {
       $todayDate = new DateTime($today);
       $endDate = new DateTime($end_date);
 
       $diff = $todayDate->diff($endDate)->days;
 
-      return max($diff, 0);
+      return $diff + 1;
     }
 
-    $today = date('Y-m-d');
+    // $today = date('Y-m-d');
     $eventsToday = [];
 
-    $query9 = "SELECT user_id, event, start_date, stop_date FROM staff_leaves WHERE (event = 'Больничный' AND '$today' BETWEEN start_date AND stop_date) OR (event = 'Отпуск' AND DATE_SUB(start_date, INTERVAL 3 DAY) <= '$today' AND '$today' <= stop_date)";
+    $query9 = "SELECT user_id, event, start_date, stop_date FROM staff_leaves WHERE (event = 'Больничный' AND '$today' BETWEEN start_date AND stop_date) OR (event = 'Отпуск' AND start_date >= '$today')";
     $result9 = mysqli_query($link, $query9);
     while ($row9 = mysqli_fetch_assoc($result9)) {
       $uid = $row9['user_id'];
@@ -827,6 +853,12 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
         ];
       }
     }
+
+    $vacationIcons = [
+      3 => 'vacation3.png',
+      2 => 'vacation2.png',
+      1 => 'vacation1.png'
+    ];
     
     for ($i = 0; $i < count($employee_arr); $i++) {
       $zero_time = "0000-00-00 00:00:00";
@@ -857,32 +889,32 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       }
 
       echo "<div class=\"img_container\">";
-      
-      $today = date('Y-m-d');
-      $vacationIcons = [
-        3 => 'vacation3.png',
-        2 => 'vacation2.png',
-        1 => 'vacation1.png'
-      ];
 
       if (isset($eventsToday[$personal_id])){
         foreach ($eventsToday[$personal_id] as $event) {
           $start = $event['start_date'];
           $stop = $event['stop_date'];
+          $today = date('Y-m-d');
 
-          if ($event['event'] === 'Отпуск') {
+          $daysLeft = getWorkingDaysUntil($today, $start, $holidayDates);
+
+          if ($event['event'] === 'Отпуск' && $today <= $stop) {
             $tooltipDate = "Отпуск: " . date("d.m.Y", strtotime($start)) . " - " . date("d.m.Y", strtotime($stop));
+
             if ($today >= $start && $today <= $stop) {
               $daysToEnd = getDaysLeft($stop, $today);
               $tooltip = "До конца отпуска осталось: $daysToEnd " . getDayWord($daysToEnd) . "\nОтпуск: " . date("d.m.Y", strtotime($start)) . " - " . date("d.m.Y", strtotime($stop));
               echo "<img src=\"img/vacation.png\" title=\"$tooltip\" style=\"width: 23px; margin: 1px 0\">";
-            } else {
-                $daysLeft = getWorkingDaysUntil($start, $today);
+            } elseif ($today < $start) {
+                $daysLeft = getWorkingDaysUntil($today, $start, $holidayDates);
+                
                 if (array_key_exists($daysLeft, $vacationIcons)) {
                   $tooltip = "Осталось $daysLeft " . getDayWord($daysLeft) . " до отпуска. \n$tooltipDate";
                   $icon = $vacationIcons[$daysLeft];
                   echo "<img src=\"img/$icon\" title=\"$tooltip\" style=\"width: 23px; margin: 1px 0\">";
                 }
+              } else {
+                "<!-- ni icon for $daysLeft days -->";
               }
           }
 
@@ -896,8 +928,8 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
         }
       }
       
-        if ($birth == $today) {
-          echo "<img style=\"margin: 1px 0\" title=\"с днем рождения!\" src=\"img/birthday.png\">";
+        if ($birth == date('m-d')) {
+          echo "<img style=\"margin: 1px 0\" title=\"C днем рождения!\" src=\"img/birthday.png\">";
           echo $img;
         } else {
           echo $img;
