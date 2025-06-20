@@ -185,11 +185,13 @@ function reg_out_work()
 function reg_eat_start()
 {
   switch_day_state( 1 );
+  location.reload();
 }
 
 function reg_eat_stop()
 {
   switch_day_state( 1 );
+  location.reload();
 }   
 
 function add_expl()
@@ -484,11 +486,22 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     $_SESSION['ss_stopDTStr'] = $stopDTStr;
     
     $_date = date('Y-m-d');
+    $empty_dt = "0000-00-00 00:00:00";
+    $bg_style = "";
 
     mysqli_set_charset($link, "utf8");
     $query0 = mysqli_query($link, "SELECT * FROM employees WHERE id = '$user_id'");
     $row0 = mysqli_fetch_assoc($query0); 
     $vn0=mysqli_num_rows($query0);
+
+    $query = mysqli_query($link, "SELECT eat_start_dt, eat_stop_dt FROM visiting WHERE user_id = '$user_id' AND DATE(in_dt) = CURDATE()");
+    $row = mysqli_fetch_assoc($query);
+
+    if ($row['eat_start_dt'] != $empty_dt && $row['eat_stop_dt'] === $empty_dt) {
+      $bg_style = "red";
+    } else {
+      $bg_style = "#ddeeff";
+    }
 
     echo "<table>";
     echo "<tr>";
@@ -500,7 +513,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
     $wholeWidth = 625;
 
-    echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
+    echo "<td bgcolor=\"$bg_style\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
 
     echo "<h5 class=\"dark\"><br>/текущий день<br><br></h5>";
         
@@ -524,7 +537,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
       echo "<table>";
       echo "<tr>";
-      echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\">";
+      echo "<td bgcolor=\"$bg_style\" bordercolor=\"#888888\" valign=\"top\" align=\"left\">";
 
       $width00 = 600;  
       $width11 = 320; 
@@ -648,7 +661,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
     $query6 = mysqli_query($link, "SELECT id, firstname, surname, lastname, phone, personal_phone, corporate_phone, DATE_FORMAT(birthday, '%m-%d') FROM employees WHERE relevance = 1 ORDER BY surname");
 
-    echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
+    echo "<td bgcolor=\"$bg_style\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
     echo "<h5 class=\"dark0\"><br>/присутствие сотрудников<br><br></h5>";
     echo "<div id=\"employee_activity\">";
 
@@ -827,7 +840,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     // $today = date('Y-m-d');
     $eventsToday = [];
 
-    $query9 = "SELECT user_id, event, start_date, stop_date FROM staff_leaves WHERE (event = 'Больничный' AND '$today' BETWEEN start_date AND stop_date) OR (event = 'Отпуск' AND start_date >= '$today')";
+    $query9 = "SELECT user_id, event, start_date, stop_date FROM staff_leaves WHERE (event = 'Больничный' AND '$today' BETWEEN start_date AND stop_date) OR (event = 'Отпуск' AND ('$today' BETWEEN start_date AND stop_date OR start_date >= '$today'))";
     $result9 = mysqli_query($link, $query9);
     while ($row9 = mysqli_fetch_assoc($result9)) {
       $uid = $row9['user_id'];
