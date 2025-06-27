@@ -141,7 +141,7 @@ function get_time_registration_div_content()
 
 function switch_day_state( next )
 {
-  $.post('ajax/switch_day_state.php', { next: next }, RetSWT);                           
+  $.post('ajax/switch_day_state.php', { next: next }, RetSWT);
   function RetSWT(dat) 
   { 
     if ( dat == 1 )
