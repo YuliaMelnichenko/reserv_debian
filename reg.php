@@ -12,7 +12,7 @@ echo "<body bgcolor=\"#ffeeff\">";
 
 if ( isset($_SESSION['ss_id']) )
 {
-  include_once "/var/www/tori/php_tori/connect.php";
+  include_once __DIR__ . "/php_tori/connect.php";
 
   $time =  date("H:i:s");
   $date_ = date('Y-m-d');

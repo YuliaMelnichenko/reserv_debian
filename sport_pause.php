@@ -21,7 +21,7 @@ echo "<body bgcolor=\"#ffffff\" >";
 
 <?php
 ////////////////////////////////////////////////////////
-include_once "/var/www/tori/funcs.php";
+include_once __DIR__ . "/funcs.php";
 save_last_location( "time_add.php" );
 auth();
 ////////////////////////////////////////////////////////
@@ -34,7 +34,7 @@ echo "<table border=0>";
 echo "<tr>";
 echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
 
-include_once "/var/www/tori/navigate.php";
+include_once __DIR__ . "/navigate.php";
 
 echo "</td>";
    

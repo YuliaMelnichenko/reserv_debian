@@ -3,13 +3,12 @@ ob_start();
 session_start();
 
 ////////////////////////////////////////////////////////
-include_once "/var/www/tori/funcs.php";
-include "/var/www/tori/php_tori/connect.php";
+include_once __DIR__ . "/funcs.php";
+include __DIR__ . "/php_tori/connect.php";
 mysqli_set_charset($link, "utf8");
 save_last_location( "time_add.php" );
 auth();
 ////////////////////////////////////////////////////////
-
 
 if (isset($_GET['action']) && $_GET['action'] === 'get' && isset($_GET['id'])) {
     header('Content-Type: application/json');
@@ -175,11 +174,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'update') {
         }
 
         $stmt = mysqli_prepare($link, "UPDATE staff_leaves SET start_date = ?, stop_date = ?, event = ? WHERE id = ? ");
+
         if (!$stmt) {
             throw new Exception("Ошибка подготовки запроса" . mysqli_error($link));
         }
 
         mysqli_stmt_bind_param($stmt, 'sssi', $start, $stop, $event, $id);
+
         if (!mysqli_stmt_execute($stmt)) {
             throw new Exception("Ошибка выполнения запроса: " . mysqli_error($link));
         }
@@ -200,11 +201,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'delete') {
         if (!$id) throw new Exception('Некорректный ID');
 
         $stmt = mysqli_prepare($link, "DELETE FROM staff_leaves WHERE id = ?");
+
         if (!$stmt) {
             throw new Exception('Ошибка подготовки запроса: ' . mysqli_error($link));
         }
 
         mysqli_stmt_bind_param($stmt, 'i', $id);
+        
         if (!mysqli_stmt_execute($stmt)) {
             throw new Exception("Ошибка удаления: " . mysqli_error($link));
         }
@@ -240,7 +243,7 @@ echo "<table border=0>";
 echo "<tr>";
 echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
 
-include_once "/var/www/tori/navigate.php";
+include_once __DIR__ . "/navigate.php";
 
 echo "</td>";
    
@@ -254,6 +257,7 @@ echo "<div id=\"event_buttons\">";
     echo "<div id=\"events\">";
     echo "<button id=\"btn_sick\" class=\"event-switch\" onclick=\"\">Больничные</button>";
     echo "<button id=\"btn_vacations\" class=\"event-switch\" onclick=\"\">Отпуска</button>";
+    // echo "<button id=\"btn_business_trip\" class=\"event-switch\" onclick=\"\">Командировки</button>";
     echo "<button id=\"btn_archive\" class=\"event-switch\" onclick=\"loadArchive();\">Архив</button>";
     echo "</div>";
     echo "<div id=\"add_info_block\">";
@@ -311,6 +315,7 @@ echo "</div>";
                     <option value="">Выберите...</option>
                     <option value="Отпуск">Отпуск</option>
                     <option value="Больничный">Больничный</option>
+                    <!-- <option value="Командировка">Командировка</option> -->
                 </select>
             </div>
         </div>
@@ -493,7 +498,6 @@ echo "</div>";
                 showToast("✅ запись удалена");
             } else {
                 alert('' + data.message);
-
             }
         })
         .catch(err => {
@@ -586,4 +590,3 @@ echo "</div>";
 
 </body>
 </html>
-

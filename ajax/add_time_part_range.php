@@ -23,7 +23,7 @@ else{
   $byAlert = 0;
 }
 
-include "/var/www/tori/php_tori/connect.php";
+include __DIR__ . "/../php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
 
@@ -50,7 +50,7 @@ if ( strtotime($add_time_part_start_date) > strtotime($add_time_part_stop_date) 
 }
 else
 {
-  include_once  "/var/www/tori/funcs.php";
+  include_once __DIR__ . "/../funcs.php";
 
   $daysRange = get_days_range( $add_time_part_start_date, $add_time_part_stop_date );   
   $newDaysRange = array();

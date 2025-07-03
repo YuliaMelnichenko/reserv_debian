@@ -23,7 +23,7 @@ echo "<body bgcolor=\"#ffffff\" >";
 </script>
 
 <?php
-include_once "/var/www/tori/funcs.php";
+include_once __DIR__ . "/funcs.php";
 
 $notificationCount = 0;
 $acceptedNotificationCount = 0;

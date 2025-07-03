@@ -11,7 +11,7 @@ $training_date = $_POST['training_date'];
 $training_start_time = $_POST['training_start_time'];
 $training_stop_time = $_POST['training_stop_time'];
 
-include "/var/www/tori/php_tori/connect.php";
+include __DIR__ . "/../php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
 

@@ -8,7 +8,7 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 $userID = $_SESSION['ss_id']; 
 $ss_visiting_ID = $_SESSION['ss_visiting_ID'];
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once __DIR__ . "/../php_tori/connect.php";
 
 $query = mysqli_query($link, "SELECT take_pause FROM visiting WHERE id = '$ss_visiting_ID' AND user_id = '$userID'");
 $merr=mysqli_error($link);

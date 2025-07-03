@@ -5,8 +5,8 @@ header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
-include "/var/www/tori/php_tori/connect.php";
-include_once "/var/www/tori/funcs.php";
+include __DIR__ . "/../php_tori/connect.php";
+include_once __DIR__ . "/../funcs.php";
 
 mysqli_set_charset($link, "utf8");
 

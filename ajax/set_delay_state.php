@@ -8,7 +8,7 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 $ID = $_POST['addID'];
 $mode = $_POST['mode'];
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once __DIR__ . "/../php_tori/connect.php";
 
 if ( $mode == 100 )
 {

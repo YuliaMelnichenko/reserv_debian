@@ -9,8 +9,8 @@ $userID_ = $_SESSION['ss_id'];
 
 $ss_delay_duration = $_SESSION['ss_delay_duration'];
 
-include_once "/var/www/tori/funcs.php";
-include_once "/var/www/tori/php_tori/connect.php";
+include_once __DIR__ . "/../funcs.php";
+include_once __DIR__ . "/../php_tori/connect.php";
 
 $currentDateArr = get_current_datetime_in_timezone();
 $currentDate = $currentDateArr[2];

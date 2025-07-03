@@ -4,7 +4,7 @@ use morphos\test\English\FunctionsTest;
 date_default_timezone_set("Asia/Novosibirsk");
 ob_start();
 session_start();
-include_once "/var/www/tori/start.php";
+include_once __DIR__ . "/start.php";
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -363,11 +363,9 @@ echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 echo "<body onload=\"check_day_change();\" bgcolor=\"#ffffff\" >";
 
-// print_r($_COOKIE);
-
-include_once "/var/www/tori/funcs.php";
-include "/var/www/tori/php_tori/connect.php";
-error_log(print_r($_SESSION, true));
+include_once __DIR__ . "/funcs.php";
+include __DIR__ . "/php_tori/connect.php";
+// error_log(print_r($_SESSION, true));
 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 $user_dayTransitionTime = $_SESSION['$ss_dayTransitionTime'];
@@ -444,8 +442,8 @@ echo "</div>";
 echo "<div align=\"left\">";
 
 ////////////////////////////////////////////////////////
-include_once  "/var/www/tori/funcs.php";
-include "/var/www/tori/php_tori/connect.php";
+include_once __DIR__ . "/funcs.php";
+include __DIR__ . "/php_tori/connect.php";
 
 $ip = $_SERVER['REMOTE_ADDR'];
 auth();
@@ -458,7 +456,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
 ////////////////////////////////////////////////////////
 
-  include "/var/www/tori/php_tori/connect.php";
+ include __DIR__ . "/php_tori/connect.php";
   if ( isset( $_SESSION['ss_id'] ) )
   { 
     $user_id = $_SESSION['ss_id'];
@@ -507,7 +505,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     echo "<tr>";
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
 
-    include_once  "/var/www/tori/navigate.php";
+    include_once __DIR__ . "/navigate.php";
 
     echo "</td>";               
 
@@ -523,7 +521,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
             
       $sv_name = get_sv_name_by_userid( $user_id );
 
-      include "/var/www/tori/php_tori/connect.php";
+     include __DIR__ . "/php_tori/connect.php";
 
       mysqli_set_charset($link, "utf8");
     
@@ -657,7 +655,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     echo "</td>";
 
     mysqli_set_charset($link, "utf8");
-    include "/var/www/tori/php_tori/connect.php";
+   include __DIR__ . "/php_tori/connect.php";
 
     $query6 = mysqli_query($link, "SELECT id, firstname, surname, lastname, phone, personal_phone, corporate_phone, DATE_FORMAT(birthday, '%m-%d') FROM employees WHERE relevance = 1 ORDER BY surname");
 
@@ -1027,7 +1025,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
   }
   echo "<font size=\"2\" color=\"#444444\" face=\"Arial\">";
-    include_once  "/var/www/tori/end.php";
+    include_once __DIR__ . "/end.php";
   echo "</font>";
 echo "</div>";
 
@@ -1055,14 +1053,6 @@ function update_clock()
 }
 
 var timerId=setInterval( "update_clock()", 10000 );
-
-// $(document).ready(function() {
-//   $.post('ajax/get_birthdays.php', {}, function(data) {
-//     if (data.trim() !== '') {
-//       $('#birthday_block').html(data).show();
-//     }
-//   });
-// });
 
 </script> 
 

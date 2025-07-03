@@ -14,8 +14,8 @@ if ( isset($_POST['userID']) )
   $newEatStartTime = "";
   $newEatStopTime = "";
 
-  include_once "/var/www/tori/funcs.php";
-  include_once "/var/www/tori/php_tori/connect.php";
+  include_once __DIR__ . "/../funcs.php";
+  include_once __DIR__ . "/../php_tori/connect.php";
 
   $query = mysqli_query($link, "DELETE FROM visiting WHERE date = '$currentDate' AND user_id = '$userID'"); 
   $merr = mysqli_error($link);

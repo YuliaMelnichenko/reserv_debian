@@ -13,8 +13,8 @@ $PENALTYDATE = $_POST['penDate'];
 $getUserID = $_POST['userID']; 
 $acceptorID = $_SESSION['ss_id']; 
 
-include_once "/var/www/tori/funcs.php";
-include_once "/var/www/tori/php_tori/connect.php";
+include_once __DIR__ . "/../funcs.php";
+include_once __DIR__ . "/../php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
 

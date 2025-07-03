@@ -18,7 +18,7 @@ session_start();
 <?php
 $err = array(); 
 	
-include_once "/var/www/tori/php_tori/connect.php";
+include_once __DIR__ . "/php_tori/connect.php";
 
 $user_id = $_SESSION['ss_id'];
 

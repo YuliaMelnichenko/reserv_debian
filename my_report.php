@@ -2,7 +2,7 @@
 date_default_timezone_set("Asia/Novosibirsk");
 ob_start();
 session_start();
-include_once "/var/www/tori/start.php";
+include_once __DIR__ . "/start.php";
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -117,8 +117,8 @@ function show_selectors(){
 
 <?php
 ////////////////////////////////////////////////////////
-include_once "/var/www/tori/funcs.php";
-include_once "/var/www/tori/funcs_rep.php";
+include_once __DIR__ . "/funcs.php";
+include_once __DIR__ . "/funcs_rep.php";
 
 save_last_location( "my_report.php" );
 
@@ -149,7 +149,7 @@ echo "<div align=\"left\">";
 
     if ( $directorView == 0 ){
       echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
-      include_once "navigate.php";
+      include_once __DIR__ . "/navigate.php";
     }
     else{
       echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 0>";
@@ -366,7 +366,7 @@ echo "</table>";
 
 echo "<font size=\"2\" color=\"#444444\" face=\"Arial\">";
 
-include_once "/var/www/tori/end.php";
+include_once __DIR__ . "/end.php";
 
 echo "</font>";
 echo "</div>";

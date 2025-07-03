@@ -17,14 +17,13 @@ echo "<body bgcolor=\"#ffffff\" >";
 ?>
 
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
-<script type="text/javascript" src="js/tory.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 </script>
 
 <?php
 ////////////////////////////////////////////////////////
 
-include_once "/var/www/tori/funcs.php";
+include_once __DIR__ . "/funcs.php";
 save_last_location( "delay_approvement.php" );
 auth();
 ////////////////////////////////////////////////////////
@@ -33,14 +32,14 @@ $userID_ = $_SESSION['ss_id'];
 
 echo "<div align=\"left\">";
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once __DIR__ . "/php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
 
 echo "<table border=0>";
   echo "<tr>";
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
-      include_once "/var/www/tori/navigate.php";
+      include_once __DIR__ . "/navigate.php";
     echo "</td>"; 
 
       $wholeWidth = 562;

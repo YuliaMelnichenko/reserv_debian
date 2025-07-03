@@ -28,7 +28,7 @@ $content .= "</td>";
 $content .= "</tr>";
 $content .= "</table><br>";  
 
-include_once "/var/www/tori/funcs.php";
+include_once __DIR__ . "/../funcs.php";
 
 $userID = $_SESSION['ss_id']; 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );

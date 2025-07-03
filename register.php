@@ -18,20 +18,23 @@ session_start();
 <?php
 $err = array(); 
 	
-include_once "/var/www/tori/php_tori/connect.php";
+include_once __DIR__ . "/php_tori/connect.php";
 
-if (isset( $_POST['r_button']) )    
-{
+if (isset( $_POST['r_button']) ) {
+  $login = mysqli_real_escape_string($link, $_POST['r_login']);
 
-  $query = mysqli_query($link, "SELECT COUNT(id) FROM employees WHERE login='".mysqli_real_escape_string($link, $_POST['r_login'])."'"); 
-  $merr=mysqli_error($link);
+  $query = mysqli_query($link, "SELECT COUNT(id) AS cnt FROM employees WHERE login='$login'"); 
+  $merr = mysqli_error($link);
+
+  $row = mysqli_fetch_assoc($query);
+
   if ( !$query ) 
   {
     echo "<br>mysql_error = $merr<br>";
   }
   else
   {
-    if(mysqli_result($query, 0) > 0) 
+    if($row && $row['cnt'] > 0) 
     { 
       $err[] = "Пользователь с таким логином уже существует"; 
     }
@@ -109,25 +112,27 @@ if (isset( $_POST['r_button']) )
       $first_name = $_POST['r_first_name'];
       $second_name = $_POST['r_second_name'];
     
-      $query = mysqli_query($link, "select max(id) FROM employees");
-      $merr=mysqli_error($link);
-      if (!$query){ $err[] = $merr; die(); }
-      else
-      {
-        $newuserid = mysqli_result($query, 0) + 1;
-        $res=mysqli_query($link, "BEGIN");
+      $query = mysqli_query($link, "SELECT MAX(id) FROM employees");
+      $merr = mysqli_error($link);
+      if (!$query){ 
+        $err[] = $merr; die(); 
+      }
+      else {
+        $row = mysqli_fetch_row($query);
+        $newuserid = ($row ? $row[0] : 0) + 1;
+        $res = mysqli_query($link, "BEGIN");
+
         mysqli_set_charset($link, "utf8");
           
-        $res=mysqli_query($link, "insert into employees values ('$newuserid','$login','$passwd','$first_name','$second_name','$surname','','','-1')");
-        $merr=mysqli_error($link);
-        if (!$res)
-        { 
-	  echo $merr;
-	  $err[] = $merr; 
-	  mysqli_query($link, "ROLLBACK");	
+        $res = mysqli_query($link, "insert into employees values ('$newuserid','$login','$passwd','$first_name','$second_name','$surname','','','-1')");
+
+        $merr = mysqli_error($link);
+        if (!$res) { 
+          echo $merr;
+          $err[] = $merr; 
+          mysqli_query($link, "ROLLBACK");	
         }
-        else
-        {
+        else {
           mysqli_query($link, "COMMIT");
         }
       }
@@ -138,8 +143,7 @@ if (isset( $_POST['r_button']) )
       exit(); 
 
     }
-    else
-    {
+    else {
       echo "При регистрации возникли следующие ошибки:<br>"; 
       foreach($err AS $error) 
       { 
@@ -149,7 +153,6 @@ if (isset( $_POST['r_button']) )
       unset( $_POST['r_login']);
     }
   }
-	 
 }
 
 echo "<h6>Для регистации заполните необходимые сведения</h6>";

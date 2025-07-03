@@ -2854,6 +2854,7 @@ h5.activ_time {
 #events {
   display: flex;
   justify-content: space-between;
+  /* width: 500px; */
   width: 350px;
 }
 
@@ -2866,6 +2867,7 @@ h5.activ_time {
 #add_info_block {
   display: flex;
   justify-content: flex-end;
+  /* width: 210px; */
   width: 350px;
 }
 

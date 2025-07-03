@@ -18,7 +18,7 @@ $ta_stop_date = substr( $ta_stop_date_time, 0, 10 );
 $ta_start_time = substr( $ta_start_date_time, 11, 8 );
 $ta_stop_time = substr( $ta_stop_date_time, 11, 8 );
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once __DIR__ . "/../php_tori/connect.php";
 
 $query0 = mysqli_query($link, "SELECT * FROM ADD_TIME"); 
 

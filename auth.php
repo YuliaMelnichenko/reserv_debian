@@ -8,7 +8,7 @@ $ip=$_SERVER['REMOTE_ADDR'];
 echo $ip;
 
 
-include_once "/var/www/tori/funcs.php";
+include __DIR__ . "/funcs.php";
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -50,14 +50,11 @@ function check_cookie()
   }
 }
 
-function auth()
-{
-  if ( document.getElementById('autologin').checked )
-  {
+function auth() {
+  var login  = document.getElementById('login').value;
+  var passwd = document.getElementById('passwd').value;
 
-    var login  = document.getElementById('login').value;
-    var passwd = document.getElementById('passwd').value;
-
+  if ( document.getElementById('autologin').checked ) {
     $.post('ajax/set_cookie.php', {login: login, passwd: passwd}, RetSWT1 );
     function RetSWT1(dat1) 
     {   // alert(dat1);
@@ -68,17 +65,18 @@ function auth()
     }
   }
 
-  $.post('ajax/auth.php', {login: login, passwd: passwd}, RetSWT);
-  function RetSWT(dat) 
-  {  
-    if ( dat.length > 100 )
-    {
-      alert( dat );
+  $.post('ajax/auth.php', {login: login, passwd: passwd}, function(dat) {
+    console.log("Server answer: ", dat);
+    if (dat.trim() === "OK") {
+      window.location = self.location;
+    } else {
+      alert("Error: " + dat );
       unset_cookie();
-      //check_cookie();
+      document.getElementById('login').value = '';
+      document.getElementById('passwd').value = '';
+      // document.getElementById('autologin').checked = false;
     }
-    window.location=self.location;
-  }   
+  });
 }
 
 function set_focus()
@@ -88,42 +86,10 @@ function set_focus()
 </script>
 <?php
 echo "<body bgcolor=\"#ffffff\" onload=\"set_focus();\">";
-#echo "<table background=\"tori.jpg\"><tr><td>";
-
-
-
-///echo "555 = ".$_SESSION['ss_id'];
                                                               
 echo "<div align=\"center\">";
 
 $ip = $_SERVER['REMOTE_ADDR'];
-
-/*if ( $ip == "192.168.100.50" or $ip == "192.168.100.69" or $ip == "192.168.100.167"  or $ip == "192.168.100.54" )
-{ 
-  $_SESSION['ss_id'] = 500; 
-  move_to_last_location(); 
-} */
-
-/*if ( $ip == "192.168.100.54" )
-{ 
-  $_SESSION['ss_id'] = 501; 
-  move_to_last_location(); 
-} */
-
-//echo "userID = ".$_SESSION['ss_id'];
-
-// if (!isset($_SESSION['start_time'])) {
-//   $_SESSION['start_time'] = time();  
-// }
-
-// echo date('H:i:s', $_SESSION['start_time']);
-
-// if (time() - $_SESSION['start_time'] >= 440) {
-//   session_unset();
-//   session_destroy();
-
-//   $_SESSION['start_time'] = time();
-// }
 
 if ( !isset($_SESSION['ss_id']) )
 {
@@ -146,7 +112,6 @@ if ( !isset($_SESSION['ss_id']) )
 
   echo "<h4>Для продолжения необходима авторизация</h4><br><br>";
 
-//  echo "<form>";
   echo "<font size=\"3\" color=\"#222222\" face=\"Arial\">Логин: </font><input type=\"text\" id=\"login\" style=\"width:120px;\" />";
   echo "<font size=\"3\" color=\"#222222\" face=\"Arial\"> Пароль: </font><input type=\"password\" id=\"passwd\" style=\"width:170px;\" /><br />";
 
@@ -173,17 +138,12 @@ if ( !isset($_SESSION['ss_id']) )
     echo "</tr>";
   echo "</table>";
 
-  //echo "<input checked style=\"font-size: 100%; width:14px; height:14px; background-color:#ddeeff; border:0px solid #888888;\" type=\"checkbox\" id=\"autologin\" value=\"1\" ><h5 class=\"small\">запомнить</h5>";
-
-  #echo "Чему равна сумма ".$first_num." и ".$second_num." ? ";
   echo "<input type=\"hidden\" value=\"$summ_\" name=\"check\" style=\"width:30px;\" />";
   echo "<button id=\"auth_btn\" style=\"font-size: 150%; width:420px; height:50px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"auth();\" name=\"nextBtn\">Авторизоваться</button>";
-//  echo "</form>";  
   echo "</td>";
   echo "</tr>";
   echo "</table>";
 
- // echo "<a href=\"register.php\" class=\"ml\" title=\"Регистрация\">регистрация</a>";
 
   echo "</td>";
   echo "</tr>";
@@ -202,7 +162,6 @@ echo "</div>";
 <script type="text/javascript" charset="utf-8"> 
 
 check_cookie();
-//auth();
 
 </script> 
 

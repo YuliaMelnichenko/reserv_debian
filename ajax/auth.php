@@ -5,8 +5,8 @@ header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
                 
-include "/var/www/tori/php_tori/connect.php";
-include_once "/var/www/tori/funcs.php";
+include __DIR__ . "/../php_tori/connect.php";
+include_once __DIR__ . "/../funcs.php";
 
 $__login = mysqli_real_escape_string($link, $_POST['login']);   	       
 $__passwd = md5(md5(trim(mysqli_real_escape_string($link, $_POST['passwd'])))); 
@@ -26,7 +26,7 @@ else
 
   if ( $vn == 1 )
   { 
-    //echo "Auth success";
+    echo "OK";
     $row = mysqli_fetch_assoc($query);
     $_SESSION['ss_id'] = $row["id"];
     $_SESSION['ss_rate'] = $row["rate"];

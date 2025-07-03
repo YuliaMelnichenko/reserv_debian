@@ -3,8 +3,8 @@
 function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRate ){
   $userDayNorm = ( $userRate / 5 ) * 60 * 60;
 
-  include "/var/www/tori/php_tori/connect.php";
-  include_once "/var/www/tori/funcs.php";
+  include __DIR__ . "/php_tori/connect.php";
+  include_once __DIR__ . "/funcs.php";
 
   $days_dates_set = array();
   $days_dates_start_set = array();
@@ -718,7 +718,7 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
 }
 
 function get_report_body_row_contents( $usersInfo ){
-  include_once "/var/www/tori/funcs.php";
+  include_once __DIR__ . "/funcs.php";
 
   $currentDateArr = get_current_datetime_in_timezone();
   $currDate = $currentDateArr[2];

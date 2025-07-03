@@ -10,7 +10,7 @@ $currentDate = date('Y-m-d H:i:s');
 $dayNumber = $_POST['currentDayNumber'];
 $new_out_time = $_POST['add_stop_time'];
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once __DIR__ . "/../php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
 

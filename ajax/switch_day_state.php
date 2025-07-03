@@ -9,8 +9,8 @@ $nextState = (int)($_POST['next']);
 
 if ( isset($_SESSION['ss_id']) )
 {
-  include_once "/var/www/tori/php_tori/connect.php";
-  include_once "/var/www/tori/funcs.php";
+  include_once __DIR__ . "/../php_tori/connect.php";
+  include_once __DIR__ . "/../funcs.php";
 
   $dtResult = get_current_datetime_in_timezone();
 

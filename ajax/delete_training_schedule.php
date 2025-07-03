@@ -11,7 +11,7 @@ $date_train = $_POST['date_train'];
 $start_time = $_POST['start_time'];
 $stop_time = $_POST['stop_time'];
 
-include "/var/www/tori/php_tori/connect.php";
+include __DIR__ . "/../php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8"); 
 

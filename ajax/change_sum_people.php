@@ -7,8 +7,8 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 
 $userID = $_SESSION['ss_id'];
 
-include "/var/www/tori/php_tori/connect.php";
-include_once "/var/www/tori/funcs.php";
+include __DIR__ . "/../php_tori/connect.php";
+include_once __DIR__ . "/../funcs.php";
 
 mysqli_set_charset($link, "utf8");
 

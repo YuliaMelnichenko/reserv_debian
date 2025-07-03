@@ -10,7 +10,7 @@ $DESC = $_POST['suDesc'];
 $ACCEPTMODE = $_POST['accept'];
 $userID = $_SESSION['ss_id']; 
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once __DIR__ . "/../php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
 $query = mysqli_query($link, "UPDATE ADD_TIME SET SUIR = '$userID', SUPERVISORDESC = '$DESC', APPROVED='$ACCEPTMODE' WHERE ID = '$ID'"); 

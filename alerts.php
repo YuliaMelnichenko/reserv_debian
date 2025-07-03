@@ -17,28 +17,27 @@ echo "<body bgcolor=\"#ffffff\" >";
 
 ?>
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
-<script type="text/javascript" src="js/tory.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
 </script>
 
 <?php
 ////////////////////////////////////////////////////////
-include_once "/var/www/tori/funcs.php";
+include_once __DIR__ . "/funcs.php";
 save_last_location( "delay_approvement.php" );
 auth();
 ////////////////////////////////////////////////////////
 
 echo "<div align=\"left\">";
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once __DIR__ . "/php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
 
 echo "<table border=1>";
   echo "<tr>";
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 120>";
-      include_once "/var/www/tori/navigate.php";
+      include_once __DIR__ . "/navigate.php";
     echo "</td>";    
     echo "<td class=\"nopadding_s\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 120>";
       echo "<h5 class=\"dark\">/уведомления по учету времени за текущий квартал</h5>";

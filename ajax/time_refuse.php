@@ -7,7 +7,7 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 
 $ID = $_POST['recID'];
 
-include_once "/var/www/tori/php_tori/connect.php";
+include_once __DIR__ . "/../php_tori/connect.php";
 
 $query = mysqli_query($link, "UPDATE ADD_TIME SET APPROVED=-1 WHERE ID = '$ID'");
 

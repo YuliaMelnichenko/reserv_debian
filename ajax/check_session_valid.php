@@ -14,7 +14,7 @@ else{
     $startDTStrVal = strtotime( $startDTStr );
     $stopDTStrVal = strtotime( $stopDTStr );
 
-    include_once "/var/www/tori/funcs.php";
+    include_once __DIR__ . "/../funcs.php";
 
     $timeArr = get_current_datetime_in_timezone();
 
@@ -76,7 +76,7 @@ else{
     }
     else{
       if ( $_SESSION['ss_state'] !=0 && $_SESSION['ss_state'] !=1 ){
-        include_once "/var/www/tori/funcs.php";
+        include_once __DIR__ . "/../funcs.php";
 
         $currentDateT = get_current_datetime_in_timezone_str( 1, 0 );
         $user_dayTransitionTime = $_SESSION['$ss_dayTransitionTime'];

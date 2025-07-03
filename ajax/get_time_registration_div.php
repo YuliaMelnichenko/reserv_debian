@@ -6,12 +6,12 @@ header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
-include_once  "/var/www/tori/funcs.php";
-include "/var/www/tori/php_tori/connect.php";
+include_once __DIR__ . "/../funcs.php";
+include __DIR__ . "/../php_tori/connect.php";
 
 function change_time ($user) {
-  include  "/var/www/tori/php_tori/connect.php";
-  include_once  "/var/www/tori/funcs.php";
+  include __DIR__ . "/../php_tori/connect.php";
+  include_once __DIR__ . "/../funcs.php";
   
   mysqli_set_charset($link, "utf8");
 
@@ -431,7 +431,13 @@ else {
   $eatDurationStr = format_time_d_hhmmss_pure( $lunchDuration );
 
   $delayRets = get_delay_info_by_user_and_day( $userID, $currentDate, $user_defaultStartTime, $user_allowedDelay );
-  $delayStr = format_time_d_hhmmss_pure( $delayRets[7] ); 
+  $delayVal = 0;
+
+  if (!empty($delayRets)) {
+    $delayVal = $delayRets[0][7];
+  }
+
+  $delayStr = format_time_d_hhmmss_pure( $delayVal); 
 
   $timeRestribution = "";
   $timeManagement = "";
@@ -483,14 +489,14 @@ else {
     $timeRestributionStat .= add_time_work_day_duration_part( $addWorkDurationStr, $addTimeDuration !=0, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestributionStat .= add_pause_work_day_duration_part( $pauseWorkDurationStr, $pauseTimeDuration !=0, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestributionStat .= eat_duration_part( $eatDurationStr, $eatNorm, 1, $timeRestributionDescWidth, $timeRestributionValWidth );
-    $timeRestributionStat .= delay_part( $delayStr, $delayRets[7] > 0, $timeRestributionDescWidth, $timeRestributionValWidth );
+    $timeRestributionStat .= delay_part( $delayStr, $delayVal > 0, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestributionStat .= empty_line();
     $timeRestributionStat .= pure_work_day_duration_part( $resultPureDurationStr, $userDayNormSec, 1, $timeRestributionDescWidth, $timeRestributionValWidth, 'Итог:', 1, 1 );
   }
   if ( $state == 2 ) {
     $timeManagement .= "<td class=\"nopadding_s\" height=10></td></tr><tr>";
     $timeManagement .= "<td class=\"nopadding_s\" style=\"font-size: 100%; margin:0; padding:0; margin-left:0;\">";
-    $timeManagement .= "<button style=\"font-size: 110%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f8d888; border:1px solid #888888; cursor:pointer;\" onclick=\"reg_eat_start();\">Зарегистрировать время ухода на обед</button>";
+    $timeManagement .= "<button style=\"font-size: 110%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f8d888; border:1px solid #888888; cursor:pointer;\" onclick=\"reg_eat_start(); return false;\">Зарегистрировать время ухода на обед</button>";
     $timeManagement .= "</td>";
     
     $timeRestribution .= change_time( $userID );
@@ -499,7 +505,7 @@ else {
     $timeRestributionStat .= pure_work_day_duration_part( $resultPureDurationWOEatStr, 0, 0, $timeRestributionDescWidth, $timeRestributionValWidth, 'Продолжительность присутствия без учета обеда', 0, 0 );
     $timeRestributionStat .= add_time_work_day_duration_part( $addWorkDurationStr, $addTimeDuration !=0, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestributionStat .= add_pause_work_day_duration_part( $pauseWorkDurationStr, $pauseTimeDuration !=0, $timeRestributionDescWidth, $timeRestributionValWidth );
-    $timeRestributionStat .= delay_part( $delayStr, $delayRets[7] > 0, $timeRestributionDescWidth, $timeRestributionValWidth );
+    $timeRestributionStat .= delay_part( $delayStr, $delayVal > 0, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestributionStat .= empty_line();
     $timeRestributionStat .= pure_work_day_duration_part( $resultPureDurationStr, 0, 0, $timeRestributionDescWidth, $timeRestributionValWidth, 'Итог:', 1, 1 );
   }
@@ -517,7 +523,7 @@ else {
     $timeRestributionStat .= add_time_work_day_duration_part( $addWorkDurationStr, $addTimeDuration !=0, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestributionStat .= add_pause_work_day_duration_part( $pauseWorkDurationStr, $pauseTimeDuration !=0, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestributionStat .= eat_duration_part( $eatDurationStr, $eatNorm, 1, $timeRestributionDescWidth, $timeRestributionValWidth );
-    $timeRestributionStat .= delay_part( $delayStr, $delayRets[7] > 0, $timeRestributionDescWidth, $timeRestributionValWidth );
+    $timeRestributionStat .= delay_part( $delayStr, $delayVal > 0, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestributionStat .= empty_line();
     $timeRestributionStat .= pure_work_day_duration_part( $resultPureDurationStr, 0, 0, $timeRestributionDescWidth, $timeRestributionValWidth, 'Итог:', 1, 1 );
   }
@@ -536,7 +542,7 @@ else {
     $timeRestributionStat .= add_time_work_day_duration_part( $addWorkDurationStr, $addTimeDuration !=0, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestributionStat .= add_pause_work_day_duration_part( $pauseWorkDurationStr, $pauseTimeDuration !=0, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestributionStat .= eat_duration_part( $eatDurationStr, $eatNorm, 1, $timeRestributionDescWidth, $timeRestributionValWidth );
-    $timeRestributionStat .= delay_part( $delayStr, $delayRets[7] > 0, $timeRestributionDescWidth, $timeRestributionValWidth );
+    $timeRestributionStat .= delay_part( $delayStr, $delayVal > 0, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestributionStat .= empty_line();
     $timeRestributionStat .= pure_work_day_duration_part( $resultPureDurationStr, 0, 0, $timeRestributionDescWidth, $timeRestributionValWidth, 'Итог:', 1, 1 );
   }   

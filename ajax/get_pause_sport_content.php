@@ -7,7 +7,7 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 
 $userID = $_SESSION['ss_id'];
 
-include_once "/var/www/tori/funcs.php";
+include_once __DIR__ . "/../funcs.php";
 
 echo "<div id=\"add_sport_pause\">";
   echo "<div id =\"close_window_sport_pause\">";

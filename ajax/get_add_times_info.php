@@ -8,8 +8,8 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 $userID_ = $_SESSION['ss_id']; 
 $currentDate = date('Y-m-d');
 
-include_once "/var/www/tori/funcs.php";
-include_once "/var/www/tori/php_tori/connect.php";
+include_once __DIR__ . "/../funcs.php";
+include_once __DIR__ . "/../php_tori/connect.php";
 
 $startDate = $_POST['startDate'];
 $stopDate = $_POST['stopDate'];
