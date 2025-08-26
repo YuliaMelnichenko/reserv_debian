@@ -161,35 +161,51 @@ echo "<div align=\"left\">";
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
     
 ///***
-if ( !isset($_SESSION['rep_start_stop_date_set']) ){
-  $month_day = GetMonthDayD( $currDate );
-  $offset = (int)$month_day - 1;
-  $curD = $currDate;
 
-  $_SESSION['rep_start_date'] = DayDecDN( $currDate, $offset );
-  $_SESSION['rep_stop_date'] = $currDate;
-  $_SESSION['rep_start_stop_date_set'] = 1;
-}
-$selected = 0;
+function getQuarterDates ($date = null) {
+  if ($date === null) {
+    $date = date('Y-m-d');
+  }
+  $month = (int)date('n', strtotime($date));
+  $year = (int)date('Y', strtotime($date));
 
-$rep_start_stop_date_mode = $_SESSION['rep_start_stop_date_mode'];
-
-  if ( isset($_SESSION['rep_start_stop_date_mode']) ){
-    $selected = $_SESSION['rep_start_stop_date_mode'] - 1;
+  if ($month >= 1 && $month <= 3) {
+    $start = "$year-01-01";
+    $end = "$year-03-31";
+  } elseif ($month >= 4 && $month <= 6) {
+    $start = "$year-04-01";
+    $end = "$year-06-30";
+  } elseif ($month >= 7 && $month <= 9) {
+    $start = "$year-07-01";
+    $end = "$year-09-30";
+  } else {
+    $start = "$year-10-01";
+    $end = "$year-12-31";
   }
 
-  $selectedArr = array();
+  $today = date("Y-m-d");
+  
+  if (strtotime($today) < strtotime($end)) {
+    $end = $today;
+  }
 
-  $selectedArr[0] = "";
-  $selectedArr[1] = "";
-  $selectedArr[2] = "";
-  $selectedArr[3] = "";
-  $selectedArr[4] = "";
-  $selectedArr[5] = "";
-  $selectedArr[6] = "";
+  return [$start, $end];
+}
 
+if ( !isset($_SESSION['rep_start_stop_date_set']) ){
+  list($_SESSION['rep_start_date'], $_SESSION['rep_stop_date']) = getQuarterDates($currDate);
+  $_SESSION['rep_start_stop_date_mode'] = 4;
+  $_SESSION['rep_start_stop_date_set'] = 1;
+}
+  if ( !isset($_SESSION['rep_start_stop_date_mode']) ){
+    $_SESSION['rep_start_stop_date_mode'] = 4;
+  }
+
+  $rep_start_stop_date_mode = $_SESSION['rep_start_stop_date_mode'];
+  $selected = $rep_start_stop_date_mode - 1;
+
+  $selectedArr = array_fill(0, 7, "");
   $selectedArr[$selected] = "selected";
-
 
 echo "<div id=\"report_container\">";
   echo "<div>";
@@ -281,18 +297,18 @@ echo "</table>";
 echo "<div class=\"report_window_main\" id=\"report_window_main\">"; 
   echo "<table class = \"no_padding\">";
     echo "<tr>";
-      echo "<td class=\"report_no_padding_no_border\">";    
+      echo "<td class=\"report_no_padding_no_border\">";
         echo "<div class=\"report_window_head_left\" id=\"report_window_head_left\">"; 
-          echo "<img src=\"/img/report_head_left.png\">";         
+          echo "<img src=\"/img/report_head_left.png\">";
         echo "</div>";
       echo "</td>";
  
-      echo "<td class=\"report_no_padding_no_border\">";    
+      echo "<td class=\"report_no_padding_no_border\">";
         if ( $userCnt == 1 ){
-          echo "<div class=\"report_window_head_single\" id=\"report_window_head_single\">";          
+          echo "<div class=\"report_window_head_single\" id=\"report_window_head_single\">";
         }
         else{
-          echo "<div class=\"report_window_head\" id=\"report_window_head\">";        
+          echo "<div class=\"report_window_head\" id=\"report_window_head\">";
         }          
             echo "<table>";
             //Заголовок
@@ -300,7 +316,7 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
                 for ( $userNum = 0; $userNum < $userCnt; $userNum ++ ){
                   $userFIO = $usersInfo[1][$userNum];
                   echo "<td class=\"report_no_padding\" bgcolor=\"#ffffff\" valign=\"middle\" align=\"center\" width = $cellWidth>";
-                    echo "<div class=\"report_head_name\">";  					                    
+                    echo "<div class=\"report_head_name\">";
                       echo "<h5>".$userFIO."</h5>";
                     echo "</div>";
                   echo "</td>";  
@@ -310,14 +326,14 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
                     echo "<div class=\"report_head_stub\">";             
                     echo "</div>";
                   echo "</td>";
-                }       
+                }
             echo "</table>";
-          echo "</div>";    
-        echo "</td>";    
+          echo "</div>";
+        echo "</td>";
       echo "</tr>";
       echo "<tr>";
-        echo "<td class=\"report_no_padding_no_border\">";    
-          echo "<div class=\"report_window_left\" id=\"report_window_left\">";          
+        echo "<td class=\"report_no_padding_no_border\">";
+          echo "<div class=\"report_window_left\" id=\"report_window_left\">";
             echo "<table class = \"no_padding\">";
               //Левая панель
               for ( $idx = count( $rowsDTContent ); $idx >= 0; $idx -- ){
@@ -327,18 +343,17 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
               }     
               echo "<tr>";
                 echo "<td class=\"report_no_padding_no_border\" valign=\"middle\" align=\"center\">";
-                  echo "<div class=\"report_head_stub_left\">";             
+                  echo "<div class=\"report_head_stub_left\">";
                   echo "</div>";
-                echo "</td>";       
-              echo "</tr>";       
-
+                echo "</td>";
+              echo "</tr>";
             echo "</table>";
-          echo "</div>";    
-        echo "</td>";    
+          echo "</div>";
+        echo "</td>";
  
-        echo "<td class=\"report_no_padding_no_border\">";    
+        echo "<td class=\"report_no_padding_no_border\">";
           if ( $userCnt == 1 ){
-            echo "<div class=\"report_window_single\" id=\"report_window_single\" onscroll=\"make_div_scroll_single();\">";          
+            echo "<div class=\"report_window_single\" id=\"report_window_single\" onscroll=\"make_div_scroll_single();\">";
           }
           else{
             echo "<div class=\"report_window\" id=\"report_window\" onscroll=\"make_div_scroll();\">";
@@ -347,7 +362,7 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
               //Тело
                 for ( $idx = count( $rowsContent ); $idx >= 0; $idx -- ){
                   echo "<tr>";
-                    echo $rowsContent[$idx];  
+                    echo $rowsContent[$idx];
                   echo "</tr>";
                 }
 
@@ -376,7 +391,7 @@ echo "</div>";
 <script type="text/javascript" charset="utf-8"> 
 
 function update_clock(){
-  $.post('ajax/get_current_day_time.php', RetSWT);                           
+  $.post('ajax/get_current_day_time.php', RetSWT);
   function RetSWT(dat) {
     if ( document.getElementById('dateTimeFieldNav') ){
       document.getElementById('dateTimeFieldNav').innerHTML = dat;

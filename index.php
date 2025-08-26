@@ -471,8 +471,6 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     $user_RemoteWorkStr = $_SESSION['ss_RemoteWorkStr'];
     $user_dayTransitionTime = $_SESSION['$ss_dayTransitionTime'];
 
-
-
     $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
     $dateArr = datetimestr_to_day_start_stop_DT_ex_str_idx( $currentDate, $user_dayTransitionTime );  
@@ -517,7 +515,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
         
     if ( $vn0 == 1 )
     {
-      $empl_state = $row0["state"];                                                  
+      $empl_state = $row0["state"];
             
       $sv_name = get_sv_name_by_userid( $user_id );
 
@@ -696,7 +694,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $time_out = date("H:i", strtotime($out_dt));
       
       if (mysqli_num_rows($query5) === 0) {
-        $img = "<img title=\"На работу не приходил\" src=\"img/in_home.png\">";
+        $img = "<img title=\"На работу не приходил\" src=\"img/home.png\" style=\"width: 23px; margin: 1px 0\">";
         array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
       }
       elseif (($eat_start_dt != $time && $eat_stop_dt === $time) || ($start_dt_AT != $time && $stop_dt_AT === $time)) {
@@ -838,7 +836,16 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     // $today = date('Y-m-d');
     $eventsToday = [];
 
-    $query9 = "SELECT user_id, event, start_date, stop_date FROM staff_leaves WHERE (event = 'Больничный' AND '$today' BETWEEN start_date AND stop_date) OR (event = 'Отпуск' AND ('$today' BETWEEN start_date AND stop_date OR start_date >= '$today'))";
+    $query9 = "
+    SELECT user_id, event, start_date, stop_date 
+    FROM staff_leaves 
+    WHERE (
+          (event = 'Больничный' AND '$today' BETWEEN start_date AND stop_date) 
+          OR 
+          (event = 'Отпуск' AND ('$today' BETWEEN start_date AND stop_date OR start_date >= '$today'))
+          OR
+          (event = 'Командировка' AND ('$today' BETWEEN start_date AND stop_date OR start_date >= '$today'))
+          )";
     $result9 = mysqli_query($link, $query9);
     while ($row9 = mysqli_fetch_assoc($result9)) {
       $uid = $row9['user_id'];
@@ -869,6 +876,12 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       3 => 'vacation3.png',
       2 => 'vacation2.png',
       1 => 'vacation1.png'
+    ];
+
+    $businessTripIcons = [
+      3 => 'business_trip3.png',
+      2 => 'business_trip2.png',
+      1 => 'business_trip1.png'
     ];
     
     for ($i = 0; $i < count($employee_arr); $i++) {
@@ -901,6 +914,10 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
       echo "<div class=\"img_container\">";
 
+      if ($birth == date('m-d')) {
+        echo "<img style=\"margin: 1px 0\" title=\"C днем рождения!\" src=\"img/birthday.png\">";          
+      } 
+
       if (isset($eventsToday[$personal_id])){
         foreach ($eventsToday[$personal_id] as $event) {
           $start = $event['start_date'];
@@ -920,13 +937,31 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
                 $daysLeft = getWorkingDaysUntil($today, $start, $holidayDates);
                 
                 if (array_key_exists($daysLeft, $vacationIcons)) {
-                  $tooltip = "Осталось $daysLeft " . getDayWord($daysLeft) . " до отпуска. \n$tooltipDate";
+                  $tooltip = "Осталось $daysLeft " . "рабочих " . getDayWord($daysLeft) . " до отпуска. \n$tooltipDate";
                   $icon = $vacationIcons[$daysLeft];
                   echo "<img src=\"img/$icon\" title=\"$tooltip\" style=\"width: 23px; margin: 1px 0\">";
                 }
               } else {
                 "<!-- ni icon for $daysLeft days -->";
               }
+          }
+
+          if ($event['event'] === 'Командировка' && $today <= $stop) {
+            $tooltipDate = "Командировка: " . date("d.m.Y", strtotime($start)) . " - " . date("d.m.Y", strtotime($stop));
+
+            if ($today >= $start && $today <= $stop) {
+              $daysToEnd = getDaysLeft($stop, $today);
+              $tooltip = "До конца командировки осталось: $daysToEnd" . getDayWord($daysToEnd) . "\nКомандировка: " . date("d.m.Y", strtotime($start)) . " - " . date("d.m.Y", strtotime($stop));
+              echo "<img src=\"img/business_trip.png\" title=\"$tooltip\" style=\"width: 23px; margin: 1px 0\">";
+            } elseif ($today < $start) {
+              $daysLeft = getWorkingDaysUntil($today, $start, $holidayDates);
+
+              if (array_key_exists($daysLeft, $businessTripIcons)) {
+                $tooltip = "Осталось $daysLeft " . "рабочих " . getDayWord($daysLeft) . " до командировки. \n$tooltipDate";
+                $icon = $businessTripIcons[$daysLeft];
+                echo "<img src=\"img/$icon\" title=\"$tooltip\" style=\"width: 23px; margin: 1px 0\">";
+              }
+            }
           }
 
           if ($event['event'] === 'Больничный') {
@@ -939,12 +974,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
         }
       }
       
-        if ($birth == date('m-d')) {
-          echo "<img style=\"margin: 1px 0\" title=\"C днем рождения!\" src=\"img/birthday.png\">";
-          echo $img;
-        } else {
-          echo $img;
-        }
+      echo $img;
 
       echo "</div>";
       echo "</div>";
@@ -965,7 +995,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     echo "<h5 class=\"dark1\">3. Добавлена кнопка \"Тренажерный зал\" в панели навигации. В данной вкладке отображается список сотрудников, присутствующих в данный момент в спортивном зале.<br></h5>";
     echo "<h5 class=\"dark1\">4. Добавлена возможность записаться в спортзал во вкладке \"Тренажерный зал\".<br></h5>";
     echo "<h5 class=\"dark1\">5. Скрыт информационный блок с обновлениями.<br></h5>";
-    echo "</div>";                        
+    echo "</div>";
     echo "</td>";
     
     echo "<td bgcolor=\"#ffffff\" valign=\"top\" align=\"left\" width = 10>";
@@ -999,7 +1029,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 		echo "<img src=\"img/minus.bmp\" onclick=\"st_month_dec();\" />";
 		echo "<img src=\"img/dva.bmp\" onclick=\"st_month_def();\" />";
                 echo "</font>";
-	    echo "</td>";                                          
+	    echo "</td>";
 	  echo "</tr>";
 
           $monthNumBase = date('m');
@@ -1016,7 +1046,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
             echo "</tr>";
           }
         echo "</table>";
-      echo "</td>";                                                                                     	
+      echo "</td>";
     }
     
     echo "</tr>";
@@ -1041,7 +1071,7 @@ get_time_registration_div_content();
 function update_clock()
 {
 
-  $.post('ajax/get_current_day_time.php', RetSWT);                           
+  $.post('ajax/get_current_day_time.php', RetSWT);
   function RetSWT(dat) 
   {
     if ( document.getElementById('dateTimeFieldNav') )

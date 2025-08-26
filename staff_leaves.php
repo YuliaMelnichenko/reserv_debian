@@ -207,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'delete') {
         }
 
         mysqli_stmt_bind_param($stmt, 'i', $id);
-        
+
         if (!mysqli_stmt_execute($stmt)) {
             throw new Exception("Ошибка удаления: " . mysqli_error($link));
         }
@@ -221,21 +221,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'delete') {
     exit;
 }
 
-
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
-<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
-<link rel="stylesheet" href="style/style.css">
-<link rel="stylesheet" href="style/main.css">
-</head>
-<body bgcolor="#ffffff">
-
-<script type="text/javascript" src="lib/jquery/jquery.js"></script>
-<script type="text/javascript" src="js/tory.js"></script>
+    <head>
+        <title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" href="style/style.css">
+        <link rel="stylesheet" href="style/main.css">
+    </head>
+    <body bgcolor="#ffffff">
+        <script type="text/javascript" src="lib/jquery/jquery.js"></script>
+        <script type="text/javascript" src="js/tory.js"></script>
 
 <?php
 echo "<div align=\"left\">";
@@ -257,7 +255,7 @@ echo "<div id=\"event_buttons\">";
     echo "<div id=\"events\">";
     echo "<button id=\"btn_sick\" class=\"event-switch\" onclick=\"\">Больничные</button>";
     echo "<button id=\"btn_vacations\" class=\"event-switch\" onclick=\"\">Отпуска</button>";
-    // echo "<button id=\"btn_business_trip\" class=\"event-switch\" onclick=\"\">Командировки</button>";
+    echo "<button id=\"btn_business_trip\" class=\"event-switch\" onclick=\"\">Командировки</button>";
     echo "<button id=\"btn_archive\" class=\"event-switch\" onclick=\"loadArchive();\">Архив</button>";
     echo "</div>";
     echo "<div id=\"add_info_block\">";
@@ -268,21 +266,21 @@ echo "<div id=\"event_buttons\">";
 echo "</div>";
 ?>
 
-<div id="leave_table_wrapper">
-    <table id="leave_table">
-        <thead>
-            <tr>
-                <th>Сотрудник</th>
-                <th>Дата начала</th>
-                <th>Дата окончания</th>
-                <th>Кол-во дней</th>
-                <th>Событие</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-</div>
+    <div id="leave_table_wrapper">
+        <table id="leave_table">
+            <thead>
+                <tr>
+                    <th>Сотрудник</th>
+                    <th>Дата начала</th>
+                    <th>Дата окончания</th>
+                    <th>Кол-во дней</th>
+                    <th>Событие</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
 <div id="toast"> ✅ Запись обновлена </div>
 
@@ -311,11 +309,11 @@ echo "</div>";
             </div>
             <div class="modal_labels" id="selectEventBlock">
                 <label style="font-family: Arial,sans; font-size: 13px; color: #333333; font-weight: 700; margin-bottom: 5px;">Событие:</label>
-                <select style="width: 110px;" name="event" required>
+                <select style="width: 120px;" name="event" required>
                     <option value="">Выберите...</option>
                     <option value="Отпуск">Отпуск</option>
                     <option value="Больничный">Больничный</option>
-                    <!-- <option value="Командировка">Командировка</option> -->
+                    <option value="Командировка">Командировка</option>
                 </select>
             </div>
         </div>
@@ -337,7 +335,11 @@ echo "</div>";
         document.getElementById('btn_sick').addEventListener('click', () => {
             currentType = 'Больничный';
             loadLeaves(currentType);
-        }); 
+        });
+        document.getElementById('btn_business_trip').addEventListener('click', () => {
+            currentType = 'Командировка';
+            loadLeaves(currentType);
+        });
         document.getElementById('btn_add').addEventListener('click', () => {
             openModal('add');
         });
@@ -392,7 +394,9 @@ echo "</div>";
             document.getElementById('btn_vacations').classList.add('active');
         } else if (type === 'Больничный') {
             document.getElementById('btn_sick').classList.add('active');
-        } 
+        } else if (type === 'Командировка') {
+            document.getElementById('btn_business_trip').classList.add('active');
+        }
 
         fetch('staff_leaves.php?action=load&type=' + encodeURIComponent(type))
             .then(res => res.text())

@@ -2818,7 +2818,7 @@ h5.activ_time {
 
 .img_container {
   display: flex;
-  width: 45px;
+  width: 70px;
   justify-content: flex-end;
 }
 
@@ -2854,8 +2854,8 @@ h5.activ_time {
 #events {
   display: flex;
   justify-content: space-between;
-  /* width: 500px; */
-  width: 350px;
+  width: 500px;
+  /* width: 350px; */
 }
 
 #event_buttons {
@@ -2867,8 +2867,8 @@ h5.activ_time {
 #add_info_block {
   display: flex;
   justify-content: flex-end;
-  /* width: 210px; */
-  width: 350px;
+  width: 210px;
+  /* width: 350px; */
 }
 
 #btn_add {

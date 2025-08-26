@@ -89,7 +89,7 @@ if ( isset($_POST['userID']) AND isset($_POST['inTime']) )
           {
             $offset = strtotime( $newInTime ) - strtotime( $eatStart ) + 1;
             
-            $format_time_d_hhmmss_pure( $offset );   
+            format_time_d_hhmmss_pure( $offset );   
              
             $newEatStartTime = inc_time_by_time( $eatStart, $offset );
             $newEatStopTime = inc_time_by_time( $eatStop, $offset );
@@ -127,7 +127,7 @@ if ( isset($_POST['userID']) AND isset($_POST['inTime']) )
           {
             $offset = strtotime( $newInTime ) - strtotime( $eatStart ) + 1;
             
-            $format_time_d_hhmmss_pure( $offset );   
+            format_time_d_hhmmss_pure( $offset );   
              
             $newEatStartTime = inc_time_by_time( $eatStart, $offset );
             $newEatStopTime = $eatStop;

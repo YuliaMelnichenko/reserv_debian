@@ -323,11 +323,9 @@ function set_alert_viewed( alertID )
   }
 } 
 
-function update_alerts_page()
-{
+function update_alerts_page() {
   $.post('ajax/get_alerts_count.php', RetSWT1);                           
-  function RetSWT1(dat1) 
-  { 
+  function RetSWT1(dat1) { 
     if ( dat1 == 1 )
     {
       window.location="alerts.php";
@@ -336,7 +334,7 @@ function update_alerts_page()
     {
       window.location="index.php";
     }
-  }   	
+  }
 }
 
 function pause_set_start()
@@ -350,7 +348,7 @@ function pause_set_start()
 
 function pause_go_back()
 {  
-  $.post('ajax/go_back_pause_page_mode.php', RetSWT1);                           
+  $.post('ajax/go_back_pause_page_mode.php', RetSWT1);
   function RetSWT1(dat1) 
   {
     show_pause_page();
@@ -361,7 +359,7 @@ function show_pause_page()
 {  
   if ( document.getElementById('pause_approvement') )
   {  
-    $.post('ajax/get_pause_page_mode.php', RetSWT1);                           
+    $.post('ajax/get_pause_page_mode.php', RetSWT1);
     function RetSWT1(dat1) 
     {  
       if ( dat1 == 1 )
@@ -396,7 +394,7 @@ function show_pause_notification()
     $.post('ajax/get_pause_notification_table.php', RetSWT1);                           
     function RetSWT1(dat1) 
     {
-      document.getElementById('pause_approvement').innerHTML = dat1;              
+      document.getElementById('pause_approvement').innerHTML = dat1;
 
       if ( document.getElementById('pause_approvement_table_users') && document.getElementById('pause_approvement') )
       { 
@@ -420,10 +418,10 @@ function show_pause_by_user( user )
 {   
   if ( document.getElementById('pause_approvement') )
   {  
-    $.post('ajax/get_pauses_by_user.php', { user: user }, RetSWT1);                           
+    $.post('ajax/get_pauses_by_user.php', { user: user }, RetSWT1);
     function RetSWT1(dat1) 
     {
-      document.getElementById('pause_approvement').innerHTML = dat1;   
+      document.getElementById('pause_approvement').innerHTML = dat1;
 
       if ( document.getElementById('pause_approvement_table') && document.getElementById('pause_approvement') )
       { 
@@ -440,7 +438,7 @@ function show_pause_by_user( user )
         set_delay_notificationc_count();
       }  
     }
-  }   	
+  }
 }        
 
 function show_add_time_table( showTable )
@@ -477,7 +475,7 @@ function upl_add_time()
     var ta_base = document.getElementById('ta_base').value;
     var ta_desc = document.getElementById('ta_desc').value;
 
-    $.post('ajax/time_appender.php', {ta_start_date_time: ta_start_date_time, ta_stop_date_time: ta_stop_date_time, ta_base: ta_base, ta_desc: ta_desc}, RetSWT);                           
+    $.post('ajax/time_appender.php', {ta_start_date_time: ta_start_date_time, ta_stop_date_time: ta_stop_date_time, ta_base: ta_base, ta_desc: ta_desc}, RetSWT);
     function RetSWT(dat) 
     {  
       window.location=self.location;
@@ -489,7 +487,7 @@ function show_delay_page()
 {  
   if ( document.getElementById('delay_approvement') )
   {  
-    $.post('ajax/get_delay_page_mode.php', RetSWT1);                           
+    $.post('ajax/get_delay_page_mode.php', RetSWT1);
     function RetSWT1(dat1) 
     {
       if ( dat1 == 1 )
@@ -509,10 +507,10 @@ function show_delay_notification()
 {  
   if ( document.getElementById('delay_approvement') )
   {  
-    $.post('ajax/get_delay_notification_table.php', RetSWT1);                           
+    $.post('ajax/get_delay_notification_table.php', RetSWT1);
     function RetSWT1(dat1) 
     {
-      document.getElementById('delay_approvement').innerHTML = dat1;              
+      document.getElementById('delay_approvement').innerHTML = dat1;
 
       if ( document.getElementById('delay_approvement_table_users') && document.getElementById('delay_approvement') )
       { 
@@ -542,10 +540,10 @@ function show_delays_by_user( user )
 {  
   if ( document.getElementById('delay_approvement') )
   {  
-    $.post('ajax/get_delays_by_user.php', { user: user }, RetSWT1);                           
+    $.post('ajax/get_delays_by_user.php', { user: user }, RetSWT1);
     function RetSWT1(dat1) 
     {
-      document.getElementById('delay_approvement').innerHTML = dat1;   
+      document.getElementById('delay_approvement').innerHTML = dat1;
 
       if ( document.getElementById('delay_approvement_table') && document.getElementById('delay_approvement') )
       { 
@@ -573,7 +571,7 @@ function show_delays_by_user( user )
 
 function delay_go_back()
 {  
-  $.post('ajax/go_back_delay_page_mode.php', RetSWT1);                           
+  $.post('ajax/go_back_delay_page_mode.php', RetSWT1);
   function RetSWT1(dat1) 
   {
     show_delay_page();
@@ -582,7 +580,7 @@ function delay_go_back()
 
 function delay_set_start()
 {  
-  $.post('ajax/go_back_delay_page_mode.php', RetSWT1);                           
+  $.post('ajax/go_back_delay_page_mode.php', RetSWT1);
   function RetSWT1(dat1) 
   {
     show_delay_page();
@@ -639,7 +637,7 @@ function mark_as_deleted_delay_for_user( addID )
   if ( perform == true )
   {
     var mode = 100;
-    $.post('ajax/set_delay_state.php', { addID: addID, mode: mode });                           
+    $.post('ajax/set_delay_state.php', { addID: addID, mode: mode });
   }   	
 }
 
@@ -650,7 +648,7 @@ function mark_as_undeleted_delay_for_user( addID )
   {
     var mode = 200;
 
-    $.post('ajax/set_delay_state.php', { addID: addID, mode: mode });                           
+    $.post('ajax/set_delay_state.php', { addID: addID, mode: mode });
   }   	
 }
 
@@ -658,7 +656,7 @@ function show_add_times_by_user( user )
 {  
   if ( document.getElementById('add_time_content') )
   {  
-    $.post('ajax/get_add_times_by_user.php', { user: user }, RetSWT1);                           
+    $.post('ajax/get_add_times_by_user.php', { user: user }, RetSWT1);
     function RetSWT1(dat1) 
     {
       document.getElementById('add_time_content').innerHTML = dat1;   
@@ -691,10 +689,10 @@ function show_add_times_by_user( user )
 
 function show_add_time_notification()
 {  
-  $.post('ajax/get_add_times_notification_table.php', RetSWT1);                           
+  $.post('ajax/get_add_times_notification_table.php', RetSWT1);
   function RetSWT1(dat1) 
   {
-    document.getElementById('add_time_content').innerHTML = dat1;              
+    document.getElementById('add_time_content').innerHTML = dat1;
 
     if ( document.getElementById('add_time_approvement_table_users') )
     { 
@@ -721,10 +719,10 @@ function show_add_time_notification()
   {  
     document.getElementById('dateTimeField').style.display='none';
 
-    $.post('ajax/get_add_times_notification_table.php', RetSWT1);                           
+    $.post('ajax/get_add_times_notification_table.php', RetSWT1);
     function RetSWT1(dat1) 
     {
-      document.getElementById('add_time_content').innerHTML = dat1;              
+      document.getElementById('add_time_content').innerHTML = dat1;
 
       if ( document.getElementById('add_time_approvement_table_users') )
       { 
@@ -749,7 +747,7 @@ function show_add_time_notification()
 
 function add_time_go_back()
 {  
-  $.post('ajax/go_back_add_time_page_mode.php', RetSWT1);                           
+  $.post('ajax/go_back_add_time_page_mode.php', RetSWT1);
   function RetSWT1(dat1) 
   {
     show_add_time_page();
@@ -838,7 +836,7 @@ function show_pause_table()
                          
     function RetSWT1(dat1) 
     {
-      document.getElementById('pause_times_table').innerHTML = dat1;              
+      document.getElementById('pause_times_table').innerHTML = dat1;
     }
   }   	
 }
@@ -851,7 +849,7 @@ function show_pause_sport_table()
         
     function RetSWT1(dat1) 
     {
-      document.getElementById('pause_sport_times_table').innerHTML = dat1;              
+      document.getElementById('pause_sport_times_table').innerHTML = dat1;
     }
   }   	
 }
@@ -863,7 +861,7 @@ function show_delay_table()
     $.post('ajax/get_delay_table.php', RetSWT1);                           
     function RetSWT1(dat1) 
     {
-      document.getElementById('delay_table').innerHTML = dat1;              
+      document.getElementById('delay_table').innerHTML = dat1;
     }
   }   	
 }
@@ -873,7 +871,7 @@ function ta_delete( delID )
   var perform=confirm('запись будет удалена. Продолжить?')
   if ( perform == true )
   {
-    $.post('ajax/time_delete.php', {delID: delID}, RetSWT);                           
+    $.post('ajax/time_delete.php', {delID: delID}, RetSWT);
     function RetSWT(dat) 
     {
       show_table();  
