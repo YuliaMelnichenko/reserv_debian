@@ -84,15 +84,18 @@ include __DIR__ . "/php_tori/connect.php";
 
 $paramArr = get_dbsetup_param( 'add_time_journal_deep_day' );
   
-$paramInt = $paramArr[1];
+$paramInt = (int)$paramArr[1];
 
-echo "<h5 class=\"big\"> Глубина просмотра журнала (дни): $paramInt</h5>";
+$today = date("d-m-Y");
+$dateForm = date("d.m.Y", strtotime("-$paramInt days"));
+
+echo "<h5 class=\"big\"> Глубина просмотра журнала (180 дней): $dateForm - $today </h5>";
 echo "<table id = \"add_time_approvement_table_users\" class = \"add_time\" border=1>";
 echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
 echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Сотрудник</h5>"."</td>";
 echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Всего</h5>"."</td>";
 echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Принятые</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Отклоненные</h5>"."</td>";                                                                      
+echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Отклоненные</h5>"."</td>";
 echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Удаленные</h5>"."</td>";
 echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Новые</h5>"."</td>";
 echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Просмотреть</h5>"."</td>";
@@ -152,7 +155,7 @@ else
   }
 }
 
-echo "</table>";   
+echo "</table>";
       echo "</td>"; 
     echo "</tr>";
   echo "</table>";
@@ -164,7 +167,7 @@ echo "</div>";
 
 function update_clock()
 {
-  $.post('ajax/get_current_day_time.php', RetSWT);                           
+  $.post('ajax/get_current_day_time.php', RetSWT);
   function RetSWT(dat) 
   {
     if ( document.getElementById('dateTimeFieldNav') )

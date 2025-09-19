@@ -332,15 +332,13 @@ function auth()
   }
 }  
 
-function get_dbsetup_param( $paramName ) 
-{
+function get_dbsetup_param( $paramName ) {
   include __DIR__ . "/php_tori/connect.php";
 
   mysqli_set_charset($link, "utf8");     
 
   $query = mysqli_query($link, "SELECT valueInt, valueFloat, valueStr FROM DBSETUP WHERE paramName = '$paramName'"); 
 
-  // $merr=mysqlii_error($link);
   if ( !$query ) 
   {
     $success = 0;
@@ -1092,8 +1090,7 @@ function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNoti
   return 1;
 }
 
-function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNotificationCount, &$refusedNotificationCount, &$deletedNotificationCount, &$newNotificationCount )
-{
+function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNotificationCount, &$refusedNotificationCount, &$deletedNotificationCount, &$newNotificationCount ){
   include __DIR__ . "/php_tori/connect.php";
   
   $notificationCount = 0;
@@ -1107,35 +1104,30 @@ function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNot
   $paramArr = get_dbsetup_param( 'add_time_journal_deep_day' );
   
   $paramInt = (-1)*$paramArr[1];
-  
-  $query = mysqli_query($link, "SELECT APPROVED FROM ADD_TIME WHERE PAUSE_MODE=0 AND USERID='$user_id' AND STOP_DT > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )"); 
 
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  $query = mysqli_query($link, "SELECT APPROVED FROM ADD_TIME WHERE PAUSE_MODE = 0 AND USERID = '$user_id' AND STOP_DT > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )"); 
+
+  $merr = mysqli_error($link);
+
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
     return 0;
   }
-  else
-  {
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
+  else {
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ) {
       $approved = $row["APPROVED"];
-      if ( $approved == 0 )
-      {
+
+      if ( $approved == 0 ) {
         $newNotificationCount ++;  
       }
-      else if ( $approved == 99 OR $approved == 100 OR $approved == 101 )
-      {
+      else if ( $approved == 99 OR $approved == 100 OR $approved == 101 ) {
         $deletedNotificationCount ++;  
       }
-      else if ( $approved == -1 )
-      {
+      else if ( $approved == -1 ) {
         $refusedNotificationCount ++;  
       }
-      else if ( $approved == 1 )
-      {
-        $acceptedNotificationCount ++;  
+      else if ( $approved == 1 ) {
+        $acceptedNotificationCount ++;
       }
       $notificationCount ++;
     }
@@ -1143,8 +1135,7 @@ function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNot
   return 1;
 }
 
-function get_notification_count( $user_id )
-{
+function get_notification_count( $user_id ){
   include __DIR__ . "/php_tori/connect.php";
 
   $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
@@ -1157,18 +1148,15 @@ function get_notification_count( $user_id )
                         and userid in (SELECT userid FROM GROUPS WHERE supervisorid='$user_id' and type=0)"); 
 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
+  else{
     return mysqli_num_rows($query);
   }
 }
 
-function get_delay_notification_count( $user_id )
-{
+function get_delay_notification_count( $user_id ){
   include __DIR__ . "/php_tori/connect.php";
 
   $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
@@ -1190,20 +1178,17 @@ function get_delay_notification_count( $user_id )
                            a.userid in (SELECT c.userid FROM GROUPS c WHERE c.supervisorid=$user_id and type=3)"); 
 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
+  else{
     return mysqli_num_rows($query);
   }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function get_penalty_id()
-{
+function get_penalty_id(){
   include __DIR__ . "/php_tori/connect.php";
 
   $query0 = mysqli_query($link, "SELECT max(ID) FROM Penalty"); 
@@ -1211,43 +1196,34 @@ function get_penalty_id()
   $newID = 0;
 
   $merr=mysqli_error($link);
-  if ( !$query0 ) 
-  {
+  if ( !$query0 ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else if ( $row = mysqli_fetch_array($query0) )
-  {
+  else if ( $row = mysqli_fetch_array($query0) ){
     $newID = $row[0] + 1;
   }
   return $newID;
 }
 
-function time_defined( $time_ )
-{
-  if ( $time_ == "00:00:00" )
-  {
+function time_defined( $time_ ){
+  if ( $time_ == "00:00:00" ){
     return 0;
   }
-  else
-  {
+  else{
     return 1;
   }
 }
 
-function represent_time( $time_ )
-{
-  if ( time_defined( $time_ ) == 1 )
-  {
+function represent_time( $time_ ){
+  if ( time_defined( $time_ ) == 1 ){
     return "<font size=\"2\" color=\"#000000\" face=\"Arial\">$time_</font>";    
   }
-  else
-  {
+  else{
     return "<font size=\"2\" color=\"#ff0000\" face=\"Arial\">??:??:??</font>";    
   }
 }
 
-function isWeekEnd( $day )
-{
+function isWeekEnd( $day ){
   $week_day = GetWeekDayD( $day );
 
   if ( $week_day == 6 OR $week_day == 7 )
@@ -1256,133 +1232,103 @@ function isWeekEnd( $day )
     return 0;
 }
 
-function round_to_minute( $time )
-{
+function round_to_minute( $time ){
   $timeMinutes = $time / 60;
   $timeMinutes = (int)$timeMinutes;
   $seconds = $time - $timeMinutes * 60;
   $timeMinutes = $timeMinutes * 60;
 
-  if ( $seconds > 30 )
-  {
+  if ( $seconds > 30 ){
     $timeMinutes = $timeMinutes + 60;
   }
   return $timeMinutes;
 }
 
-function work_day_duration_current_date( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration )
-{
-  if ( time_defined( $in_time ) == 0 )
-  {
+function work_day_duration_current_date( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration ){
+  if ( time_defined( $in_time ) == 0 ){
     return "??:??:??";
   }
-  else if ( time_defined( $out_time ) == 0 )
-  {
-    if ( time_defined( $eat_start ) == 0 AND time_defined( $eat_stop ) == 0 )
-    {
+  else if ( time_defined( $out_time ) == 0 ){
+    if ( time_defined( $eat_start ) == 0 AND time_defined( $eat_stop ) == 0 ){
       return format_time_d( strtotime(date("H:i:s")) - strtotime($in_time) + $add_time_duration );
     }
-    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 0 )
-    {
+    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 0 ){
       return format_time_d( strtotime($eat_start) - strtotime($in_time) + $add_time_duration );
     }
-    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 1 )
-    {
+    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 1 ){
       return format_time_d( strtotime(date("H:i:s")) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) ) );
     }
   }
-  else
-  {
+  else{
     return format_time_d( strtotime($out_time) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) ) + $add_time_duration );  
   }
 }
 
-function work_day_duration( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration )
-{
-  if ( time_defined( $in_time ) == 0 OR time_defined( $out_time ) == 0 OR time_defined( $eat_start ) == 0 OR time_defined( $eat_stop ) == 0 )
-  {
+function work_day_duration( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration ){
+  if ( time_defined( $in_time ) == 0 OR time_defined( $out_time ) == 0 OR time_defined( $eat_start ) == 0 OR time_defined( $eat_stop ) == 0 ){
     if ( $add_time_duration == 0 )
       return "-1";
     else 
       return format_time_d( $add_time_duration );
   }
-  else
-  {
+  else{
     return format_time_d( strtotime($out_time) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) ) + $add_time_duration );  
   }
 }
 
-function work_day_duration_current_date_n( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration )
-{
-  if ( time_defined( $in_time ) == 0 )
-  {
+function work_day_duration_current_date_n( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration ){
+  if ( time_defined( $in_time ) == 0 ){
     return 0;
   }
-  else if ( time_defined( $out_time ) == 0 )
-  {
-    if ( time_defined( $eat_start ) == 0 AND time_defined( $eat_stop ) == 0 )
-    {
+  else if ( time_defined( $out_time ) == 0 ){
+    if ( time_defined( $eat_start ) == 0 AND time_defined( $eat_stop ) == 0 ){
       return strtotime(date("H:i:s")) - strtotime($in_time) + $add_time_duration;
     }
-    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 0 )
-    {
+    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 0 ){
       return strtotime($eat_start) - strtotime($in_time) + $add_time_duration;
     }
-    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 1 )
-    {
+    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 1 ){
       return strtotime(date("H:i:s")) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) );
     }
   }
-  else
-  {
+  else{
     return format_time_d( strtotime($out_time) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) ) + $add_time_duration );  
   }
 }
 
-function work_day_duration_current_date_nn( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration )
-{
-  if ( time_defined( $in_time ) == 0 )
-  {
+function work_day_duration_current_date_nn( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration ){
+  if ( time_defined( $in_time ) == 0 ){
     return 0;
   }
-  else if ( time_defined( $out_time ) == 0 )
-  {
-    if ( time_defined( $eat_start ) == 0 AND time_defined( $eat_stop ) == 0 )
-    {
+  else if ( time_defined( $out_time ) == 0 ){
+    if ( time_defined( $eat_start ) == 0 AND time_defined( $eat_stop ) == 0 ){
       return strtotime(date("H:i:s")) - strtotime($in_time) + $add_time_duration;
     }
-    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 0 )
-    {
+    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 0 ){
       return strtotime($eat_start) - strtotime($in_time) + $add_time_duration;
     }
-    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 1 )
-    {
+    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 1 ){
       return strtotime(date("H:i:s")) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) );
     }
   }
-  else
-  {
+  else{
     return strtotime($out_time) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) ) + $add_time_duration;  
   }
 }
 
-function work_day_duration_n( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration )
-{
-  if ( time_defined( $in_time ) == 0 OR time_defined( $out_time ) == 0 OR time_defined( $eat_start ) == 0 OR time_defined( $eat_stop ) == 0 )
-  {
+function work_day_duration_n( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration ){
+  if ( time_defined( $in_time ) == 0 OR time_defined( $out_time ) == 0 OR time_defined( $eat_start ) == 0 OR time_defined( $eat_stop ) == 0 ){
     if ( $add_time_duration == 0 )
       return 0;
     else 
       return $add_time_duration;
   }
-  else
-  {
+  else{
     return strtotime($out_time) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) ) + $add_time_duration;  
   }
 }
 
-function format_time_d( $short_time_ )
-{
+function format_time_d( $short_time_ ){
   $hours = (int)($short_time_/(3600));
 
   $mins	= (int)($short_time_/(60) - $hours*(60));
@@ -1401,8 +1347,7 @@ function format_time_d( $short_time_ )
   return "<font size=\"2\" color=\"#000000\" face=\"Arial\">".$result_time."</font>";
 }
 
-function format_time_d_pure( $short_time_ )
-{
+function format_time_d_pure( $short_time_ ){
   $hours = (int)($short_time_/(3600));
 
   $mins	= (int)($short_time_/(60) - $hours*(60));
@@ -1421,8 +1366,7 @@ function format_time_d_pure( $short_time_ )
   return $result_time;
 }
 
-function format_time_d_hhmm( $short_time_ )
-{
+function format_time_d_hhmm( $short_time_ ){
   $hours = (int)($short_time_/(3600));
 
   $mins	= (int)($short_time_/(60) - $hours*(60));
@@ -1441,8 +1385,7 @@ function format_time_d_hhmm( $short_time_ )
   return "<font size=\"2\" color=\"#000000\" face=\"Arial\">".$result_time."</font>";
 }
 
-function format_time_d_hhmm_pure( $short_time_ )
-{
+function format_time_d_hhmm_pure( $short_time_ ){
   $hours = (int)($short_time_/(3600));
 
   $mins	= (int)($short_time_/(60) - $hours*(60));
@@ -1461,10 +1404,8 @@ function format_time_d_hhmm_pure( $short_time_ )
   return $result_time;
 }
 
-function format_time_d_hhmmss_pure( $short_time_ )
-{
-  if ( $short_time_ >= 0 )
-  {
+function format_time_d_hhmmss_pure( $short_time_ ){
+  if ( $short_time_ >= 0 ){
     $hours = (int)($short_time_/(3600));
   
     $mins	= (int)($short_time_/(60) - $hours*(60));
@@ -1481,17 +1422,14 @@ function format_time_d_hhmmss_pure( $short_time_ )
   
     $result_time = "$hours:$mins:$secs";
   }
-  else               
-  {                
+  else{
     $result_time = "ERR (time<0)";
   }
   return $result_time;
 }
 
-function format_time_d_hhmmss_pure_partial( $short_time_ )
-{
-  if ( $short_time_ >= 0 )
-  {
+function format_time_d_hhmmss_pure_partial( $short_time_ ){
+  if ( $short_time_ >= 0 ){
     $hoursPart = (float)($short_time_/(3600));
 
     $result_time = sprintf("%2.2f", $hoursPart);
@@ -1499,18 +1437,15 @@ function format_time_d_hhmmss_pure_partial( $short_time_ )
   return $result_time;
 }
 
-function format_time_d_hhmmss_pure_HH( $short_time_ )
-{
-  if ( $short_time_ >= 0 )
-  {
+function format_time_d_hhmmss_pure_HH( $short_time_ ){
+  if ( $short_time_ >= 0 ){
     $hours = (int)($short_time_/(3600));
 
     if ( $hours < 10 )
      $hours = "0".$hours;
     $result_time = "$hours";
   }
-  else               
-  {                
+  else{
     $result_time = "ERR (time<0)";
   }
   return $result_time;

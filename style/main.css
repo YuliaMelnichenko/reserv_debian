@@ -2906,7 +2906,9 @@ h5.activ_time {
 }
 
 #leave_table th,
-#leave_table td {
+#leave_table td,
+#overtime_table th,
+#overtime_table td {
   border: 1px solid #ccc;
   padding: 6px;
   text-align: center;
@@ -2982,8 +2984,46 @@ h5.activ_time {
   align-items: center;
 }
 
-#leave_table_wrapper {
+.leave_table_wrapper {
   max-height: 400px;
   overflow-y: auto;
   margin-top: 10px;
+}
+
+#hours_input {
+  width: 35px;
+  height: 21px;
+  padding: 0;
+}
+
+#btn_search {
+  height: 23px;
+  margin: 0 10px;
+  background-color: #f8d888;
+  border: 1px solid #888888;
+}
+
+#results_table {
+  border-collapse: collapse;
+  width: 690px;
+  margin: 0;
+  border:solid #d17125 1px;
+  background-color:#eeeeee;
+}
+
+#results_table th,
+#results_table td {
+  text-align: center;
+}
+
+#results_table td:first-child {
+  text-align: left;
+}
+
+.table_wrapper {
+  margin: 10px 0;
+  max-height: 73vh;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  width: 560px;
 }

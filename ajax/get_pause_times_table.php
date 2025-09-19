@@ -13,16 +13,14 @@ $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 $userID_ = $_SESSION['ss_id']; 
 
 $paramArr = get_dbsetup_param( 'pause_journal_deep_day' );
-  
-$paramInt = $paramArr[1];
+$paramInt = (int)$paramArr[1];
 
-$paramIntSign = (-1)*$paramArr[1];
+$today = date("d-m-Y");
+$dateForm = date("d.m.Y", strtotime("-$paramInt days"));
 
-echo "<h5 class=\"big\"> Глубина просмотра журнала (дни): $paramInt</h5>";
-
+echo "<h5 class=\"big\"> Глубина просмотра журнала (180 дней): $dateForm - $today </h5>";
 echo "<table class=\"add_time\" border=1>";
 echo "<tr bgcolor=\"#DDDDDD\" bordercolor=\"#888888\">";
-
 echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Начало<br>(дата, время)</h5>"."</td>";
 echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Окончание<br>(дата, время)</h5>"."</td>";
 echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Длительность</h5>"."</td>";
@@ -46,8 +44,7 @@ $query = mysqli_query($link, "SELECT * FROM ADD_TIME
                       pause_mode = 1
                       ORDER BY ID DESC"); 
 
-while($row = mysqli_fetch_array($query, MYSQLI_ASSOC))
-{
+while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
   $ta_id = $row["ID"];
   $ta_suir = $row["SUIR"];
   $ta_start_date = $row["START_DT"];
@@ -62,13 +59,11 @@ while($row = mysqli_fetch_array($query, MYSQLI_ASSOC))
 
   $ta_reason_description = "Приостановка учета времени";
 
-  if ( $colorMode == 0 )
-  {
+  if ( $colorMode == 0 ) {
     $color = $color1;
     $colorMode = 1;
   }
-  else
-  {
+  else {
     $color = $color3;
     $colorMode = 0;
   }

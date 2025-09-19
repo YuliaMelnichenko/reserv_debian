@@ -51,11 +51,12 @@ echo "<table border=0>";
         echo "</div>";
 
     $paramArr = get_dbsetup_param( 'pause_journal_deep_day' );
-  
-    $paramInt = $paramArr[1];
+    $paramInt = (int)$paramArr[1];
 
-    echo "<h5 class=\"big\"> Глубина просмотра журнала (дни): $paramInt</h5>";
+    $today = date("d-m-Y");
+    $dateForm = date("d.m.Y", strtotime("-$paramInt days"));
 
+    echo "<h5 class=\"big\"> Глубина просмотра журнала (180 дней): $dateForm - $today </h5>";
     echo "<table id = \"pause_approvement_table_users\" class=\"add_time\" border=1>";
     echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
     echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Сотрудник</h5>"."</td>";

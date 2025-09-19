@@ -14,9 +14,12 @@ $user_allowedDelay = $_SESSION['ss_allowedDelay'];
 
 $paramArr = get_dbsetup_param( 'delay_journal_deep_day' );
   
-$paramInt = $paramArr[1];
+$paramInt = (int)$paramArr[1];
 
-echo "<h5 class=\"big\"> Глубина просмотра журнала (дни): $paramInt</h5>";
+$today = date("d-m-Y");
+$dateForm = date("d.m.Y", strtotime("-$paramInt days"));
+
+echo "<h5 class=\"big\"> Глубина просмотра журнала (180 дней): $dateForm - $today </h5>";
 
 echo "<table class=\"add_time\" cellpadding=\"0\" cellspacing=\"0\" border=1>";
 echo "<tr bgcolor=\"#DDDDDD\" bordercolor=\"#888888\">";

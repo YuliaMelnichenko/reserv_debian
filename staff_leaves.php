@@ -266,21 +266,21 @@ echo "<div id=\"event_buttons\">";
 echo "</div>";
 ?>
 
-    <div id="leave_table_wrapper">
-        <table id="leave_table">
-            <thead>
-                <tr>
-                    <th>Сотрудник</th>
-                    <th>Дата начала</th>
-                    <th>Дата окончания</th>
-                    <th>Кол-во дней</th>
-                    <th>Событие</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+<div class="leave_table_wrapper">
+    <table id="leave_table">
+        <thead>
+            <tr>
+                <th>Сотрудник</th>
+                <th>Дата начала</th>
+                <th>Дата окончания</th>
+                <th>Кол-во дней</th>
+                <th>Событие</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
 
 <div id="toast"> ✅ Запись обновлена </div>
 

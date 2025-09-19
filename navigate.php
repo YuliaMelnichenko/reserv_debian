@@ -74,6 +74,9 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
   if ($_SESSION['ss_id'] == 1 || $_SESSION['ss_id'] == 2 || $_SESSION['ss_id'] == 3 || $_SESSION['ss_id'] == 30 || $_SESSION['ss_id'] == 31 || $_SESSION['ss_id'] == 50 || $_SESSION['ss_id'] == 148 || $_SESSION['ss_id'] == 500) {
       if ( $needToShow == 1 ){ echo "<tr><td><button style=\"cursor: pointer; font-size: 80%; text-align: left; padding: 5px 0px 5px 5px; width:230px; height:40px; background-color:#a8fd88; border:1px solid #888888;\" onclick=\"location.href='staff_leaves.php'\"><h5 class=\"bigger\">Отсутствие сотрудников</h5></button></td></tr>"; }
   }
+  if ( $_SESSION['ss_id'] == 148 || $_SESSION['ss_id'] == 1 ) {
+      if ( $needToShow == 1 ){ echo "<tr><td><button style=\"cursor: pointer; font-size: 80%; text-align: left; padding: 5px 0px 5px 5px; width:230px; height:40px; background-color:#a8fd88; border:1px solid #888888;\" onclick=\"location.href='work_overtime.php'\"><h5 class=\"bigger\">Переработки</h5></button></td></tr>"; }
+  }
 
   if ( am_i_superuser( $_SESSION['ss_id'] ) == 1 ){
     $sv_id = $_SESSION['ss_id'];

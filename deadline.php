@@ -287,7 +287,7 @@ auth();
 
       mysqli_set_charset($link, "utf8");
     
-      $query01 = mysqli_query($link, "SELECT * FROM DEPARTMENTS WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = '$user_id')"); 
+      $query01 = mysqli_query($link, "SELECT * FROM departments WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = '$user_id')"); 
 
       $row01 = mysqli_fetch_assoc($query01);
 
