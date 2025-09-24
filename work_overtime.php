@@ -35,6 +35,20 @@ function getPeriodBounds (string $period): array {
     return [$start, $end];
 }
 
+function formatHours($hours) {
+    $minutes = intval(round($hours * 60));
+
+    if ($minutes <= 0) return '—';
+
+    $h = intdiv($minutes, 60);
+    $m = $minutes % 60;
+
+    if ($h > 0 && $m > 0) return "$h ч $m мин";
+
+    if ($h > 0) return "$h ч";
+    return "$m мин";
+}
+
 // === AJAX: список сотрудников с количеством переработок >= hours (текущий квартал) ===
 if (isset($_GET['action']) && $_GET['action'] === 'load') {
     header('Content-Type: application/json; charset=utf-8');
@@ -43,7 +57,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
         $hours = isset($_GET['hours']) ? floatval($_GET['hours']) : 9.0;
 
         $period = $_GET['period'] ?? 'quarter';
-        // list($qstart, $qend) = getPeriodBounds($period);
 
         if ($period === 'custom') {
             $start = $_GET['start'] ?? '';
@@ -113,7 +126,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
         if ($hours <= 0) $hours = 9.0;
 
         $period = $_GET['period'] ?? 'quarter';
-        // list($qstart, $qend) = getPeriodBounds($period);
 
         if ($period === 'custom') {
             $start = $_GET['start'] ?? '';
@@ -130,39 +142,78 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
         $threshold_seconds = intval(round($hours * 3600));
 
         $sql = "
-            SELECT DATE(v.in_dt) AS date,
-                   ROUND(
-                       (TIME_TO_SEC(TIMEDIFF(v.out_dt, v.in_dt))
-                        - IF(v.eat_start_dt IS NULL OR v.eat_stop_dt IS NULL, 0,
-                             TIME_TO_SEC(TIMEDIFF(v.eat_stop_dt, v.eat_start_dt)))
-                       ) / 3600, 0
-                   ) AS hours
-            FROM visiting v
-            WHERE v.user_id = ?
-              AND v.in_dt >= ?
-              AND v.in_dt < ?
-              AND v.in_dt IS NOT NULL AND v.out_dt IS NOT NULL
-              AND (
-                    TIME_TO_SEC(TIMEDIFF(v.out_dt, v.in_dt))
-                    - IF(v.eat_start_dt IS NULL OR v.eat_stop_dt IS NULL, 0,
-                         TIME_TO_SEC(TIMEDIFF(v.eat_stop_dt, v.eat_start_dt)))
-                  ) >= ?
-            ORDER BY v.in_dt DESC
-        ";
+            SELECT d.work_date,
+                   ROUND(IFNULL(v.office_hours, 0) + IFNULL(a.outside_hours, 0), 2) AS total_hours,
+                   IFNULL(a.outside_hours, 0) AS outside_hours
+            FROM (
+                SELECT DATE(in_dt) AS work_date
+                FROM visiting
+                WHERE user_id = ?
+                  AND in_dt >= ?
+                  AND in_dt < ?
+                GROUP BY DATE(in_dt)
+                
+                UNION
+                
+                SELECT DATE(START_DT) AS work_date
+                FROM ADD_TIME
+                WHERE USERID = ?
+                  AND START_DT >= ?
+                  AND START_DT < ?
+                  AND REASON IN (1, 2, 3, 5)
+                GROUP BY DATE(START_DT)
+            ) d 
+            LEFT JOIN (
+                SELECT DATE(in_dt) AS work_date,
+                       ROUND (SUM(
+                         TIME_TO_SEC(TIMEDIFF(out_dt, in_dt))
+                          - IF(eat_start_dt IS NULL OR eat_stop_dt IS NULL, 0,
+                               TIME_TO_SEC(TIMEDIFF(eat_stop_dt, eat_start_dt)))
+                         ) / 3600, 2) AS office_hours
+                FROM visiting 
+                WHERE user_id = ?
+                  AND in_dt >= ?
+                  AND in_dt < ?
+                  AND in_dt IS NOT NULL AND out_dt IS NOT NULL
+                GROUP BY DATE(in_dt) 
+            ) v ON d.work_date = v.work_date
+            LEFT JOIN (
+                SELECT DATE(START_DT) AS work_date,
+                       ROUND(SUM(TIME_TO_SEC(TIMEDIFF(STOP_DT, START_DT))) / 3600, 2) AS outside_hours
+                FROM ADD_TIME
+                WHERE USERID = ?
+                  AND START_DT >= ?
+                  AND START_DT < ?
+                  AND REASON IN (1, 2, 3, 5)
+                GROUP BY DATE(START_DT)
+            ) a ON d.work_date = a.work_date
+            WHERE (IFNULL(v.office_hours, 0) + IFNULL(a.outside_hours, 0)) * 3600 >= ?
+            ORDER BY d.work_date DESC";
 
         $stmt = mysqli_prepare($link, $sql);
         if (!$stmt) throw new Exception('Ошибка подготовки запроса ' . mysqli_error($link));
 
-        mysqli_stmt_bind_param($stmt, 'issi', $empId, $qstart, $qend, $threshold_seconds);
+        if (mysqli_stmt_param_count($stmt) !== 13) {
+            throw new Exception('Количество плейсхолдеров не совпадает: ' . mysqli_stmt_param_count($stmt));
+        }
+
+        mysqli_stmt_bind_param($stmt, 
+                                   'ississississi', 
+                                     $empId, $qstart, $qend, //visiting (union)
+                                           $empId, $qstart, $qend, //add_time (union)
+                                           $empId, $qstart, $qend, //visiting (left join)
+                                           $empId, $qstart, $qend, //add_time (left join)
+                                           $threshold_seconds);
+
         mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);
 
         $rows = [];
         while ($row = mysqli_fetch_assoc($res)) {
             $rows[] = [
-                'date' => $row['date'],
-                'hours' => round(floatval($row['hours']), 2),
-                'work_outside' => ''
+                'date' => $row['work_date'],
+                'hours' => formatHours($row['total_hours']),
+                'work_outside' => formatHours($row['outside_hours'])
             ];
         }
 
@@ -327,10 +378,6 @@ $(document).ready(function () {
         loadList(hours);
     });
 
-    // $('#period_select').on('click', function() {
-    //     const hours = $('#hours_input').val();
-    //     loadList(hours);
-    // });
     $('#period_select').on('change', function() {
         if ($(this).val() === 'custom') {
             $('#custom_range_block').show();
@@ -384,7 +431,7 @@ function showDetails(empId, hours, fioEncoded) {
                 html += `<tr>
                             <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(r.date)}</td>
                             <td style="border: 1px solid #ccc; padding: 6px;">${r.hours}</td>
-                            <td style="border: 1px solid #ccc; padding: 6px;"></td>
+                            <td style="border: 1px solid #ccc; padding: 6px;">${r.work_outside}</td>
                         </tr>`;
             });
             $('#details_table tbody').html(html);
