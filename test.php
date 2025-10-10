@@ -1,3 +1,3 @@
 <?php
-echo md5(md5("dirSVV1!"));
+echo md5(md5("rodyakinv1!"));
 ?>

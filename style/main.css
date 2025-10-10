@@ -3027,3 +3027,29 @@ h5.activ_time {
   border: 1px solid #ccc;
   width: 560px;
 }
+
+#remote_work {
+  position: fixed;
+  width: 260px;
+  height: 110px;
+  left: 50%;
+  top: 35%;
+  margin-left: -130px;
+  margin-top: -100 px;
+  background: #faefdd;
+  border: solid 3px #888888;
+  overflow: none;
+  display: none;
+  padding:10px;
+}
+
+#supervisor {
+  width: 260px;
+  border: 1px solid #888888;
+}
+
+#head_container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}

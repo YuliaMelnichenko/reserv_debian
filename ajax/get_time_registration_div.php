@@ -414,7 +414,7 @@ else {
  
   $errorDur = 0;
  
-  $durations = get_durations( $in_dt, $out_dt, $eat_start_dt, $eat_stop_dt, $addTimesArray, $state, $currentDay );      
+  $durations = get_durations( $in_dt, $out_dt, $eat_start_dt, $eat_stop_dt, $addTimesArray, $state, $currentDay );
 
   $resultPureDurationWOEat = $durations[0];
   $resultPureDuration = $durations[3];
@@ -454,9 +454,12 @@ else {
         echo "</div>";
       }
       else {
-        echo "<div class=\"right_button\">";
-        echo "<button class=\"pauseBtn\" title=\"посещение тренажерного зала\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"set_sport_pause();\"><img src=\"img/sport.png\"></button>";
-        echo "<button class=\"pauseBtn\" title=\"приостановка учета времени\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"set_pause_header();\"><img src=\"img/pause.png\"></button>";
+        echo "<div class=\"right_button\">"; 
+        if ($_SESSION['ss_id'] == 148) {
+        echo "<button class=\"pauseBtn\" title=\"Удаленная работа\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"remote_work();\"><img src=\"img/go1.png\"></button>";
+        }
+        echo "<button class=\"pauseBtn\" title=\"Посещение тренажерного зала\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"set_sport_pause();\"><img src=\"img/sport.png\"></button>";
+        echo "<button class=\"pauseBtn\" title=\"Приостановка учета времени\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"set_pause_header();\"><img src=\"img/pause.png\"></button>";
         echo "</div>";
       }
     echo "</div>";

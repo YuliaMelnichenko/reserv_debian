@@ -1,4 +1,8 @@
 <?php
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 session_start();
 
 header("Content-type: text/plain; charset=utf-8");
@@ -78,43 +82,28 @@ else if ( $report_type == 4 )
   $_SESSION['rep_start_stop_date_set'] = 2;
 }  
 
-else if ( $report_type == 5 )
-{
-  $month = GetMonthD( $currDate );
-  $startMonth = 1;
-  $monthOffset = 0;
-  if ( $month >= 1 AND $month <= 3 )
-  {
-    $monthOffset = $month - 1;  
-  }
-  if ( $month >= 4 AND $month <= 6 )
-  {
-    $monthOffset = $month - 4;  
-  }
-  if ( $month >= 7 AND $month <= 9 )
-  {
-    $monthOffset = $month - 7;  
-  }
-  if ( $month >= 10 AND $month <= 12 )
-  {
-    $monthOffset = $month - 10;  
+else if ( $report_type == 5 ) {
+  $currDateObj = new DateTime($currDate);
+
+  $month = (int)$currDateObj -> format('n');
+  $currentQuarter = ceil($month / 3);
+
+  $preQuarter = $currentQuarter - 1;
+  $year = (int)$currDateObj -> format('Y');
+
+  if ($preQuarter === 0) {
+    $preQuarter = 4;
+    $year--;
   }
 
-  $monthOffset = $monthOffset + 3;
- 
-  $newStartDate = MonthDecDN( $currDate, $monthOffset );
-  $month_day = GetMonthDayD( $newStartDate );
-  $dayOffset = $month_day - 1; 
-  $newStartDate = DayDecDN( $newStartDate, $dayOffset );
-  $_SESSION['rep_start_date'] = $newStartDate;
+  $startMonth = ($preQuarter - 1) * 3 + 1;
+  $startDate = new DateTime("$year-$startMonth-01");
 
+  $endDate = clone $startDate;
+  $endDate->modify('+3 month')->modify('-1 day');
 
-  $newStopDate = $newStartDate;
-  $newStopDate = MonthDecDN( $newStartDate, -3 );
-  $newStopDate = DayDecDN( $newStopDate, 1 );
-
-  $_SESSION['rep_stop_date'] = $newStopDate;  
-
+  $_SESSION['rep_start_date'] = $startDate->format('Y-m-d');
+  $_SESSION['rep_stop_date'] = $endDate->format('Y-m-d');
   $_SESSION['rep_start_stop_date_set'] = 2;
 }  
 

@@ -421,6 +421,9 @@ echo "</div>";
 echo "<div id=\"sport_pause\">";
 echo "</div>";
 
+echo "<div id=\"remote_work\">";
+echo "</div>";
+
 echo "<div id=\"pause_head\">";
 echo "</div>";
 

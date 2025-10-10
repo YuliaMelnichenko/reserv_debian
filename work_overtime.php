@@ -1,4 +1,4 @@
- <?php 
+<?php 
 ob_start();
 session_start();
 
@@ -130,6 +130,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
         if ($period === 'custom') {
             $start = $_GET['start'] ?? '';
             $end = $_GET['end'] ?? '';
+
             if (!$start || !$end) {
                 throw new Exception('Не заданы даты для ручного ввода');
             }
@@ -139,12 +140,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
             list($qstart, $qend) = getPeriodBounds($period);
         }
 
-        $threshold_seconds = intval(round($hours * 3600));
+        // $threshold_seconds = intval(round($hours * 3600));
 
         $sql = "
-            SELECT d.work_date,
-                   ROUND(IFNULL(v.office_hours, 0) + IFNULL(a.outside_hours, 0), 2) AS total_hours,
-                   IFNULL(a.outside_hours, 0) AS outside_hours
+            SELECT
+                d.work_date,
+                ROUND(IFNULL(v.office_hours, 0) + IFNULL(a.outside_hours, 0), 2) AS total_hours,
+                ROUND(IFNULL(a.outside_hours, 0), 2) AS outside_hours
             FROM (
                 SELECT DATE(in_dt) AS work_date
                 FROM visiting
@@ -165,7 +167,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
             ) d 
             LEFT JOIN (
                 SELECT DATE(in_dt) AS work_date,
-                       ROUND (SUM(
+                       ROUND(SUM(
                          TIME_TO_SEC(TIMEDIFF(out_dt, in_dt))
                           - IF(eat_start_dt IS NULL OR eat_stop_dt IS NULL, 0,
                                TIME_TO_SEC(TIMEDIFF(eat_stop_dt, eat_start_dt)))
@@ -187,8 +189,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
                   AND REASON IN (1, 2, 3, 5)
                 GROUP BY DATE(START_DT)
             ) a ON d.work_date = a.work_date
-            WHERE (IFNULL(v.office_hours, 0) + IFNULL(a.outside_hours, 0)) * 3600 >= ?
-            ORDER BY d.work_date DESC";
+            WHERE (IFNULL(v.office_hours, 0) + IFNULL(a.outside_hours, 0)) >= ?
+            ORDER BY d.work_date DESC
+        ";
 
         $stmt = mysqli_prepare($link, $sql);
         if (!$stmt) throw new Exception('Ошибка подготовки запроса ' . mysqli_error($link));
@@ -198,12 +201,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
         }
 
         mysqli_stmt_bind_param($stmt, 
-                                   'ississississi', 
+                                   'ississississd', 
                                      $empId, $qstart, $qend, //visiting (union)
                                            $empId, $qstart, $qend, //add_time (union)
-                                           $empId, $qstart, $qend, //visiting (left join)
-                                           $empId, $qstart, $qend, //add_time (left join)
-                                           $threshold_seconds);
+                                           $empId, $qstart, $qend, //visiting (join)
+                                           $empId, $qstart, $qend, //add_time (join)
+                                           $hours                  // порог в часах
+        );
 
         mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);
@@ -219,6 +223,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
 
         echo json_encode([
             'status' => 'success',
+            'count' => count($rows),
             'data' => $rows,
             'quarter_start' => $qstart,
             'quarter_end' => $qend
@@ -252,7 +257,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
     </style>
 </head>
 <body>
-<script type="text/javascript" src="http://192.168.100.216/lib/jquery/jquery2.js"></script> 
 
 <?php 
 echo "<div align=\"left\">";
@@ -321,6 +325,7 @@ echo "<h5 class=\"dark\"><br>/Выгрузка сотрудников по пе�
     </table>
 </div>
 
+<script type="text/javascript" src="http://192.168.100.216/lib/jquery/jquery2.js"></script> 
 <script>
 $(document).ready(function () {
     function loadList(hours) {

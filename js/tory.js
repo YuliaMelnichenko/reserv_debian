@@ -1253,17 +1253,16 @@ function set_pause_header()
 {
   if ( document.getElementById('pause_head') )
   { 
-    document.getElementById('pause_head').style.display='block'; 
+    document.getElementById('pause_head').style.display='block';
     $.post('ajax/get_pause_content.php', RetSWT);
     function RetSWT(dat) 
     { 
-      document.getElementById('pause_head').innerHTML = dat;    
+      document.getElementById('pause_head').innerHTML = dat;
     }
   }
 }
 
-function set_sport_pause()
-{
+function set_sport_pause() {
   if ( document.getElementById('sport_pause') )
   { 
     document.getElementById('sport_pause').style.display='block'; 
@@ -1273,6 +1272,159 @@ function set_sport_pause()
       document.getElementById('sport_pause').innerHTML = dat;    
     }
   }
+}
+
+function closeModal() {
+  var modal = document.getElementById("remote_work");
+  if (modal) {
+    modal.style.display = "none";
+    modal.innerHTML = '';
+  }
+}
+
+// function saveRemoteWork() {
+//     var supervisorEl = document.getElementById("supervisor");
+//     if (!supervisorEl) {
+//       alert("Ошибка: элемент выбора руководителя не найден");
+//       return;
+//     }
+
+//     var supervisorId = supervisorEl.value;
+//     if (!supervisorId) {
+//       alert("Выберите руководителя");
+//       return;
+//     }
+
+//     var params = "supervisor_id=" + encodeURIComponent(supervisorId);
+
+//     fetch ("ajax/remote_work.php", {
+//         method: "POST",
+//         headers: {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"},
+//         body: params
+//     })
+//     .then(function(response) {
+//       if (!response.ok) {
+//         return response.json().then(function(j) {
+//           throw new Error(j.message || 'Server error');
+//         }).catch(function() {
+//           return response.text().then(function(t) {
+//             throw new Error(t || ('HTTP error ' + response.status));
+//           });
+//         });
+//       }
+//       return response.json();
+//     })
+//     .then(function(data) {
+//       if (data.status === "success") {
+//         alert("Сохранено!");
+//         closeModal();
+//         document.dispatchEvent(new CustomEvent('remoteWorkSaved', {detail: { supervisorId: +supervisorId} }));
+//       } else {
+//         alert("Ошибка: " + (data.message || 'unknown error'));
+//       }
+//     })
+//     .catch(function(err) {
+//       alert("Ошибка соединения: " + err.message);
+//       console.error('saveRemoteWork error: ', err);
+//     });
+// }
+
+document.addEventListener('click', function(e) {
+  const t = e.target;
+
+  if (t && t.id === 'saveRemoteBtn') {
+    e.preventDefault();
+    saveRemoteWork();
+    return;
+  }
+
+  if (t && t.id === 'closeRemoteBtn') {
+    e.preventDefault();
+    closeModal();
+    return;
+  }
+}, false);
+
+async function saveRemoteWork() {
+  const btn = document.getElementById('saveRemoteBtn');
+  const sel = document.getElementById('supervisor');
+
+  if (!sel) {
+    alert('Ошибка: элемент выбора руководителя не найден'); 
+    return;
+  }
+
+  const supervisorId = sel.value;
+
+  if (!supervisorId) {
+    alert('Выберите руководителя');
+    return;
+  }
+
+  if (btn && btn.dataset.processing === '1') return;
+  if (btn) {
+    btn.dataset.processing = '1';
+    btn.disabled = true;
+  }
+
+  try {
+    const rep = await fetch('ajax/remote_work.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8' },
+      body: 'supervisor_id=' + encodeURIComponent(supervisorId)
+    });
+
+    const text = await resp.text();
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = { status: 'error', message: text };
+    }
+
+    if (data.status === 'success') {
+      alert('Saved');
+      closeModal();
+    } else {
+      alert('Error: ' (data.message || 'unknown error'));
+    }
+  } catch (err) {
+    alert('Connection error: ' + err.message);
+  } finally {
+    if (btn) {
+      btn.dataset.processing = '0'; 
+      btn.disabled = false;
+    }
+  }
+}
+
+function remote_work() {
+  var container = document.getElementById('remote_work');
+  if (!container) return;
+
+  container.style.display='block';
+
+  $.get('ajax/remote_work.php', function(dat) {
+    container.innerHTML = dat;
+
+    var btn = document.getElementById('saveRemoteBtn');
+    if (btn) {
+      btn.removeEventListener('click', saveRemoteWork);
+      btn.addEventListener('click', saveRemoteWork);
+    }
+
+    var closeImg = document.getElementById('closeRemoteBtn');
+    if (closeImg) {
+      closeImg.removeEventListener('click', closeModal);
+      closeImg.addEventListener('click', closeModal);
+    }
+  }, 'html')
+  .fail(function(jqXHR) {
+    var text = jqXHR.responseText || ('HTTP ' + jqXHR.status);
+    console.error('Ошибка загрузки модалки remote_work ', text);
+    alert('Ошибка загрузки формы' + jqXHR.status);
+  });
 }
 
 function resume_from_pause( pauseID )
