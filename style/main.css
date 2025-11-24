@@ -38,6 +38,23 @@ table.pauseFullScreen {
   transition: 0.5s;
 }
 
+table.lunchPauseFullScreen {
+  opacity: 1; 
+  background: rgba(221,238,255,0.8);
+  pointer-events: auto;
+  position: fixed; 
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2000;
+  transition: all 0.5s ease;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  transition: 0.5s;
+}
+
 div.layer_question_div {
   z-index: 2100;
   position: absolute;
@@ -2451,6 +2468,20 @@ li:hover ul, li.over ul { display: block; }
   cursor: pointer;
 }
 
+#lunch_time_back {
+  cursor: pointer;
+}
+
+#lunch_head_block {
+  display: flex;
+  justify-content: space-between;
+}
+
+#saveRemoteBtn {
+  cursor: pointer;
+  background-color:#f8d888;
+}
+
 .change_time {
   margin: 0;
   font-family: Arial, sans;
@@ -2460,7 +2491,7 @@ li:hover ul, li.over ul { display: block; }
 }
 
 .right_button {
-  width: 100px;
+  width: 140px;
   display: flex;
   justify-content: space-between;
 }
@@ -3031,7 +3062,7 @@ h5.activ_time {
 #remote_work {
   position: fixed;
   width: 260px;
-  height: 110px;
+  height: 90px;
   left: 50%;
   top: 35%;
   margin-left: -130px;
@@ -3051,5 +3082,10 @@ h5.activ_time {
 #head_container {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 5px;
+  margin-bottom: 15px;
+}
+
+.work-status {
+  height: 23px;
+  width: 23px;
 }

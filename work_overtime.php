@@ -15,12 +15,12 @@ function getPeriodBounds (string $period): array {
 
     switch ($period) {
         case 'week':
-            $start = date('Y-m-d 00:00:00', strtotime('-6 days'));
-            $end = $today;
+            $start = date('Y-m-d 00:00:00', strtotime('monday this week'));
+            // $end = $today;
             break;
         case 'month':
-            $start = date('Y-m-d 00:00:00', strtotime('-1 month +1 day'));
-            $end = $today;
+            $start = date('Y-m-01 00:00:00');
+            // $end = $today;
             break;
         case 'quarter':
         default:
@@ -28,11 +28,12 @@ function getPeriodBounds (string $period): array {
             $month = intval(date('n'));
             $quarter = intval(ceil($month / 3));
             $start_month = ($quarter - 1) * 3 + 1;
-            $start = date('Y-m-d 00:00:00', strtotime("$year-$start_month-01"));
-            $end = date('Y-m-d 00:00:00', strtotime("+3 month", strtotime($start)));
+            // $start = date('Y-m-d 00:00:00', strtotime("$year-$start_month-01"));
+            $start = date("$year-$start_month-01 00:00:00");
+            // $end = date('Y-m-d 00:00:00', strtotime("+3 month", strtotime($start)));
             break;
     }
-    return [$start, $end];
+    return [$start, $today];
 }
 
 function formatHours($hours) {
@@ -53,56 +54,131 @@ function formatHours($hours) {
 if (isset($_GET['action']) && $_GET['action'] === 'load') {
     header('Content-Type: application/json; charset=utf-8');
 
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+
     try {
         $hours = isset($_GET['hours']) ? floatval($_GET['hours']) : 9.0;
-
         $period = $_GET['period'] ?? 'quarter';
 
         if ($period === 'custom') {
             $start = $_GET['start'] ?? '';
             $end = $_GET['end'] ?? '';
+
             if (!$start || !$end) {
                 throw new Exception('Не заданы даты для ручного ввода');
             }
+
             $qstart = date('Y-m-d 00:00:00', strtotime($start));
             $qend = date('Y-m-d 23:59:59', strtotime($end));
         } else {
             list($qstart, $qend) = getPeriodBounds($period);
         }
 
-        $threshold_seconds = intval(round($hours * 3600));
+        // $threshold_seconds = intval(round($hours * 3600));
+
+        // $sql = "
+        //     SELECT e.id AS empId,
+        //         CONCAT_WS(' ', e.surname, e.firstname, e.lastname) AS fio,
+        //         COUNT(*) AS overtime_count
+        //     FROM visiting v
+        //     JOIN employees e ON v.user_id = e.id
+        //     WHERE v.in_dt >= ? AND v.in_dt < ?
+        //     AND v.in_dt IS NOT NULL AND v.out_dt IS NOT NULL
+        //     AND (
+        //             TIME_TO_SEC(TIMEDIFF(v.out_dt, v.in_dt))
+        //             - IF(v.eat_start_dt IS NULL OR v.eat_stop_dt IS NULL, 0,
+        //                 TIME_TO_SEC(TIMEDIFF(v.eat_stop_dt, v.eat_start_dt)))
+        //         ) >= ?
+        //     GROUP BY e.id
+        //     HAVING overtime_count > 0
+        //     ORDER BY overtime_count DESC, fio ASC
+        // ";
 
         $sql = "
-            SELECT e.id AS empId,
+            SELECT 
+                e.id AS emp_id,
                 CONCAT_WS(' ', e.surname, e.firstname, e.lastname) AS fio,
-                COUNT(*) AS overtime_count
-            FROM visiting v
-            JOIN employees e ON v.user_id = e.id
-            WHERE v.in_dt >= ? AND v.in_dt < ?
-            AND v.in_dt IS NOT NULL AND v.out_dt IS NOT NULL
-            AND (
-                    TIME_TO_SEC(TIMEDIFF(v.out_dt, v.in_dt))
-                    - IF(v.eat_start_dt IS NULL OR v.eat_stop_dt IS NULL, 0,
-                        TIME_TO_SEC(TIMEDIFF(v.eat_stop_dt, v.eat_start_dt)))
-                ) >= ?
+                COUNT(t.work_date) AS overtime_days,
+                ROUND(SUM(t.total_hours) - (? * COUNT(t.work_date)), 2) AS overtime_hours
+            FROM employees e
+            LEFT JOIN (
+                SELECT d.user_id, d.work_date,
+                       (IFNULL(v.office_hours, 0) + IFNULL(a.outside_hours, 0)) AS total_hours
+                FROM (
+                    SELECT user_id, DATE(in_dt) AS work_date
+                    FROM visiting
+                    WHERE in_dt >= ? AND in_dt < ?
+                    GROUP BY user_id, DATE(in_dt)
+                    
+                    UNION
+                    
+                    SELECT USERID AS user_id, DATE(START_DT) AS work_date
+                    FROM ADD_TIME
+                    WHERE START_DT >= ? AND START_DT < ? 
+                      AND REASON IN (1, 2, 3, 4, 5)
+                    GROUP BY USERID, DATE(START_DT)
+                ) d 
+                LEFT JOIN (
+                    SELECT user_id, DATE(in_dt) AS work_date,
+                        ROUND(SUM(
+                            TIME_TO_SEC(TIMEDIFF(out_dt, in_dt))
+                            - IF(eat_start_dt IS NULL OR eat_stop_dt IS NULL, 0, 
+                                TIME_TO_SEC(TIMEDIFF(eat_stop_dt, eat_start_dt)))
+                        ) / 3600, 2) AS office_hours
+                    FROM visiting 
+                    WHERE in_dt >= ? AND in_dt < ?
+                      AND in_dt IS NOT NULL AND out_dt IS NOT NULL
+                    GROUP BY user_id, DATE(in_dt)
+                ) v ON d.user_id = v.user_id AND d.work_date = v.work_date
+                LEFT JOIN (
+                    SELECT USERID AS user_id, DATE(START_DT) AS work_date,
+                        ROUND(SUM(TIME_TO_SEC(TIMEDIFF(STOP_DT, START_DT))) / 3600, 2) AS outside_hours
+                    FROM ADD_TIME
+                    WHERE START_DT >= ? AND START_DT < ?
+                      AND REASON IN (1, 2, 3, 4, 5)
+                    GROUP BY USERID, DATE(START_DT)
+                ) a ON d.user_id = a.user_id AND d.work_date = a.work_date
+                WHERE (IFNULL(v.office_hours, 0) + IFNULL(a.outside_hours, 0)) >= ?
+            ) AS t ON e.id = t.user_id
+            WHERE t.work_date IS NOT NULL
             GROUP BY e.id
-            HAVING overtime_count > 0
-            ORDER BY overtime_count DESC, fio ASC
+            ORDER BY overtime_days DESC, fio ASC
         ";
 
         $stmt = mysqli_prepare($link, $sql);
-        if (!$stmt) throw new Exception('Ошибка подготовки запроса: ' . mysqli_error($link));
 
-        mysqli_stmt_bind_param($stmt, 'ssi', $qstart, $qend, $threshold_seconds);
+        if (!$stmt) {
+            throw new Exception('Ошибка подготовки запроса: ' . mysqli_error($link));
+        }
+        // mysqli_stmt_bind_param($stmt, 'ssi', $qstart, $qend, $threshold_seconds);
+
+        mysqli_stmt_bind_param($stmt, 
+                                   'dssssssssd', 
+                                     $hours, // 1
+                                    $qstart, $qend, // 2-3 visiting (union)
+                                           $qstart, $qend, // 4-5 add_time (union)
+                                           $qstart, $qend, // 6-7 visiting (join)
+                                           $qstart, $qend, // 8-9 add_time (join)
+                                           $hours          // 10 (порог в часах)
+        );
+        
         mysqli_stmt_execute($stmt);
+
         $res = mysqli_stmt_get_result($stmt);
 
         $rows = [];
+
         while ($row = mysqli_fetch_assoc($res)) {
             $rows[] = [
-                'id' => intval($row['empId']),
+                // 'id' => intval($row['empId']),
+                // 'fio' => $row['fio'],
+                // 'overtime_count' => intval($row['overtime_count'])
+                'id' => intval($row['emp_id']),
                 'fio' => $row['fio'],
-                'overtime_count' => intval($row['overtime_count'])
+                'overtime_count' => intval($row['overtime_days']),
+                'overtime_hours' => floatval($row['overtime_hours'])
             ];
         }
 
@@ -143,26 +219,25 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
         // $threshold_seconds = intval(round($hours * 3600));
 
         $sql = "
-            SELECT
-                d.work_date,
-                ROUND(IFNULL(v.office_hours, 0) + IFNULL(a.outside_hours, 0), 2) AS total_hours,
-                ROUND(IFNULL(a.outside_hours, 0), 2) AS outside_hours
+            SELECT 
+                   d.work_date,
+                   ROUND(IFNULL(v.office_hours, 0) + IFNULL(a.outside_hours, 0), 2) AS total_hours,
+                   ROUND(IFNULL(v.office_hours, 0), 2) AS office_hours,
+                   ROUND(IFNULL(a.outside_hours, 0), 2) AS outside_hours
             FROM (
                 SELECT DATE(in_dt) AS work_date
                 FROM visiting
                 WHERE user_id = ?
-                  AND in_dt >= ?
-                  AND in_dt < ?
+                  AND in_dt >= ? AND in_dt < ?
                 GROUP BY DATE(in_dt)
-                
+
                 UNION
                 
                 SELECT DATE(START_DT) AS work_date
                 FROM ADD_TIME
-                WHERE USERID = ?
-                  AND START_DT >= ?
-                  AND START_DT < ?
-                  AND REASON IN (1, 2, 3, 5)
+                WHERE USERID = ? 
+                  AND START_DT >= ? AND START_DT < ?
+                  AND REASON IN (1, 2, 3, 4, 5)
                 GROUP BY DATE(START_DT)
             ) d 
             LEFT JOIN (
@@ -173,9 +248,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
                                TIME_TO_SEC(TIMEDIFF(eat_stop_dt, eat_start_dt)))
                          ) / 3600, 2) AS office_hours
                 FROM visiting 
-                WHERE user_id = ?
-                  AND in_dt >= ?
-                  AND in_dt < ?
+                WHERE user_id = ? 
+                  AND in_dt >= ? AND in_dt < ?
                   AND in_dt IS NOT NULL AND out_dt IS NOT NULL
                 GROUP BY DATE(in_dt) 
             ) v ON d.work_date = v.work_date
@@ -183,10 +257,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
                 SELECT DATE(START_DT) AS work_date,
                        ROUND(SUM(TIME_TO_SEC(TIMEDIFF(STOP_DT, START_DT))) / 3600, 2) AS outside_hours
                 FROM ADD_TIME
-                WHERE USERID = ?
-                  AND START_DT >= ?
-                  AND START_DT < ?
-                  AND REASON IN (1, 2, 3, 5)
+                WHERE USERID = ? 
+                  AND START_DT >= ? AND START_DT < ?
+                  AND REASON IN (1, 2, 3, 4, 5)
                 GROUP BY DATE(START_DT)
             ) a ON d.work_date = a.work_date
             WHERE (IFNULL(v.office_hours, 0) + IFNULL(a.outside_hours, 0)) >= ?
@@ -216,14 +289,15 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
         while ($row = mysqli_fetch_assoc($res)) {
             $rows[] = [
                 'date' => $row['work_date'],
-                'hours' => formatHours($row['total_hours']),
-                'work_outside' => formatHours($row['outside_hours'])
+                'hours_total' => formatHours($row['total_hours']),
+                'office_hours' => formatHours($row['office_hours']),
+                'outside_hours' => formatHours($row['outside_hours'])
             ];
         }
 
         echo json_encode([
             'status' => 'success',
-            'count' => count($rows),
+            // 'count' => count($rows),
             'data' => $rows,
             'quarter_start' => $qstart,
             'quarter_end' => $qend
@@ -325,7 +399,8 @@ echo "<h5 class=\"dark\"><br>/Выгрузка сотрудников по пе�
     </table>
 </div>
 
-<script type="text/javascript" src="http://192.168.100.216/lib/jquery/jquery2.js"></script> 
+<!-- <script type="text/javascript" src="http://192.168.100.216/lib/jquery/jquery2.js"></script>  -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function () {
     function loadList(hours) {
@@ -435,8 +510,10 @@ function showDetails(empId, hours, fioEncoded) {
             rows.forEach(r => {
                 html += `<tr>
                             <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(r.date)}</td>
-                            <td style="border: 1px solid #ccc; padding: 6px;">${r.hours}</td>
-                            <td style="border: 1px solid #ccc; padding: 6px;">${r.work_outside}</td>
+                            <td style="border: 1px solid #ccc; padding: 6px;">${r.hours_total}</td>
+                            <td style="border: 1px solid #ccc; padding: 6px;">
+                                ${r.outside_hours === '-' ? '' : r.outside_hours}
+                            </td>
                         </tr>`;
             });
             $('#details_table tbody').html(html);

@@ -1,6 +1,5 @@
 <?php
 
-use morphos\test\English\FunctionsTest;
 date_default_timezone_set("Asia/Novosibirsk");
 ob_start();
 session_start();
@@ -16,7 +15,6 @@ var timerIdSessValid=setInterval( "check_sess()", 20000 );
 
 
 function check_sess(){
-
   $.post('ajax/check_session_valid.php', RetSWT);
   function RetSWT(dat) {
     if ( dat == 0 ){
@@ -27,7 +25,6 @@ function check_sess(){
 }
 
 function check_day_change(){
-
   document.getElementById('layer_div').style.display='none';
   document.getElementById('layer_question_div').style.display='none';
 
@@ -39,14 +36,13 @@ function check_day_change(){
       document.getElementById('layer_question_div').style.display='none';
     }
   }
-
 }
 
 var timerIdDayChange=setInterval( "check_day_change()", 3000 );
 
 function day_continue_confirm()
 {
-  $.post('ajax/day_continue_confirm.php', RetSWT);                           
+  $.post('ajax/day_continue_confirm.php', RetSWT);
   function RetSWT(dat) 
   {
     document.getElementById('layer_div').style.display='none';
@@ -58,7 +54,7 @@ function day_continue_confirm()
 
 function day_continue_reject()
 {
-  $.post('ajax/day_continue_reject.php', RetSWT);                           
+  $.post('ajax/day_continue_reject.php', RetSWT);
   function RetSWT(dat) 
   {
     document.getElementById('layer_div').style.display='none';
@@ -105,7 +101,7 @@ check_pause_state();
 
 function st_month_inc()
 {	
-  $.post('ajax/stat_month_inc.php', RetSWT);                           
+  $.post('ajax/stat_month_inc.php', RetSWT);
   function RetSWT(dat) 
     {  
       window.location=self.location;
@@ -114,7 +110,7 @@ function st_month_inc()
 
 function st_month_dec()
 {	
-  $.post('ajax/stat_month_dec.php', RetSWT);                           
+  $.post('ajax/stat_month_dec.php', RetSWT);
   function RetSWT(dat) 
   {  
     window.location=self.location;
@@ -123,7 +119,7 @@ function st_month_dec()
 
 function st_month_def()
 {	
-  $.post('ajax/stat_month_def.php', RetSWT);                           
+  $.post('ajax/stat_month_def.php', RetSWT);
   function RetSWT(dat) 
   {  
     window.location=self.location;
@@ -139,20 +135,27 @@ function get_time_registration_div_content()
   }
 } 
 
-function switch_day_state( next )
-{
-  $.post('ajax/switch_day_state.php', { next: next }, RetSWT);
-  function RetSWT(dat) 
-  { 
-    if ( dat == 1 )
-    {
-      get_time_registration_div_content();
+// function switch_day_state( next ) {
+//   $.post('ajax/switch_day_state.php', { next: next }, RetSWT);
+//   function RetSWT(dat) { 
+//     if ( dat == 1 ){
+//       get_time_registration_div_content();
+//     } else {
+//       alert( dat );
+//     }
+//   }
+//   build_in_delay_expl();
+// }
+
+function switch_day_state(next, callback) {
+  $.post('ajax/switch_day_state.php', {next: next}, function(dat) {
+    if (dat.trim() === "1") {
+      if (typeof callback === 'function') callback();
+      else get_time_registration_div_content();
+    } else {
+      alert(dat);
     }
-    else
-    {
-      alert( dat );
-    }
-  }
+  });
   build_in_delay_expl();
 }
 
@@ -182,17 +185,42 @@ function reg_out_work()
   switch_day_state( 1 );
 }
 
-function reg_eat_start()
-{
-  switch_day_state( 1 );
-  location.reload();
+// function reg_eat_start()
+// {
+//   switch_day_state( 1 );
+//   location.reload();
+// }
+
+// function reg_eat_stop()
+// {
+//   switch_day_state( 1 );
+//   location.reload();
+// } 
+
+function reg_eat_start () {
+  switch_day_state(1, function() {
+    $.get('ajax/set_lunch.php', function(html) {
+      $('body').append(html);
+    });
+  });
 }
 
-function reg_eat_stop()
-{
-  switch_day_state( 1 );
-  location.reload();
-}   
+function reg_eat_stop() {
+  switch_day_state(1, function() {
+    $('#lunchPauseFullScreen').remove();
+    location.reload();
+  });
+}
+
+$(document).ready(function() {
+  $.get('ajax/get_current_state.php', function(state) {
+    if (parseInt(state, 10) === 3) {
+      $.get('ajax/set_lunch.php', function(html) {
+        $('body').append(html);
+      });
+    }
+  });
+});
 
 function add_expl()
 {
@@ -257,7 +285,7 @@ function enter_out_time()
 
 function enter_stop_eat_time()
 {
-    $.post('ajax/get_eat_stop.php', RetSWT1);
+  $.post('ajax/get_eat_stop.php', RetSWT1);
   function RetSWT1(dat1) 
   {
     if ( document.getElementById('delay_out_time') )
@@ -317,7 +345,7 @@ function build_in_delay_expl()
   function RetSWT2(dat2)
   {
     if ( document.getElementById('delay_explanation_buildin') ){ document.getElementById('delay_explanation_buildin').innerHTML = dat2; }
-    if ( document.getElementById('delay_explanation_delay') ){ document.getElementById('delay_explanation_delay').style.display='none'; }
+    if ( document.getElementById('delay_explanation_delay') ){ document.getElementById('delay_explanation_delay').style.display = 'none'; }
   }
 }
 function build_in_add_work()
@@ -365,7 +393,6 @@ echo "<body onload=\"check_day_change();\" bgcolor=\"#ffffff\" >";
 
 include_once __DIR__ . "/funcs.php";
 include __DIR__ . "/php_tori/connect.php";
-// error_log(print_r($_SESSION, true));
 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 $user_dayTransitionTime = $_SESSION['$ss_dayTransitionTime'];
@@ -496,11 +523,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     $query = mysqli_query($link, "SELECT eat_start_dt, eat_stop_dt FROM visiting WHERE user_id = '$user_id' AND DATE(in_dt) = CURDATE()");
     $row = mysqli_fetch_assoc($query);
 
-    if ($row['eat_start_dt'] != $empty_dt && $row['eat_stop_dt'] === $empty_dt) {
-      $bg_style = "red";
-    } else {
-      $bg_style = "#ddeeff";
-    }
+    $bg_style = "#ddeeff";
 
     echo "<table>";
     echo "<tr>";
@@ -623,7 +646,6 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
         echo "</tr>";
       echo "</table>";
 
-
       echo "<div id=\"delay_explanation_buildin\">";
       echo  "</div>";
 
@@ -686,6 +708,15 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $query7 = mysqli_query($link, "SELECT a.START_DT, a.STOP_DT, e.surname FROM ADD_TIME a JOIN employees e ON a.USERID = e.id WHERE DATE(a.START_DT) = CURDATE() AND a.USERID = '$id_empl' AND  a.STOP_DT IS NULL ORDER BY a.START_DT DESC LIMIT 1");
       $row7 = mysqli_fetch_array($query7);
 
+      $remote_sql = "SELECT id FROM remote_work WHERE user_id = ? AND DATE(date_approval) = CURDATE() LIMIT 1";
+
+      $remote_stmt = mysqli_prepare($link, $remote_sql);
+      mysqli_stmt_bind_param($remote_stmt,  "i", $id_empl);
+      mysqli_stmt_execute($remote_stmt);
+      $remote_res = mysqli_stmt_get_result($remote_stmt);
+
+      $hasRemoteWorkToday = mysqli_num_rows($remote_res) > 0;
+
       $in_dt = $row5["in_dt"];
       $eat_start_dt = $row5["eat_start_dt"];
       $eat_stop_dt = $row5["eat_stop_dt"];
@@ -695,21 +726,25 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
       $time_in = date("H:i", strtotime($in_dt));
       $time_out = date("H:i", strtotime($out_dt));
-      
-      if (mysqli_num_rows($query5) === 0) {
-        $img = "<img title=\"На работу не приходил\" src=\"img/home.png\" style=\"width: 23px; margin: 1px 0\">";
+
+      if ($hasRemoteWorkToday) {
+        $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Работает удаленно\" src=\"img/remoteWorkIcon2.png\" style=\"margin: 1px 0\">";
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
+      }      
+      elseif (mysqli_num_rows($query5) === 0) {
+        $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"На работу не приходил\" src=\"img/home.png\" style=\"margin: 1px 0\">";
         array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
       }
       elseif (($eat_start_dt != $time && $eat_stop_dt === $time) || ($start_dt_AT != $time && $stop_dt_AT === $time)) {
-        $img = "<img title=\"Обед/приостановка времени\" src=\"img/pause_time.png\">";
+        $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Обед/приостановка времени\" src=\"img/pause_time.png\">";
         array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
       }
       elseif ($in_dt != $time && $out_dt != $time) {
-        $img = "<img title=\"Ушел домой\" src=\"img/go_home.png\">";
+        $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Ушел домой\" src=\"img/go_home.png\">";
         array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
       }
       else {
-        $img = "<img style=\"margin: 1px 0\" title=\"На рабочем месте\" src=\"img/in_work2.png\">";
+        $img = "<img class=\"work-status\" data-emp=\"$id_empl\" style=\"margin: 1px 0\" title=\"На рабочем месте\" src=\"img/in_work2.png\">";
         array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
       }
     }
@@ -781,7 +816,69 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       return $holidays;
     }
 
+    // function getHolidayAndWorkDates (mysqli $link, $formDate = null) {
+    //   if ($formDate === null) $formDate = date('Y-m-d');
+
+    //   $holidays = [];
+    //   $workdays = [];
+
+    //   $sql = "SELECT date, type FROM work_dayoff WHERE date >= ?";
+
+    //   if ($stmt = mysqli_prepare($link, $sql)) {
+    //     mysqli_stmt_bind_param($stmt, 's', $fromDate);
+    //     mysqli_stmt_execute($stmt);
+    //     $result = mysqli_stmt_get_result($stmt);
+
+    //     while ($row = mysqli_fetch_assoc($result)) {
+    //       $d = $row['date'];
+    //       $t = (int)$row['type'];
+    //       if ($t === 0) {
+    //         $holidays[] = $d;
+    //       } elseif ($t === 1) {
+    //         $workdays[] = $d;
+    //       }
+    //     }
+    //     mysqli_stmt_close($stmt);
+    //   }
+
+    //   return [$holidays, $workdays];
+    // }
+
+    // function getWorkingDaysBetween ($fromDate, $toDate, array $holidays = [], array $workdays = []) {
+    //   $start = new DateTime($fromDate);
+    //   $end = new DateTime($toDate);
+
+    //   if ($start >= $end) return 0;
+
+    //   $interval = new DateInterval('P1D');
+    //   $period = new DatePeriod($start, $interval, $end);
+
+    //   $workingDays = 0;
+    //   $hMap = array_flip($holidays);
+    //   $wMap = array_flip($workdays);
+
+    //   foreach ($period as $dt) {
+    //     $dateStr = $dt->format('Y-m-d');
+
+    //     if (isset($wMap[$dateStr])) {
+    //       continue;
+    //     }
+
+    //     if (isset($hMap[$dateStr])) {
+    //       continue;
+    //     }
+
+    //     $dow = (int)$dt->format('N');
+    //     if ($dow >= 6) continue;
+
+    //     $workingDays++;
+    //   }
+
+    //   return $workdays;
+    // }
+
     $holidayDates = getHolidayDates($link, $today);
+    // $startDate = $event['start_date'];
 
     function getWorkingDaysUntil($today, $start_date, $holidays = []) {
       $start = new DateTime($today);
@@ -1071,9 +1168,7 @@ build_in_delay_expl();
 build_in_add_work();
 get_time_registration_div_content();   
 
-function update_clock()
-{
-
+function update_clock(){
   $.post('ajax/get_current_day_time.php', RetSWT);
   function RetSWT(dat) 
   {
@@ -1082,7 +1177,6 @@ function update_clock()
       document.getElementById('dateTimeFieldNav').innerHTML = dat;
     }
   }
-
 }
 
 var timerId=setInterval( "update_clock()", 10000 );
