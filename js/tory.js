@@ -1274,6 +1274,24 @@ function set_sport_pause() {
   }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function closeModal() {
   const modal = document.getElementById("remote_work");
   if (modal) {
@@ -1316,7 +1334,7 @@ async function saveRemoteWork() {
     let data;
     try {
       data = JSON.parse(text);
-    } catch {
+    } catch (e) {
       data = { status: 'error', message: text };
     }
 
@@ -1341,13 +1359,9 @@ async function saveRemoteWork() {
       }
 
       closeModal();
-    }
-
-    if (data.status !== 'success') {
+    } else {
       alert('Ошибка: ' + (data.message || 'unknown error'));
-      return;
     }
-
   } catch (err) {
     alert('Connection error: ' + err.message);
   } finally {
@@ -1355,6 +1369,61 @@ async function saveRemoteWork() {
       btn.dataset.processing = '0'; 
       btn.disabled = false;
     }
+  }
+}
+
+// Новая функция — завершение удалённой работы
+async function finishRemoteWork() {
+  const btn = document.getElementById('finishRemoteBtn');
+  if (!btn) return;
+
+  if (btn.dataset.processing === '1') return;
+  btn.dataset.processing = '1';
+  btn.disabled = true;
+
+  try {
+    const response = await fetch('ajax/remote_work.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8' },
+      body: 'action=finish',
+      credentials: 'same-origin'
+    });
+
+    const text = await response.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      data = { status: 'error', message: text };
+    }
+
+    if (!response.ok) {
+      alert('Ошибка сервера: ' + (data.message || response.status));
+      return;
+    }
+
+    if (data.status === 'success') {
+      const employeeId = document.getElementById("employeeId") ? document.getElementById("employeeId").value : null;
+
+      if (employeeId) {
+        const icon = document.querySelector(`img.work-status[data-emp="${employeeId}"]`);
+        if (icon) {
+          icon.src = "img/in_work2.png";
+          icon.title = "На рабочем месте";
+        } else {
+          console.warn('Иконка work-status для сотрудника не найдена в DOM, employeeId=', employeeId);
+        }
+      }
+      closeModal();
+      alert("Удаленная работа завершена");
+    } else {
+      alert('Ошибка: ' + (data.message || 'unknown error'));
+    }
+  } catch (err) {
+    alert('Connection error: ' + err.message);
+  } finally {
+    btn.dataset.processing = '0';
+    btn.disabled = false;
   }
 }
 
@@ -1382,6 +1451,12 @@ document.addEventListener('click', function (e) {
   if (t.id === 'saveRemoteBtn') {
     e.preventDefault();
     saveRemoteWork();
+    return;
+  }
+
+  if (t.id === 'finishRemoteBtn') {
+    e.preventDefault();
+    finishRemoteWork();
     return;
   }
 

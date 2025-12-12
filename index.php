@@ -678,9 +678,37 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     echo "</td>";
 
     mysqli_set_charset($link, "utf8");
-   include __DIR__ . "/php_tori/connect.php";
+    include __DIR__ . "/php_tori/connect.php";
 
-    $query6 = mysqli_query($link, "SELECT id, firstname, surname, lastname, phone, personal_phone, corporate_phone, DATE_FORMAT(birthday, '%m-%d') FROM employees WHERE relevance = 1 ORDER BY surname");
+    $bosses_arr = [];
+
+    $bosses_sql = "SELECT id, firstname, surname, lastname, DATE_FORMAT(birthday, '%m-%d') AS bday FROM employees WHERE id IN (500, 501)";
+
+    $bosses_q = mysqli_query($link, $bosses_sql);
+
+    if ($bosses_q) {
+      while ($b = mysqli_fetch_assoc($bosses_q)) {
+        if (isset($b['bday']) && $b['bday'] === date('m-d')) {
+          $full_name = trim($b['surname'] . " " . $b['firstname'] . " " . $b['lastname']);
+          $img = "<img style=\"margin: 1px 0\" title=\"C днем рождения!\" src=\"img/birthday.png\">";
+          $bosses_arr[] = [
+            $full_name,
+            "",
+            "",
+            $img,
+            "",
+            "",
+            "",
+            "",
+            "",
+            $b['id'],
+            $b['bday']
+          ];
+        }
+      }
+    }
+
+    $query6 = mysqli_query($link, "SELECT id, firstname, surname, lastname, phone, personal_phone, corporate_phone, DATE_FORMAT(birthday, '%m-%d') FROM employees WHERE relevance = 1 AND id NOT IN (500,501) ORDER BY surname");
 
     echo "<td bgcolor=\"$bg_style\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
     echo "<h5 class=\"dark0\"><br>/присутствие сотрудников<br><br></h5>";
@@ -708,14 +736,14 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $query7 = mysqli_query($link, "SELECT a.START_DT, a.STOP_DT, e.surname FROM ADD_TIME a JOIN employees e ON a.USERID = e.id WHERE DATE(a.START_DT) = CURDATE() AND a.USERID = '$id_empl' AND  a.STOP_DT IS NULL ORDER BY a.START_DT DESC LIMIT 1");
       $row7 = mysqli_fetch_array($query7);
 
-      $remote_sql = "SELECT id FROM remote_work WHERE user_id = ? AND DATE(date_approval) = CURDATE() LIMIT 1";
+      $remote_sql = "SELECT id, start_dt, stop_dt FROM remote_work WHERE user_id = ? AND DATE(start_dt) = CURDATE() ORDER BY id DESC LIMIT 1";
 
       $remote_stmt = mysqli_prepare($link, $remote_sql);
       mysqli_stmt_bind_param($remote_stmt,  "i", $id_empl);
       mysqli_stmt_execute($remote_stmt);
       $remote_res = mysqli_stmt_get_result($remote_stmt);
-
-      $hasRemoteWorkToday = mysqli_num_rows($remote_res) > 0;
+      $remote_row = mysqli_fetch_assoc($remote_res);
+      $isRemoteNow = ($remote_row && is_null($remote_row['stop_dt']));
 
       $in_dt = $row5["in_dt"];
       $eat_start_dt = $row5["eat_start_dt"];
@@ -727,27 +755,29 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $time_in = date("H:i", strtotime($in_dt));
       $time_out = date("H:i", strtotime($out_dt));
 
-      if ($hasRemoteWorkToday) {
-        $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Работает удаленно\" src=\"img/remoteWorkIcon2.png\" style=\"margin: 1px 0\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
-      }      
-      elseif (mysqli_num_rows($query5) === 0) {
-        $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"На работу не приходил\" src=\"img/home.png\" style=\"margin: 1px 0\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
-      }
-      elseif (($eat_start_dt != $time && $eat_stop_dt === $time) || ($start_dt_AT != $time && $stop_dt_AT === $time)) {
+      if (($eat_start_dt != $time && $eat_stop_dt === $time) || ($start_dt_AT != $time && $stop_dt_AT === $time)) {
         $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Обед/приостановка времени\" src=\"img/pause_time.png\">";
         array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
-      }
-      elseif ($in_dt != $time && $out_dt != $time) {
+      } elseif (mysqli_num_rows($query5) > 0 && $in_dt != $time && $out_dt != $time) {
         $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Ушел домой\" src=\"img/go_home.png\">";
         array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
-      }
-      else {
+      } elseif ($isRemoteNow) {
+        $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Работает удаленно\" src=\"img/remoteWorkIcon2.png\" style=\"margin: 1px 0\">";
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
+      } elseif (mysqli_num_rows($query5) === 0) {
+        $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"На работу не приходил\" src=\"img/home.png\" style=\"margin: 1px 0\">";
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));       
+      } else {
         $img = "<img class=\"work-status\" data-emp=\"$id_empl\" style=\"margin: 1px 0\" title=\"На рабочем месте\" src=\"img/in_work2.png\">";
         array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
       }
     }
+
+    $boss_block = $bosses_arr;
+
+    $employee_arr = array_filter($employee_arr, function($item) {
+      return !in_array($item[9], [500, 501]);
+    });
 
     function sort_employee ($a, $b) {
       if (is_null($a[4]) && is_null($b[4])) {
@@ -763,6 +793,8 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     }
 
     usort($employee_arr, "sort_employee");
+
+    $employee_arr = array_merge($bosses_arr, $employee_arr);
 
     function get_phone_info($id_empl, $phone, $personal_phone, $corporate_phone) {
       $tooltipId = 'u' . $id_empl . '-phones';
@@ -878,7 +910,6 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     // }
 
     $holidayDates = getHolidayDates($link, $today);
-    // $startDate = $event['start_date'];
 
     function getWorkingDaysUntil($today, $start_date, $holidays = []) {
       $start = new DateTime($today);
@@ -933,7 +964,6 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       return $diff + 1;
     }
 
-    // $today = date('Y-m-d');
     $eventsToday = [];
 
     $query9 = "
@@ -1014,8 +1044,10 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
       echo "<div class=\"img_container\">";
 
-      if ($birth == date('m-d')) {
-        echo "<img style=\"margin: 1px 0\" title=\"C днем рождения!\" src=\"img/birthday.png\">";          
+      if (!in_array($personal_id, [500, 501])) {
+        if (!empty($birth) && $birth == date('m-d')) {
+          echo "<img style=\"margin: 1px 0\" title=\"C днем рождения!\" src=\"img/birthday.png\">";          
+        }
       } 
 
       if (isset($eventsToday[$personal_id])){

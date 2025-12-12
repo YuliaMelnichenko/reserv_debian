@@ -87,8 +87,9 @@ if ( isset($_SESSION['ss_id']) )
       }
     }
     else if ( $_SESSION['ss_state'] == 4 )
-    {  
+    { 
       $res=mysqli_query($link, "UPDATE visiting SET out_dt = '$dateTimeStr', state = 0 WHERE user_id = '$id' AND ID = '$ss_visiting_ID'");
+      $res2=mysqli_query($link, "UPDATE remote_work SET stop_dt = NOW() WHERE user_id = '$id' AND stop_dt IS NULL");
       $merr=mysqli_error($link);
       if (!$res)
       { 
@@ -99,6 +100,8 @@ if ( isset($_SESSION['ss_id']) )
         $_SESSION['ss_state'] = 0;
         echo "1";
       }
+      // header("Location: ".$_SERVER['HTTP_REFERER']); 
+      // exit;
     }
   }
   //go back

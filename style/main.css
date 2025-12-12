@@ -3062,7 +3062,7 @@ h5.activ_time {
 #remote_work {
   position: fixed;
   width: 260px;
-  height: 90px;
+  max-height: 160px;
   left: 50%;
   top: 35%;
   margin-left: -130px;
@@ -3072,6 +3072,11 @@ h5.activ_time {
   overflow: none;
   display: none;
   padding:10px;
+}
+
+#finishRemoteBtn {
+  background-color: #f8d888;
+  cursor: pointer;
 }
 
 #supervisor {

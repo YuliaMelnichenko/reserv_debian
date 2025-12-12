@@ -444,21 +444,19 @@ else {
 
   echo "<div id=\"state_buttons\">";
     echo "<div class=\"left_button\">";
-      echo "<button id =\"time_back\" title=\"возврат состояния регистрации времени до предыдущего\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"rollback_state(); location.reload();\"><img src=\"img/rollbackState.png\"></button>";
+      echo "<button id =\"time_back\" title=\"возврат состояния регистрации времени до предыдущего\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"rollback_state(); location.reload(true);\"><img src=\"img/rollbackState.png\"></button>";
     echo "</div>";
     echo "<div class=\"nopadding_s\" align=\"right\" width=50% style=\"font-size: 100%; margin:0; padding:0; margin-left:0;\">";
       if ( $_SESSION['ss_state'] == 3 OR $_SESSION['ss_state'] == 0 ) {
         echo "<div class=\"right_button\">";
+        echo "<button class=\"pauseBtn_des\" title=\"в обеденное время и при отметке об уходе с рабочего места изменения запрещены!\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"remote_work();\"><img src=\"img/remoteWorkIcon2.png\" style=\"width: 15px; height: 14px;\"></button>";
         echo "<button class=\"pauseBtn_des\" title=\"в обеденное время и при отметке об уходе с рабочего места приостановка учета времени запрещена!\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"disclamer( '$state_db' );\"><img src=\"img/sport_disabled.png\"></button>";
         echo "<button class=\"pauseBtn_des\" title=\"в обеденное время и при отметке об уходе с рабочего места приостановка учета времени запрещена!\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"disclamer( '$state_db' );\"><img src=\"img/pauseDisabled.png\"></button>";
-        echo "<button class=\"pauseBtn_des\" title=\"в обеденное время и при отметке об уходе с рабочего места изменения запрещены!\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"remote_work();\"><img src=\"img/remoteWorkIcon2.png\" style=\"width: 15px; height: 14px;\"></button>";
         echo "</div>";
       }
       else {
         echo "<div class=\"right_button\">"; 
-        if ($_SESSION['ss_id'] == 148 ) {
         echo "<button class=\"pauseBtn\" title=\"Удаленная работа\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"remote_work();\"><img src=\"img/remoteWorkIcon2.png\" style=\"width: 15px; height: 14px;\"></button>";
-        }
         echo "<button class=\"pauseBtn\" title=\"Посещение тренажерного зала\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"set_sport_pause();\"><img src=\"img/sport.png\"></button>";
         echo "<button class=\"pauseBtn\" title=\"Приостановка учета времени\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"set_pause_header();\"><img src=\"img/pause.png\"></button>";
         echo "</div>";
@@ -534,7 +532,7 @@ else {
   if ( $state == 4 ) {  
     $timeManagement .= "<td class=\"nopadding_s\" height=10></td></tr><tr>";
     $timeManagement .= "<td class=\"nopadding_s\" style=\"font-size: 100%; margin:0; padding:0; margin-left:0;\">";
-      $timeManagement .= "<button style=\"font-size: 100%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f8d888; border:1px solid #888888; cursor:pointer;\" onclick=\"reg_out_work();\">Зарегистрировать время ухода с рабочего места</button>";
+      $timeManagement .= "<button style=\"font-size: 100%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f8d888; border:1px solid #888888; cursor:pointer;\" onclick=\"reg_out_work(); location.reload(true);\">Зарегистрировать время ухода с рабочего места</button>";
     $timeManagement .= "</td>";
 
     $timeRestribution .= change_time( $userID );
