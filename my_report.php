@@ -3,6 +3,19 @@ date_default_timezone_set("Asia/Novosibirsk");
 ob_start();
 session_start();
 include_once __DIR__ . "/start.php";
+if (
+    !isset($_SESSION['rep_start_date']) ||
+    !isset($_SESSION['rep_stop_date'])
+) {
+    $currDate = date('Y-m-d');
+
+    list($start, $end) = getQuarterDates($currDate);
+
+    $_SESSION['rep_start_date'] = $start;
+    $_SESSION['rep_stop_date']  = $end;
+    $_SESSION['rep_start_stop_date_mode'] = 4;
+    $_SESSION['rep_start_stop_date_set'] = 1;
+}
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -21,35 +34,95 @@ include_once __DIR__ . "/start.php";
 
 <script type="text/javascript" charset="utf-8"> 
 
-function set_period(){
-  var report_type = document.getElementById('report_type').value;
-  var start_report_date = document.getElementById('report_start_date').value;
-  var stop_report_date = document.getElementById('report_stop_date').value;
+function set_period() {
+  var reportType = document.getElementById('report_type').value;
+  var manualBlock = document.getElementById('manual_rep');
+  var startReportDate = document.getElementById('report_start_date').value;
+  var stopReportDate = document.getElementById('report_stop_date').value;
 
-  if ( report_type == 7 ){
-    document.getElementById('manual_rep').style.display='flex';
+  if (reportType == 7) {
+    manualBlock.style.display = 'flex';
+    return;
   }
-  else{
-    document.getElementById('manual_rep').style.display='none';
-    $.post('ajax/set_report_date_interval.php', {report_type: report_type, start_report_date: start_report_date, stop_report_date: stop_report_date}, RetSWT);
-    function RetSWT(dat) {
-      window.location=self.location;
-      if ( report_type == 7 ){
-        document.getElementById('manual_rep').style.display='flex';
+
+  manualBlock.style.display = 'none';
+
+  $.ajax({
+    type: 'POST',
+    url: 'ajax/set_report_date_interval.php',
+    data: {
+      report_type: reportType,
+      start_report_date: startReportDate,
+      stop_report_date: stopReportDate
+    },
+    cache: false,
+    success: function(response) {
+      if (typeof response === 'string' && response.indexOf('Ошибка') !== -1) {
+        alert(response);
+        return;
       }
+
+      window.location.reload();
+    },
+    error: function(xhr) {
+      var message = 'Не удалось изменить отчетный период.';
+
+      if (xhr.responseText) {
+        message += '\n\n' + xhr.responseText;
+      }
+
+      alert(message);
     }
-  }
+  });
 }
 
-function manual_report_set(){
-  var report_type = document.getElementById('report_type').value;
-  var start_report_date = document.getElementById('report_start_date').value;
-  var stop_report_date = document.getElementById('report_stop_date').value;
+function manual_report_set() {
+  var reportType = document.getElementById('report_type').value;
+  var startReportDate = document.getElementById('report_start_date').value;
+  var stopReportDate = document.getElementById('report_stop_date').value;
 
-  $.post('ajax/set_report_date_interval.php', {report_type: report_type, start_report_date: start_report_date, stop_report_date: stop_report_date}, RetSWT);
-  function RetSWT(dat) {
-    window.location=self.location;
+  if (!startReportDate || !stopReportDate) {
+    alert('Укажите дату начала и дату окончания периода.');
+    return;
   }
+
+  if (startReportDate > stopReportDate) {
+    alert('Дата начала периода не может быть позже даты окончания.');
+    return;
+  }
+
+  $.ajax({
+    type: 'POST',
+    url: 'ajax/set_report_date_interval.php',
+    data: {
+      report_type: reportType,
+      start_report_date: startReportDate,
+      stop_report_date: stopReportDate
+    },
+    cache: false,
+    success: function(response) {
+      if (typeof response === 'string' && response.indexOf('Ошибка') !== -1) {
+        alert(response);
+        return;
+      }
+
+      if (typeof response === 'string' && response.indexOf('Слишком большой диапазон') !== -1) {
+        alert(response);
+        return;
+      }
+
+      window.location.reload();
+    },
+    error: function(xhr) {
+      var message = 'Не удалось применить ручной отчетный период.';
+
+      if (xhr.responseText) {
+        message += '\n\n' + xhr.responseText;
+      }
+
+      alert(message);
+    }
+  });
 }
 
 function ta_delete( delID ){
@@ -192,20 +265,119 @@ function getQuarterDates ($date = null) {
   return [$start, $end];
 }
 
-if ( !isset($_SESSION['rep_start_stop_date_set']) ){
-  list($_SESSION['rep_start_date'], $_SESSION['rep_stop_date']) = getQuarterDates($currDate);
-  $_SESSION['rep_start_stop_date_mode'] = 4;
-  $_SESSION['rep_start_stop_date_set'] = 1;
+function getWeekDates($date = null) {
+  if ($date === null) {
+    $date = date('Y-m-d');
+  }
+
+  $dateValue = strtotime($date);
+  $weekDayNumber = (int)date('N', $dateValue);
+
+  $start = date('Y-m-d', strtotime('-' . ($weekDayNumber - 1) . ' days', $dateValue));
+  $end = date('Y-m-d', $dateValue);
+
+  return [$start, $end];
 }
-  if ( !isset($_SESSION['rep_start_stop_date_mode']) ){
+
+function getMonthDates($date = null) {
+  if ($date === null) {
+    $date = date('Y-m-d');
+  }
+
+  $start = date('Y-m-01', strtotime($date));
+  $end = date('Y-m-d', strtotime($date));
+
+  return [$start, $end];
+}
+
+function getPreviousMonthDates($date = null) {
+  if ($date === null) {
+    $date = date('Y-m-d');
+  }
+
+  $prevMonthDate = strtotime('first day of previous month', strtotime($date));
+
+  $start = date('Y-m-01', $prevMonthDate);
+  $end = date('Y-m-t', $prevMonthDate);
+
+  return [$start, $end];
+}
+
+function getPreviousQuarterDates($date = null) {
+  if ($date === null) {
+    $date = date('Y-m-d');
+  }
+
+  list($currentQuarterStart) = getQuarterDates($date);
+  $previousQuarterDate = date('Y-m-d', strtotime($currentQuarterStart . ' -1 day'));
+
+  return getQuarterDates($previousQuarterDate);
+}
+
+function refreshReportPeriodDates($currDate) {
+  if (!isset($_SESSION['rep_start_stop_date_mode'])) {
     $_SESSION['rep_start_stop_date_mode'] = 4;
   }
 
-  $rep_start_stop_date_mode = $_SESSION['rep_start_stop_date_mode'];
-  $selected = $rep_start_stop_date_mode - 1;
+  if (!isset($_SESSION['rep_start_stop_date_set'])) {
+    $_SESSION['rep_start_stop_date_set'] = 1;
+  }
 
-  $selectedArr = array_fill(0, 7, "");
-  $selectedArr[$selected] = "selected";
+  $mode = (int)$_SESSION['rep_start_stop_date_mode'];
+
+  if ($mode == 1) {
+    list($_SESSION['rep_start_date'], $_SESSION['rep_stop_date']) = getWeekDates($currDate);
+  }
+  else if ($mode == 2) {
+    list($_SESSION['rep_start_date'], $_SESSION['rep_stop_date']) = getMonthDates($currDate);
+  }
+  else if ($mode == 3) {
+    list($_SESSION['rep_start_date'], $_SESSION['rep_stop_date']) = getPreviousMonthDates($currDate);
+  }
+  else if ($mode == 4) {
+    list($_SESSION['rep_start_date'], $_SESSION['rep_stop_date']) = getQuarterDates($currDate);
+  }
+  else if ($mode == 5) {
+    list($_SESSION['rep_start_date'], $_SESSION['rep_stop_date']) = getPreviousQuarterDates($currDate);
+  }
+}
+
+if (!isset($_SESSION['rep_start_stop_date_mode'])) {
+  $_SESSION['rep_start_stop_date_mode'] = 4;
+}
+
+if (!isset($_SESSION['rep_start_stop_date_set'])) {
+  $_SESSION['rep_start_stop_date_set'] = 1;
+}
+
+refreshReportPeriodDates($currDate);
+
+if (
+  !isset($_SESSION['report_cache_date']) ||
+  $_SESSION['report_cache_date'] != $currDate ||
+  !isset($_SESSION['report_cache_mode']) ||
+  $_SESSION['report_cache_mode'] != $_SESSION['rep_start_stop_date_mode'] ||
+  !isset($_SESSION['report_cache_start_date']) ||
+  $_SESSION['report_cache_start_date'] != $_SESSION['rep_start_date'] ||
+  !isset($_SESSION['report_cache_stop_date']) ||
+  $_SESSION['report_cache_stop_date'] != $_SESSION['rep_stop_date']
+) {
+  unset($_SESSION['full_report']);
+  unset($_SESSION['usersInfo']);
+  unset($_SESSION['report_stats']);
+  unset($_SESSION['rowsContents']);
+
+  $_SESSION['report_cache_date'] = $currDate;
+  $_SESSION['report_cache_mode'] = $_SESSION['rep_start_stop_date_mode'];
+  $_SESSION['report_cache_start_date'] = $_SESSION['rep_start_date'];
+  $_SESSION['report_cache_stop_date'] = $_SESSION['rep_stop_date'];
+}
+
+$rep_start_stop_date_mode = $_SESSION['rep_start_stop_date_mode'];
+$selected = $rep_start_stop_date_mode - 1;
+
+$selectedArr = array_fill(0, 7, "");
+$selectedArr[$selected] = "selected";
 
 echo "<div id=\"report_container\">";
   echo "<div>";
@@ -253,6 +425,20 @@ $svID = $_SESSION['ss_id'];
 
 $user_defaultStartTimeStr = $_SESSION['ss_defaultStartTime'];
 $user_allowedDelay = $_SESSION['ss_allowedDelay'];
+
+$autoTodayModes = array(1, 2, 4, 6);
+
+if (
+  in_array((int)$_SESSION['rep_start_stop_date_mode'], $autoTodayModes)
+  && $_SESSION['rep_stop_date'] < $currDate
+) {
+  $_SESSION['rep_stop_date'] = $currDate;
+
+  unset($_SESSION['full_report']);
+  unset($_SESSION['usersInfo']);
+  unset($_SESSION['report_stats']);
+  unset($_SESSION['rowsContents']);
+}
 
 $rep_start_date = $_SESSION['rep_start_date'];
 $rep_stop_date = $_SESSION['rep_stop_date'];

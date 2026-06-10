@@ -1,5 +1,13 @@
 <?php
 
+if (empty($_SESSION['rep_start_date']) || empty($_SESSION['rep_stop_date'])) {
+    die('Ошибка: не задан период отчета');
+}
+
+if (strtotime($_SESSION['rep_start_date']) > strtotime($_SESSION['rep_stop_date'])) {
+    die('Ошибка: некорректный диапазон дат');
+}
+
 function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRate ){
   $userDayNorm = ( $userRate / 5 ) * 60 * 60;
 
@@ -105,7 +113,7 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
     }   
   }  
 
-  $dayTypes = get_workdays_holidays_bay_range( $startDate, $stopDate );
+  $dayTypesByDate = get_work_dayoff_types_by_range($link, $startDate, $stopDate);
   $currentDateArr = get_current_datetime_in_timezone();
   $currentDate = $currentDateArr[2];
 
@@ -225,30 +233,24 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
     }
   }
 
-  for ( $idxd = 0; $idxd < count( $days_dates_set ); $idxd ++ )
-  {
+  for ( $idxd = 0; $idxd < count( $days_dates_set ); $idxd ++ ){
+    $day = $days_dates_set[$idxd];
     $add = 0;
-    for ( $idx = 0; $idx < count( $dayTypes[0] ); $idx ++ )
-    {
-      if ( $days_dates_set[$idxd] == $dayTypes[0][$idx] )
-      {
 
-        if ( $dayTypes[1][$idx] == 0 )
-        {
-          $add = 100;  
-          $days_norm[$idxd] = 0;
-          break;
-        }
-        else if ( $dayTypes[1][$idx] == 1 )
-        {
-          $add = 200;
+    if (isset($dayTypesByDate[$day])) {
+      if ($dayTypesByDate[$day] == 0) {
+        $add = 100;
+        $days_norm[$idxd] = 0;
+      }
+      else if ($dayTypesByDate[$day] == 1) {
+        $add = 200;
+        $days_norm[$idxd] = $userDayNorm;
+      }
+      else if ($dayTypesByDate[$day] == 2) {
+        $add = 300;
 
-          $days_norm[$idxd] = $userDayNorm;
-          break;
-        }
-        else
-        {
-          break;
+        if ($days_norm[$idxd] > 0) {
+          $days_norm[$idxd] = max(0, $days_norm[$idxd] - 3600);
         }
       }
     }
@@ -265,6 +267,12 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       }
     }
   }
+
+  $days_norm_before_leaves = $days_norm;
+
+  $days_norm = apply_staff_leaves_to_days_norm($link, $userID, $startDate, $stopDate, $days_dates_set, $days_norm);
+
+  $days_leave_events = get_staff_leave_events_by_days($link, $userID, $startDate, $stopDate, $days_dates_set);
 
   unset($tempDates);
   $tempDates = array();   
@@ -369,6 +377,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   $dayNormWholePeriod = 0;
   $PenaltiesDurationWholePeriod = 0;
   $PenaltiesCountWholePeriod = 0;
+  $dayNormBeforeLeavesWholePeriod = 0;
+  $leaveDurationWholePeriod = 0;
 
   $resultPureDurationPeriod = 0;
   $addTimeDurationPeriod = 0;
@@ -377,6 +387,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   $dayNormPeriod = 0;
   $PenaltiesDurationPeriod = 0;
   $PenaltiesCountPeriod = 0;
+  $dayNormBeforeLeavesPeriod = 0;
+  $leaveDurationPeriod = 0;
 
   $resultPureDurationWeek = 0;
   $addTimeDurationWeek = 0;
@@ -385,6 +397,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   $dayNormWeek = 0;
   $PenaltiesDurationWeek = 0;
   $PenaltiesCountWeek = 0;
+  $dayNormBeforeLeavesWeek = 0;
+  $leaveDurationWeek = 0;
 
   $resultPureDurationMonth = 0;
   $addTimeDurationMonth = 0;
@@ -393,6 +407,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   $dayNormMonth = 0;
   $PenaltiesDurationMonth = 0;
   $PenaltiesCountMonth = 0;
+  $dayNormBeforeLeavesMonth = 0;
+  $leaveDurationMonth = 0;
 
   $resultPureDurationQuarter = 0;
   $addTimeDurationQuarter = 0;
@@ -401,6 +417,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   $dayNormQuarter = 0;
   $PenaltiesDurationQuarter = 0;
   $PenaltiesCountQuarter = 0;
+  $dayNormBeforeLeavesQuarter = 0;
+  $leaveDurationQuarter = 0;
 
   $resultPureDurationYear = 0;
   $addTimeDurationYear = 0;
@@ -409,14 +427,19 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   $dayNormYear = 0;
   $PenaltiesDurationYear = 0;
   $PenaltiesCountYear = 0;
+  $dayNormBeforeLeavesYear = 0;
+  $leaveDurationYear = 0;
 
 
   if ( count( $days_dates_set ) > 0 )
   {
-    $firstPeriodDate = $days_dates_set[$idx];    
+    $firstPeriodDate = $days_dates_set[0];   
   }
 
   $day = "";
+
+  $dayNormBeforeLeaves = 0;
+  $leaveDuration = 0;
 
   for ( $idx = 0; $idx <= count( $days_dates_set ); $idx ++ )
   {
@@ -429,8 +452,7 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $day = DayIncDN( $day, 1 );
     } 
          
-    if ( $day != "NDF" )
-    {
+   if ( $idx < count( $days_dates_set ) ){
       $day_day[] = $days_dates_set[$idx];
       $day_work_start = $days_work_start[$idx];
       $day_work_stop = $days_work_stop[$idx];
@@ -451,6 +473,9 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $pauseTimeDuration = $durations[5];
       $lunchDuration = $durations[1];  
       $dayNorm = $day_norm;
+
+      $dayNormBeforeLeaves = $days_norm_before_leaves[$idx];
+      $leaveDuration = $dayNormBeforeLeaves - $dayNorm;
   
       $PenaltiesDuration = 0;
       $PenaltiesCount = 0; 
@@ -459,6 +484,18 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
         $PenaltiesDuration = $day_penalty_duration;  
       }
     }
+    else{
+      $resultPureDuration = 0;
+      $addTimeDuration = 0;
+      $pauseTimeDuration = 0;
+      $lunchDuration = 0;
+      $dayNorm = 0;
+      $PenaltiesDuration = 0;
+      $PenaltiesCount = 0;
+      $dayNormBeforeLeaves = 0;
+      $leaveDuration = 0;
+    }
+    
     if ( $weekOpened == 0 && is_first_week_day( $day ) ){
       $weekOpened = 1;
       $periodOpened = -1;
@@ -474,7 +511,10 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
         $stat_result_value[7] = $PenaltiesDurationPeriod;
         $stat_result_value[8] = $PenaltiesCountPeriod;
         $stat_result_value[9] = $pauseTimeDurationPeriod;
+        $stat_result_value[10] = $dayNormBeforeLeavesPeriod;
+        $stat_result_value[11] = $leaveDurationPeriod;
         $stat_results[] = $stat_result_value;
+
       }
     } 
     else if ( $weekOpened == 1 && is_first_week_day( $day ) )
@@ -492,6 +532,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $stat_result_value[7] = $PenaltiesDurationWeek;
       $stat_result_value[8] = $PenaltiesCountWeek;
       $stat_result_value[9] = $pauseTimeDurationWeek;
+      $stat_result_value[10] = $dayNormBeforeLeavesWeek;
+      $stat_result_value[11] = $leaveDurationWeek;
       $stat_results[] = $stat_result_value;
 
       $resultPureDurationWeek = 0;
@@ -501,6 +543,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $dayNormWeek = 0;
       $PenaltiesDurationWeek = 0;
       $PenaltiesCountWeek = 0;
+      $dayNormBeforeLeavesWeek = 0;
+      $leaveDurationWeek = 0;
     }
               
     if ( $monthOpened == 0 && is_first_month_day( $day ) )
@@ -521,7 +565,9 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $stat_result_value[6] = $dayNormMonth;
       $stat_result_value[7] = $PenaltiesDurationMonth;
       $stat_result_value[8] = $PenaltiesCountMonth;
-      $stat_result_value[9] = $pauseTimeDurationMonth; 
+      $stat_result_value[9] = $pauseTimeDurationMonth;
+      $stat_result_value[10] = $dayNormBeforeLeavesMonth;
+      $stat_result_value[11] = $leaveDurationMonth;
 
       $stat_results[] = $stat_result_value;
 
@@ -532,6 +578,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $dayNormMonth = 0;
       $PenaltiesDurationMonth = 0;
       $PenaltiesCountMonth = 0;
+      $dayNormBeforeLeavesMonth = 0;
+      $leaveDurationMonth = 0;
     }                 
     if ( $quarterOpened == 0 AND is_first_quarter_day( $day ) )
     {
@@ -551,7 +599,9 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $stat_result_value[6] = $dayNormQuarter;
       $stat_result_value[7] = $PenaltiesDurationQuarter;
       $stat_result_value[8] = $PenaltiesCountQuarter;
-      $stat_result_value[9] = $pauseTimeDurationQuarter; 
+      $stat_result_value[9] = $pauseTimeDurationQuarter;
+      $stat_result_value[10] = $dayNormBeforeLeavesQuarter;
+      $stat_result_value[11] = $leaveDurationQuarter;
 
       $stat_results[] = $stat_result_value;
 
@@ -562,6 +612,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $dayNormQuarter = 0;
       $PenaltiesDurationQuarter = 0;
       $PenaltiesCountQuarter = 0;
+      $dayNormBeforeLeavesQuarter = 0;
+      $leaveDurationQuarter = 0;
     }                 
 
     if ( $yearOpened == 0 && is_first_year_day( $day ) )
@@ -582,7 +634,9 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $stat_result_value[6] = $dayNormYear;
       $stat_result_value[7] = $PenaltiesDurationYear;
       $stat_result_value[8] = $PenaltiesCountYear;
-      $stat_result_value[9] = $pauseTimeDurationYear; 
+      $stat_result_value[9] = $pauseTimeDurationYear;
+      $stat_result_value[10] = $dayNormBeforeLeavesYear;
+      $stat_result_value[11] = $leaveDurationYear;
 
       $stat_results[] = $stat_result_value;
 
@@ -593,6 +647,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $dayNormYear = 0;
       $PenaltiesDurationYear = 0;
       $PenaltiesCountYear = 0;
+      $dayNormBeforeLeavesYear = 0;
+      $leaveDurationYear = 0;
     }                   
 
     if ( $weekOpened == 0 )
@@ -609,6 +665,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $dayNormPeriod += $dayNorm;
       $PenaltiesDurationPeriod += $PenaltiesDuration;
       $PenaltiesCountPeriod += $PenaltiesCount;
+      $dayNormBeforeLeavesPeriod += $dayNormBeforeLeaves;
+      $leaveDurationPeriod += $leaveDuration;
 
     }
 
@@ -617,11 +675,12 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $resultPureDurationWeek += $resultPureDuration; 
       $addTimeDurationWeek += $addTimeDuration;  
       $pauseTimeDurationWeek += $pauseTimeDuration;
-
       $lunchDurationWeek += $lunchDuration;  
       $dayNormWeek += $dayNorm;
       $PenaltiesDurationWeek += $PenaltiesDuration;
       $PenaltiesCountWeek += $PenaltiesCount;
+      $dayNormBeforeLeavesWeek += $dayNormBeforeLeaves;
+      $leaveDurationWeek += $leaveDuration;
     }
 
     if ( $monthOpened == 1 )
@@ -633,6 +692,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $dayNormMonth += $dayNorm;
       $PenaltiesDurationMonth += $PenaltiesDuration;
       $PenaltiesCountMonth += $PenaltiesCount;
+      $dayNormBeforeLeavesMonth += $dayNormBeforeLeaves;
+      $leaveDurationMonth += $leaveDuration;
     }
 
     if ( $quarterOpened == 1 )
@@ -644,6 +705,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $dayNormQuarter += $dayNorm;
       $PenaltiesDurationQuarter += $PenaltiesDuration;
       $PenaltiesCountQuarter += $PenaltiesCount;
+      $dayNormBeforeLeavesQuarter += $dayNormBeforeLeaves;
+      $leaveDurationQuarter += $leaveDuration;
     }
 
     if ( $yearOpened == 1 )
@@ -655,6 +718,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $dayNormYear += $dayNorm;
       $PenaltiesDurationYear += $PenaltiesDuration;
       $PenaltiesCountYear += $PenaltiesCount;
+      $dayNormBeforeLeavesYear += $dayNormBeforeLeaves;
+      $leaveDurationYear += $leaveDuration;
     }                   
 
     $resultPureDurationWholePeriod += $resultPureDuration;
@@ -663,8 +728,9 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
     $lunchDurationWholePeriod += $lunchDuration;
     $dayNormWholePeriod += $dayNorm;
     $PenaltiesDurationWholePeriod += $PenaltiesDuration;
-
     $PenaltiesCountWholePeriod += $PenaltiesCount;
+    $dayNormBeforeLeavesWholePeriod += $dayNormBeforeLeaves;
+    $leaveDurationWholePeriod += $leaveDuration;
   }
 
   $stat_result_value[0] = $firstPeriodDate;
@@ -677,16 +743,9 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   $stat_result_value[7] = $PenaltiesDurationWholePeriod;
   $stat_result_value[8] = $PenaltiesCountWholePeriod;
   $stat_result_value[9] = $pauseTimeDurationWholePeriod; 
+  $stat_result_value[10] = $dayNormBeforeLeavesWholePeriod;
+  $stat_result_value[11] = $leaveDurationWholePeriod;
   $stat_results[] = $stat_result_value;
-
-  foreach ( $stat_results as $resu )
-  { 
-    if ( $resu[5] >= 4 )
-    {
-//      echo  $resu[0]." ".$resu[1]."|".format_time_d_hhmmss_pure( $resu[2] )." ".format_time_d_hhmmss_pure( $resu[3] )." ".format_time_d_hhmmss_pure( $resu[4] )."|".$resu[5]."<br>";
-    }
-  }
-
 
   $stats = array();
   $stats[] = $days_dates_set;           // 0
@@ -713,6 +772,7 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   $stats[] = $days_remoteWorkState;     // 18
   $stats[] = $days_timeZoneSec;         // 19
   $stats[] = $days_dayTransitionTime;   // 20
+  $stats[] = $days_leave_events; // 21
 
   return $stats;
 }

@@ -222,9 +222,6 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
                 echo "<button onclick=\"refuse_add_time_for_user('$ta_id', '$ta_SUdescription' );\" $refBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
                   echo "<img title=\"Отклонить\" src=\"img/$refBtnImg\">";
                 echo "</button>";
-              echo "</td>";
-              echo "<td width=\"2\">";
-              echo "</td>";
               echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
                 if ( $delRestore == 1 ){
                   echo "<button onclick=\"mark_as_deleted_add_time_for_user( '$ta_id' ); location.reload();\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";

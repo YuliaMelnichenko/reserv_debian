@@ -20,7 +20,7 @@ echo "<body bgcolor=\"#ffffff\" >";
 <script type="text/javascript" charset="utf-8"> 
 
 function update_clock(){
-  $.post('ajax/get_current_day_time.php', RetSWT);                           
+  $.post('ajax/get_current_day_time.php', RetSWT);
   function RetSWT(dat) {
     if ( document.getElementById('dateTimeFieldNav') ){
       document.getElementById('dateTimeFieldNav').innerHTML = dat;
@@ -89,7 +89,7 @@ $delayTimes = get_all_delay_info_by_user( $userID, $user_defaultStartTime, $user
       if ( count( $delayTimes ) == 0 ){
         echo "<table id=\"add_time_approvement_table\" border=0>";
           echo "<tr>";
-            echo "<td valign=\"middle\" width=1000 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";                                                                                
+            echo "<td valign=\"middle\" width=1000 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";
             echo "<td width=262 valign=\"middle\" align=\"right\">";
               echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='delay_approvement.php';\"><h5>Назад</h5></button>";
             echo "</td>";
@@ -97,11 +97,11 @@ $delayTimes = get_all_delay_info_by_user( $userID, $user_defaultStartTime, $user
         echo "</table>";
 
         echo "<h5><br>Нет сведений!</h5>";
-        echo "</td>";               
+        echo "</td>";
         echo "<tr>";
         echo "<table>";
         exit;
-      }       
+      }
 
 $rWidth = $wholeWidth - 312;
 
@@ -110,13 +110,13 @@ echo "<table id=\"delay_approvement_table\" border=0>";
     echo "<td class=\"nopadding_s\">";
       echo "<table border=0>";
         echo "<tr>";
-          echo "<td valign=\"middle\" width=1000 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";                                                                                
+          echo "<td valign=\"middle\" width=1000 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";
           echo "<td width=262 valign=\"middle\" align=\"right\">";
             echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='delay_approvement.php';\"><h5>Назад</h5></button>";
           echo "</td>";
         echo "</tr>";
       echo "</table>";
-    echo "</td>";     
+    echo "</td>";
   echo "</tr>";
   echo "<tr>";
     echo "<td class=\"nopadding\" width=1300 valign=\"middle\" align=\"left\">";
@@ -229,25 +229,25 @@ echo "<table id=\"delay_approvement_table\" border=0>";
               echo "<tr>";
                 echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
                   echo "<button onclick=\"accept_delay_for_user( '$retDelay_id', '$retDelay_acceptor_description', '$retDelay_penalty_id', '$retDelay_start_date', '$userID' );\" $accBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
-                    echo "<img title=\"Принять\" src=\"img/$accBtnImg\">";                   
+                    echo "<img title=\"Принять\" src=\"img/$accBtnImg\">";
                   echo "</button>";
                 echo "</td>";
                 echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
                   echo "<button onclick=\"refuse_delay_for_user('$retDelay_id', '$retDelay_acceptor_description', '$retDelay_penalty_id', '$retDelay_start_date', '$userID' );\" $refBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
-                    echo "<img title=\"Отклонить\" src=\"img/$refBtnImg\">";                   
+                    echo "<img title=\"Отклонить\" src=\"img/$refBtnImg\">";
                   echo "</button>";
-                echo "</td>";
-                  echo "<td width=\"2\">";
-                  echo "</td>";
+                // echo "</td>";
+                //   echo "<td width=\"2\">";
+                //   echo "</td>";
                 echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
                   if ( $delRestore == 1 ){ 
                     echo "<button onclick=\"mark_as_deleted_delay_for_user( '$retDelay_id' ); location.reload();\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
-                      echo "<img title=\"Удалить\" src=\"img/delete_small.bmp\">";                   
+                      echo "<img title=\"Удалить\" src=\"img/delete_small.bmp\">";
                     echo "</button>";
                   }
                   else{
                     echo "<button onclick=\"mark_as_undeleted_delay_for_user( '$retDelay_id' ); location.reload();\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
-                      echo "<img title=\"Восстановить\" src=\"img/restore_small.bmp\">";                   
+                      echo "<img title=\"Восстановить\" src=\"img/restore_small.bmp\">";
                     echo "</button>";
                   }
                 echo "</td>";

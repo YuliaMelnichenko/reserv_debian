@@ -1,126 +1,137 @@
 <?php
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 session_start();
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+  exit;
+}
+
+if (!isset($_POST['report_type'])) {
+  exit;
+}
+
+$report_type = intval($_POST['report_type']);
+
+if ($report_type < 1 || $report_type > 7) {
+  exit;
+}
 
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
-$report_type = $_POST['report_type'];
-$start_report_date = $_POST['start_report_date'];
-$stop_report_date = $_POST['stop_report_date'];
+include_once __DIR__ . "/../funcs.php";
 
 $currDate = date('Y-m-d');
 
-$_SESSION['rep_stop_date'] = $currDate;
-$_SESSION['rep_start_stop_date_set'] = 0; //0 - not set, 1 - one border have been set, 2 - two borders have been set
+$start_report_date = isset($_POST['start_report_date']) ? $_POST['start_report_date'] : "";
+$stop_report_date = isset($_POST['stop_report_date']) ? $_POST['stop_report_date'] : "";
 
-include_once __DIR__ . "/../funcs.php";
+error_log("CALL set_report_date_interval: " . json_encode($_POST));
+
+unset($_SESSION['rep_start_date']);
+unset($_SESSION['rep_stop_date']);
 
 $_SESSION['rep_start_stop_date_mode'] = $report_type;
+$_SESSION['rep_start_stop_date_set'] = 0;
 
-if ( $report_type == 1 )
-{
-  $week_day = GetWeekDayD( $currDate );
-
+if ($report_type == 1) {
+  $week_day = GetWeekDayD($currDate);
   $offset = $week_day - 1;
 
-  $_SESSION['rep_start_date'] = DayDecDN( $currDate, $offset );
+  $_SESSION['rep_start_date'] = DayDecDN($currDate, $offset);
+  $_SESSION['rep_stop_date'] = $currDate;
   $_SESSION['rep_start_stop_date_set'] = 2;
 }
-else if ( $report_type == 2 )
-{
-  $month_day = GetMonthDayD( $currDate );
+else if ($report_type == 2) {
+  $month_day = GetMonthDayD($currDate);
   $offset = $month_day - 1;
-  $_SESSION['rep_start_date'] = DayDecDN( $currDate, $offset );
+
+  $_SESSION['rep_start_date'] = DayDecDN($currDate, $offset);
+  $_SESSION['rep_stop_date'] = $currDate;
   $_SESSION['rep_start_stop_date_set'] = 2;
-}  
+}
+else if ($report_type == 3) {
+  $prevMonthDate = strtotime('first day of previous month', strtotime($currDate));
 
-else if ( $report_type == 3 )
-{
-  $month_day = GetMonthDayD( $currDate );
-  $offset = $month_day - 1;
-  $_SESSION['rep_start_date'] = DayDecDN( $currDate, $offset );
-  $_SESSION['rep_start_date'] = MonthDecDN( $_SESSION['rep_start_date'], 1 );
-
+  $_SESSION['rep_start_date'] = date('Y-m-01', $prevMonthDate);
+  $_SESSION['rep_stop_date'] = date('Y-m-t', $prevMonthDate);
   $_SESSION['rep_start_stop_date_set'] = 2;
-}  
+}
+else if ($report_type == 4) {
+  $month = (int)date('n', strtotime($currDate));
+  $year = (int)date('Y', strtotime($currDate));
 
-else if ( $report_type == 4 )
-{
-  $month = GetMonthD( $currDate );
-  $startMonth = 1;
-  $monthOffset = 0;
-  if ( $month >= 1 AND $month <= 3 )
-  {
-    $monthOffset = $month - 1;  
+  if ($month >= 1 && $month <= 3) {
+    $_SESSION['rep_start_date'] = "$year-01-01";
   }
-  if ( $month >= 4 AND $month <= 6 )
-  {
-    $monthOffset = $month - 4;  
+  else if ($month >= 4 && $month <= 6) {
+    $_SESSION['rep_start_date'] = "$year-04-01";
   }
-  if ( $month >= 7 AND $month <= 9 )
-  {
-    $monthOffset = $month - 7;  
+  else if ($month >= 7 && $month <= 9) {
+    $_SESSION['rep_start_date'] = "$year-07-01";
   }
-  if ( $month >= 10 AND $month <= 12 )
-  {
-    $monthOffset = $month - 10;  
+  else {
+    $_SESSION['rep_start_date'] = "$year-10-01";
   }
 
-  $newStartDate = MonthDecDN( $currDate, $monthOffset );
-  $month_day = GetMonthDayD( $newStartDate );
-  $dayOffset = $month_day - 1; 
-
-  $newStartDate = DayDecDN( $newStartDate, $dayOffset );
-
-  $_SESSION['rep_start_date'] = $newStartDate;
-
+  $_SESSION['rep_stop_date'] = $currDate;
   $_SESSION['rep_start_stop_date_set'] = 2;
-}  
+}
+else if ($report_type == 5) {
+  $month = (int)date('n', strtotime($currDate));
+  $year = (int)date('Y', strtotime($currDate));
+  $currentQuarter = (int)ceil($month / 3);
+  $prevQuarter = $currentQuarter - 1;
 
-else if ( $report_type == 5 ) {
-  $currDateObj = new DateTime($currDate);
-
-  $month = (int)$currDateObj -> format('n');
-  $currentQuarter = ceil($month / 3);
-
-  $preQuarter = $currentQuarter - 1;
-  $year = (int)$currDateObj -> format('Y');
-
-  if ($preQuarter === 0) {
-    $preQuarter = 4;
+  if ($prevQuarter <= 0) {
+    $prevQuarter = 4;
     $year--;
   }
 
-  $startMonth = ($preQuarter - 1) * 3 + 1;
-  $startDate = new DateTime("$year-$startMonth-01");
+  $startMonth = ($prevQuarter - 1) * 3 + 1;
+  $startDate = sprintf('%04d-%02d-01', $year, $startMonth);
+  $endDate = date('Y-m-t', strtotime($startDate . ' +2 months'));
 
-  $endDate = clone $startDate;
-  $endDate->modify('+3 month')->modify('-1 day');
-
-  $_SESSION['rep_start_date'] = $startDate->format('Y-m-d');
-  $_SESSION['rep_stop_date'] = $endDate->format('Y-m-d');
-  $_SESSION['rep_start_stop_date_set'] = 2;
-}  
-
-else if ( $report_type == 6 )
-{ 
-  $_SESSION['rep_start_date'] = GetFirstYearDay( GetCurrentYearD( $currDate ) );
+  $_SESSION['rep_start_date'] = $startDate;
+  $_SESSION['rep_stop_date'] = $endDate;
   $_SESSION['rep_start_stop_date_set'] = 2;
 }
-
-else if ( $report_type == 7 )
-{ 
+else if ($report_type == 6) {
+  $_SESSION['rep_start_date'] = GetFirstYearDay(GetCurrentYearD($currDate));
+  $_SESSION['rep_stop_date'] = $currDate;
+  $_SESSION['rep_start_stop_date_set'] = 2;
+}
+else if ($report_type == 7) {
   $_SESSION['rep_start_date'] = $start_report_date;
   $_SESSION['rep_stop_date'] = $stop_report_date;
   $_SESSION['rep_start_stop_date_set'] = 2;
 }
 
-echo $report_type."_";
+if (empty($_SESSION['rep_start_date']) || empty($_SESSION['rep_stop_date'])) {
+  error_log("ERROR: даты не установлены!");
+  die('Ошибка: период не определен');
+}
 
-echo "star = ".$_SESSION['rep_start_date']." stop = ".$_SESSION['rep_stop_date'];
+$diff = (strtotime($_SESSION['rep_stop_date']) - strtotime($_SESSION['rep_start_date'])) / 86400;
+
+if ($diff < 0) {
+  die('Ошибка: неверный диапазон дат');
+}
+
+if ($diff > 366) {
+  die('Слишком большой диапазон дат');
+}
+
+unset($_SESSION['full_report']);
+unset($_SESSION['usersInfo']);
+unset($_SESSION['report_stats']);
+unset($_SESSION['rowsContents']);
+
+$_SESSION['report_cache_date'] = $currDate;
+$_SESSION['report_cache_mode'] = $_SESSION['rep_start_stop_date_mode'];
+$_SESSION['report_cache_start_date'] = $_SESSION['rep_start_date'];
+$_SESSION['report_cache_stop_date'] = $_SESSION['rep_stop_date'];
+
+echo $report_type . "_";
+echo "start = " . $_SESSION['rep_start_date'] . " stop = " . $_SESSION['rep_stop_date'];
 ?>

@@ -28,9 +28,7 @@ function getPeriodBounds (string $period): array {
             $month = intval(date('n'));
             $quarter = intval(ceil($month / 3));
             $start_month = ($quarter - 1) * 3 + 1;
-            // $start = date('Y-m-d 00:00:00', strtotime("$year-$start_month-01"));
             $start = date("$year-$start_month-01 00:00:00");
-            // $end = date('Y-m-d 00:00:00', strtotime("+3 month", strtotime($start)));
             break;
     }
     return [$start, $today];
@@ -75,26 +73,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
         } else {
             list($qstart, $qend) = getPeriodBounds($period);
         }
-
-        // $threshold_seconds = intval(round($hours * 3600));
-
-        // $sql = "
-        //     SELECT e.id AS empId,
-        //         CONCAT_WS(' ', e.surname, e.firstname, e.lastname) AS fio,
-        //         COUNT(*) AS overtime_count
-        //     FROM visiting v
-        //     JOIN employees e ON v.user_id = e.id
-        //     WHERE v.in_dt >= ? AND v.in_dt < ?
-        //     AND v.in_dt IS NOT NULL AND v.out_dt IS NOT NULL
-        //     AND (
-        //             TIME_TO_SEC(TIMEDIFF(v.out_dt, v.in_dt))
-        //             - IF(v.eat_start_dt IS NULL OR v.eat_stop_dt IS NULL, 0,
-        //                 TIME_TO_SEC(TIMEDIFF(v.eat_stop_dt, v.eat_start_dt)))
-        //         ) >= ?
-        //     GROUP BY e.id
-        //     HAVING overtime_count > 0
-        //     ORDER BY overtime_count DESC, fio ASC
-        // ";
 
         $sql = "
             SELECT 
@@ -152,7 +130,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
         if (!$stmt) {
             throw new Exception('Ошибка подготовки запроса: ' . mysqli_error($link));
         }
-        // mysqli_stmt_bind_param($stmt, 'ssi', $qstart, $qend, $threshold_seconds);
 
         mysqli_stmt_bind_param($stmt, 
                                    'dssssssssd', 
@@ -172,9 +149,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
 
         while ($row = mysqli_fetch_assoc($res)) {
             $rows[] = [
-                // 'id' => intval($row['empId']),
-                // 'fio' => $row['fio'],
-                // 'overtime_count' => intval($row['overtime_count'])
                 'id' => intval($row['emp_id']),
                 'fio' => $row['fio'],
                 'overtime_count' => intval($row['overtime_days']),
@@ -215,8 +189,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
         } else {
             list($qstart, $qend) = getPeriodBounds($period);
         }
-
-        // $threshold_seconds = intval(round($hours * 3600));
 
         $sql = "
             SELECT 
@@ -297,7 +269,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
 
         echo json_encode([
             'status' => 'success',
-            // 'count' => count($rows),
             'data' => $rows,
             'quarter_start' => $qstart,
             'quarter_end' => $qend
@@ -399,7 +370,6 @@ echo "<h5 class=\"dark\"><br>/Выгрузка сотрудников по пе�
     </table>
 </div>
 
-<!-- <script type="text/javascript" src="http://192.168.100.216/lib/jquery/jquery2.js"></script>  -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function () {

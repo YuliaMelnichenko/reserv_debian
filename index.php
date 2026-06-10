@@ -11,7 +11,7 @@ include_once __DIR__ . "/start.php";
 <script type="text/javascript" src="js/tory.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
-var timerIdSessValid=setInterval( "check_sess()", 20000 );
+var timerIdSessValid=setInterval( "check_sess()", 500000 );
 
 
 function check_sess(){
@@ -31,7 +31,7 @@ function check_day_change(){
   $.post('ajax/check_day_change.php', RetSWT);
   function RetSWT(dat){
     if ( dat == 1 ){
-      clearInterval( timerIdDayChange );   
+      clearInterval( timerIdDayChange );
       document.getElementById('layer_div').style.display='none';
       document.getElementById('layer_question_div').style.display='none';
     }
@@ -184,18 +184,6 @@ function reg_out_work()
 {
   switch_day_state( 1 );
 }
-
-// function reg_eat_start()
-// {
-//   switch_day_state( 1 );
-//   location.reload();
-// }
-
-// function reg_eat_stop()
-// {
-//   switch_day_state( 1 );
-//   location.reload();
-// } 
 
 function reg_eat_start () {
   switch_day_state(1, function() {
@@ -426,7 +414,7 @@ echo "<table>";
                   echo "<button style=\"cursor: pointer; font-size: 80%; width:180px; height:30px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"day_continue_confirm();\">Ok</button>";                   
                 echo "</td>";
                 echo "<td class=\"report_no_padding_no_border_no_bg\" bordercolor=\"#888888\" valign=\"middle\" align=\"center\" width = 198px>";
-                  echo "<button style=\"cursor: pointer; font-size: 80%; width:180px; height:30px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"day_continue_reject();\">Oтмена</button>";                   
+                  echo "<button style=\"cursor: pointer; font-size: 80%; width:180px; height:30px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"day_continue_reject();\">Oтмена</button>";
                 echo "</td>";
               echo "</tr>";
             echo "</table>";
@@ -468,7 +456,7 @@ echo "</div>";
 
 echo "<div id=\"delay_explanation_delay\">";
 echo "</div>";
-                                                              
+
 echo "<div align=\"left\">";
 
 ////////////////////////////////////////////////////////
@@ -503,7 +491,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
     $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
-    $dateArr = datetimestr_to_day_start_stop_DT_ex_str_idx( $currentDate, $user_dayTransitionTime );  
+    $dateArr = datetimestr_to_day_start_stop_DT_ex_str_idx( $currentDate, $user_dayTransitionTime );
 
     $startDTStr = $dateArr[0];
     $stopDTStr = $dateArr[1];    
@@ -563,7 +551,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
       $width00 = 600;  
       $width11 = 320; 
-      $width22 = $width00 - $width11; 
+      $width22 = $width00 - $width11;
 
       echo "<table>";
         echo "<tr>";
@@ -581,7 +569,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"middle\" align=\"center\">";
             echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$depName." (".$room." к.)"."</span>";
-          echo "</td>";  
+          echo "</td>";
         echo "</tr>";
 
         echo "<tr>";
@@ -682,7 +670,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
     $bosses_arr = [];
 
-    $bosses_sql = "SELECT id, firstname, surname, lastname, DATE_FORMAT(birthday, '%m-%d') AS bday FROM employees WHERE id IN (500, 501)";
+    $bosses_sql = "SELECT id, firstname, surname, lastname, DATE_FORMAT(birthday, '%m-%d') AS bday FROM employees WHERE id IN (400, 500, 501)";
 
     $bosses_q = mysqli_query($link, $bosses_sql);
 
@@ -708,7 +696,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       }
     }
 
-    $query6 = mysqli_query($link, "SELECT id, firstname, surname, lastname, phone, personal_phone, corporate_phone, DATE_FORMAT(birthday, '%m-%d') FROM employees WHERE relevance = 1 AND id NOT IN (500,501) ORDER BY surname");
+    $query6 = mysqli_query($link, "SELECT id, firstname, surname, lastname, phone, personal_phone, corporate_phone, DATE_FORMAT(birthday, '%m-%d'), email FROM employees WHERE relevance = 1 AND id NOT IN (400, 500, 501) ORDER BY surname");
 
     echo "<td bgcolor=\"$bg_style\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
     echo "<h5 class=\"dark0\"><br>/присутствие сотрудников<br><br></h5>";
@@ -726,6 +714,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $corporate_phone = $row6["corporate_phone"];
       $birthday = $row6["DATE_FORMAT(birthday, '%m-%d')"];
       $full_name = $surname." ".$firstname." ".$lastname;
+      $email_empl = $row6["email"];
 
       $time = "0000-00-00 00:00:00";
 
@@ -757,68 +746,74 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
       if (($eat_start_dt != $time && $eat_stop_dt === $time) || ($start_dt_AT != $time && $stop_dt_AT === $time)) {
         $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Обед/приостановка времени\" src=\"img/pause_time.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday, $email_empl));
       } elseif (mysqli_num_rows($query5) > 0 && $in_dt != $time && $out_dt != $time) {
         $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Ушел домой\" src=\"img/go_home.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday, $email_empl));
       } elseif ($isRemoteNow) {
         $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Работает удаленно\" src=\"img/remoteWorkIcon2.png\" style=\"margin: 1px 0\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday, $email_empl));
       } elseif (mysqli_num_rows($query5) === 0) {
         $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"На работу не приходил\" src=\"img/home.png\" style=\"margin: 1px 0\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));       
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday, $email_empl));
       } else {
         $img = "<img class=\"work-status\" data-emp=\"$id_empl\" style=\"margin: 1px 0\" title=\"На рабочем месте\" src=\"img/in_work2.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday));
+        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday, $email_empl));
       }
     }
 
-    $boss_block = $bosses_arr;
-
     $employee_arr = array_filter($employee_arr, function($item) {
-      return !in_array($item[9], [500, 501]);
+      return !in_array($item[9], [400, 500, 501]);
     });
 
     function sort_employee ($a, $b) {
       if (is_null($a[4]) && is_null($b[4])) {
-        return strnatcmp($a[0], $b[0]);
+        return mb_strtolower($a[0], 'UTF-8') <=> mb_strtolower($b[0], 'UTF-8');
       }
       if ($a[3] === "<img style=\"margin: 1px 0\" title=\"На рабочем месте\" src=\"img/in_work2.png\">" && $b[3] === "<img style=\"margin: 1px 0\" title=\"На рабочем месте\" src=\"img/in_work2.png\">") {
-        return strnatcmp($a[0], $b[0]);
+        return mb_strtolower($a[0], 'UTF-8') <=> mb_strtolower($b[0], 'UTF-8');
       }
       if ($a[3] === "<img title=\"Ушел домой\" src=\"img/go_home.png\">" && $b[3] === "<img title=\"Ушел домой\" src=\"img/go_home.png\">") {
-        return strnatcmp($a[0], $b[0]);
+        return mb_strtolower($a[0], 'UTF-8') <=> mb_strtolower($b[0], 'UTF-8');
       }
-      return strnatcmp($a[5], $b[5]);
+      return $a[5] <=> $b[5];
     }
 
     usort($employee_arr, "sort_employee");
 
-    $employee_arr = array_merge($bosses_arr, $employee_arr);
+    $employee_arr = array_merge($bosses_arr, $employee_arr); 
 
-    function get_phone_info($id_empl, $phone, $personal_phone, $corporate_phone) {
-      $tooltipId = 'u' . $id_empl . '-phones';
-      $phones = [];
-      $phones[] = "Телефон внутренний: " . htmlspecialchars($phone);
+    function get_phone_info($id_empl, $phone, $personal_phone, $corporate_phone, $email_empl) {
+      $tooltipId = 'u' . $id_empl . '-contacts';
+      $contacts = [];
+      $contacts[] = "Телефон внутренний: " . htmlspecialchars($phone);
 
       switch (true) {
-        case (!empty($corporate_phone) && !empty($personal_phone)):
-          $phones[] = "Мобильный: " . htmlspecialchars($personal_phone);
-          $phones[] = "Служебный мобильный: " . htmlspecialchars($corporate_phone);
+        case (!empty($corporate_phone) && !empty($personal_phone) && !empty($email_empl)):
+          $contacts[] = "Мобильный: " . htmlspecialchars($personal_phone);
+          $contacts[] = "Служебный мобильный: " . htmlspecialchars($corporate_phone);
+          $contacts[] = "Эл. почта: " . htmlspecialchars($email_empl);
           break;
 
         case (!empty($corporate_phone)):
-          $phones[] = "Служебный мобильный: " . htmlspecialchars($corporate_phone);
+          $contacts[] = "Служебный мобильный: " . htmlspecialchars($corporate_phone);
+          $contacts[] = "Эл. почта: " . htmlspecialchars($email_empl);
           break;
         
         case (!empty($personal_phone)): 
-          $phones[] = "Мобильный: " . htmlspecialchars($personal_phone);
+          $contacts[] = "Мобильный: " . htmlspecialchars($personal_phone);
+          $contacts[] = "Эл. почта: " . htmlspecialchars($email_empl);
+
+          break;
+
+        case (!empty($email_empl)):
+          $contacts[] = "Эл. почта: " . htmlspecialchars($email_empl);
           break;
       }
 
-      if (!empty($phones)) {
+      if (!empty($contacts)) {
         echo '<div class="phone_tooltip" data-phone-tooltip-target="' . $tooltipId . '">';
-        echo implode('<br>', $phones);
+        echo implode('<br>', $contacts);
         echo '</div>';
       }
     }
@@ -847,67 +842,6 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       }
       return $holidays;
     }
-
-    // function getHolidayAndWorkDates (mysqli $link, $formDate = null) {
-    //   if ($formDate === null) $formDate = date('Y-m-d');
-
-    //   $holidays = [];
-    //   $workdays = [];
-
-    //   $sql = "SELECT date, type FROM work_dayoff WHERE date >= ?";
-
-    //   if ($stmt = mysqli_prepare($link, $sql)) {
-    //     mysqli_stmt_bind_param($stmt, 's', $fromDate);
-    //     mysqli_stmt_execute($stmt);
-    //     $result = mysqli_stmt_get_result($stmt);
-
-    //     while ($row = mysqli_fetch_assoc($result)) {
-    //       $d = $row['date'];
-    //       $t = (int)$row['type'];
-    //       if ($t === 0) {
-    //         $holidays[] = $d;
-    //       } elseif ($t === 1) {
-    //         $workdays[] = $d;
-    //       }
-    //     }
-    //     mysqli_stmt_close($stmt);
-    //   }
-
-    //   return [$holidays, $workdays];
-    // }
-
-    // function getWorkingDaysBetween ($fromDate, $toDate, array $holidays = [], array $workdays = []) {
-    //   $start = new DateTime($fromDate);
-    //   $end = new DateTime($toDate);
-
-    //   if ($start >= $end) return 0;
-
-    //   $interval = new DateInterval('P1D');
-    //   $period = new DatePeriod($start, $interval, $end);
-
-    //   $workingDays = 0;
-    //   $hMap = array_flip($holidays);
-    //   $wMap = array_flip($workdays);
-
-    //   foreach ($period as $dt) {
-    //     $dateStr = $dt->format('Y-m-d');
-
-    //     if (isset($wMap[$dateStr])) {
-    //       continue;
-    //     }
-
-    //     if (isset($hMap[$dateStr])) {
-    //       continue;
-    //     }
-
-    //     $dow = (int)$dt->format('N');
-    //     if ($dow >= 6) continue;
-
-    //     $workingDays++;
-    //   }
-
-    //   return $workdays;
-    // }
 
     $holidayDates = getHolidayDates($link, $today);
 
@@ -1027,9 +961,10 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
       $corp_phone = $employee_arr[$i][8];
       $personal_id = $employee_arr[$i][9];
       $birth = $employee_arr[$i][10];
+      $email = $employee_arr[$i][11];
 
       echo "<div class=\"activity\">";
-      echo "<h5 class=\"activ_text\" data-phone-tooltip=\"u$personal_id-phones\">" . $name . "</h5>";
+      echo "<h5 class=\"activ_text\" data-phone-tooltip=\"u$personal_id-contacts\">" . $name . "</h5>";
 
       if ($dat_in == "") {
         echo "";
@@ -1038,13 +973,12 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
         echo "<h5 class=\"activ_time\">$start</h5>";
       }
       else {
-        usort($employee_arr, "sort_employee");
         echo "<h5 class=\"activ_time\">".$start." - ".$stop."</h5>";
       }
 
       echo "<div class=\"img_container\">";
 
-      if (!in_array($personal_id, [500, 501])) {
+      if (!in_array($personal_id, [400, 500, 501])) {
         if (!empty($birth) && $birth == date('m-d')) {
           echo "<img style=\"margin: 1px 0\" title=\"C днем рождения!\" src=\"img/birthday.png\">";          
         }
@@ -1110,7 +1044,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
 
       echo "</div>";
       echo "</div>";
-      get_phone_info($personal_id, $phone, $pers_phone, $corp_phone);
+      get_phone_info($personal_id, $phone, $pers_phone, $corp_phone, $email);
 
     }
     echo "</div>";
@@ -1217,5 +1151,5 @@ var timerId=setInterval( "update_clock()", 10000 );
 
 <?php
 echo "</body>";
-echo "</html>";  
+echo "</html>";
 ?>

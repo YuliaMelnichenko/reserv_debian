@@ -1,6 +1,14 @@
 body {
+    font-family: Arial !important;
+}
+
+body {
   margin: 0;
   padding: 0;
+}
+
+button {
+  cursor: pointer;
 }
 
 div.layer_div {
@@ -1067,7 +1075,7 @@ div.report_head_left_date_cert1 {
 div.report_head_left_date_rep_period {
   position: static;
   width: 100px;
-  height: 130px;
+  height: 160px;
   background: #dddddd;
   padding:0px;
   line-height: 20px; 
@@ -1076,7 +1084,7 @@ div.report_head_left_date_rep_period {
 div.report_head_left_date_rep_week {
   position: static;
   width: 100px;
-  height: 130px;
+  height: 160px;
   background: #eeee77;
   padding:0px;
   line-height: 35px; 
@@ -1085,7 +1093,7 @@ div.report_head_left_date_rep_week {
 div.report_head_left_date_rep_month {
   position: static;
   width: 100px;
-  height: 130px;
+  height: 160px;
   background: #77eeee;
   padding:0px;
   line-height: 35px; 
@@ -1094,7 +1102,7 @@ div.report_head_left_date_rep_month {
 div.report_head_left_date_rep_quarter {
   position: static;
   width: 100px;
-  height: 130px;
+  height: 160px;
   background: #77ee77;
   padding:0px;
   line-height: 35px;
@@ -1103,7 +1111,7 @@ div.report_head_left_date_rep_quarter {
 div.report_head_left_date_rep_year {
   position: static;
   width: 100px;
-  height: 130px;
+  height: 160px;
   background: #7777ee;
   padding:0px;
   line-height: 35px; 
@@ -1117,7 +1125,7 @@ div.report_body_head_summary {
   flex-direction: column;
   position: static;
   width: 165px;
-  height: 130px;
+  height: 160px;
   padding:0px;
 }
 
@@ -1965,10 +1973,7 @@ td.nopadding {
 
 td.nopadding_s {
   margin: 0px;
-  padding-top:1px;
-  padding-left:1px;
-  padding-right:1px;
-  padding-bottom:1px
+  padding:1px 5px;
 }
 
 td.nopadding_s2 {
@@ -3016,7 +3021,8 @@ h5.activ_time {
 }
 
 .leave_table_wrapper {
-  max-height: 400px;
+  min-height: 400px;
+  max-height: 650px;
   overflow-y: auto;
   margin-top: 10px;
 }
