@@ -798,19 +798,75 @@ function part_time_add( byAlert ){
     }
 
     if ( document.getElementById('add_time_range').checked ){
-      if ( document.getElementById('add_time_part_base_1') && document.getElementById('add_time_part_desc_1') &&  document.getElementById('add_time_part_start_date') && document.getElementById('add_time_part_stop_date') && document.getElementById('add_time_part_duration') && document.getElementById('exclude_weekend_holidays') ) {
+      if (
+        document.getElementById('add_time_part_base_1') &&
+        document.getElementById('add_time_part_desc_1') &&
+        document.getElementById('add_time_part_start_date') &&
+        document.getElementById('add_time_part_stop_date') &&
+        document.getElementById('add_time_part_start_time') &&
+        document.getElementById('add_time_part_stop_time') &&
+        document.getElementById('exclude_weekend_holidays')
+      ) {
         var add_time_part_base = document.getElementById('add_time_part_base_1').value;
         var add_time_part_desk = document.getElementById('add_time_part_desc_1').value;
         var add_time_part_start_date = document.getElementById('add_time_part_start_date').value;
         var add_time_part_stop_date = document.getElementById('add_time_part_stop_date').value;
-        var add_time_part_duration = document.getElementById('add_time_part_duration').value;
+        var add_time_part_start_time = document.getElementById('add_time_part_start_time').value;
+        var add_time_part_stop_time = document.getElementById('add_time_part_stop_time').value;
         var exclude_weekend_holidays = 0;
-        
+
         if ( document.getElementById('exclude_weekend_holidays').checked ){
           exclude_weekend_holidays = 1;
         }
 
-        $.post('ajax/add_time_part_range.php', {add_time_part_start_date: add_time_part_start_date, add_time_part_stop_date: add_time_part_stop_date, add_time_part_duration: add_time_part_duration, add_time_part_base: add_time_part_base, add_time_part_desk: add_time_part_desk, exclude_weekend_holidays: exclude_weekend_holidays, byAlert: byAlert }, RetSWT20);
+        if ( add_time_part_start_date == "" || add_time_part_stop_date == "" ){
+          alert( "Укажите дату начала и дату окончания диапазона!" );
+          return;
+        }
+
+        if ( add_time_part_start_time == "" || add_time_part_stop_time == "" ){
+          alert( "Укажите время начала и время окончания работ!" );
+          return;
+        }
+
+        if ( add_time_part_start_date > add_time_part_stop_date ){
+          alert( "Дата начала диапазона больше даты окончания диапазона!" );
+          return;
+        }
+
+        var add_time_part_start_dt = add_time_part_start_date + "T" + add_time_part_start_time;
+        var add_time_part_stop_dt = add_time_part_stop_date + "T" + add_time_part_stop_time;
+
+        if ( add_time_part_start_dt == add_time_part_stop_dt ){
+          alert( "Длительность работы равна 0!" );
+          return;
+        }
+
+        if ( add_time_part_start_dt > add_time_part_stop_dt ){
+          alert( "Дата и время начала работ больше даты и времени окончания работ!" );
+          return;
+        }
+
+        if ( add_time_part_start_time >= add_time_part_stop_time ){
+          alert( "В диапазоне дат время начала должно быть меньше времени окончания в каждом дне!" );
+          return;
+        }
+
+        $.post(
+          'ajax/add_time_part_range.php',
+          {
+            add_time_part_start_date: add_time_part_start_date,
+            add_time_part_stop_date: add_time_part_stop_date,
+            add_time_part_start_time: add_time_part_start_time,
+            add_time_part_stop_time: add_time_part_stop_time,
+            add_time_part_base: add_time_part_base,
+            add_time_part_desk: add_time_part_desk,
+            exclude_weekend_holidays: exclude_weekend_holidays,
+            byAlert: byAlert
+          },
+          RetSWT20
+        );
+
         function RetSWT20(dat20) {  
           if ( dat20 == 1 ){ 
             if ( byAlert == 1 ){
@@ -819,6 +875,9 @@ function part_time_add( byAlert ){
             else{
               show_add_time_table( 1 );
             }
+          }
+          else {
+            alert(dat20);
           }
         }
       }

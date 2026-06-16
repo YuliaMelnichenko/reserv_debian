@@ -1407,8 +1407,8 @@ report_window_head_single {
 
 #delay_explanation_add_time_part {
   position: fixed;
-  width: 1010px;
-  height: 350px;
+  width: 1065px;
+  height: 360px;
   left: 50%;
   top: 35%;
   margin-left: -425px;
@@ -2935,10 +2935,29 @@ h5.activ_time {
   display: none;
   border-collapse: collapse;
   margin-top: 15px;
-  width: 690px;
+  width: 785px;
   margin: 0;
   border:solid #d17125 1px;
   background-color:#eeeeee;
+}
+
+.merged-fio-cell {
+  font-weight: bold;
+  vertical-align: middle;
+  background: #eef5ff;
+  border-right: 1px solid #888888;
+}
+
+.employee-group-start td {
+  border-top: 2px solid #666666;
+}
+
+.employee-group-start:first-child td {
+  border-top: 1px solid #888888;
+}
+
+.employee-group-border {
+    border-top: 1,5px solid #666666 !important;
 }
 
 #leave_table th,
@@ -3099,4 +3118,20 @@ h5.activ_time {
 .work-status {
   height: 23px;
   width: 23px;
+}
+
+#add_time_part_start_time {
+  margin: 0 5px;
+}
+
+#add_time_part_stop_time {
+  margin: 0 5px;
+}
+
+.time_add_table {
+  margin: 0 10px;
+}
+
+.add_time_radio {
+  margin-bottom: 5px;
 }

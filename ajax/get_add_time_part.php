@@ -29,8 +29,10 @@ else
 $content = "<table cellpadding=\"0\" cellspacing=\"0\" border=0 bordercolor=\"#888888\">";
 $content .= "<tr>";
  $content .= "<td>";
- $content .= "<input checked type=\"radio\" style=\"background-color:#faefdd; border:0px;\" id=\"add_time_certain\" name=\"group2\"><h5 class=\"middle\">Задать единичную запись</h5><br>";
-  $content .= "<table cellpadding=\"0\" cellspacing=\"0\" border=1 bordercolor=\"#888888\">";
+ $content .= "<div class=\"add_time_radio\">";
+    $content .= "<input checked type=\"radio\" style=\"background-color:#faefdd; border:0px;\" id=\"add_time_certain\" name=\"group2\"><h5 class=\"middle\">Задать единичную запись</h5><br>";
+ $content .= "</div>";
+  $content .= "<table class=\"time_add_table\" cellpadding=\"0\" cellspacing=\"0\" border=1 bordercolor=\"#888888\">";
   $content .= "<tr>";
   $content .= "<td valign=\"middle\" align=\"center\" width = 320>"."<h5 class=\"bigDark\">Начало<br>(дата, время)"."</h5></td>";
   $content .= "<td valign=\"middle\" align=\"center\" width = 320>"."<h5 class=\"bigDark\">Окончание<br>(дата, время)"."</h5></td>";
@@ -66,12 +68,15 @@ $content .= "<tr>";
 $content .= "</tr>";
 $content .= "<tr>";
  $content .= "<td>";
- $content .= "<br><input type=\"radio\" style=\"background-color:#faefdd; border:0px;\" id=\"add_time_range\" name=\"group2\"><h5 class=\"middle\">Задать записи для диапазона дат</h5>";
-  $content .= "<br><table cellpadding=\"0\" cellspacing=\"0\" border=1 bordercolor=\"#888888\">";
+ $content .= "<div class=\"add_time_radio\">";
+    $content .= "<br><input type=\"radio\" style=\"background-color:#faefdd; border:0px;\" id=\"add_time_range\" name=\"group2\"><h5 class=\"middle\">Задать записи для диапазона дат</h5>";
+ $content .= "</div>";
+  $content .= "<table class=\"time_add_table\" cellpadding=\"0\" cellspacing=\"0\" border=1 bordercolor=\"#888888\">";
   $content .= "<tr>";
   $content .= "<td valign=\"middle\" align=\"center\" width = 140>"."<h5 class=\"bigDark\">Начало<br>(дата)"."</h5></td>";
   $content .= "<td valign=\"middle\" align=\"center\" width = 140>"."<h5 class=\"bigDark\">Окончание<br>(дата)"."</h5></td>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 110>"."<h5 class=\"bigDark\">Длительность<br>(чч:мм)"."</h5></td>";
+  $content .= "<td valign=\"middle\" align=\"center\" width = 130>"."<h5 class=\"bigDark\">Начало<br>(время)"."</h5></td>";
+  $content .= "<td valign=\"middle\" align=\"center\" width = 130>"."<h5 class=\"bigDark\">Окончание<br>(время)"."</h5></td>";
   $content .= "<td valign=\"middle\" align=\"center\" width = 320>"."<h5 class=\"bigDark\">Основание"."</h5></td>";
   $content .= "<td valign=\"middle\" align=\"center\" width = 310>"."<h5 class=\"bigDark\">Комментарий"."</h5></td>";
   $content .= "</tr>";
@@ -83,7 +88,11 @@ $content .= "<tr>";
   $content .= "<h5 class=\"middle\"></h5><input id=\"add_time_part_stop_date\" align=\"center\" type=\"date\">";
   $content .= "</td>";
   $content .= "<td valign=\"middle\" align=\"center\" width =130>";
-  $content .= "<h5 class=\"middle\"></h5><input id=\"add_time_part_duration\" align=\"center\" type=\"time\">";
+  $content .= "<h5 class=\"middle\"></h5><input id=\"add_time_part_start_time\" align=\"center\" type=\"time\">";
+  $content .= "</td>";
+
+  $content .= "<td valign=\"middle\" align=\"center\" width =130>";
+  $content .= "<h5 class=\"middle\"></h5><input id=\"add_time_part_stop_time\" align=\"center\" type=\"time\">";
   $content .= "</td>";
   $content .= "<td valign=\"middle\" align=\"center\" width = 310>";
   $content .= "<select id=\"add_time_part_base_1\" bgcolor=\"#888888\" >";
@@ -109,7 +118,7 @@ $content .= "</tr>";
 $content .= "</table><br>";  
 
 
-$content .= "<table cellpadding=\"0\" cellspacing=\"0\" border=0 width=1010>";  
+$content .= "<table cellpadding=\"0\" cellspacing=\"0\" border=0 width=1065>";  
 $content .= "<tr>";
 
 $content .= "<td bordercolor=\"#000000\" width=\"50%\" valign=\"middle\" align=\"left\">";

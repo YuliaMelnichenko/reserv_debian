@@ -318,7 +318,7 @@ $user_defaultStartTime = $_SESSION['ss_defaultStartTime'];
 $user_allowedDelay = $_SESSION['ss_allowedDelay'];
 $user_defaultStartTimeWithDelay = $_SESSION['ss_defaultStartTimeWithDelay'];
 $user_defaultStartTimeWithDelayVal = $_SESSION['ss_defaultStartTimeWithDelayVal'];
-$user_dayTransitionTime = $_SESSION['$ss_dayTransitionTime'];
+$user_dayTransitionTime = isset($_SESSION['ss_dayTransitionTime']) ? $_SESSION['ss_dayTransitionTime'] : "06:00:00";
 $user_remoteWork = $_SESSION['ss_RemoteWork'];
 $visiting_id = $_SESSION['ss_visiting_ID'];
 $isThereDelayVal = $_SESSION['ss_there_is_delay'];
@@ -328,7 +328,29 @@ $dateArr = datetimestr_to_day_start_stop_DT_ex_str( $currentDate, $user_dayTrans
 $startDTStr = $dateArr[0];
 $stopDTStr = $dateArr[1];    
 
-$query = mysqli_query($link, "SELECT * FROM visiting WHERE user_id = '$userID' AND in_dt >= '$startDTStr' AND in_dt < '$stopDTStr'");
+$openVisitQuery = mysqli_query($link, "
+  SELECT *
+  FROM visiting
+  WHERE user_id = '$userID'
+    AND state != 0
+  ORDER BY ID DESC
+  LIMIT 1
+");
+
+if ($openVisitQuery && mysqli_num_rows($openVisitQuery) > 0) {
+  $query = $openVisitQuery;
+}
+else {
+  $query = mysqli_query($link, "
+    SELECT *
+    FROM visiting
+    WHERE user_id = '$userID'
+      AND in_dt >= '$startDTStr'
+      AND in_dt < '$stopDTStr'
+    ORDER BY ID DESC
+    LIMIT 1
+  ");
+}
  
 $btnWidth = 616;
 $btnHeight = 40;

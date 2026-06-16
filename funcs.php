@@ -3049,29 +3049,24 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
   $query = mysqli_query($link, $sqlQuery ); 
 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }                     
 
   $results = Array();
  
-  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-  {
+  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
     $result = Array();
       
     $START_DT_VAL = $row["START_DT"];
     $STOP_DT_VAL = $row["STOP_DT"];
 
-    if ( $restrictDTRangeToCurrentDay == 1 )
-    {
-      if ( strtotime($START_DT_VAL) <= strtotime($startDTStr) )
-      {
-          $START_DT_VAL = $startDTStr;
+    if ( $restrictDTRangeToCurrentDay == 1 ){
+      if ( strtotime($START_DT_VAL) <= strtotime($startDTStr) ){
+        $START_DT_VAL = $startDTStr;
       }
-      if ( strtotime($STOP_DT_VAL) >= strtotime($stopDTStr) )
-      {
-          $START_DT_VAL = $stopDTStr;
+      if ( strtotime($STOP_DT_VAL) >= strtotime($stopDTStr) ){
+        $STOP_DT_VAL = $stopDTStr;
       }
     }
 

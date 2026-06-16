@@ -49,7 +49,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
 
     $type = $_GET['type'] ?? 'Отпуск';
 
-    $stmt = mysqli_prepare($link, "SELECT * FROM staff_leaves WHERE event = ? AND stop_date >= CURDATE() ORDER BY stop_date DESC");
+    $stmt = mysqli_prepare($link, "SELECT * FROM staff_leaves WHERE event = ? AND stop_date >= CURDATE() ORDER BY fio ASC, start_date ASC, stop_date ASC");    
     mysqli_stmt_bind_param($stmt, 's', $type);
     mysqli_stmt_execute($stmt);
 
@@ -76,11 +76,126 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
     exit;
 }
 
+function getArchivePeriodDates($periodType, $startDateManual, $stopDateManual) {
+    $currDate = date('Y-m-d');
+
+    if ($periodType == 0) {
+        return ["", ""];
+    }
+
+    if ($periodType == 1) {
+        $weekDay = (int)date('N', strtotime($currDate));
+        $start = date('Y-m-d', strtotime("-" . ($weekDay - 1) . " days", strtotime($currDate)));
+
+        return [$start, $currDate];
+    }
+
+    if ($periodType == 2) {
+        return [date('Y-m-01', strtotime($currDate)), $currDate];
+    }
+
+    if ($periodType == 3) {
+        $prevMonthDate = strtotime('first day of previous month', strtotime($currDate));
+
+        return [
+            date('Y-m-01', $prevMonthDate),
+            date('Y-m-t', $prevMonthDate)
+        ];
+    }
+
+    if ($periodType == 4) {
+        $month = (int)date('n', strtotime($currDate));
+        $year = (int)date('Y', strtotime($currDate));
+
+        if ($month >= 1 && $month <= 3) {
+            return ["$year-01-01", $currDate];
+        }
+
+        if ($month >= 4 && $month <= 6) {
+            return ["$year-04-01", $currDate];
+        }
+
+        if ($month >= 7 && $month <= 9) {
+            return ["$year-07-01", $currDate];
+        }
+
+        return ["$year-10-01", $currDate];
+    }
+
+    if ($periodType == 5) {
+        $month = (int)date('n', strtotime($currDate));
+        $year = (int)date('Y', strtotime($currDate));
+        $currentQuarter = (int)ceil($month / 3);
+        $previousQuarter = $currentQuarter - 1;
+
+        if ($previousQuarter <= 0) {
+            $previousQuarter = 4;
+            $year--;
+        }
+
+        $startMonth = ($previousQuarter - 1) * 3 + 1;
+        $start = sprintf('%04d-%02d-01', $year, $startMonth);
+        $stop = date('Y-m-t', strtotime($start . ' +2 months'));
+
+        return [$start, $stop];
+    }
+
+    if ($periodType == 7) {
+        return [$startDateManual, $stopDateManual];
+    }
+
+    return ["", ""];
+}
+
 if (isset($_GET['action']) && $_GET['action'] === 'archive') {
     header('Content-Type: application/json');
 
-    $query = "SELECT * FROM staff_leaves WHERE stop_date < CURDATE() ORDER BY fio ASC, stop_date DESC";
-    $result = mysqli_query($link, $query);
+    $employeeId = intval($_GET['employee_id'] ?? 0);
+    $event = $_GET['event'] ?? '';
+    $periodType = intval($_GET['period_type'] ?? 0);
+    $startDateManual = $_GET['start_date'] ?? '';
+    $stopDateManual = $_GET['stop_date'] ?? '';
+
+    list($filterStartDate, $filterStopDate) = getArchivePeriodDates($periodType, $startDateManual, $stopDateManual);
+
+    $where = ["stop_date < CURDATE()"];
+    $params = [];
+    $types = "";
+
+    if ($employeeId > 0) {
+        $where[] = "user_id = ?";
+        $params[] = $employeeId;
+        $types .= "i";
+    }
+
+    if ($event !== '') {
+        $where[] = "event = ?";
+        $params[] = $event;
+        $types .= "s";
+    }
+
+    if ($filterStartDate !== '' && $filterStopDate !== '') {
+        $where[] = "start_date <= ? AND stop_date >= ?";
+        $params[] = $filterStopDate;
+        $params[] = $filterStartDate;
+        $types .= "ss";
+    }
+
+    $sql = "SELECT * FROM staff_leaves WHERE " . implode(" AND ", $where) . " ORDER BY fio ASC, start_date DESC, stop_date DESC";
+
+    $stmt = mysqli_prepare($link, $sql);
+
+    if (!$stmt) {
+        echo json_encode(['error' => mysqli_error($link)]);
+        exit;
+    }
+
+    if (count($params) > 0) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
 
     if (!$result) {
         echo json_encode(['error' => mysqli_error($link)]);
@@ -88,10 +203,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'archive') {
     }
 
     $rows = [];
-    $count = 0;
 
     while ($row = mysqli_fetch_assoc($result)) {
-        $count ++;
         $start = strtotime($row['start_date']);
         $stop = strtotime($row['stop_date']);
         $days = round(($stop - $start) / 86400 + 1);
@@ -102,9 +215,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'archive') {
             'start_date' => $row['start_date'],
             'stop_date' => $row['stop_date'],
             'event' => $row['event'],
-            'total_days' => $days 
+            'total_days' => $days
         ];
     }
+
     echo json_encode($rows);
 
     exit;
@@ -245,7 +359,7 @@ include_once __DIR__ . "/navigate.php";
 
 echo "</td>";
    
-$wholeWidth = 705;
+$wholeWidth = 800;
 
 echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
 
@@ -263,6 +377,44 @@ echo "<div id=\"event_buttons\">";
             echo "<img src=\"img/plus.png\" alt=\"Добавить запись\" height=\"24\">";
         echo "</button>";
     echo "</div>";
+echo "</div>";
+echo "<div id=\"archive_filters\" style=\"display:none; margin: 8px 0; padding: 6px; background:#eef5ff; border:1px solid #888888;\">";
+
+    echo "<span style=\"font-family: Arial,sans; font-size: 13px; font-weight: 700; margin-right:5px;\">Сотрудник:</span>";
+    echo "<select id=\"archive_employee_filter\" class=\"flat\" style=\"width:160px; margin-right:15px;\">";
+        echo "<option value=\"0\">Все сотрудники</option>";
+        foreach (getEmployees($link) as $id => $fio) {
+            echo "<option value=\"" . intval($id) . "\">" . htmlspecialchars($fio) . "</option>";
+        }
+    echo "</select>";
+
+    echo "<span style=\"font-family: Arial,sans; font-size: 13px; font-weight: 700; margin-right:5px;\">Дата:</span>";
+    echo "<select id=\"archive_period_filter\" class=\"flat\" style=\"width:170px; margin-right:15px;\" onchange=\"toggleArchiveManualPeriod();\">";
+        echo "<option value=\"0\">Все даты</option>";
+        echo "<option value=\"1\">С начала недели</option>";
+        echo "<option value=\"2\">С начала месяца</option>";
+        echo "<option value=\"3\">За предыдущий месяц</option>";
+        echo "<option value=\"4\" selected>С начала квартала</option>";
+        echo "<option value=\"5\">За предыдущий квартал</option>";
+        echo "<option value=\"7\">Задать вручную</option>";
+    echo "</select>";
+
+    echo "<span id=\"archive_manual_period\" style=\"display:none; margin-right:8px;\">";
+        echo "<input id=\"archive_start_date_filter\" type=\"date\" style=\"width:110px;\">";
+        echo " - ";
+        echo "<input id=\"archive_stop_date_filter\" type=\"date\" style=\"width:110px;\">";
+    echo "</span>";
+
+    echo "<span style=\"font-family: Arial,sans; font-size: 13px; font-weight: 700; margin-right:5px;\">Событие:</span>";
+    echo "<select id=\"archive_event_filter\" class=\"flat\" style=\"width:130px; margin-right:15px;\">";
+        echo "<option value=\"\">Все события</option>";
+        echo "<option value=\"Отпуск\">Отпуска</option>";
+        echo "<option value=\"Больничный\">Больничные</option>";
+        echo "<option value=\"Командировка\">Командировки</option>";
+    echo "</select>";
+
+    echo "<button class=\"button_style\" style=\"font-size: 90%; width:90px; height:23px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"loadArchive();\">Обновить</button>";
+
 echo "</div>";
 ?>
 
@@ -385,7 +537,92 @@ echo "</div>";
         });
     });
 
+    function renderLeaveRowsWithMergedNames(tbody, data) {
+        tbody.innerHTML = "";
+
+        if (!Array.isArray(data) || data.length === 0) {
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+                <td colspan="6" align="center">
+                    Нет записей
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+            return;
+        }
+
+        const groupedRows = groupRowsByEmployeeName(data);
+
+        groupedRows.forEach(group => {
+            group.rows.forEach((row, rowIndex) => {
+                const tr = document.createElement('tr');
+
+                const borderClass = rowIndex === 0 ? 'employee-group-border' : '';
+
+                let nameCell = "";
+
+                if (rowIndex === 0) {
+                    nameCell = `
+                        <td rowspan="${group.rows.length}" valign="middle" class="merged-fio-cell ${borderClass}">
+                            ${escapeHtml(group.name)}
+                        </td>
+                    `;
+                }
+
+                tr.innerHTML = `
+                    ${nameCell}
+                    <td class="${borderClass}">${formatDate(row.start_date)}</td>
+                    <td class="${borderClass}">${formatDate(row.stop_date)}</td>
+                    <td class="${borderClass}">${row.total_days}</td>
+                    <td class="${borderClass}">${escapeHtml(row.event)}</td>
+                    <td class="${borderClass}">
+                        <button id="btn_red" onclick="editLeave(${row.id})" title="Редактировать">
+                            <img src="img/red2.png" alt="Редактировать" width="20" height="20">
+                        </button>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        });
+    }
+
+    function groupRowsByEmployeeName(data) {
+        const groups = [];
+        let currentGroup = null;
+
+        data.forEach(row => {
+            const name = row.name || "";
+
+            if (currentGroup === null || currentGroup.name !== name) {
+                currentGroup = {
+                    name: name,
+                    rows: []
+                };
+
+                groups.push(currentGroup);
+            }
+
+            currentGroup.rows.push(row);
+        });
+
+        return groups;
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     function loadLeaves (type) {
+        document.getElementById('archive_filters').style.display = 'none';
+
         document.querySelectorAll('#event_buttons button.event-switch').forEach(btn => {
             btn.classList.remove('active');
         });
@@ -407,25 +644,7 @@ echo "</div>";
                     const tbody = table.querySelector('tbody');
                     tbody.innerHTML = "";
 
-                    data.forEach(row => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>${row.name}</td>
-                            <td>${formatDate(row.start_date)}</td>
-                            <td>${formatDate(row.stop_date)}</td>
-                            <td>${row.total_days}</td>
-                            <td>${row.event}</td>
-                            <td>
-                                <button id="btn_red" onclick='editLeave(${row.id})' title="Редактировать">
-                                    <img src="img/red2.png" alt="Редактировать" width="20" height="20">
-                                </button>
-                                <button id="btn_del" onclick='confirmDelete(${row.id})' title="Удалить запись">
-                                    <img src="img/delete.png" alt="Удалить запись" width="20" height="20">
-                                </button>
-                            </td>
-                        `
-                        tbody.appendChild(tr);
-                    });
+                    renderLeaveRowsWithMergedNames(tbody, data);
                     table.style.display = 'table';
                 } catch (err) {
                     console.error('Ошибка JSON: ', err);
@@ -511,37 +730,58 @@ echo "</div>";
     }
 
     function loadArchive() {
+        currentType = 'Архив';
+
         document.querySelectorAll('#event_buttons button.event-switch').forEach(btn => {
             btn.classList.remove('active');
         });
 
         document.getElementById('btn_archive').classList.add('active');
+        document.getElementById('archive_filters').style.display = 'block';
 
-        fetch('staff_leaves.php?action=archive')
+        const employeeId = document.getElementById('archive_employee_filter').value;
+        const event = document.getElementById('archive_event_filter').value;
+        const periodType = document.getElementById('archive_period_filter').value;
+        const startDate = document.getElementById('archive_start_date_filter').value;
+        const stopDate = document.getElementById('archive_stop_date_filter').value;
+
+        if (periodType == 7) {
+            if (!startDate || !stopDate) {
+                alert('Укажите дату начала и дату окончания периода.');
+                return;
+            }
+
+            if (startDate > stopDate) {
+                alert('Дата начала периода не может быть позже даты окончания.');
+                return;
+            }
+        }
+
+        const params = new URLSearchParams({
+            action: 'archive',
+            employee_id: employeeId,
+            event: event,
+            period_type: periodType,
+            start_date: startDate,
+            stop_date: stopDate
+        });
+
+        fetch('staff_leaves.php?' + params.toString())
             .then(res => res.text())
             .then(text => {
                 try {
                     const data = JSON.parse(text);
+
+                    if (data.error) {
+                        alert('Ошибка: ' + data.error);
+                        return;
+                    }
+
                     const table = document.getElementById('leave_table');
                     const tbody = table.querySelector('tbody');
                     tbody.innerHTML = "";
 
-                    data.forEach(row => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>${row.name}</td>
-                            <td>${formatDate(row.start_date)}</td>
-                            <td>${formatDate(row.stop_date)}</td>
-                            <td>${row.total_days}</td>
-                            <td>${row.event}</td>
-                            <td>
-                                <button id="btn_red" onclick='editLeave(${row.id})' title="Редактировать">
-                                    <img src="img/red2.png" alt="Редактировать" width="20" height="20">
-                                </button>
-                            </td>
-                        `
-                        tbody.appendChild(tr);
-                    });
+                    renderLeaveRowsWithMergedNames(tbody, data);
 
                     table.style.display = 'table';
                 } catch (err) {
@@ -549,6 +789,17 @@ echo "</div>";
                     console.warn('Ответ сервера: ', text);
                 }
             });
+    }
+
+    function toggleArchiveManualPeriod() {
+        const periodType = document.getElementById('archive_period_filter').value;
+        const manualPeriod = document.getElementById('archive_manual_period');
+
+        if (periodType == 7) {
+            manualPeriod.style.display = 'inline';
+        } else {
+            manualPeriod.style.display = 'none';
+        }
     }
 
     function closeModal() {

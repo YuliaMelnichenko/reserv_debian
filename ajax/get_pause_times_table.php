@@ -39,10 +39,18 @@ $query = mysqli_query($link, "SELECT * FROM ADD_TIME
                       WHERE   
                       USERID='$userID_'
                         AND
-                      STOP_DT > ADDDATE( '$currentDate', INTERVAL $paramIntSign DAY ) 
+                      (
+                        STOP_DT > ADDDATE('$currentDate', INTERVAL -$paramInt DAY)
+                        OR STOP_DT = '0000-00-00 00:00:00'
+                      )
                         AND 
                       pause_mode = 1
                       ORDER BY ID DESC"); 
+
+if (!$query) {
+  echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+  exit;
+}
 
 while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
   $ta_id = $row["ID"];
@@ -68,7 +76,13 @@ while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
     $colorMode = 0;
   }
                           
-  $time_duration = format_time_( strtotime($ta_stop_date) - strtotime($ta_start_date) );
+  if (is_time_defined($ta_stop_date) == 1) {
+    $time_duration = format_time_(strtotime($ta_stop_date) - strtotime($ta_start_date));
+  } else {
+    $timeRes = get_current_datetime_in_timezone();
+    $time_duration = format_time_(strtotime($timeRes[1]) - strtotime($ta_start_date));
+    $ta_stop_date = "Активна";
+  }
   	
   echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
   echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">$ta_start_date</h5></td>";
