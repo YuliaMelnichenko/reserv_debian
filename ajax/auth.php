@@ -50,7 +50,7 @@ else
     $retArr = get_current_datetime_in_timezone();
     $_SESSION['ss_UserTimeZoneStr'] = $retArr[5];
     $ss_dayTransitionTime = $row["dayTransitionTime"];
-    $_SESSION['$ss_dayTransitionTime'] = $ss_dayTransitionTime;
+    $_SESSION['ss_dayTransitionTime'] = $ss_dayTransitionTime;
     
 
     $ss_RemoteWork = $row["remoteWork"];
@@ -82,7 +82,7 @@ else
     unset($_SESSION['ss_delay_show_save']);          
     unset($_SESSION['ss_UserTimeZoneMins']);
     unset($_SESSION['ss_UserTimeZoneStr']);
-    unset($_SESSION['$ss_dayTransitionTime']);
+    unset($_SESSION['ss_dayTransitionTime']);
     unset($_SESSION['ss_sessid']); 
     unset($_SESSION['ss_RemoteWork']);
     unset($_SESSION['ss_RemoteWorkStr']);

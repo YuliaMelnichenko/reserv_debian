@@ -13,7 +13,6 @@ include_once __DIR__ . "/start.php";
 
 var timerIdSessValid=setInterval( "check_sess()", 500000 );
 
-
 function check_sess(){
   $.post('ajax/check_session_valid.php', RetSWT);
   function RetSWT(dat) {
@@ -185,10 +184,17 @@ function reg_out_work()
   switch_day_state( 1 );
 }
 
-function reg_eat_start () {
+function reg_eat_start() {
   switch_day_state(1, function() {
     $.get('ajax/set_lunch.php', function(html) {
-      $('body').append(html);
+      $('#lunchPauseFullScreen').remove();
+
+      if ($.trim(html) !== '') {
+        $('body').append(html);
+      }
+      else {
+        get_time_registration_div_content();
+      }
     });
   });
 }
@@ -204,8 +210,15 @@ $(document).ready(function() {
   $.get('ajax/get_current_state.php', function(state) {
     if (parseInt(state, 10) === 3) {
       $.get('ajax/set_lunch.php', function(html) {
-        $('body').append(html);
+        $('#lunchPauseFullScreen').remove();
+
+        if ($.trim(html) !== '') {
+          $('body').append(html);
+        }
       });
+    }
+    else {
+      $('#lunchPauseFullScreen').remove();
     }
   });
 });
@@ -258,13 +271,10 @@ function close_add_sport_time()
   if ( document.getElementById('delay_explanation_sport_time') ){ document.getElementById('delay_explanation_sport_time').style.display='none'; }
 }
 
-function enter_out_time()
-{
-    $.post('ajax/get_out_time.php', RetSWT1);
-  function RetSWT1(dat1) 
-  {
-    if ( document.getElementById('delay_out_time') )
-    {
+function enter_out_time(){
+  $.post('ajax/get_out_time.php', RetSWT1);
+  function RetSWT1(dat1) {
+    if ( document.getElementById('delay_out_time') ){
       document.getElementById('delay_out_time').innerHTML=dat1;
       document.getElementById('delay_out_time').style.display='flex';
     }
@@ -383,14 +393,14 @@ include_once __DIR__ . "/funcs.php";
 include __DIR__ . "/php_tori/connect.php";
 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
-$user_dayTransitionTime = $_SESSION['$ss_dayTransitionTime'];
+$user_dayTransitionTime = isset($_SESSION['ss_dayTransitionTime'])
+  ? $_SESSION['ss_dayTransitionTime']
+  : "06:00:00";
 
 $timeArr = datetimestr_to_day_start_stop_DT_ex_str( $currentDate, $user_dayTransitionTime );
 
-$startDTOuter = $timeArr[0];
-$stopDTOuter = $timeArr[1];
-$transTimeBefore = $timeArr[2];
-$transTimeAfter = $timeArr[3];
+$startDTOuter = isset($timeArr[0]) ? $timeArr[0] : "";
+$stopDTOuter = isset($timeArr[1]) ? $timeArr[1] : "";
 
 echo "<div id=\"layer_div\" class=\"layer_div\">";
 echo "</div>";
@@ -487,7 +497,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     $user_defaultStartTimeWithDelay = $_SESSION['ss_defaultStartTimeWithDelay'];
     $user_RemoteWork = $_SESSION['ss_RemoteWork'];
     $user_RemoteWorkStr = $_SESSION['ss_RemoteWorkStr'];
-    $user_dayTransitionTime = $_SESSION['$ss_dayTransitionTime'];
+    $user_dayTransitionTime = $_SESSION['ss_dayTransitionTime'];
 
     $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
@@ -496,8 +506,12 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
     $startDTStr = $dateArr[0];
     $stopDTStr = $dateArr[1];    
     
-    $_SESSION['ss_startDTStr'] = $startDTStr;
-    $_SESSION['ss_stopDTStr'] = $stopDTStr;
+    sync_time_registration_session_by_period($link, $user_id, $startDTStr, $stopDTStr);
+
+    echo "<script type=\"text/javascript\">";
+    echo "window.toriStopDTStr = " . json_encode($stopDTStr) . ";";
+    echo "console.log('toriStopDTStr from PHP:', window.toriStopDTStr);";
+    echo "</script>";
     
     $_date = date('Y-m-d');
     $empty_dt = "0000-00-00 00:00:00";

@@ -1,3 +1,38 @@
+function scheduleTimeRegistrationPeriodReload() {
+  return;
+
+  if (!window.toriStopDTStr) {
+    return;
+  }
+
+  var stopTime = new Date(window.toriStopDTStr.replace(' ', 'T')).getTime();
+
+  if (!stopTime || isNaN(stopTime)) {
+    console.log('Некорректный toriStopDTStr:', window.toriStopDTStr);
+    return;
+  }
+
+  var now = Date.now();
+  var delay = stopTime - now + 3000;
+
+  console.log('toriStopDTStr:', window.toriStopDTStr);
+  console.log('reload delay ms:', delay);
+
+  if (delay <= 0) {
+    console.log('Период уже завершен, автоперезагрузка отменена.');
+    return;
+  }
+
+  if (delay > 86400000) {
+    console.log('До конца периода больше суток, автоперезагрузка отменена.');
+    return;
+  }
+
+  setTimeout(function() {
+    location.reload();
+  }, delay);
+}
+
 function unset_cookie(){
   $.post('ajax/delete_cookie.php', RetSWT1 );
   function RetSWT1(dat1) {
@@ -106,34 +141,78 @@ function set_add_time_notificationc_count(){
   }
 }
 
-function save_changes_time ( userID, currentDayNumber ) {
+function save_changes_time(userID) {
   if (document.getElementById('add_stop_time')) {
-    var stop_working = document.getElementById('add_stop_time').value;
-    $.post('ajax/set_change_out_time.php', { add_stop_time: stop_working, userID: userID, currentDayNumber: currentDayNumber}, RetSWT1);
-    function RetSWT1(dat1) { 
-      if ( dat1 == 2 ) {
-        alert( "Время ухода изменено." );
-        location.reload();
-      }
-      else {
-        alert( "Произошла ошибка." );
-      }
+    var stopWorking = document.getElementById('add_stop_time').value;
+    var visitId = document.getElementById('change_visit_id')
+      ? document.getElementById('change_visit_id').value
+      : 0;
+
+    if (!visitId || visitId <= 0) {
+      alert("Не найдена запись рабочего дня для изменения.");
+      return;
     }
+
+    if (!stopWorking) {
+      alert("Укажите дату и время ухода.");
+      return;
+    }
+
+    $.post(
+      'ajax/set_change_out_time.php',
+      {
+        visit_id: visitId,
+        add_stop_time: stopWorking
+      },
+      function(dat1) {
+        if (dat1 == 2) {
+          alert("Время ухода изменено.");
+          location.reload();
+        }
+        else {
+          alert(dat1);
+        }
+      }
+    );
   }
+
   if (document.getElementById('add_stop_eat_time')) {
-    var stop_eat = document.getElementById('add_stop_eat_time').value;
-    $.post('ajax/set_change_stop_eat.php', { add_stop_eat_time: stop_eat, userID: userID, currentDayNumber: currentDayNumber}, RetSWT2);
-    function RetSWT2(dat2) { 
-      if ( dat2 == 2 ) {
-        alert( "Время изменено." );
-        location.reload();
-      }
-      else {
-        alert( "Произошла ошибка." );
-      }
+    var stopEat = document.getElementById('add_stop_eat_time').value;
+    var visitIdEat = document.getElementById('change_visit_id')
+      ? document.getElementById('change_visit_id').value
+      : 0;
+
+    if (!visitIdEat || visitIdEat <= 0) {
+      alert("Не найдена запись рабочего дня для изменения.");
+      return;
     }
+
+    if (!stopEat) {
+      alert("Укажите дату и время окончания обеда.");
+      return;
+    }
+
+    $.post(
+      'ajax/set_change_stop_eat.php',
+      {
+        visit_id: visitIdEat,
+        add_stop_eat_time: stopEat
+      },
+      function(dat2) {
+        if (dat2 == 2) {
+          alert("Время изменено.");
+          location.reload();
+        }
+        else {
+          alert(dat2);
+        }
+      }
+    );
   }
-  if ( document.getElementById('delay_out_time') ){ document.getElementById('delay_out_time').style.display='none'; }
+
+  if (document.getElementById('delay_out_time')) {
+    document.getElementById('delay_out_time').style.display = 'none';
+  }
 }
 
 function show_entrance_page(){

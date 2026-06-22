@@ -45,6 +45,66 @@ function get_current_datetime_in_timezone(){
   return array($valid, $datetime, $dateStr, $timeStr, $timeZoneMinsSrc, $timeZoneStr);
 }
 
+function sync_time_registration_session_by_period($link, $userID, $startDTStr, $stopDTStr){
+  include __DIR__ . "/php_tori/connect.php";
+
+  $userID = mysqli_real_escape_string($link, $userID);
+  $startDTStr = mysqli_real_escape_string($link, $startDTStr);
+  $stopDTStr = mysqli_real_escape_string($link, $stopDTStr);
+
+  $oldStart = isset($_SESSION['ss_startDTStr']) ? $_SESSION['ss_startDTStr'] : "";
+  $oldStop = isset($_SESSION['ss_stopDTStr']) ? $_SESSION['ss_stopDTStr'] : "";
+
+  if ($oldStart != "" && $oldStop != "" && ($oldStart != $startDTStr || $oldStop != $stopDTStr)) {
+    unset($_SESSION['time_registration_cache']);
+    unset($_SESSION['time_registration_div']);
+  }
+
+  $_SESSION['ss_startDTStr'] = $startDTStr;
+  $_SESSION['ss_stopDTStr'] = $stopDTStr;
+
+$maxOpenShiftHours = 20;
+
+$currentDateTimeResult = get_current_datetime_in_timezone();
+$currentDateTime = $currentDateTimeResult[1];
+
+$query = mysqli_query($link, "
+  SELECT ID, state
+  FROM visiting
+  WHERE user_id = '$userID'
+    AND (
+      (
+        in_dt >= '$startDTStr'
+        AND in_dt < '$stopDTStr'
+      )
+      OR
+      (
+        state != 0
+        AND in_dt < '$startDTStr'
+        AND TIMESTAMPDIFF(HOUR, in_dt, '$currentDateTime') <= $maxOpenShiftHours
+      )
+    )
+  ORDER BY in_dt DESC, ID DESC
+  LIMIT 1
+");
+
+  if (!$query) {
+    echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+    return;
+  }
+
+  if (mysqli_num_rows($query) == 0) {
+    $_SESSION['ss_state'] = 1;
+    $_SESSION['ss_visiting_ID'] = 0;
+    return;
+  }
+
+  $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
+
+  $_SESSION['ss_state'] = (int)$row["state"];
+  $_SESSION['ss_visiting_ID'] = (int)$row["ID"];
+}
+
 function get_splited_current_date_time_in_timezone()
 {
     $retarr = get_current_datetime_in_timezone();
@@ -147,89 +207,80 @@ function datetime_to_time_str( $indatetime )
     return $retStr;
 }
 
-function datetimestr_to_day_start_stop_DT_ex_str( $inputDatetimeStr, $dayTransitionTimeStr )
+function datetimestr_to_day_start_stop_DT_ex_str($dateTimeStr, $dayTransitionTime)
 {
-    $inputDatePartStr = substr( $inputDatetimeStr, 0, 10);
+  if ($dayTransitionTime == "" || $dayTransitionTime == "NDF") {
+    $dayTransitionTime = "00:00:00";
+  }
 
-    $transitionTimeTempStr = $inputDatePartStr." ".$dayTransitionTimeStr;
+  if (strlen($dayTransitionTime) == 5) {
+    $dayTransitionTime .= ":00";
+  }
 
-    $datetimeEndStr = date("H:i:s", strtotime($transitionTimeTempStr));      
+  $currentTimestamp = strtotime($dateTimeStr);
 
-    $transSec = time_to_second( $datetimeEndStr );         
+  if ($currentTimestamp === false) {
+    $currentTimestamp = time();
+  }
 
-    if ( strtotime( $inputDatetimeStr ) > strtotime( $transitionTimeTempStr ) )
-    {
-        $datetimeBeginStr = $dayTransitionTimeStr;
-        $datetimeEndStr = date("H:i:s", strtotime($dayTransitionTimeStr."+ 23 hour + 59 minute + 59 second"));
+  $currentDate = date("Y-m-d", $currentTimestamp);
+  $todayStartTimestamp = strtotime($currentDate . " " . $dayTransitionTime);
 
-        $startDTOuter = $inputDatePartStr." ".$datetimeBeginStr;       
-        $stopDTOuter = $inputDatePartStr." ".$datetimeEndStr;
+  if ($todayStartTimestamp === false) {
+    $todayStartTimestamp = strtotime($currentDate . " 00:00:00");
+  }
 
-        if ( $transSec > 0 ) 
-        {
-          $stopDTOuter = date("Y-m-d H:i:s", strtotime($stopDTOuter."+ 1 day"));
-        }
-        else
-        {
-          $stopDTOuter = date("Y-m-d H:i:s", strtotime($stopDTOuter));
-        }
+  if ($currentTimestamp < $todayStartTimestamp) {
+    $startTimestamp = strtotime("-1 day", $todayStartTimestamp);
+  }
+  else {
+    $startTimestamp = $todayStartTimestamp;
+  }
 
-        $transTimeBefore = date("Y-m-d H:i:s", strtotime($startDTOuter."- 1 second"));  
-        $transTimeAfter = date("Y-m-d H:i:s", strtotime($stopDTOuter."- 23 hour - 59 minute - 59 second"));
+  $stopTimestamp = strtotime("+1 day", $startTimestamp) - 1;
 
-        $differTime = strtotime( $inputDatetimeStr ) - strtotime( $transitionTimeTempStr );
-    }
-    else
-    {
-        $datetimeBeginStr = $dayTransitionTimeStr;
-        $datetimeEndStr = date("H:i:s", strtotime($dayTransitionTimeStr."+ 23 hour + 59 minute + 59 second"));
-
-        $startDTOuter = $inputDatePartStr." ".$datetimeBeginStr;       
-        $stopDTOuter = $inputDatePartStr." ".$datetimeEndStr;
-
-        $startDTOuter = date("Y-m-d H:i:s", strtotime($startDTOuter."- 1 day"));
-
-        $transTimeBefore = date("Y-m-d H:i:s", strtotime($startDTOuter."+ 23 hour + 59 minute + 59 second"));  
-        $transTimeAfter = date("Y-m-d H:i:s", strtotime($stopDTOuter."- 23 hour - 59 minute - 59 second"));
-
-        $differTime = strtotime( $transitionTimeTempStr ) - strtotime( $inputDatetimeStr );
-    }
-
-    $differTimeStr = gmdate("H:i:s", $differTime );  
-
-    return array( $startDTOuter, $stopDTOuter, $transTimeBefore, $transTimeAfter, $differTimeStr );
+  return array(
+    date("Y-m-d H:i:s", $startTimestamp),
+    date("Y-m-d H:i:s", $stopTimestamp)
+  );
 }
 
-function datetimestr_to_day_start_stop_DT_ex_str_idx( $inputDatetimeStr, $dayTransitionTimeStr )
-{
-    $inputDatePartStr = substr( $inputDatetimeStr, 0, 10);
+function datetimestr_to_day_start_stop_DT_ex_str_idx($dateTimeStr, $dayTransitionTime){
+  if ($dayTransitionTime == "" || $dayTransitionTime == "NDF") {
+    $dayTransitionTime = "00:00:00";
+  }
 
-    $transitionTimeTempStr = $inputDatePartStr." ".$dayTransitionTimeStr;
+  if (strlen($dayTransitionTime) == 5) {
+    $dayTransitionTime .= ":00";
+  }
 
-    if ( strtotime( $inputDatetimeStr ) > strtotime( $transitionTimeTempStr ) )
-    {
-        $datetimeBeginStr = $dayTransitionTimeStr;
-        $datetimeEndStr = date("H:i:s", strtotime($dayTransitionTimeStr."+ 23 hour + 59 minute + 59 second"));
+  $currentTimestamp = strtotime($dateTimeStr);
 
-        $startDT = $inputDatePartStr." ".$datetimeBeginStr;       
-        $stopDT = $inputDatePartStr." ".$datetimeEndStr;
+  if ($currentTimestamp === false) {
+    $currentTimestamp = time();
+  }
 
-        $stopDT = date("Y-m-d H:i:s", strtotime($stopDT."+ 0 day"));
-    }
-    else
-    {
-        $datetimeBeginStr = $dayTransitionTimeStr;
-        $datetimeEndStr = date("H:i:s", strtotime($dayTransitionTimeStr."+ 23 hour + 59 minute + 59 second"));
+  $currentDate = date("Y-m-d", $currentTimestamp);
+  $todayStartTimestamp = strtotime($currentDate . " " . $dayTransitionTime);
 
-        $startDT = $inputDatePartStr." ".$datetimeBeginStr;       
-        $stopDT = $inputDatePartStr." ".$datetimeEndStr;
+  if ($todayStartTimestamp === false) {
+    $todayStartTimestamp = strtotime($currentDate . " 00:00:00");
+  }
 
-        $startDT = date("Y-m-d H:i:s", strtotime($startDT."- 1 day"));
-    }
+  if ($currentTimestamp < $todayStartTimestamp) {
+    $startTimestamp = strtotime("-1 day", $todayStartTimestamp);
+  }
+  else {
+    $startTimestamp = $todayStartTimestamp;
+  }
 
-    return array( $startDT, $stopDT );
+  $stopTimestamp = strtotime("+1 day", $startTimestamp) - 1;
+
+  return array(
+    date("Y-m-d H:i:s", $startTimestamp),
+    date("Y-m-d H:i:s", $stopTimestamp)
+  );
 }
-
 
 function time_to_second( $timeStr )
 {

@@ -2,57 +2,96 @@
 session_start();
 
 header("Content-type: text/html; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: 0");
 
 if (!isset($_SESSION['ss_id']) || !isset($_SESSION['ss_visiting_ID'])) {
-    exit('Ошибка: нет активной сессии пользователя.');
+  exit('');
 }
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
 $userID = $_SESSION['ss_id'];
-$visitingID = $_SESSION['ss_visiting_ID'];
+$visitingID = (int)$_SESSION['ss_visiting_ID'];
 
 mysqli_set_charset($link, "utf8");
-error_reporting(E_ALL | E_STRICT);
-ini_set('display_errors', 'On');
 
-// Получаем данные о текущем посещении
-$query = mysqli_query($link, "
-    SELECT in_dt, eat_start_dt, eat_stop_dt, state
-    FROM visiting
-    WHERE ID = '$visitingID' AND user_id = '$userID'
-    LIMIT 1
-");
-
-if (!$query) {
-    echo "Ошибка БД: " . mysqli_error($link);
-    exit;
+if ($visitingID <= 0) {
+  exit('');
 }
 
-if (mysqli_num_rows($query) == 0) {
-    echo "Нет активной записи посещения.";
-    exit;
-}
-
-$row = mysqli_fetch_assoc($query);
-$eatStart = $row['eat_start_dt'];
-$eatStop = $row['eat_stop_dt'];
-$state = (int)$row['state'];
+$userDayTransitionTime = isset($_SESSION['ss_dayTransitionTime'])
+  ? $_SESSION['ss_dayTransitionTime']
+  : "06:00:00";
 
 $dtResult = get_current_datetime_in_timezone();
 $currentDateTime = $dtResult[1];
 
-// вычисляем длительность обеда, если начат, но не завершён
-$duration = 0;
-if ($eatStart != '0000-00-00 00:00:00' && $state == 3) {
-    $duration = strtotime($currentDateTime) - strtotime($eatStart);
-}
-$durationStr = format_time_d_hhmmss_pure($duration);
+$dateArr = datetimestr_to_day_start_stop_DT_ex_str_idx($currentDateTime, $userDayTransitionTime);
 
-// Выводим окно обеда
+$startDTStr = $dateArr[0];
+$stopDTStr = $dateArr[1];
+
+$maxOpenShiftHours = 20;
+
+$userID = mysqli_real_escape_string($link, $userID);
+$currentDateTimeEsc = mysqli_real_escape_string($link, $currentDateTime);
+$startDTStrEsc = mysqli_real_escape_string($link, $startDTStr);
+$stopDTStrEsc = mysqli_real_escape_string($link, $stopDTStr);
+
+$query = mysqli_query($link, "
+  SELECT ID, in_dt, eat_start_dt, eat_stop_dt, state
+  FROM visiting
+  WHERE ID = '$visitingID'
+    AND user_id = '$userID'
+    AND (
+      (
+        in_dt >= '$startDTStrEsc'
+        AND in_dt < '$stopDTStrEsc'
+      )
+      OR
+      (
+        state != 0
+        AND in_dt < '$startDTStrEsc'
+        AND TIMESTAMPDIFF(HOUR, in_dt, '$currentDateTimeEsc') <= $maxOpenShiftHours
+      )
+    )
+  LIMIT 1
+");
+
+if (!$query) {
+  exit('');
+}
+
+if (mysqli_num_rows($query) == 0) {
+  $_SESSION['ss_state'] = 1;
+  $_SESSION['ss_visiting_ID'] = 0;
+  exit('');
+}
+
+$row = mysqli_fetch_assoc($query);
+
+$eatStart = $row['eat_start_dt'];
+$eatStop = $row['eat_stop_dt'];
+$state = (int)$row['state'];
+
+if ($state != 3 || $eatStart == '0000-00-00 00:00:00' || strtotime($eatStart) === false) {
+  $_SESSION['ss_state'] = $state;
+  $_SESSION['ss_visiting_ID'] = (int)$row["ID"];
+  exit('');
+}
+
+$eatStartTimestamp = strtotime($eatStart);
+$currentTimestamp = strtotime($currentDateTime);
+
+if ($currentTimestamp === false || $eatStartTimestamp === false || $currentTimestamp < $eatStartTimestamp) {
+  exit('');
+}
+
+$duration = $currentTimestamp - $eatStartTimestamp;
+$durationStr = format_time_d_hhmmss_pure($duration);
 ?>
 <table bgcolor="#FFFFFF" id="lunchPauseFullScreen">
   <tr>
@@ -61,10 +100,10 @@ $durationStr = format_time_d_hhmmss_pure($duration);
         <tr>
           <td align="center" width="446">
             <div id="lunch_head_block">
-                <div class="left_button" style="display: flex; align-items: center; margin-left: 2px">
-                    <button id ="lunch_time_back" title="возврат состояния регистрации времени до предыдущего" style="font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;" onclick="rollback_state(); location.reload();"><img src="img/rollbackState.png"></button>
-                </div>
-                <h5 class="bigbig1" style="margin-right: 135px"><br>Сотрудник на обеде<br><br></h5>
+              <div class="left_button" style="display: flex; align-items: center; margin-left: 2px">
+                <button id ="lunch_time_back" title="возврат состояния регистрации времени до предыдущего" style="font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;" onclick="rollback_state(); location.reload();"><img src="img/rollbackState.png"></button>
+              </div>
+              <h5 class="bigbig1" style="margin-right: 135px"><br>Сотрудник на обеде<br><br></h5>
             </div>
           </td>
         </tr>
@@ -84,7 +123,7 @@ $durationStr = format_time_d_hhmmss_pure($duration);
                   <h5 class="big">Длительность:</h5>
                 </td>
                 <td class="report_no_padding" valign="middle" align="left">
-                  <h5 class="big"><?= htmlspecialchars($durationStr) ?></h5>
+                  <h5 class="big" id="lunchDurationTimer"><?= htmlspecialchars($durationStr) ?></h5>
                 </td>
               </tr>
             </table>
@@ -109,7 +148,11 @@ $durationStr = format_time_d_hhmmss_pure($duration);
 <script type="text/javascript">
 function set_pause_full_screen() {
   const el = document.getElementById('lunchPauseFullScreen');
-  if (!el) return;
+
+  if (!el) {
+    return;
+  }
+
   el.style.position = 'fixed';
   el.style.top = '0';
   el.style.left = '0';
@@ -118,6 +161,45 @@ function set_pause_full_screen() {
   el.style.zIndex = '9999';
   el.style.backgroundColor = 'rgba(255,255,255,0.96)';
 }
+
+function formatLunchDuration(totalSeconds) {
+  totalSeconds = Math.max(0, parseInt(totalSeconds, 10) || 0);
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return String(hours).padStart(2, '0') + ':' +
+    String(minutes).padStart(2, '0') + ':' +
+    String(seconds).padStart(2, '0');
+}
+
+function startLunchDurationTimer(startTimestampMs, serverNowTimestampMs) {
+  const timerEl = document.getElementById('lunchDurationTimer');
+
+  if (!timerEl || !startTimestampMs || !serverNowTimestampMs) {
+    return;
+  }
+
+  const browserStartedAtMs = Date.now();
+
+  function updateLunchTimer() {
+    const browserElapsedMs = Date.now() - browserStartedAtMs;
+    const currentServerTimeMs = serverNowTimestampMs + browserElapsedMs;
+    const durationSeconds = Math.floor((currentServerTimeMs - startTimestampMs) / 1000);
+
+    timerEl.textContent = formatLunchDuration(durationSeconds);
+  }
+
+  updateLunchTimer();
+  setInterval(updateLunchTimer, 1000);
+}
+
 set_pause_full_screen();
 window.onresize = set_pause_full_screen;
+
+startLunchDurationTimer(
+  <?= (int)($eatStartTimestamp * 1000) ?>,
+  <?= (int)($currentTimestamp * 1000) ?>
+);
 </script>

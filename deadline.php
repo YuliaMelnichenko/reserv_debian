@@ -47,18 +47,50 @@ function get_time_registration_div_content(){
   }
 } 
 
-function switch_day_state( next ){
-  $.post('ajax/switch_day_state.php', { next: next }, RetSWT);                           
-  function RetSWT(dat) {
-    if ( dat == 1 ){
-      get_time_registration_div_content();
-    }
-    else
-    {
-      alert( dat );
-    }
+var timeRegistrationRequestInProgress = false;
+
+function switch_day_state(next, callback) {
+  if (timeRegistrationRequestInProgress) {
+    return;
   }
-  build_in_delay_expl();
+
+  timeRegistrationRequestInProgress = true;
+
+  $.post(
+    'ajax/switch_day_state.php',
+    {
+      next: next
+    },
+    function(dat) {
+      timeRegistrationRequestInProgress = false;
+
+      if (dat == 1 || dat == "1") {
+        if (typeof callback === 'function') {
+          callback();
+        }
+        else {
+          get_time_registration_div_content();
+        }
+
+        build_in_delay_expl();
+      }
+      else {
+        alert(dat);
+        get_time_registration_div_content();
+      }
+    }
+  ).fail(function(xhr) {
+    timeRegistrationRequestInProgress = false;
+
+    var message = "Ошибка изменения состояния рабочего дня.";
+
+    if (xhr.responseText) {
+      message += "\n\n" + xhr.responseText;
+    }
+
+    alert(message);
+    get_time_registration_div_content();
+  });
 }
 
 function rollback_state()

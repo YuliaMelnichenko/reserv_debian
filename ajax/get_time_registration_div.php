@@ -22,7 +22,12 @@ function change_time ($user) {
 
   if ($currentDayNumber == "1") {
     $threeDaysAgo = mysqli_query($link, "SELECT out_dt, eat_start_dt, eat_stop_dt FROM visiting WHERE user_id = '$user' and DATE(in_dt) = DATE(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY))");
-    $row2 = mysqli_fetch_assoc( $threeDaysAgo );
+    $row2 = mysqli_fetch_assoc($threeDaysAgo);
+
+    if (!$row2) {
+      return $content;
+    }
+
     $out_value1 = $row2["out_dt"];
     $eat_start_value1 = $row2["eat_start_dt"];
     $eat_stop_value1 = $row2["eat_stop_dt"];
@@ -37,7 +42,12 @@ function change_time ($user) {
   }
   else {
     $yesterday = mysqli_query($link, "SELECT out_dt, eat_start_dt, eat_stop_dt FROM visiting WHERE user_id = '$user' and DATE(in_dt) = DATE(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY))");
-    $row9 = mysqli_fetch_assoc( $yesterday );
+    $row9 = mysqli_fetch_assoc($yesterday);
+
+    if (!$row9) {
+      return $content;
+    }
+
     $out_value = $row9["out_dt"];
     $eat_start_value = $row9["eat_start_dt"];
     $eat_stop_value = $row9["eat_stop_dt"];
@@ -314,42 +324,57 @@ $userID = $_SESSION['ss_id'];
 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
+$dtResult = get_current_datetime_in_timezone();
+$currentDateTime = $dtResult[1];
+
 $user_defaultStartTime = $_SESSION['ss_defaultStartTime'];
 $user_allowedDelay = $_SESSION['ss_allowedDelay'];
 $user_defaultStartTimeWithDelay = $_SESSION['ss_defaultStartTimeWithDelay'];
 $user_defaultStartTimeWithDelayVal = $_SESSION['ss_defaultStartTimeWithDelayVal'];
 $user_dayTransitionTime = isset($_SESSION['ss_dayTransitionTime']) ? $_SESSION['ss_dayTransitionTime'] : "06:00:00";
 $user_remoteWork = $_SESSION['ss_RemoteWork'];
-$visiting_id = $_SESSION['ss_visiting_ID'];
-$isThereDelayVal = $_SESSION['ss_there_is_delay'];
+$visiting_id = isset($_SESSION['ss_visiting_ID'])
+  ? (int)$_SESSION['ss_visiting_ID']
+  : 0;
+$isThereDelayVal = isset($_SESSION['ss_there_is_delay'])
+  ? $_SESSION['ss_there_is_delay']
+  : 0;
 
 $dateArr = datetimestr_to_day_start_stop_DT_ex_str( $currentDate, $user_dayTransitionTime );  
                                                                                                                                          
 $startDTStr = $dateArr[0];
 $stopDTStr = $dateArr[1];    
 
-$openVisitQuery = mysqli_query($link, "
+$maxOpenShiftHours = 20;
+
+$userIDEsc = mysqli_real_escape_string($link, $userID);
+$startDTStrEsc = mysqli_real_escape_string($link, $startDTStr);
+$stopDTStrEsc = mysqli_real_escape_string($link, $stopDTStr);
+$currentDateTimeEsc = mysqli_real_escape_string($link, $currentDateTime);
+
+$query = mysqli_query($link, "
   SELECT *
   FROM visiting
   WHERE user_id = '$userID'
-    AND state != 0
-  ORDER BY ID DESC
+    AND (
+      (
+        in_dt >= '$startDTStr'
+        AND in_dt < '$stopDTStr'
+      )
+      OR
+      (
+        state != 0
+        AND in_dt < '$startDTStr'
+        AND TIMESTAMPDIFF(HOUR, in_dt, '$currentDateTime') <= $maxOpenShiftHours
+      )
+    )
+  ORDER BY in_dt DESC, ID DESC
   LIMIT 1
 ");
 
-if ($openVisitQuery && mysqli_num_rows($openVisitQuery) > 0) {
-  $query = $openVisitQuery;
-}
-else {
-  $query = mysqli_query($link, "
-    SELECT *
-    FROM visiting
-    WHERE user_id = '$userID'
-      AND in_dt >= '$startDTStr'
-      AND in_dt < '$stopDTStr'
-    ORDER BY ID DESC
-    LIMIT 1
-  ");
+if (!$query) {
+  echo "mysqli_error = " . mysqli_error($link);
+  exit;
 }
  
 $btnWidth = 616;
@@ -358,6 +383,7 @@ $btnHeight = 40;
 $vn=mysqli_num_rows($query);
 if ( $vn == 0 ) {
   $_SESSION['ss_state'] = 1;
+  $_SESSION['ss_visiting_ID'] = 0;
 
   $dtArr = get_splited_current_date_time_in_timezone();
 
@@ -399,17 +425,47 @@ if ( $vn == 0 ) {
   echo "</table>";
 }
 else { 
-  $row1 = mysqli_fetch_assoc($query);                                                                                                                                     
-
-  $_SESSION['ss_state'] = $row1["state"];
-  $state = $_SESSION['ss_state'];
+  $row1 = mysqli_fetch_assoc($query);
 
   $in_dt = $row1["in_dt"];
   $eat_start_dt = $row1["eat_start_dt"];
   $eat_stop_dt = $row1["eat_stop_dt"];
   $out_dt = $row1["out_dt"];
-  $state_db = $row1["state"];
-  $_SESSION['ss_visiting_ID'] = $row1["ID"];
+  $state_db = (int)$row1["state"];
+  $visitID = (int)$row1["ID"];
+
+  if ($state_db == 3 && $eat_start_dt == "0000-00-00 00:00:00") {
+    mysqli_query($link, "
+      UPDATE visiting
+      SET state = 2,
+          eat_start_dt = '0000-00-00 00:00:00',
+          eat_stop_dt = '0000-00-00 00:00:00',
+          changes = 1
+      WHERE ID = '$visitID'
+        AND user_id = '$userIDEsc'
+    ");
+
+    $state_db = 2;
+  }
+
+  if ($state_db == 4 && $eat_start_dt == "0000-00-00 00:00:00") {
+    mysqli_query($link, "
+      UPDATE visiting
+      SET state = 2,
+          eat_start_dt = '0000-00-00 00:00:00',
+          eat_stop_dt = '0000-00-00 00:00:00',
+          changes = 1
+      WHERE ID = '$visitID'
+        AND user_id = '$userIDEsc'
+    ");
+
+    $state_db = 2;
+  }
+
+  $_SESSION['ss_state'] = $state_db;
+  $state = $state_db;
+  $state_db = $state;
+  $_SESSION['ss_visiting_ID'] = $visitID;
   
   $changesArr = is_there_day_change( $in_dt, $eat_start_dt, $eat_stop_dt, $out_dt, $currentDate, $state );
 
@@ -469,7 +525,7 @@ else {
       echo "<button id =\"time_back\" title=\"возврат состояния регистрации времени до предыдущего\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"rollback_state(); location.reload(true);\"><img src=\"img/rollbackState.png\"></button>";
     echo "</div>";
     echo "<div class=\"nopadding_s\" align=\"right\" width=50% style=\"font-size: 100%; margin:0; padding:0; margin-left:0;\">";
-      if ( $_SESSION['ss_state'] == 3 OR $_SESSION['ss_state'] == 0 ) {
+      if ($state == 3 || $state == 0) {
         echo "<div class=\"right_button\">";
         echo "<button class=\"pauseBtn_des\" title=\"в обеденное время и при отметке об уходе с рабочего места изменения запрещены!\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"remote_work();\"><img src=\"img/remoteWorkIcon2.png\" style=\"width: 15px; height: 14px;\"></button>";
         echo "<button class=\"pauseBtn_des\" title=\"в обеденное время и при отметке об уходе с рабочего места приостановка учета времени запрещена!\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"disclamer( '$state_db' );\"><img src=\"img/sport_disabled.png\"></button>";
@@ -554,7 +610,7 @@ else {
   if ( $state == 4 ) {  
     $timeManagement .= "<td class=\"nopadding_s\" height=10></td></tr><tr>";
     $timeManagement .= "<td class=\"nopadding_s\" style=\"font-size: 100%; margin:0; padding:0; margin-left:0;\">";
-      $timeManagement .= "<button style=\"font-size: 100%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f8d888; border:1px solid #888888; cursor:pointer;\" onclick=\"reg_out_work(); location.reload(true);\">Зарегистрировать время ухода с рабочего места</button>";
+      $timeManagement .= "<button style=\"font-size: 100%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f8d888; border:1px solid #888888; cursor:pointer;\" onclick=\"reg_out_work(); return false;\">Зарегистрировать время ухода с рабочего места</button>";
     $timeManagement .= "</td>";
 
     $timeRestribution .= change_time( $userID );

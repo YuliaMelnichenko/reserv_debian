@@ -32,7 +32,7 @@ include_once __DIR__ . "/../funcs.php";
 
 $userID = $_SESSION['ss_id']; 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
-$user_dayTransitionTime = $_SESSION['$ss_dayTransitionTime'];
+$user_dayTransitionTime = $_SESSION['ss_dayTransitionTime'];
 $dateArr = datetimestr_to_day_start_stop_DT_ex_str( $currentDate, $user_dayTransitionTime );                                                                                                                                          
 $startDTStr = $dateArr[0];
 $stopDTStr = $dateArr[1];    
