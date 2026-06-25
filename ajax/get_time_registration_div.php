@@ -42,15 +42,24 @@ function change_time ($user) {
   }
   else {
     $yesterday = mysqli_query($link, "SELECT out_dt, eat_start_dt, eat_stop_dt FROM visiting WHERE user_id = '$user' and DATE(in_dt) = DATE(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY))");
+
     $row9 = mysqli_fetch_assoc($yesterday);
 
     if (!$row9) {
       return $content;
     }
 
-    $out_value = $row9["out_dt"];
-    $eat_start_value = $row9["eat_start_dt"];
-    $eat_stop_value = $row9["eat_stop_dt"];
+    $out_value = isset($row9["out_dt"])
+      ? $row9["out_dt"]
+      : "0000-00-00 00:00:00";
+
+    $eat_start_value = isset($row9["eat_start_dt"])
+      ? $row9["eat_start_dt"]
+      : "0000-00-00 00:00:00";
+
+    $eat_stop_value = isset($row9["eat_stop_dt"])
+      ? $row9["eat_stop_dt"]
+      : "0000-00-00 00:00:00";
         
     if ( $eat_start_value !== "0000-00-00 00:00:00" && $eat_stop_value == "0000-00-00 00:00:00" ){
       $content .= "<tr>";
@@ -327,10 +336,40 @@ $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 $dtResult = get_current_datetime_in_timezone();
 $currentDateTime = $dtResult[1];
 
-$user_defaultStartTime = $_SESSION['ss_defaultStartTime'];
-$user_allowedDelay = $_SESSION['ss_allowedDelay'];
-$user_defaultStartTimeWithDelay = $_SESSION['ss_defaultStartTimeWithDelay'];
-$user_defaultStartTimeWithDelayVal = $_SESSION['ss_defaultStartTimeWithDelayVal'];
+$user_defaultStartTime = "";
+$user_allowedDelay = 0;
+
+get_user_defStartTime_and_allowedDelay(
+  $userID,
+  $user_defaultStartTime,
+  $user_allowedDelay
+);
+
+if ($user_defaultStartTime == "" || $user_defaultStartTime == "NDF") {
+  $user_defaultStartTime = isset($_SESSION['ss_defaultStartTime'])
+    ? $_SESSION['ss_defaultStartTime']
+    : "NDF";
+}
+
+$user_allowedDelay = (int)$user_allowedDelay;
+
+$user_defaultStartTimeWithDelay = "NDF";
+$user_defaultStartTimeWithDelayVal = 0;
+
+if ($user_defaultStartTime != "NDF" && strtotime($user_defaultStartTime) !== false) {
+  $user_defaultStartTimeWithDelay = date(
+    "H:i:s",
+    strtotime($user_defaultStartTime . " + " . $user_allowedDelay . " minute")
+  );
+
+  $user_defaultStartTimeWithDelayVal = strtotime($user_defaultStartTimeWithDelay);
+}
+
+$_SESSION['ss_defaultStartTime'] = $user_defaultStartTime;
+$_SESSION['ss_allowedDelay'] = $user_allowedDelay;
+$_SESSION['ss_defaultStartTimeWithDelay'] = $user_defaultStartTimeWithDelay;
+$_SESSION['ss_defaultStartTimeWithDelayVal'] = $user_defaultStartTimeWithDelayVal;
+
 $user_dayTransitionTime = isset($_SESSION['ss_dayTransitionTime']) ? $_SESSION['ss_dayTransitionTime'] : "06:00:00";
 $user_remoteWork = $_SESSION['ss_RemoteWork'];
 $visiting_id = isset($_SESSION['ss_visiting_ID'])
@@ -345,7 +384,8 @@ $dateArr = datetimestr_to_day_start_stop_DT_ex_str( $currentDate, $user_dayTrans
 $startDTStr = $dateArr[0];
 $stopDTStr = $dateArr[1];    
 
-$maxOpenShiftHours = 20;
+$maxOpenShiftHours = 3;
+$maxOpenShiftSeconds = $maxOpenShiftHours * 60 * 60;
 
 $userIDEsc = mysqli_real_escape_string($link, $userID);
 $startDTStrEsc = mysqli_real_escape_string($link, $startDTStr);
@@ -365,7 +405,7 @@ $query = mysqli_query($link, "
       (
         state != 0
         AND in_dt < '$startDTStr'
-        AND TIMESTAMPDIFF(HOUR, in_dt, '$currentDateTime') <= $maxOpenShiftHours
+        AND TIMESTAMPDIFF(SECOND, '$startDTStr', '$currentDateTime') <= $maxOpenShiftSeconds
       )
     )
   ORDER BY in_dt DESC, ID DESC
@@ -559,7 +599,7 @@ else {
       $timeManagement .= "</font>";
     $timeManagement .= "</td>";
 
-    $timeRestribution .= in_time_part( $in_dt, $changeIn, $_SESSION['ss_there_is_delay'], $timeRestributionDescWidth, $timeRestributionValWidth );
+    $timeRestribution .= in_time_part( $in_dt, $changeIn, $isThereDelayVal, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestribution .= eat_start_part( $eat_start_dt, $changeEatStart, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestribution .= eat_stop_part( $eat_stop_dt, $changeEatStop, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestribution .= out_time_part( $out_dt, $changeOut, $timeRestributionDescWidth, $timeRestributionValWidth );
@@ -580,7 +620,7 @@ else {
     $timeManagement .= "</td>";
     
     $timeRestribution .= change_time( $userID );
-    $timeRestribution .= in_time_part( $in_dt, $changeIn, $_SESSION['ss_there_is_delay'], $timeRestributionDescWidth, $timeRestributionValWidth );
+    $timeRestribution .= in_time_part( $in_dt, $changeIn, $isThereDelayVal, $timeRestributionDescWidth, $timeRestributionValWidth );
 
     $timeRestributionStat .= pure_work_day_duration_part( $resultPureDurationWOEatStr, 0, 0, $timeRestributionDescWidth, $timeRestributionValWidth, 'Продолжительность присутствия без учета обеда', 0, 0 );
     $timeRestributionStat .= add_time_work_day_duration_part( $addWorkDurationStr, $addTimeDuration !=0, $timeRestributionDescWidth, $timeRestributionValWidth );
@@ -596,7 +636,7 @@ else {
     $timeManagement .= "</td>";
 
     $timeRestribution .= change_time( $userID );
-    $timeRestribution .= in_time_part( $in_dt, $changeIn, $_SESSION['ss_there_is_delay'], $timeRestributionDescWidth, $timeRestributionValWidth );
+    $timeRestribution .= in_time_part( $in_dt, $changeIn, $isThereDelayVal, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestribution .= eat_start_part( $eat_start_dt, $changeEatStart, $timeRestributionDescWidth, $timeRestributionValWidth );
 
     $timeRestributionStat .= pure_work_day_duration_part( $resultPureDurationWOEatStr, 0, 0, $timeRestributionDescWidth, $timeRestributionValWidth, 'Продолжительность присутствия без учета обеда', 0, 0 );

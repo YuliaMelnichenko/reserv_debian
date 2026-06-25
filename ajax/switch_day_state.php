@@ -36,7 +36,7 @@ $dateArr = datetimestr_to_day_start_stop_DT_ex_str_idx($dateTimeStr, $userDayTra
 $startDTStr = $dateArr[0];
 $stopDTStr = $dateArr[1];
 
-$maxOpenShiftHours = 20;
+$maxOpenShiftHours = 3;
 $maxOpenShiftSeconds = $maxOpenShiftHours * 60 * 60;
 
 function reset_time_registration_session()
@@ -45,7 +45,7 @@ function reset_time_registration_session()
   $_SESSION['ss_visiting_ID'] = 0;
 }
 
-function sync_time_registration_state_from_db($link, $userID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftHours)
+function sync_time_registration_state_from_db($link, $userID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds)
 {
   $userID = mysqli_real_escape_string($link, $userID);
   $startDTStr = mysqli_real_escape_string($link, $startDTStr);
@@ -65,7 +65,7 @@ function sync_time_registration_state_from_db($link, $userID, $startDTStr, $stop
         (
           state != 0
           AND in_dt < '$startDTStr'
-          AND TIMESTAMPDIFF(HOUR, in_dt, '$dateTimeStr') <= $maxOpenShiftHours
+          AND TIMESTAMPDIFF(SECOND, '$startDTStr', '$dateTimeStr') <= $maxOpenShiftSeconds
         )
       )
     ORDER BY in_dt DESC, ID DESC
@@ -191,7 +191,7 @@ $syncedState = sync_time_registration_state_from_db(
   $startDTStr,
   $stopDTStr,
   $dateTimeStr,
-  $maxOpenShiftHours
+  $maxOpenShiftSeconds
 );
 
 $ss_state = (int)$syncedState["state"];
@@ -207,32 +207,43 @@ if ($nextState == 1) {
     $ss_visiting_ID = 0;
 
     $openCheck = mysqli_query($link, "
-  SELECT ID, in_dt, state
-  FROM visiting
-  WHERE user_id = '$id'
-    AND state != 0
-  ORDER BY in_dt DESC, ID DESC
-  LIMIT 1
-");
+      SELECT ID, in_dt, state
+      FROM visiting
+      WHERE user_id = '$id'
+        AND state != 0
+        AND (
+          (
+            in_dt >= '$startDTStr'
+            AND in_dt < '$stopDTStr'
+          )
+          OR
+          (
+            in_dt < '$startDTStr'
+            AND TIMESTAMPDIFF(SECOND, '$startDTStr', '$dateTimeStr') <= $maxOpenShiftSeconds
+          )
+        )
+      ORDER BY in_dt DESC, ID DESC
+      LIMIT 1
+    ");
 
-if (!$openCheck) {
-  echo mysqli_error($link);
-  exit;
-}
+    if (!$openCheck) {
+      echo mysqli_error($link);
+      exit;
+    }
 
-if (mysqli_num_rows($openCheck) > 0) {
-  $openRow = mysqli_fetch_array($openCheck, MYSQLI_ASSOC);
+    if (mysqli_num_rows($openCheck) > 0) {
+      $openRow = mysqli_fetch_array($openCheck, MYSQLI_ASSOC);
 
-  $_SESSION['ss_state'] = (int)$openRow["state"];
-  $_SESSION['ss_visiting_ID'] = (int)$openRow["ID"];
+      $_SESSION['ss_state'] = (int)$openRow["state"];
+      $_SESSION['ss_visiting_ID'] = (int)$openRow["ID"];
 
-  error_log(
-    "TORI_SWITCH_BLOCK_INSERT user=$id open_visit=" . $openRow["ID"] . " open_state=" . $openRow["state"] . " open_in=" . $openRow["in_dt"]
-  );
+      error_log(
+        "TORI_SWITCH_BLOCK_INSERT_RECENT user=$id open_visit=" . $openRow["ID"] . " open_state=" . $openRow["state"] . " open_in=" . $openRow["in_dt"]
+      );
 
-  echo "Ошибка: у сотрудника уже есть открытый рабочий день от " . $openRow["in_dt"] . ". Новый приход не создан. Обновите страницу.";
-  exit;
-}
+      echo "Ошибка: у сотрудника уже есть открытый рабочий день от " . $openRow["in_dt"] . ". Новый приход не создан. Обновите страницу.";
+      exit;
+    }
 
     $query = mysqli_query($link, "SELECT a.ID FROM visiting a WHERE a.ID = (SELECT max(ID) FROM visiting)");
 
@@ -367,24 +378,38 @@ if (mysqli_num_rows($openCheck) > 0) {
   if ($ss_state == 4) {
     $visitRow = require_current_visit_row($link, $id, $ss_visiting_ID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds, 4);
 
+    if ($visitRow === null) {
+      echo "Ошибка: не найдена активная запись рабочего дня. Обновите страницу.";
+      exit;
+    }
+
+    $visitID = (int)$visitRow["ID"];
+    $dbState = (int)$visitRow["state"];
+
+    if ($dbState == 0) {
+      $_SESSION['ss_state'] = 0;
+      $_SESSION['ss_visiting_ID'] = $visitID;
+
+      echo "1";
+      exit;
+    }
+
     if (strtotime($dateTimeStr) <= strtotime($visitRow["in_dt"])) {
       echo "Ошибка: время ухода не может быть меньше или равно времени прихода.";
       exit;
     }
 
+    $dateTimeStrEsc = mysqli_real_escape_string($link, $dateTimeStr);
+    $idEsc = mysqli_real_escape_string($link, $id);
+    $visitIDEsc = mysqli_real_escape_string($link, $visitID);
+
     $res = mysqli_query($link, "
       UPDATE visiting
-      SET out_dt = '$dateTimeStr',
+      SET out_dt = '$dateTimeStrEsc',
           state = 0
-      WHERE user_id = '$id'
-        AND ID = '$ss_visiting_ID'
-    ");
-
-    $res2 = mysqli_query($link, "
-      UPDATE remote_work
-      SET stop_dt = NOW()
-      WHERE user_id = '$id'
-        AND stop_dt IS NULL
+      WHERE user_id = '$idEsc'
+        AND ID = '$visitIDEsc'
+        AND state = 4
     ");
 
     if (!$res) {
@@ -392,12 +417,45 @@ if (mysqli_num_rows($openCheck) > 0) {
       exit;
     }
 
+    $res2 = mysqli_query($link, "
+      UPDATE remote_work
+      SET stop_dt = NOW()
+      WHERE user_id = '$idEsc'
+        AND stop_dt IS NULL
+    ");
+
+    if (!$res2) {
+      echo mysqli_error($link);
+      exit;
+    }
+
     if (mysqli_affected_rows($link) <= 0) {
+      $checkQuery = mysqli_query($link, "
+        SELECT ID, state, out_dt
+        FROM visiting
+        WHERE user_id = '$idEsc'
+          AND ID = '$visitIDEsc'
+        LIMIT 1
+      ");
+
+      if ($checkQuery && mysqli_num_rows($checkQuery) > 0) {
+        $checkRow = mysqli_fetch_array($checkQuery, MYSQLI_ASSOC);
+
+        if ((int)$checkRow["state"] == 0) {
+          $_SESSION['ss_state'] = 0;
+          $_SESSION['ss_visiting_ID'] = $visitID;
+
+          echo "1";
+          exit;
+        }
+      }
+
       echo "Ошибка: не удалось зарегистрировать уход. Обновите страницу.";
       exit;
     }
 
     $_SESSION['ss_state'] = 0;
+    $_SESSION['ss_visiting_ID'] = $visitID;
 
     echo "1";
     exit;

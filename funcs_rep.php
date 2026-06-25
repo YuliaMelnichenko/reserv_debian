@@ -831,13 +831,29 @@ function get_report_body_row_contents( $usersInfo ){
       $rowDTContent .= "</td>";
     } 
 
-    for ( $userNum = 0; $userNum < $userCount; $userNum ++ )
-    {
-      $userID = $usersInfo[0][$userNum];
-      $userDefaultStartTime = $usersInfo[3][$userNum];
-      $userAllowedDelay = $usersInfo[6][$userNum]; 
+    for ( $userNum = 0; $userNum < $userCount; $userNum ++ ){
+      if ( !isset($usersInfo[0][$userNum]) || !isset($usersInfo[7][$userNum]) ){
+        continue;
+      }
 
-      $cellContent = get_cell_content_by_stat( $usersInfo[7][$userNum], $index, $cellWidth, $userID, $userDefaultStartTime, $userAllowedDelay );
+      $userID = $usersInfo[0][$userNum];
+
+      $userDefaultStartTime = isset($usersInfo[3][$userNum])
+        ? $usersInfo[3][$userNum]
+        : "NDF";
+
+      $userAllowedDelay = isset($usersInfo[6][$userNum])
+        ? $usersInfo[6][$userNum]
+        : 0;
+
+      $cellContent = get_cell_content_by_stat(
+        $usersInfo[7][$userNum],
+        $index,
+        $cellWidth,
+        $userID,
+        $userDefaultStartTime,
+        $userAllowedDelay
+      );
 
       $rowContent .= $cellContent;
     }

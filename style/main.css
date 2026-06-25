@@ -938,8 +938,8 @@ div.report_head_stub_left {
 
 #delay_out_time {
   position: fixed;
-  width: 325px;
-  height: 150px;
+  width: 450px;
+  height: 130px;
   left: 50%;
   top: 35%;
   margin-left: -225px;
@@ -978,7 +978,7 @@ div.report_head_stub_left {
 .reg_out_time_body {
   display: flex;
   margin-left: 15px;
-  justify-content: center;
+  justify-content: space-between;
 }
   
 .reg_out_time_button_save {

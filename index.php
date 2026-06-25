@@ -476,10 +476,12 @@ include __DIR__ . "/php_tori/connect.php";
 $ip = $_SERVER['REMOTE_ADDR'];
 auth();
 
-if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 )
-{
+if (
+  isset($_SESSION['ss_id']) &&
+  ($_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501)
+) {
   header("Location: my_report.php");
-  exit(); 
+  exit();
 }
 
 ////////////////////////////////////////////////////////

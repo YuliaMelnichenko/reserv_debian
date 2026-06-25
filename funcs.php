@@ -63,7 +63,8 @@ function sync_time_registration_session_by_period($link, $userID, $startDTStr, $
   $_SESSION['ss_startDTStr'] = $startDTStr;
   $_SESSION['ss_stopDTStr'] = $stopDTStr;
 
-$maxOpenShiftHours = 20;
+$maxOpenShiftHours = 3;
+$maxOpenShiftSeconds = $maxOpenShiftHours * 60 * 60;
 
 $currentDateTimeResult = get_current_datetime_in_timezone();
 $currentDateTime = $currentDateTimeResult[1];
@@ -81,7 +82,7 @@ $query = mysqli_query($link, "
       (
         state != 0
         AND in_dt < '$startDTStr'
-        AND TIMESTAMPDIFF(HOUR, in_dt, '$currentDateTime') <= $maxOpenShiftHours
+        AND TIMESTAMPDIFF(SECOND, '$startDTStr', '$currentDateTime') <= $maxOpenShiftSeconds
       )
     )
   ORDER BY in_dt DESC, ID DESC
@@ -2942,21 +2943,44 @@ echo "sdas";
   return $retArray;
 } 
 
-function get_delay_value( $in_dt, $defauiltInTime, $allowedDelay )                                                                                                                    
-{
-  $in_time_val = strtotime(date("H:i:s", strtotime($in_dt)));
-
-  $defailt_in_time_val = strtotime(date("H:i:s", strtotime($defauiltInTime)));
-
-  $defailt_in_time_with_delay_val = strtotime(date("H:i:s", strtotime($defauiltInTime."+ $allowedDelay minute")));
-
+function get_delay_value( $in_dt, $defauiltInTime, $allowedDelay ){
   $isThereDelay = 0;
   $delay_val = 0;
 
-  if ( $in_time_val > $defailt_in_time_with_delay_val )
-  {
+  if (
+    !isset($in_dt) ||
+    !isset($defauiltInTime) ||
+    $in_dt == "" ||
+    $defauiltInTime == "" ||
+    $defauiltInTime == "NDF" ||
+    $in_dt == "0000-00-00 00:00:00"
+  ){
+    return array($isThereDelay, $delay_val);
+  }
+
+  $in_time_val = strtotime($in_dt);
+
+  if ($in_time_val === false){
+    return array($isThereDelay, $delay_val);
+  }
+
+  if (strlen($defauiltInTime) == 5){
+    $defauiltInTime .= ":00";
+  }
+
+  $in_date = date("Y-m-d", $in_time_val);
+  $defailt_in_time_val = strtotime($in_date . " " . $defauiltInTime);
+
+  if ($defailt_in_time_val === false){
+    return array($isThereDelay, $delay_val);
+  }
+
+  $allowedDelay = (int)$allowedDelay;
+  $defailt_in_time_with_delay_val = $defailt_in_time_val + $allowedDelay * 60;
+
+  if ( $in_time_val > $defailt_in_time_with_delay_val ){
     $isThereDelay = 1;
-    $delay_val = $in_time_val - $defailt_in_time_val;    
+    $delay_val = $in_time_val - $defailt_in_time_with_delay_val;
   }
 
   return array($isThereDelay, $delay_val);
@@ -3508,6 +3532,25 @@ function is_there_day_change_betw( $in_dt, $eat_start_dt, $eat_stop_dt, $out_dt,
 
 function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $defaultStartTimeStr, $user_allowedDelay ){
   include_once "/var/www/tori/funcs.php";
+
+  $delayCheckEnabled = 1;
+
+  if (
+    !isset($defaultStartTimeStr) ||
+    $defaultStartTimeStr == "" ||
+    $defaultStartTimeStr == "NDF" ||
+    strtotime($defaultStartTimeStr) === false
+  ) {
+    $delayCheckEnabled = 0;
+    $defaultStartTimeStr = "NDF";
+    $user_allowedDelay = 0;
+  }
+
+  if (!isset($user_allowedDelay) || $user_allowedDelay == "" || !is_numeric($user_allowedDelay)) {
+    $user_allowedDelay = 0;
+  }
+
+  $user_allowedDelay = (int)$user_allowedDelay;
 
   // $dayTypes = get_workdays_holidays_bay_range( $startDate, $stopDate );
   $currentDateArr = get_current_datetime_in_timezone();
@@ -4583,50 +4626,42 @@ function GetCurrentDate()
   return date("Y-m-d");
 }
 
-function GetWorkDayStartTime()
-{
+function GetWorkDayStartTime(){
   return date("H:i:s", mktime(10, 00, 00, 0, 0, 0 ) );
 } 
 
-function GetFirstYearDay( $year )
-{
+function GetFirstYearDay( $year ){
   return date("Y-m-d", mktime(00, 00, 00, 1, 1, $year));
 }
 
-function GetFirstYearDayEx( $date )
-{
+function GetFirstYearDayEx( $date ){
   $year = GetCurrentYearD( $date );
   return date("Y-m-d", mktime(00, 00, 00, 1, 1, $year));
 }
 
-function GetFirstMonthDayEx( $date )
-{
+function GetFirstMonthDayEx( $date ){
   $monthDay = (-1)*GetMonthDayD( $date ) + 1;
 
   return DayIncDN( $date, $monthDay );
 }
 
-function GetFirstQuarterDayEx( $date )
-{
+function GetFirstQuarterDayEx( $date ){
   return MonthDecDN( $date, 3 );
 }
 
-function GetFirstQuarterDayByDate( $date )
-{
+function GetFirstQuarterDayByDate( $date ){
   $firstQuarterMonth = GetFirstQuarterMonth( $date );
   $currentMonth = (int)GetMonthD( $date );
 
   $offset = $currentMonth - $firstQuarterMonth;
 
-  if ( $offset != 0 )
-  {
+  if ( $offset != 0 ){
     $date = MonthDecDN( $date, $offset );
   }
   return GetFirstMonthDayEx( $date );
 }
 
-function GetWeekDayNameD( $day )
-{
+function GetWeekDayNameD( $day ){
   $week_day = GetWeekDayD( $day );
 
   if ( $week_day == 1 )
@@ -4645,8 +4680,7 @@ function GetWeekDayNameD( $day )
     return "Воскресенье";
 }
 
-function GetMonthNameByDate( $date )
-{
+function GetMonthNameByDate( $date ){
   $month = (int)(GetMonthD( $date ));
 
   if ( $month == 1 )

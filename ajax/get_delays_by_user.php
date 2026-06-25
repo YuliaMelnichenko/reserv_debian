@@ -65,7 +65,7 @@ echo "<table id=\"delay_approvement_table\" border=0>";
 
       $delayTimes = Array();
 
-      $delayTimes = get_all_delay_info_by_user( $userID, $user_defaultStartTime, $allowedDelay );
+      $delayTimes = get_all_delay_info_by_user( $userID, $user_defaultStartTime, $user_allowedDelay );
 
       foreach( $delayTimes as $delayTime )
       {

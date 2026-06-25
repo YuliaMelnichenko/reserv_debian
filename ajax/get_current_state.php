@@ -30,7 +30,8 @@ $dateArr = datetimestr_to_day_start_stop_DT_ex_str_idx($currentDateTime, $userDa
 $startDTStr = $dateArr[0];
 $stopDTStr = $dateArr[1];
 
-$maxOpenShiftHours = 20;
+$maxOpenShiftHours = 3;
+$maxOpenShiftSeconds = $maxOpenShiftHours * 60 * 60;
 
 $userID = mysqli_real_escape_string($link, $userID);
 $startDTStr = mysqli_real_escape_string($link, $startDTStr);
@@ -50,7 +51,7 @@ $query = mysqli_query($link, "
       (
         state != 0
         AND in_dt < '$startDTStr'
-        AND TIMESTAMPDIFF(HOUR, in_dt, '$currentDateTime') <= $maxOpenShiftHours
+        AND TIMESTAMPDIFF(SECOND, '$startDTStr', '$currentDateTime') <= $maxOpenShiftSeconds
       )
     )
   ORDER BY in_dt DESC, ID DESC
