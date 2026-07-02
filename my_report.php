@@ -135,39 +135,12 @@ function ta_delete( delID ){
   }
 }
 
-function show_adds_info( startDate, stopDate, userID ){
-  document.getElementById('adds_list_header').style.display='none';
-  $.post('ajax/get_add_times_info.php', {startDate: startDate, stopDate: stopDate, userID: userID}, RetSWT);
-  function RetSWT(dat) {
-    document.getElementById('adds_list_header').innerHTML = dat;
-    document.getElementById('adds_list_header').style.display='block';
-  }
-}
-
-function show_pauses_info( startDate, stopDate, userID ){
-  document.getElementById('pauses_list_header').style.display='none';
-  $.post('ajax/get_pauses_times_info.php', {startDate: startDate, stopDate: stopDate, userID: userID}, RetSWT);
-  function RetSWT(dat) {
-    document.getElementById('pauses_list_header').innerHTML = dat;
-    document.getElementById('pauses_list_header').style.display='block';
-  }
-}
-
 function close_add_time_list(){
   document.getElementById('adds_list_header').style.display='none';
 }
 
 function close_pause_time_list(){
   document.getElementById('pauses_list_header').style.display='none';
-}
-
-function show_penalties_info( startDate, stopDate, userID ){
-  document.getElementById('penalty_list_header').style.display='none';
-  $.post('ajax/get_penalties_info.php', {startDate: startDate, stopDate: stopDate, userID: userID}, RetSWT);
-  function RetSWT(dat) {
-    document.getElementById('penalty_list_header').innerHTML = dat;
-    document.getElementById('penalty_list_header').style.display='block';
-  }
 }
 
 function close_penalties_list(){
