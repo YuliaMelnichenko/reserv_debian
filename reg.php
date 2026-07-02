@@ -2,6 +2,9 @@
 ob_start();
 session_start();
 
+
+require_once __DIR__ . '/inc/access.php';
+require_page_auth();
 echo "<html>";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";

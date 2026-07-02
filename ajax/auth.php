@@ -26,8 +26,8 @@ else
 
   if ( $vn == 1 )
   { 
-    echo "OK";
     $row = mysqli_fetch_assoc($query);
+    session_regenerate_id(true);
     $_SESSION['ss_id'] = $row["id"];
     $_SESSION['ss_rate'] = $row["rate"];
     $ss_defaultStartTime = $row["defaultStartTime"];	
@@ -45,7 +45,6 @@ else
     $_SESSION['ss_mode'] = 1;
     $_SESSION['ss_delay_show_save'] = 0;
     $_SESSION['ss_UserTimeZoneMins'] = $row["userTimeZoneMins"];
-    session_regenerate_id();
     $_SESSION['ss_sessid'] = session_id();
     $retArr = get_current_datetime_in_timezone();
     $_SESSION['ss_UserTimeZoneStr'] = $retArr[5];
@@ -66,6 +65,7 @@ else
     $_SESSION['rep_start_stop_date_mode'] = 2;
 
     $_SESSION['ss_dayWasChanged'] = 0;
+    echo "OK";
   }
   else
   {

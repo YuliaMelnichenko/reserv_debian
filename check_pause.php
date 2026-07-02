@@ -84,7 +84,6 @@ if ( !isset($_SESSION['ss_id']) )
   echo "</tr>";
   echo "</table>";
 
-  echo "<a href=\"register.php\" class=\"ml\" title=\"Регистрация\">регистрация</a>";
 
   echo "</td>";
   echo "</tr>";
