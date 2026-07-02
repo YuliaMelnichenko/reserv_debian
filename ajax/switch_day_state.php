@@ -1,6 +1,9 @@
 <?php
 session_start();
 
+
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -197,6 +200,10 @@ $syncedState = sync_time_registration_state_from_db(
 $ss_state = (int)$syncedState["state"];
 $ss_visiting_ID = (int)$syncedState["visiting_ID"];
 
+error_log(
+  "TORI_SWITCH_SYNC user=$id next=$nextState state=$ss_state visit=$ss_visiting_ID start=$startDTStr stop=$stopDTStr now=$dateTimeStr"
+);
+
 if ($nextState == 1) {
   if ($ss_state == 1) {
     $_SESSION['ss_visiting_ID'] = 0;
@@ -233,6 +240,10 @@ if ($nextState == 1) {
       $_SESSION['ss_state'] = (int)$openRow["state"];
       $_SESSION['ss_visiting_ID'] = (int)$openRow["ID"];
 
+      error_log(
+        "TORI_SWITCH_BLOCK_INSERT_RECENT user=$id open_visit=" . $openRow["ID"] . " open_state=" . $openRow["state"] . " open_in=" . $openRow["in_dt"]
+      );
+
       echo "Ошибка: у сотрудника уже есть открытый рабочий день от " . $openRow["in_dt"] . ". Новый приход не создан. Обновите страницу.";
       exit;
     }
@@ -251,6 +262,10 @@ if ($nextState == 1) {
       $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
       $newID = (int)$row["ID"] + 1;
     }
+
+    error_log(
+  "TORI_SWITCH_INSERT user=$id next=$nextState state=$ss_state visit=$ss_visiting_ID now=$dateTimeStr"
+);
 
     $res = mysqli_query($link, "
       INSERT INTO visiting (
@@ -289,6 +304,10 @@ if ($nextState == 1) {
     echo "1";
     exit;
   }
+
+  error_log(
+  "TORI_SWITCH_LUNCH_START user=$id next=$nextState state=$ss_state visit=$ss_visiting_ID now=$dateTimeStr"
+);
 
   if ($ss_state == 2) {
     $visitRow = require_current_visit_row($link, $id, $ss_visiting_ID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds, 2);

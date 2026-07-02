@@ -342,11 +342,15 @@ function move_to_last_location(){
   }
 }  
 
-function auth() 
+function auth()
 {
-  if ( !isset($_SESSION['ss_id']) ) 
+  $sessionIsValid = isset($_SESSION['ss_id'], $_SESSION['ss_sessid'])
+    && hash_equals((string) $_SESSION['ss_sessid'], session_id());
+
+  if (!$sessionIsValid)
   {
-    header("Location: auth.php");
+    header('Location: auth.php');
+    exit;
   }
 }  
 
