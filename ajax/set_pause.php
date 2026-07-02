@@ -16,15 +16,15 @@ mysqli_set_charset($link, "utf8");
 $userID = $_SESSION['ss_id'];
 $ss_visiting_ID = $_SESSION['ss_visiting_ID'];
  
-$superUserID = $_POST['superuserID'];
-$description = $_POST['desk'];
+$superUserID = (int) ($_POST['superuserID'] ?? -1);
+$description = (string) ($_POST['desk'] ?? '');
 
 $dtResult = get_current_datetime_in_timezone();
 
 $currentDate = $dtResult[2];
 $currentDateTime = $dtResult[1];
 
-$query = mysqli_query($link, "UPDATE visiting SET take_pause = '1' WHERE id = '$ss_visiting_ID' AND user_id = '$userID'");
+$query = db_execute($link, 'UPDATE visiting SET take_pause = 1 WHERE id = ? AND user_id = ?', 'ii', array($ss_visiting_ID, $userID));
 $merr=mysqli_error($link);
 
 if (!$query){
@@ -33,7 +33,7 @@ if (!$query){
 else{
   mysqli_set_charset($link, "utf8");
   
-  $query = mysqli_query($link, "INSERT INTO ADD_TIME (ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE, BYALERT) VALUES ('$currentDate', '$superUserID', '$userID', '$currentDateTime', '0000-00-00 00:00:00', '-1', '$description', '', '0', '1', '0')");
+$query = db_execute($link, "INSERT INTO ADD_TIME (ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE, BYALERT) VALUES (?, ?, ?, ?, '0000-00-00 00:00:00', -1, ?, '', 0, 1, 0)", 'siiss', array($currentDate, $superUserID, $userID, $currentDateTime, $description));
 
   $merr=mysqli_error($link);
   if (!$query)

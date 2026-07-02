@@ -18,7 +18,7 @@ if (!isset($_POST['visit_id']) || !isset($_POST['add_stop_time'])) {
   exit;
 }
 
-$userID = $_SESSION['ss_id'];
+$userID = (int)$_SESSION['ss_id'];
 $visitID = (int)$_POST['visit_id'];
 $newOutTimeRaw = $_POST['add_stop_time'];
 
@@ -43,16 +43,13 @@ include_once __DIR__ . "/../funcs.php";
 
 mysqli_set_charset($link, "utf8");
 
-$userID = mysqli_real_escape_string($link, $userID);
-$newOutTime = mysqli_real_escape_string($link, $newOutTime);
-
-$query = mysqli_query($link, "
+$query = db_query($link, "
   SELECT ID, in_dt, state
   FROM visiting
-  WHERE ID = '$visitID'
-    AND user_id = '$userID'
+  WHERE ID = ?
+    AND user_id = ?
   LIMIT 1
-");
+", 'ii', array($visitID, $userID));
 
 if (!$query) {
   echo "Ошибка БД: " . mysqli_error($link);
@@ -81,26 +78,26 @@ if (strtotime($newOutTime) >= strtotime($currentStartDT)) {
   exit;
 }
 
-$res = mysqli_query($link, "
+$res = db_execute($link, "
   UPDATE visiting
-  SET out_dt = '$newOutTime',
+  SET out_dt = ?,
       state = 0,
       changes = 1
-  WHERE ID = '$visitID'
-    AND user_id = '$userID'
-");
+  WHERE ID = ?
+    AND user_id = ?
+", 'sii', array($newOutTime, $visitID, $userID));
 
 if (!$res) {
   echo "Ошибка БД: " . mysqli_error($link);
   exit;
 }
 
-$logText = mysqli_real_escape_string($link, "Ручное изменение времени ухода. visiting.ID=$visitID; out_dt=$newOutTime");
+$logText = "Ручное изменение времени ухода. visiting.ID=$visitID; out_dt=$newOutTime";
 
-mysqli_query($link, "
+db_execute($link, "
   INSERT INTO logging_changes (USER_ID, DATE_CHANGE, CHANGES)
-  VALUES ('$userID', NOW(), '$logText')
-");
+  VALUES (?, NOW(), ?)
+", 'is', array($userID, $logText));
 
 echo "2";
 ?>

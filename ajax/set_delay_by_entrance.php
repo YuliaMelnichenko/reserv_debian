@@ -19,7 +19,7 @@ else
 
 require_ajax_self_or_superuser($userId);
 
-$ss_delay_duration = $_SESSION['ss_delay_duration'];
+$ss_delay_duration = (int)$_SESSION['ss_delay_duration'];
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
@@ -29,12 +29,12 @@ $currentDate = $currentDateArr[2];
 
 mysqli_set_charset($link, "utf8");
 
-$query = mysqli_query($link, "SELECT * FROM Delays WHERE userID = '$userId' AND date = '$currentDate'");
+$query = db_query($link, "SELECT * FROM Delays WHERE userID = ? AND date = ?", 'is', array($userId, $currentDate));
 $merr=mysqli_error($link);
 if ( !$query ) 
 {
   echo "<br>mysql_error = $merr<br>";
-  $errorThere = 1;
+  exit;
 }
 
 $vn=mysqli_num_rows($query);
@@ -54,7 +54,7 @@ if ( $vn == 0 )
     $newID = $row[0] + 1;
   }
 
-  $query = mysqli_query($link, "INSERT INTO Delays VALUES ('$newID', '$currentDate', '$ss_delay_duration', '$userId', '-1', 'Без объяснения', '-1', '-1', '', '0')");
+  $query = db_execute($link, "INSERT INTO Delays VALUES (?, ?, ?, ?, -1, 'Без объяснения', -1, -1, '', 0)", 'isii', array($newID, $currentDate, $ss_delay_duration, $userId));
   $merr=mysqli_error($link);
   if (!$query)
   {

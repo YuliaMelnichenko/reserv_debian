@@ -10,9 +10,9 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 
 $userID_ = $_SESSION['ss_id']; 
 
-$training_date = $_POST['training_date'];
-$training_start_time = $_POST['training_start_time'];
-$training_stop_time = $_POST['training_stop_time'];
+$training_date = (string) ($_POST['training_date'] ?? '');
+$training_start_time = (string) ($_POST['training_start_time'] ?? '');
+$training_stop_time = (string) ($_POST['training_stop_time'] ?? '');
 
 include __DIR__ . "/../php_tori/connect.php";
 
@@ -28,7 +28,7 @@ else if ($row = mysqli_fetch_array($query0)) {
   $newID = $row[0] + 1;
 }
 
-$query = mysqli_query($link, "INSERT INTO gym_schedule (ID, USERID, DATE_TRAIN, START_TIME, STOP_TIME) VALUES ('$newID','$userID_','$training_date', '$training_start_time', '$training_stop_time')");
+$query = db_execute($link, 'INSERT INTO gym_schedule (ID, USERID, DATE_TRAIN, START_TIME, STOP_TIME) VALUES (?, ?, ?, ?, ?)', 'iisss', array($newID, $userID_, $training_date, $training_start_time, $training_stop_time));
 
 $merr=mysqli_error($link);
 

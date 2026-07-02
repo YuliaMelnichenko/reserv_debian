@@ -14,10 +14,10 @@ $userID = $_SESSION['ss_id'];
 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
-$start_time = $_POST['add_time_part_start_dt'];
-$stop_time = $_POST['add_time_part_stop_dt'];
-$base = $_POST['add_time_part_base'];
-$desk = $_POST['add_time_part_desk'];
+$start_time = (string) ($_POST['add_time_part_start_dt'] ?? '');
+$stop_time = (string) ($_POST['add_time_part_stop_dt'] ?? '');
+$base = (string) ($_POST['add_time_part_base'] ?? '');
+$desk = (string) ($_POST['add_time_part_desk'] ?? '');
 
 if ( isset( $_POST['byAlert'] ) AND $_POST['byAlert'] == 1 ){
   $byAlert = 1;
@@ -28,12 +28,17 @@ else{
   
 mysqli_set_charset($link, "utf8");
 
-$supervisor_query = mysqli_query($link,"SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 AND USERID = '$userID'");
+$supervisor_query = db_query($link, 'SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 AND USERID = ?', 'i', array($userID));
 $row = mysqli_fetch_array($supervisor_query);
 
 $sv_ID = $row["SUPERVISORID"];
                                             
-$query = mysqli_query($link, "INSERT INTO ADD_TIME (ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE, BYALERT ) VALUES ('$currentDate', '$sv_ID', '$userID','$start_time','$stop_time','$base','$desk', '', '0', '0', '$byAlert')");
+$query = db_execute(
+  $link,
+  "INSERT INTO ADD_TIME (ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE, BYALERT) VALUES (?, ?, ?, ?, ?, ?, ?, '', 0, 0, ?)",
+  'siissssi',
+  array($currentDate, $sv_ID, $userID, $start_time, $stop_time, $base, $desk, $byAlert)
+);
 $merr=mysqli_error($link);
 
 if (!$query){
@@ -47,7 +52,7 @@ else{
 
     $descDel = "<font color=\"#FF0000\">Из доп. времени:</font> ".$desk;
 
-    $query1 = mysqli_query($link, "UPDATE Delays SET explaneDesk = '$descDel' WHERE id = '$addTimeDescID'");
+  $query1 = db_execute($link, 'UPDATE Delays SET explaneDesk = ? WHERE id = ?', 'si', array($descDel, $addTimeDescID));
 
     unset($_SESSION['ss_ch_delay_ID']);
                                         

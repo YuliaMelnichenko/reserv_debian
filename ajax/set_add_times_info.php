@@ -8,15 +8,21 @@ header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
-$ID = $_POST['addID'];
-$DESC = $_POST['suDesc'];
-$ACCEPTMODE = $_POST['accept'];
-$userID = $_SESSION['ss_id']; 
+$ID = (int) ($_POST['addID'] ?? 0);
+$DESC = (string) ($_POST['suDesc'] ?? '');
+$ACCEPTMODE = (int) ($_POST['accept'] ?? 0);
+$userID = (int) $_SESSION['ss_id'];
+require_ajax_add_time_access($ID);
 
 include_once __DIR__ . "/../php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
-$query = mysqli_query($link, "UPDATE ADD_TIME SET SUIR = '$userID', SUPERVISORDESC = '$DESC', APPROVED='$ACCEPTMODE' WHERE ID = '$ID'"); 
+$query = db_execute(
+  $link,
+  'UPDATE ADD_TIME SET SUIR = ?, SUPERVISORDESC = ?, APPROVED = ? WHERE ID = ?',
+  'isii',
+  array($userID, $DESC, $ACCEPTMODE, $ID)
+);
 
 $merr=mysqli_error($link);
 if ( !$query ) 

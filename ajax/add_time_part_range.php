@@ -13,7 +13,7 @@ if (!isset($_SESSION['ss_id'])) {
   exit;
 }
 
-$userID_ = $_SESSION['ss_id'];
+$userID_ = (int)$_SESSION['ss_id'];
 $currentDate = date('Y-m-d');
 
 $add_time_part_start_date = isset($_POST['add_time_part_start_date']) ? $_POST['add_time_part_start_date'] : "";
@@ -66,15 +66,7 @@ function get_days_range_inclusive($startDate, $stopDate){
 
 mysqli_set_charset($link, "utf8");
 
-$add_time_part_start_date = mysqli_real_escape_string($link, $add_time_part_start_date);
-$add_time_part_stop_date = mysqli_real_escape_string($link, $add_time_part_stop_date);
-$add_time_part_start_time = mysqli_real_escape_string($link, $add_time_part_start_time);
-$add_time_part_stop_time = mysqli_real_escape_string($link, $add_time_part_stop_time);
-$add_time_part_base = mysqli_real_escape_string($link, $add_time_part_base);
-$add_time_part_desk = mysqli_real_escape_string($link, $add_time_part_desk);
-$userID_ = mysqli_real_escape_string($link, $userID_);
-
-$supervisor_query = mysqli_query($link, "SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 AND USERID = '$userID_' LIMIT 1");
+$supervisor_query = db_query($link, "SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 AND USERID = ? LIMIT 1", 'i', array($userID_));
 
 if (!$supervisor_query) {
   echo "<br>mysql_error = " . mysqli_error($link) . "<br>";
@@ -144,14 +136,10 @@ foreach ($newDaysRange as $rDay) {
     break;
   }
 
-  $rDayEsc = mysqli_real_escape_string($link, $rDay);
-  $startEsc = mysqli_real_escape_string($link, $start);
-  $stopEsc = mysqli_real_escape_string($link, $stop);
-
-  $query = mysqli_query($link, "INSERT INTO ADD_TIME 
+  $query = db_execute($link, "INSERT INTO ADD_TIME
     (ID, ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE, BYALERT)
     VALUES
-    ('$newID', '$currentDate', '$sv_ID', '$userID_', '$startEsc', '$stopEsc', '$add_time_part_base', '$add_time_part_desk', '', '0', '0', '$byAlert')");
+    (?, ?, ?, ?, ?, ?, ?, ?, '', 0, 0, ?)", 'isiissssi', array($newID, $currentDate, $sv_ID, $userID_, $start, $stop, $add_time_part_base, $add_time_part_desk, $byAlert));
 
   if (!$query) {
     $err .= "mysql_error = " . mysqli_error($link) . "<br>";

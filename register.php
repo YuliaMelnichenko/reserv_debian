@@ -24,9 +24,9 @@ $err = array();
 include_once __DIR__ . "/php_tori/connect.php";
 
 if (isset( $_POST['r_button']) ) {
-  $login = mysqli_real_escape_string($link, $_POST['r_login']);
+  $login = trim((string) ($_POST['r_login'] ?? ''));
 
-  $query = mysqli_query($link, "SELECT COUNT(id) AS cnt FROM employees WHERE login='$login'"); 
+  $query = db_query($link, 'SELECT COUNT(id) AS cnt FROM employees WHERE login = ?', 's', array($login));
   $merr = mysqli_error($link);
 
   $row = mysqli_fetch_assoc($query);
@@ -52,7 +52,7 @@ if (isset( $_POST['r_button']) ) {
 
     if ( count($err) == 0 )
     {
-      if(strlen($_POST['r_passwd']) != strlen($_POST['r_passwd_rep'])) 
+      if((string) $_POST['r_passwd'] !== (string) $_POST['r_passwd_rep'])
       { 
         $err[] = "Пароль и его повтор не совпадают"; 
       }
@@ -108,8 +108,8 @@ if (isset( $_POST['r_button']) ) {
 
     if(count($err) == 0) 
     { 
-      $login = mysqli_real_escape_string($link, $_POST['r_login']);   	       
-      $passwd = md5(md5(trim(mysqli_real_escape_string($link, $_POST['r_passwd'])))); 
+      $login = trim((string) $_POST['r_login']);
+      $passwd = md5(md5(trim((string) $_POST['r_passwd'])));
 
       $surname = $_POST['r_surname'];
       $first_name = $_POST['r_first_name'];
@@ -127,7 +127,7 @@ if (isset( $_POST['r_button']) ) {
 
         mysqli_set_charset($link, "utf8");
           
-        $res = mysqli_query($link, "insert into employees values ('$newuserid','$login','$passwd','$first_name','$second_name','$surname','','','-1')");
+        $res = db_execute($link, 'INSERT INTO employees VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', 'isssssssi', array($newuserid, $login, $passwd, $first_name, $second_name, $surname, '', '', -1));
 
         $merr = mysqli_error($link);
         if (!$res) { 
@@ -185,4 +185,4 @@ echo "<br><a href=\"index.php\" class=\"ml\" title=\"Вернуться на г�
 
 </div>
 </body>
-</html> 
+</html>
