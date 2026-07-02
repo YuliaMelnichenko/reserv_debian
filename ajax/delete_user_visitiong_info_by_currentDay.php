@@ -20,7 +20,12 @@ if ( isset($_POST['userID']) )
   include_once __DIR__ . "/../funcs.php";
   include_once __DIR__ . "/../php_tori/connect.php";
 
-  $query = mysqli_query($link, "DELETE FROM visiting WHERE date = '$currentDate' AND user_id = '$userID'"); 
+  $query = db_execute(
+    $link,
+    'DELETE FROM visiting WHERE date = ? AND user_id = ?',
+    'si',
+    array($currentDate, $userID)
+  );
   $merr = mysqli_error($link);
   if ( !$query ) 
   {

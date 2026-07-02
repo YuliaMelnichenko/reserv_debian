@@ -18,24 +18,24 @@ include_once __DIR__ . "/../php_tori/connect.php";
 $currentDateArr = get_current_datetime_in_timezone();
 $currentDate = $currentDateArr[2];
 
-$superuserID = $_POST['delayExplanationSU'];
-$delayExplanation = $_POST['delayExplanation'];
+$superuserID = (int) ($_POST['delayExplanationSU'] ?? -1);
+$delayExplanation = (string) ($_POST['delayExplanation'] ?? '');
 
 $mode = 0;
 
 if ( isset( $_POST['mode'] ) AND $_POST['mode'] == 1 )
 {
-  $mode = $_POST['mode'];
-  $delayID = $_POST['delayID'];
+  $mode = (int) $_POST['mode'];
+  $delayID = (int) ($_POST['delayID'] ?? 0);
 }
 
 if ( $mode == 0 )
 {
-  $query0 = mysqli_query($link, "SELECT ID, STATUS FROM Delays WHERE date = '$currentDate' AND userID = '$userID_'"); 
+  $query0 = db_query($link, 'SELECT ID, STATUS FROM Delays WHERE date = ? AND userID = ?', 'si', array($currentDate, $userID_));
 }
 else
 {
-  $query0 = mysqli_query($link, "SELECT ID, STATUS FROM Delays WHERE ID = '$delayID' AND userID = '$userID_'"); 
+  $query0 = db_query($link, 'SELECT ID, STATUS FROM Delays WHERE ID = ? AND userID = ?', 'ii', array($delayID, $userID_));
 }
 
 $insertMode = 1;
@@ -69,7 +69,12 @@ if ( $insertMode == 1 )
 mysqli_set_charset($link, "utf8");
 if ( $insertMode == 1 )
 {
-  $query = mysqli_query($link, "INSERT INTO Delays VALUES ('$newID', '$currentDate', '$ss_delay_duration', '$userID_', '$superuserID', '$delayExplanation', '-1', '-1', '', '0')");
+  $query = db_execute(
+    $link,
+    "INSERT INTO Delays VALUES (?, ?, ?, ?, ?, ?, -1, -1, '', 0)",
+    'isiiis',
+    array($newID, $currentDate, $ss_delay_duration, $userID_, $superuserID, $delayExplanation)
+  );
   $merr=mysqli_error($link);
   if (!$query)
   {
@@ -87,11 +92,11 @@ else
   {
     if ( $mode == 0 )
     { 
-      $query = mysqli_query($link, "UPDATE Delays SET supervisorID = '$superuserID', explaneDesk = '$delayExplanation' WHERE id = '$newID'");
+      $query = db_execute($link, 'UPDATE Delays SET supervisorID = ?, explaneDesk = ? WHERE id = ?', 'isi', array($superuserID, $delayExplanation, $newID));
     }
     else
     {
-      $query = mysqli_query($link, "UPDATE Delays SET supervisorID = '$superuserID', explaneDesk = '$delayExplanation' WHERE ID = '$delayID' AND userID = '$userID_'"); 
+      $query = db_execute($link, 'UPDATE Delays SET supervisorID = ?, explaneDesk = ? WHERE ID = ? AND userID = ?', 'isii', array($superuserID, $delayExplanation, $delayID, $userID_));
     }
 
     $merr=mysqli_error($link);

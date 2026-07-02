@@ -15,11 +15,16 @@ include_once __DIR__ . "/../funcs.php";
 
 mysqli_set_charset($link, "utf8");
 
-$date_train = $_POST['training_date'];
-$start_time = $_POST['training_start_time'];
-$stop_time = $_POST['training_stop_time'];
+$date_train = (string) ($_POST['training_date'] ?? '');
+$start_time = (string) ($_POST['training_start_time'] ?? '');
+$stop_time = (string) ($_POST['training_stop_time'] ?? '');
 
-$query = mysqli_query($link, "SELECT COUNT(DISTINCT USERID) FROM gym_schedule WHERE DATE_TRAIN='$date_train' AND START_TIME='$start_time' AND STOP_TIME='$stop_time'");
+$query = db_query(
+  $link,
+  'SELECT COUNT(DISTINCT USERID) FROM gym_schedule WHERE DATE_TRAIN = ? AND START_TIME = ? AND STOP_TIME = ?',
+  'sss',
+  array($date_train, $start_time, $stop_time)
+);
 $row = mysqli_fetch_assoc($query);
 $merr = mysqli_error($link);
 

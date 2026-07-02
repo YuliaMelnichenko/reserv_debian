@@ -7,13 +7,19 @@ header("Cache-Control: post-check=0, pre-check=0", false);
                 
 include __DIR__ . "/../php_tori/connect.php";
 include_once __DIR__ . "/../funcs.php";
+require_once __DIR__ . "/../inc/database.php";
 
-$__login = mysqli_real_escape_string($link, $_POST['login']);   	       
-$__passwd = md5(md5(trim(mysqli_real_escape_string($link, $_POST['passwd'])))); 
+$__login = trim((string) ($_POST['login'] ?? ''));
+$__passwd = md5(md5(trim((string) ($_POST['passwd'] ?? ''))));
 
 mysqli_set_charset($link, "utf8");
 
-$query = mysqli_query($link, "SELECT id, rate, defaultStartTime, allowedDelayMinutes, userTimeZoneMins, dayTransitionTime, remoteWork FROM employees WHERE login = '$__login' AND passwd = '$__passwd'"); 
+$query = db_query(
+  $link,
+  'SELECT id, rate, defaultStartTime, allowedDelayMinutes, userTimeZoneMins, dayTransitionTime, remoteWork FROM employees WHERE login = ? AND passwd = ?',
+  'ss',
+  array($__login, $__passwd)
+);
 $merr = mysqli_error($link);
 
 if ( !$query ) 
