@@ -1,5 +1,4 @@
 <?php
-// session_start();
 
 function get_current_datetime_in_timezone(){
   $valid = 0;
@@ -63,31 +62,31 @@ function sync_time_registration_session_by_period($link, $userID, $startDTStr, $
   $_SESSION['ss_startDTStr'] = $startDTStr;
   $_SESSION['ss_stopDTStr'] = $stopDTStr;
 
-$maxOpenShiftHours = 3;
-$maxOpenShiftSeconds = $maxOpenShiftHours * 60 * 60;
+  $maxOpenShiftHours = 3;
+  $maxOpenShiftSeconds = $maxOpenShiftHours * 60 * 60;
 
-$currentDateTimeResult = get_current_datetime_in_timezone();
-$currentDateTime = $currentDateTimeResult[1];
+  $currentDateTimeResult = get_current_datetime_in_timezone();
+  $currentDateTime = $currentDateTimeResult[1];
 
-$query = mysqli_query($link, "
-  SELECT ID, state
-  FROM visiting
-  WHERE user_id = '$userID'
-    AND (
-      (
-        in_dt >= '$startDTStr'
-        AND in_dt < '$stopDTStr'
+  $query = mysqli_query($link, "
+    SELECT ID, state
+    FROM visiting
+    WHERE user_id = '$userID'
+      AND (
+        (
+          in_dt >= '$startDTStr'
+          AND in_dt < '$stopDTStr'
+        )
+        OR
+        (
+          state != 0
+          AND in_dt < '$startDTStr'
+          AND TIMESTAMPDIFF(SECOND, '$startDTStr', '$currentDateTime') <= $maxOpenShiftSeconds
+        )
       )
-      OR
-      (
-        state != 0
-        AND in_dt < '$startDTStr'
-        AND TIMESTAMPDIFF(SECOND, '$startDTStr', '$currentDateTime') <= $maxOpenShiftSeconds
-      )
-    )
-  ORDER BY in_dt DESC, ID DESC
-  LIMIT 1
-");
+    ORDER BY in_dt DESC, ID DESC
+    LIMIT 1
+  ");
 
   if (!$query) {
     echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
@@ -106,110 +105,94 @@ $query = mysqli_query($link, "
   $_SESSION['ss_visiting_ID'] = (int)$row["ID"];
 }
 
-function get_splited_current_date_time_in_timezone()
-{
-    $retarr = get_current_datetime_in_timezone();
+function get_splited_current_date_time_in_timezone(){
+  $retarr = get_current_datetime_in_timezone();
   
-    $datevalStr = date( "Y-m-d", strtotime( $retarr[1] ) );
-    $timevalStr = date( "H:i:s", strtotime( $retarr[1] ) );
+  $datevalStr = date( "Y-m-d", strtotime( $retarr[1] ) );
+  $timevalStr = date( "H:i:s", strtotime( $retarr[1] ) );
 
-    $dateval = strtotime( $datevalStr );
-    $timeval = strtotime( $timevalStr );
+  $dateval = strtotime( $datevalStr );
+  $timeval = strtotime( $timevalStr );
 
-    return array($dateval, $timeval, $datevalStr, $timevalStr);
+  return array($dateval, $timeval, $datevalStr, $timevalStr);
 }
 
-function get_current_datetime_in_timezone_str( $showDate, $showTimeZone )
-{
-    $retStr = "";
+function get_current_datetime_in_timezone_str( $showDate, $showTimeZone ){
+  $retStr = "";
 
-    $result = get_current_datetime_in_timezone();
+  $result = get_current_datetime_in_timezone();
 
-    $valid = $result[0];
+  $valid = $result[0];
 
-    $dateStr = $result[2];
-    $timeStr = $result[3];
-    $timezoneStr = $result[5];
+  $dateStr = $result[2];
+  $timeStr = $result[3];
+  $timezoneStr = $result[5];
 
-    // $timeZoneMins = $timezone; // неизвестная переменная $timezone
-    // $timeZoneHours = round( $timeZoneMins / 60 );
-    // $timeZoneMins = $timeZoneMins - $timeZoneHours * 60;
+  if ( $valid == 1 ){
+    $retStr = $dateStr;
 
-    if ( $valid == 1 )
-    {
-        $retStr = $dateStr;
-
-        if ( $showDate == 1 )
-        {
-            $retStr = $retStr." ".$timeStr;
-        }
-
-        if ( $showTimeZone == 1 )
-        {
-            $retStr = $retStr." (".$timezoneStr.")";
-        }
+    if ( $showDate == 1 ){
+      $retStr = $retStr." ".$timeStr;
     }
+
+    if ( $showTimeZone == 1 ){
+      $retStr = $retStr." (".$timezoneStr.")";
+    }
+  }
     
-    return $retStr;
+  return $retStr;
 }
 
-function timezone_min_to_str( $timeZoneMinSrc )
-{
-    $sign = "+";
+function timezone_min_to_str( $timeZoneMinSrc ){
+  $sign = "+";
 
-    if ( $timeZoneMinSrc < 0 )
-    {
-      $sign = "-";
-    }
+  if ( $timeZoneMinSrc < 0 ){
+    $sign = "-";
+  }
 
-    $timeZoneMinSrc = (int)$timeZoneMinSrc;
+  $timeZoneMinSrc = (int)$timeZoneMinSrc;
 
-    $timeZoneHour = round($timeZoneMinSrc / 60);
-    $timeZoneMin = $timeZoneMinSrc - $timeZoneHour * 60;
+  $timeZoneHour = round($timeZoneMinSrc / 60);
+  $timeZoneMin = $timeZoneMinSrc - $timeZoneHour * 60;
 
-    $timeZoneHourStr = (string)$timeZoneHour;
-    $timeZoneMinStr = (string)$timeZoneMin;
+  $timeZoneHourStr = (string)$timeZoneHour;
+  $timeZoneMinStr = (string)$timeZoneMin;
 
-    if ( $timeZoneHour < 10 )
-    {
-      $timeZoneHourStr = "0".$timeZoneHourStr;
-    }
+  if ( $timeZoneHour < 10 ){
+    $timeZoneHourStr = "0".$timeZoneHourStr;
+  }
 
-    if ( $timeZoneMin < 10 )
-    {
-      $timeZoneMinStr = "0".$timeZoneMinStr;
-    }
+  if ( $timeZoneMin < 10 ){
+    $timeZoneMinStr = "0".$timeZoneMinStr;
+  }
 
-    $timeZoneRes = "UTC".$sign.$timeZoneHour.":".$timeZoneMinStr;
-
-    return $timeZoneRes;
+  $timeZoneRes = "UTC".$sign.$timeZoneHour.":".$timeZoneMinStr;
+  
+  return $timeZoneRes;
 }
 
-function split_data_and_time_by_nl_str( $indatetime )
-{
-    $retStr = "";
+function split_data_and_time_by_nl_str( $indatetime ){
+  $retStr = "";
 
-    $datePart = substr( $indatetime, 0, 10);
-    $timePart = substr( $indatetime, 11, 8);
+  $datePart = substr( $indatetime, 0, 10);
+  $timePart = substr( $indatetime, 11, 8);
 
-    $retStr = $datePart." ".$timePart;
+  $retStr = $datePart." ".$timePart;
 
-    return $retStr;
+  return $retStr;
 }
 
-function datetime_to_time_str( $indatetime )
-{
-    $retStr = "";
+function datetime_to_time_str( $indatetime ){
+  $retStr = "";
 
-    $timePart = substr( $indatetime, 11, 8);
+  $timePart = substr( $indatetime, 11, 8);
 
-    $retStr = $timePart;
+  $retStr = $timePart;
 
-    return $retStr;
+  return $retStr;
 }
 
-function datetimestr_to_day_start_stop_DT_ex_str($dateTimeStr, $dayTransitionTime)
-{
+function datetimestr_to_day_start_stop_DT_ex_str($dateTimeStr, $dayTransitionTime){
   if ($dayTransitionTime == "" || $dayTransitionTime == "NDF") {
     $dayTransitionTime = "00:00:00";
   }
@@ -283,76 +266,15 @@ function datetimestr_to_day_start_stop_DT_ex_str_idx($dateTimeStr, $dayTransitio
   );
 }
 
-function time_to_second( $timeStr )
-{
-    $hourVal = (int)date("H", strtotime($timeStr));
-    $minuteVal = (int)date("i", strtotime($timeStr));
-    $secondVal = (int)date("s", strtotime($timeStr));
+function time_to_second( $timeStr ){
+  $hourVal = (int)date("H", strtotime($timeStr));
+  $minuteVal = (int)date("i", strtotime($timeStr));
+  $secondVal = (int)date("s", strtotime($timeStr));
 
-    $timeVal = $hourVal * 3600 + $minuteVal * 60 + $secondVal;
+  $timeVal = $hourVal * 3600 + $minuteVal * 60 + $secondVal;
    
-    return $timeVal;
+  return $timeVal;
 }   
-
-function shift_datetimestr_by_day_num( $datetimeStr, $dayCnt )
-{
-    //$dateArr = datetimestr_to_day_start_stop_DT_str( $dateTime );
-    
-    $sign = "+";
-    if ( $dayCnt < 0 )
-    {
-        $sign = "-";
-    }    
-
-    $datetimeStr = date("Y-m-d H:i:s", strtotime($datetimeStr."$sign $dayCnt day"));
-
-    return $datetimeStr;
-}
-
-function set_cookie( $userName, $userPass )
-{
-  $duration = time() + 3600 * 24 * 31;  
-
-  $retSetName = setcookie( "TORIUSERNAME", $userName, $duration );
-  $retSetPass = setcookie( "TORIPASSWORD", $userPass, $duration );
-
-  if ( $retSetName == 1 AND $retSetPass == 1 )
-  {
-    return 1;
-  }
-  return 0;
-}
-
-function get_cookie( &$userName, &$userPass )
-{
-  $userName = $_COOKIE['TORIUSERNAME'];
-  $userPass = $_COOKIE['TORIPASSWORD'];
-
-  $userName = trim($userName);
-
-  if ( $userName != "" AND $userPass != "" )
-  {
-    return 1;
-  }
-  return 0;
-}
-
-function delete_cookie()
-{
-  $retSetName = setcookie( "TORIUSERNAME", "" );
-  $retSetPass = setcookie( "TORIPASSWORD", "" );
-
-  if ( $retSetName == 1 AND $retSetPass == 1 )
-  {
-    return 1;
-  }
-  return 0;
-}
-
-function get_last_location()
-{
-  return $_SESSION['ss_last_location'];
-}  
 
 function save_last_location( $location ){
   $_SESSION['ss_last_location'] = $location;
@@ -370,16 +292,13 @@ function move_to_last_location(){
     header("Location: $loc");
     exit(); 
   }
-  else
-  { 
+  else{ 
     header("Location: index.php");
   }
 }  
 
-function auth() 
-{
-  if ( !isset($_SESSION['ss_id']) ) 
-  {
+function auth() {
+  if ( !isset($_SESSION['ss_id']) ) {
     header("Location: auth.php");
   }
 }  
@@ -391,15 +310,12 @@ function get_dbsetup_param( $paramName ) {
 
   $query = mysqli_query($link, "SELECT valueInt, valueFloat, valueStr FROM DBSETUP WHERE paramName = '$paramName'"); 
 
-  if ( !$query ) 
-  {
+  if ( !$query ) {
     $success = 0;
   }
-  else
-  {
+  else{
     $vn = mysqli_num_rows($query);
-    if ( $vn == 1 )
-    {  
+    if ( $vn == 1 ){  
       $row0 = mysqli_fetch_array($query, MYSQLI_ASSOC);
       $valInt = $row0["valueInt"]; 	
       $valFloat = $row0["valueFloat"]; 	
@@ -411,227 +327,42 @@ function get_dbsetup_param( $paramName ) {
   return array( $success, $valInt, $valFloat, $valStr );
 }  
 
-function get_sv_name_by_userid( $user_id )
-{
+function get_sv_name_by_userid( $user_id ){
   include __DIR__ . "/php_tori/connect.php";
 
   $query0 = mysqli_query($link, "SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 and USERID='$user_id'"); 
 
   $merr=mysqli_error($link);
-  if ( !$query0 ) 
-  {
+  if ( !$query0 ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
+  else{
     $vn=mysqli_num_rows($query0);
-    if ( $vn >= 1 )
-    {  
+    if ( $vn >= 1 ){  
       $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC);
       $svID = $row0["SUPERVISORID"]; 	
     }
-    else
-    {
+    else{
       return "";
     }
   } 	
 
   $query = mysqli_query($link, "SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID='$svID'"); 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
+  else{
     $vn=mysqli_num_rows($query);
-    if ( $vn == 1 )
-    {  
+    if ( $vn == 1 ){  
       $row = mysqli_fetch_assoc($query);
       return $row["SURNAME"]." ".$row["FIRSTNAME"]." ".$row["LASTNAME"];
     }
-    else
-    {
+    else{
       return "Unknown. Error 2";
     }
   } 
-}  
-
-function get_group_user_IDs_by_svID( $svID, $mode )
-{
-  include __DIR__ . "/php_tori/connect.php";
-
-  $userIDs=array();
-
-  mysqli_set_charset($link, "utf8");
-  if ( $svID !=-1 )
-  {
-    $query0 = mysqli_query($link, "SELECT USERID FROM GROUPS WHERE SUPERVISORID='$svID' and TYPE='$mode' GROUP BY USERID"); 
-  }
-  else
-  {
-    $query0 = mysqli_query($link, "SELECT USERID FROM GROUPS WHERE TYPE='$mode' GROUP BY USERID"); 
-  }
-
-  $merr=mysqli_error($link);
-  if ( !$query0 ) 
-  {
-    echo "<br>mysqli_error = $merr<br>";
-  }
-  else
-  {
-    $vn=mysqli_num_rows($query0);
-    if ($vn == 0)
-    {
-      $userIDs[] = $svID;
-    }
-    else
-    {
-      while($row = mysqli_fetch_array($query0, MYSQLI_ASSOC))
-      {
-        $userIDs[] = $row["USERID"];  
-      }
-    }
-  } 
-  return $userIDs;
-}  
-
-function get_group_user_info_by_svID( $svID, $mode )
-{
-  include __DIR__ . "/php_tori/connect.php";
-
-  $userIDs=array();
-
-  mysqli_set_charset($link, "utf8");
-  if ( $svID !=-1 )
-  {
-    $query0 = mysqli_query($link, "SELECT USERID FROM GROUPS WHERE SUPERVISORID='$svID' and TYPE='$mode' GROUP BY USERID"); 
-  }
-  else
-  {
-    $query0 = mysqli_query($link, "SELECT USERID FROM GROUPS WHERE TYPE='$mode' GROUP BY USERID"); 
-  }
-
-  $merr=mysqli_error($link);
-  if ( !$query0 ) 
-  {
-    echo "<br>mysqli_error = $merr<br>";
-  }
-  else
-  {
-    $vn=mysqli_num_rows($query0);
-    if ($vn == 0)
-    {
-      $userIDs[] = $svID;
-    }
-    else
-    {
-      while($row = mysqli_fetch_array($query0, MYSQLI_ASSOC))
-      {
-        $userIDs[] = $row["USERID"];  
-      }
-    }
-  }
-  
-
-  $newUserIDs=array();
-
-  $ownUserID = -1;
-
-  if ( isset( $_SESSION['ss_id'] ) )
-  {
-    $ownUserID = $_SESSION['ss_id'];
-    if ( $ownUserID != 500 & $ownUserID != 501 )
-    {
-        $newUserIDs[] = $ownUserID;
-    }
-  }
-
-  foreach ($userIDs as $val)
-  {
-    if ( $val != $ownUserID )
-    {
-      $newUserIDs[] = $val;
-    }
-  }
-
-  $usersRate=array();
-  $usersDdefaultStartTime=array();
-  $usersDefaultStartHour=array();
-  $usersDefaultStartMinute=array();
-  $usersAllowedDelay=array();
-  
-  foreach ( $newUserIDs as $ID )
-  {
-    $query = mysqli_query($link, "SELECT rate, defaultStartTime, defaultStartHour, defaultStartMinute, AllowedDelayMinutes FROM employees WHERE ID='$ID'"); 
-    $merr=mysqli_error($link);
-    if ( !$query ) 
-    {
-      echo "<br>mysqli_error = $merr<br>";
-    }
-    else
-    {
-      $vn=mysqli_num_rows($query);
-      if ( $vn == 1 )
-      {  
-        $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
- 	$usersRate[] = $row["rate"];
- 	$usersDdefaultStartTime[] = $row["defaultStartTime"];
- 	$usersDefaultStartHour[] = $row["defaultStartHour"];
- 	$usersDefaultStartMinute[] = $row["defaultStartMinute"];
- 	$usersAllowedDelay[] = $row["AllowedDelayMinutes"];
-      }
-    }
-  }
-  $usersInfo = array();
-  $usersInfo[1] = $newUserIDs;
-  $usersInfo[2] = $usersRate;
-  $usersInfo[3] = $usersDdefaultStartTime;
-  $usersInfo[4] = $usersDefaultStartHour;
-  $usersInfo[5] = $usersDefaultStartMinute;
-  $usersInfo[6] = $usersAllowedDelay;
-
-  return $usersInfo;
-}  
-
-function get_group_user_IDs_by_svID_for_report( $svID )
-{
-  include __DIR__ . "/php_tori/connect.php";
-
-  $userIDs=array();
-
-  mysqli_set_charset($link, "utf8");
-  if ( $svID !=-1 )
-  {
-    $query0 = mysqli_query($link, "SELECT USERID FROM GROUPS WHERE SUPERVISORID='$svID' and ( TYPE=0 or TYPE=-1 ) GROUP BY USERID"); 
-  }
-  else
-  {
-    $query0 = mysqli_query($link, "SELECT USERID FROM GROUPS WHERE TYPE=0 or TYPE=-1 GROUP BY USERID"); 
-  }
-
-  $merr=mysqli_error($link);
-  if ( !$query0 ) 
-  {
-    echo "<br>mysqli_error = $merr<br>";
-  }
-  else
-  {
-    $vn=mysqli_num_rows($query0);
-    if ($vn == 0)
-    {
-      $userIDs[] = $svID;
-    }
-    else
-    {
-      while($row = mysqli_fetch_array($query0, MYSQLI_ASSOC))
-      {
-        $userIDs[] = $row["USERID"];  
-      }
-    }
-  } 
-  return $userIDs;
-}  
+}   
 
 function get_group_user_info_by_svID_for_report_ex( $svID ){
   include __DIR__ . "/php_tori/connect.php";
@@ -696,19 +427,15 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
 
   $ownUserID = -1;
 
-  if ( isset( $_SESSION['ss_id'] ) )
-  {
+  if ( isset( $_SESSION['ss_id'] ) ){
     $ownUserID = $_SESSION['ss_id'];
-    if ( $ownUserID != 500 & $ownUserID != 501 )
-    {
-        $newUserIDs[] = $ownUserID;
+    if ( $ownUserID != 500 & $ownUserID != 501 ){
+      $newUserIDs[] = $ownUserID;
     }
   }
 
-  foreach ($userIDs as $val)
-  {
-    if ( $val != $ownUserID )
-    {
+  foreach ($userIDs as $val){
+    if ( $val != $ownUserID ){
       $newUserIDs[] = $val;
     }
   }
@@ -716,26 +443,21 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
   $usersRate=array();
   $usersFIO=array();
   
-  foreach ( $newUserIDs as $ID )
-  {
+  foreach ( $newUserIDs as $ID ){
     $query = mysqli_query($link, "SELECT rate, firstname, lastname, surname FROM employees WHERE ID='$ID'"); 
     $merr=mysqli_error($link);
-    if ( !$query ) 
-    {
+    if ( !$query ) {
       echo "<br>mysqli_error = $merr<br>";
     }
-    else
-    {
+    else{
       $vn=mysqli_num_rows($query);
-      if ( $vn == 1 )
-      {  
+      if ( $vn == 1 ){  
         $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
  	      $usersRate[] = $row["rate"];
         $usersFIO[] = $row["surname"]." <span style=\"color:#94A097\"> </br>".$row["firstname"]." </br>".$row["lastname"]." </span>";
       }
     }
   }
-  //foreach ($usersFIO as $val){ echo "$val\n"; } echo "<br>";
 
   $usersInfo = array();
   $usersInfo[0] = $newUserIDs;
@@ -745,97 +467,41 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
   return $usersInfo;
 }  
 
-function get_name_by_userid( $user_id )
-{
+function get_name_by_userid( $user_id ){
   include __DIR__ . "/php_tori/connect.php";
   $query = mysqli_query($link, "SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID='$user_id'"); 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
+  else{
     $vn=mysqli_num_rows($query);
-    if ( $vn == 1 )
-    {  
+    
+    if ( $vn == 1 ){  
       $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
       return $row["SURNAME"]." ".$row["FIRSTNAME"]." ".$row["LASTNAME"];
     }
-    else
-    {
+    else{
       return "Unknown. Error 3";
     }
   } 
 }  
 
-function added_time_status_str( $code )
-{
-  $result = "undefined!";
-
-  if ( $code == 0 )
-  {
-    $result = "На рассмотрении";    
-  }
-  if ( $code == -1 )
-  {
-    $result = "Отклонено";    
-  }
-  if ( $code == 1 )
-  {
-    $result = "Принято";    
-  }
-
-  return $result;
-}
-
-function format_time_( $short_time_ )
-{
+function format_time_( $short_time_ ){
   $hours = (int)($short_time_/(3600));
-  if ( $hours > 24 )
-  {
+  
+  if ( $hours > 24 ){
     $result_time = gmdate("dд H:i:s", $short_time_ );
   }
-  else
-  {
+  else{
     $result_time = gmdate("H:i:s", $short_time_ );
   }
 
   return $result_time;
 }
 
-function valid_dinner( $short_time_ )
-{
-  $hours = (int)($short_time_/(3600));
-  $mins	= (int)($short_time_/(60) - $hours*(60));
-
-  $valid = 1;
-
-  if ( $hours >= 1 AND $mins >= 15 )
-  {
-    $valid = 0;
-  }
-
-  return $valid;
-}
-
-function valid_workday( $short_time_ )
-{
-  $hours = (int)($short_time_/(3600));
-  $mins	= (int)($short_time_/(60) - $hours*(60));
-
-  $valid = 1;
-
-  if ( $hours <= 7 AND $mins < 55 )
-  { 
-    $valid = 0;
-  }
-  
-  return $valid;
-}
-
-function format_time_hour_min( $short_time_ )
-{
+function format_time_hour_min( $short_time_ ){
   $hours = (int)($short_time_/(3600));
 
   $mins	= (int)($short_time_/(60) - $hours*(60));
@@ -859,8 +525,7 @@ function format_time_hour_min( $short_time_ )
   return $result_time;
 }
 
-function format_time_differs_from_norm_hour_min( $short_time_, $norm )
-{
+function format_time_differs_from_norm_hour_min( $short_time_, $norm ){
   $hours = (int)($short_time_/(3600)); 
 
   $mins	= (int)($short_time_/(60) - $hours*(60));
@@ -890,23 +555,19 @@ function format_time_differs_from_norm_hour_min( $short_time_, $norm )
    $mins = "0".$mins;
 
   $result_time = $hours.":".$mins;
-  #$result_time = $minutes_;
 
   return $result_time;
 }
 
-function GetWeekDay( $date_one )
-{
+function GetWeekDay( $date_one ){
   return date('w',strtotime( $date_one ));
 }
 
-function GetMonthDay( $date_one )
-{
+function GetMonthDay( $date_one ){
   return date('d',strtotime( $date_one ));
 }
 
-function GetWeekDayName( $week_day )
-{
+function GetWeekDayName( $week_day ){
   if ( $week_day == 1 )
     return "Понедельник";
   if ( $week_day == 2 )
@@ -923,8 +584,7 @@ function GetWeekDayName( $week_day )
     return "Воскресенье";
 }
 
-function GetMonthName( $month )
-{
+function GetMonthName( $month ){
   if ( $month == 1 )
     return "Январь";
   if ( $month == 2 )
@@ -951,38 +611,6 @@ function GetMonthName( $month )
     return "Декабрь";
 }
 
-function GetMonthNameEx( $offset )
-{
-  $StatCurrMonthNum = (int)date('m');
-
-  $StatCurrMonthNum = $StatCurrMonthNum + $offset;
-
-  if ( $StatCurrMonthNum == 1 )
-    return "Январь";
-  if ( $StatCurrMonthNum == 2 )
-    return "Февраль";
-  if ( $StatCurrMonthNum == 3 )
-    return "Март";
-  if ( $StatCurrMonthNum == 4 )
-    return "Апрель";
-  if ( $StatCurrMonthNum == 5 )
-    return "Май";
-  if ( $StatCurrMonthNum == 6 )
-    return "Июнь";
-  if ( $StatCurrMonthNum == 7 )
-    return "Июль";
-  if ( $StatCurrMonthNum == 8 )
-    return "Август";
-  if ( $StatCurrMonthNum == 9 )
-    return "Сентябрь";
-  if ( $StatCurrMonthNum == 10 )
-    return "Октябрь";
-  if ( $StatCurrMonthNum == 11 )
-    return "Ноябрь";
-  if ( $StatCurrMonthNum == 12 )
-    return "Декабрь";
-}
-
 function GetHourNormByMonth( $date, $rate ){
   include __DIR__ . "/php_tori/connect.php";
 
@@ -991,20 +619,17 @@ function GetHourNormByMonth( $date, $rate ){
   $query0 = mysqli_query($link, "SELECT dur40, dur36, dur24 FROM factory_calendar WHERE date='$date'"); 
 
   $merr=mysqli_error($link);
-  if ( !$query0 ) 
-  {
+  
+  if ( !$query0 ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
-   
+  else{
     $vn=mysqli_num_rows($query0);
-    if ( $vn > 1 )
-    {  
+    
+    if ( $vn > 1 ){  
       return "Error 378. Dublicate factory calendar dates";
     }
-    else
-    {
+    else{
       $row0 = mysqli_fetch_array($query0,MYSQLI_ASSOC);
       if ( $rate == 40 ){ $duration = $row0["dur40"]; }	
       if ( $rate == 36 ){ $duration = $row0["dur36"]; }	
@@ -1014,14 +639,8 @@ function GetHourNormByMonth( $date, $rate ){
   return $duration; 	
 }
 
-function DayInc( $day )
-{
+function DayInc( $day ){
   return strtotime( "+1 day", $day );
-}
-
-function DayDec( $day )
-{
-  return strtotime( "-1 day", $day );
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1031,6 +650,7 @@ function am_i_superuser( $userID ) {
 
   $query = mysqli_query($link, "SELECT * FROM GROUPS WHERE SUPERVISORID='$userID' and TYPE <> -1"); 
   $merr = mysqli_error($link);
+  
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
     return 0;
@@ -1044,8 +664,7 @@ function am_i_superuser( $userID ) {
   return 0;
 }
 
-function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotificationCount, &$refusedNotificationCount, &$deletedNotificationCount, &$newNotificationCount )
-{
+function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotificationCount, &$refusedNotificationCount, &$deletedNotificationCount, &$newNotificationCount ){
   include __DIR__ . "/php_tori/connect.php";
 
   $notificationCount = 0;
@@ -1077,30 +696,26 @@ function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotifi
                           a.date > ADDDATE( '$currentDate', INTERVAL -180 DAY )");
 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
     return 0;
   }
-  else
-  {
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
+  else{
+    
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
       $approved = $row["status"];
-      if ( $approved == 0 )
-      {
+      
+      if ( $approved == 0 ){
         $newNotificationCount ++;  
       }
-      else if ( $approved == 99 OR $approved == 100 OR $approved == 101 )
-      {
+      else if ( $approved == 99 OR $approved == 100 OR $approved == 101 ){
         $deletedNotificationCount ++;  
       }
-      else if ( $approved == -1 )
-      {
+      else if ( $approved == -1 ){
         $refusedNotificationCount ++;  
       }
-      else if ( $approved == 1 )
-      {
+      else if ( $approved == 1 ){
         $acceptedNotificationCount ++;  
       }
       $notificationCount ++;
@@ -1109,8 +724,7 @@ function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotifi
   return 1;
 }
 
-function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNotificationCount )
-{
+function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNotificationCount ){
   include __DIR__ . "/php_tori/connect.php";
 
   $notificationCount = 0;
@@ -1121,19 +735,15 @@ function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNoti
 
   $merr=mysqli_error($link);
 
-  if ( !$query ) 
-  {
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
     return 0;
   }
-  else
-  {
-    while ( $row1 = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
+  else{
+    while ( $row1 = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
       $startDate = $row1["START_DT"];
 
-      if ( $startDate == $currentDate )
-      {       
+      if ( $startDate == $currentDate ){
         $currentDayNotificationCount ++;  
       }
       $notificationCount ++;
@@ -1200,6 +810,7 @@ function get_notification_count( $user_id ){
                         and userid in (SELECT USERID FROM GROUPS WHERE SUPERVISORID='$user_id' and type=0)"); 
 
   $merr=mysqli_error($link);
+  
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
@@ -1230,6 +841,7 @@ function get_delay_notification_count( $user_id ){
                            a.userid in (SELECT c.userid FROM GROUPS c WHERE c.supervisorid=$user_id and type=3)"); 
 
   $merr=mysqli_error($link);
+  
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
@@ -1248,6 +860,7 @@ function get_penalty_id(){
   $newID = 0;
 
   $merr=mysqli_error($link);
+  
   if ( !$query0 ) {
     echo "<br>mysqli_error = $merr<br>";
   }
@@ -1255,24 +868,6 @@ function get_penalty_id(){
     $newID = $row[0] + 1;
   }
   return $newID;
-}
-
-function time_defined( $time_ ){
-  if ( $time_ == "00:00:00" ){
-    return 0;
-  }
-  else{
-    return 1;
-  }
-}
-
-function represent_time( $time_ ){
-  if ( time_defined( $time_ ) == 1 ){
-    return "<font size=\"2\" color=\"#000000\" face=\"Arial\">$time_</font>";    
-  }
-  else{
-    return "<font size=\"2\" color=\"#ff0000\" face=\"Arial\">??:??:??</font>";    
-  }
 }
 
 function isWeekEnd( $day ){
@@ -1294,147 +889,6 @@ function round_to_minute( $time ){
     $timeMinutes = $timeMinutes + 60;
   }
   return $timeMinutes;
-}
-
-function work_day_duration_current_date( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration ){
-  if ( time_defined( $in_time ) == 0 ){
-    return "??:??:??";
-  }
-  else if ( time_defined( $out_time ) == 0 ){
-    if ( time_defined( $eat_start ) == 0 AND time_defined( $eat_stop ) == 0 ){
-      return format_time_d( strtotime(date("H:i:s")) - strtotime($in_time) + $add_time_duration );
-    }
-    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 0 ){
-      return format_time_d( strtotime($eat_start) - strtotime($in_time) + $add_time_duration );
-    }
-    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 1 ){
-      return format_time_d( strtotime(date("H:i:s")) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) ) );
-    }
-  }
-  else{
-    return format_time_d( strtotime($out_time) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) ) + $add_time_duration );  
-  }
-}
-
-function work_day_duration( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration ){
-  if ( time_defined( $in_time ) == 0 OR time_defined( $out_time ) == 0 OR time_defined( $eat_start ) == 0 OR time_defined( $eat_stop ) == 0 ){
-    if ( $add_time_duration == 0 )
-      return "-1";
-    else 
-      return format_time_d( $add_time_duration );
-  }
-  else{
-    return format_time_d( strtotime($out_time) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) ) + $add_time_duration );  
-  }
-}
-
-function work_day_duration_current_date_n( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration ){
-  if ( time_defined( $in_time ) == 0 ){
-    return 0;
-  }
-  else if ( time_defined( $out_time ) == 0 ){
-    if ( time_defined( $eat_start ) == 0 AND time_defined( $eat_stop ) == 0 ){
-      return strtotime(date("H:i:s")) - strtotime($in_time) + $add_time_duration;
-    }
-    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 0 ){
-      return strtotime($eat_start) - strtotime($in_time) + $add_time_duration;
-    }
-    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 1 ){
-      return strtotime(date("H:i:s")) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) );
-    }
-  }
-  else{
-    return format_time_d( strtotime($out_time) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) ) + $add_time_duration );  
-  }
-}
-
-function work_day_duration_current_date_nn( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration ){
-  if ( time_defined( $in_time ) == 0 ){
-    return 0;
-  }
-  else if ( time_defined( $out_time ) == 0 ){
-    if ( time_defined( $eat_start ) == 0 AND time_defined( $eat_stop ) == 0 ){
-      return strtotime(date("H:i:s")) - strtotime($in_time) + $add_time_duration;
-    }
-    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 0 ){
-      return strtotime($eat_start) - strtotime($in_time) + $add_time_duration;
-    }
-    if ( time_defined( $eat_start ) == 1 AND time_defined( $eat_stop ) == 1 ){
-      return strtotime(date("H:i:s")) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) );
-    }
-  }
-  else{
-    return strtotime($out_time) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) ) + $add_time_duration;  
-  }
-}
-
-function work_day_duration_n( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration ){
-  if ( time_defined( $in_time ) == 0 OR time_defined( $out_time ) == 0 OR time_defined( $eat_start ) == 0 OR time_defined( $eat_stop ) == 0 ){
-    if ( $add_time_duration == 0 )
-      return 0;
-    else 
-      return $add_time_duration;
-  }
-  else{
-    return strtotime($out_time) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) ) + $add_time_duration;  
-  }
-}
-
-function format_time_d( $short_time_ ){
-  $hours = (int)($short_time_/(3600));
-
-  $mins	= (int)($short_time_/(60) - $hours*(60));
-  $secs = (int)($short_time_ - $hours*(3600) - $mins*(60) );
-  
-  if ( $hours < 10 )
-   $hours = "0".$hours;
-
-  if ( $mins < 10 )
-   $mins = "0".$mins;
-
-  if ( $secs < 10 )
-   $secs = "0".$secs;
-
-  $result_time = $hours.":".$mins.":".$secs;
-  return "<font size=\"2\" color=\"#000000\" face=\"Arial\">".$result_time."</font>";
-}
-
-function format_time_d_pure( $short_time_ ){
-  $hours = (int)($short_time_/(3600));
-
-  $mins	= (int)($short_time_/(60) - $hours*(60));
-  $secs = (int)($short_time_ - $hours*(3600) - $mins*(60) );
-  
-  if ( $hours < 10 )
-   $hours = "0".$hours;
-
-  if ( $mins < 10 )
-   $mins = "0".$mins;
-
-  if ( $secs < 10 )
-   $secs = "0".$secs;
-
-  $result_time = $hours.":".$mins.":".$secs;
-  return $result_time;
-}
-
-function format_time_d_hhmm( $short_time_ ){
-  $hours = (int)($short_time_/(3600));
-
-  $mins	= (int)($short_time_/(60) - $hours*(60));
-  $secs = (int)($short_time_ - $hours*(3600) - $mins*(60) );
-
-  if( $secs >= 30 )
-    $mins = $mins + 1;
-  
-  if ( $hours < 10 )
-   $hours = "0".$hours;
-
-  if ( $mins < 10 )
-   $mins = "0".$mins;
-
-  $result_time = $hours.":".$mins;
-  return "<font size=\"2\" color=\"#000000\" face=\"Arial\">".$result_time."</font>";
 }
 
 function format_time_d_hhmm_pure( $short_time_ ){
@@ -1503,178 +957,40 @@ function format_time_d_hhmmss_pure_HH( $short_time_ ){
   return $result_time;
 }
 
-function format_time_d_hhmmss_pure_styled( $short_time_ )
-{
+function format_time_d_hhmmss_pure_styled( $short_time_ ){
   $result_time = format_time_d_hhmmss_pure( $short_time_ );
 
-  if ( $short_time_ > 0 )
-  {
+  if ( $short_time_ > 0 ){
     $result_time = "<h5 class=\"middle\">".$result_time."</h5>";
   }
-  else
-  {
+  else{
     $result_time = "<h5 class=\"middleGrey\">".$result_time."</h5>";
   }
   return $result_time;
 }
 
-function day_duration( $stop_date, $start_date )
-{
-  $seconds = strtotime( $stop_date ) - strtotime( $start_date );
-  $days = $seconds/24/60/60;
-  return $days;
-}
-
-function hours_norm( $stop_date, $start_date, $use_start_date )
-{
-  $procDate = $stop_date;
-  $validDays = 0;
-
-  if ( $use_start_date == 0 )
-  {
-    $start_date = DayIncDN( $start_date, 1 );
-
-  }
-
-  for ( ; ; $procDate = DayDecDN( $procDate, 1 ) ) 
-  {
-    //echo 
-    if ( is_weakend( $procDate ) )
-    {
-      if ( is_workday( $procDate ) )
-      {
-        $validDays ++;
-      }
-    }
-    else
-    {
-      if ( !is_holiday( $procDate ) )
-      {
-        $validDays ++;
-      }
-    }
-    if( $procDate <= $start_date )
-      break; 
-  }
-
-  return $validDays * 8;
-}
-
-function estimate_hours( $hoursMinutesNorm, $realSeconds )
-{
-  $border = 0; //Percent  
-
-  $secondsNorm = $hoursMinutesNorm;
-
-  if ( $realSeconds - $secondsNorm < 0 )
-  {
-    $differ = abs( $realSeconds - $secondsNorm );
-    $offset = $differ/$secondsNorm * 100;
-    if ( $offset > $border )
-      return 0;
-    else
-      return 1;
-  }
-  else
-    return 1;
-}
-
-function H_to_hhmm( $hours, $Minutes )
-{
-  $hoursStr = $hours;
-  $MinutesStr = "";
-
-  if ( $hours < 10 )
-    $hoursStr = "0".$hours;
-
-  if ( $Minutes < 10 )
-    $MinutesStr = "0".$Minutes;
-
-  return $hoursStr.":".$MinutesStr;
-}
-
-function is_weakend( $date )
-{
+function is_weakend( $date ){
   $dayN = GetWeekDayD( $date );
+  
   if ( $dayN == 6 OR $dayN == 7 )
     return 1;
-  return 0;
-}
-
-function is_workday( $date )
-{
-  include __DIR__ . "/php_tori/connect.php";
-    
-  $query = mysqli_query($link, "SELECT * FROM work_dayoff where date = '$date' and type = 1"); 
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
-    echo "<br>mysqli_error = $merr<br>";
-  }
-  else
-  {
-    $vn=mysqli_num_rows($query);
-    if ( $vn == 1 )
-    {
-      return 1;
-    }
   
     return 0;
-  }
-  return 0;
 }
 
-function currentWorcDayDurationMinutes()
-{
-  $minutes = (int)((strtotime(GetCurrentTime()) - strtotime(GetWorkDayStartTime()))/(60));
-  $hours = (int)($minutes/60);
-  return $minutes - $hours*60;  
-}
-
-function currentWorcDayDurationHours()
-{
-  return (int)((strtotime(GetCurrentTime()) - strtotime(GetWorkDayStartTime()))/(60*60));
-}    
-
-function is_holiday( $date )
-{
-  include __DIR__ . "/php_tori/connect.php";
-
-  $query = mysqli_query($link, "SELECT * FROM work_dayoff where date = '$date' and type = 0"); 
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
-    echo "<br>mysqli_error = $merr<br>";
-  }
-  else
-  {
-    $vn=mysqli_num_rows($query);
-    if ( $vn == 1 )
-    {
-      return 1;
-    }
-  
-    return 0;
-  }
-  return 0;
-}
-
-function get_workdays_holidays_bay_range( $startDate, $stopDate )
-{
+function get_workdays_holidays_bay_range( $startDate, $stopDate ){
   $dates = array();
   $types = array();
   include __DIR__ . "/php_tori/connect.php";
 
   $query = mysqli_query($link, "SELECT distinct DATE, TYPE FROM work_dayoff where date >= '$startDate' and date <= '$stopDate'"); 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
+  else{
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
       $dates[] = $row["DATE"];
       $types[] = $row["TYPE"];
     }
@@ -1686,22 +1002,19 @@ function get_workdays_holidays_bay_range( $startDate, $stopDate )
   return $result;
 }
 
-function get_holidays()
-{
+function get_holidays(){
   $holidays = array();
   $index = 1;
   include __DIR__ . "/php_tori/connect.php";
 
   $query = mysqli_query($link, "SELECT DATE FROM work_dayoff where type = 0"); 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
+  else{
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
       $holidays[$index] = $row["DATE"];
       $index = $index + 1;
     }
@@ -1709,22 +1022,19 @@ function get_holidays()
   return $holidays;
 }
 
-function get_work_day()
-{
+function get_work_day(){
   $workDays = array();
   $index = 1;
   include __DIR__ . "/php_tori/connect.php";
 
   $query = mysqli_query($link, "SELECT DATE FROM work_dayoff where type = 1"); 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
+  else{
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
       $workDays[$index] = $row["DATE"];
       $index = $index + 1;
     }
@@ -1732,35 +1042,27 @@ function get_work_day()
   return $workDays;
 }
 
-function get_days_range( $startDate, $stopDate )
-{
+function get_days_range( $startDate, $stopDate ){
   $daysRange = array();
   $idx = 1;
 
-
-  for ( $date = $startDate; ; $date = DayIncDN( $date, 1 ) )
-  {
+  for ( $date = $startDate; ; $date = DayIncDN( $date, 1 ) ){
     $daysRange[$idx] = $date;
     $idx ++;  
-
         
-    if ( $date == $stopDate )
-    {
+    if ( $date == $stopDate ){
       break;
     }
   }
   return $daysRange;
 }
 
-function get_days_wo_weekends( $daysRange )
-{
+function get_days_wo_weekends( $daysRange ){
   $days = array();
   $idx = 1;
 
-  for ( $idx1 = 1; $idx1 <= count( $daysRange ); $idx1 ++ )
-  {
-    if ( ! isWeekEnd( $daysRange[$idx1] ) )
-    {
+  for ( $idx1 = 1; $idx1 <= count( $daysRange ); $idx1 ++ ){
+    if ( ! isWeekEnd( $daysRange[$idx1] ) ){
       $days[$idx] = $daysRange[$idx1];
       $idx ++;  
     }
@@ -1769,28 +1071,23 @@ function get_days_wo_weekends( $daysRange )
   return $days;
 }
 
-function get_days_wo_holidays( $daysRange )
-{
+function get_days_wo_holidays( $daysRange ){
   $holidays = get_holidays();
 
   $days = array();
   $idx = 1;
 
-  for ( $idx1 = 1; $idx1 <= count( $daysRange ); $idx1 ++ )
-  {
+  for ( $idx1 = 1; $idx1 <= count( $daysRange ); $idx1 ++ ){
     $found = 0;
 
-    for ( $idx2 = 1; $idx2 <= count( $holidays ); $idx2 ++ )
-    {
+    for ( $idx2 = 1; $idx2 <= count( $holidays ); $idx2 ++ ){
 
-      if ( $daysRange[$idx1] == $holidays[$idx2] )
-      {
+      if ( $daysRange[$idx1] == $holidays[$idx2] ){
         $found = 1;
         break;
       }
     }
-    if ( $found == 0 )
-    {
+    if ( $found == 0 ){
       $days[$idx] = $daysRange[$idx1];
       $idx ++;  
     }
@@ -1799,27 +1096,22 @@ function get_days_wo_holidays( $daysRange )
   return $days;
 }      
 
-function get_days_with_add_workdays( $daysRange )
-{
+function get_days_with_add_workdays( $daysRange ){
   $workDays = get_work_day();
 
   $days = $daysRange;
   $idx = count($daysRange) + 1;
 
-  for ( $idx1 = 1; $idx1 <= count( $workDays ); $idx1 ++ )
-  {
+  for ( $idx1 = 1; $idx1 <= count( $workDays ); $idx1 ++ ){
     $found = 0;
 
-    for ( $idx2 = 1; $idx2 <= count( $daysRange ); $idx2 ++ )
-    {
-      if ( $workDays[$idx1] == $daysRange[$idx2] )
-      {
+    for ( $idx2 = 1; $idx2 <= count( $daysRange ); $idx2 ++ ){
+      if ( $workDays[$idx1] == $daysRange[$idx2] ){
         $found = 1;
         break;
       }
     }
-    if ( $found == 1 )
-    {
+    if ( $found == 1 ){
       $days[$idx] = $workDays[$idx1];
       $idx ++;  
     }
@@ -1827,84 +1119,33 @@ function get_days_with_add_workdays( $daysRange )
   return $days;
 }
 
-function max_date( $daysRange )
-{
+function max_date( $daysRange ){
   if ( count($daysRange) == 0 )
     return "";
   $maxDate = $daysRange[1];
-  for ( $idx1 = 1; $idx1 <= count( $daysRange ); $idx1 ++ )
-  {
-    if( strtotime( $daysRange[$idx1] ) > strtotime( $maxDate ) )
-    {
+  
+  for ( $idx1 = 1; $idx1 <= count( $daysRange ); $idx1 ++ ){
+    if( strtotime( $daysRange[$idx1] ) > strtotime( $maxDate )) {
       $maxDate = $daysRange[$idx1];
     }
   }                                
   return $maxDate;  
 }
 
-function min_date( $daysRange )
-{
+function min_date( $daysRange ){
   if ( count($daysRange) == 0 )
     return "";
   $minDate = $daysRange[1];
-  for ( $idx1 = 1; $idx1 < count( $daysRange ); $idx1 ++ )
-  {
-    if( strtotime( $daysRange[$idx1] ) < strtotime( max_date( $daysRange ) ) )
-    {
+  
+  for ( $idx1 = 1; $idx1 < count( $daysRange ); $idx1 ++ ){
+    if( strtotime( $daysRange[$idx1] ) < strtotime( max_date( $daysRange ) ) ){
       $minDate = $daysRange[$idx1];
     }
   }                                
   return $minDate;  
 }
 
-function order_days( $daysRange ){
-  $maxDate = max_date( $daysRange );
-  $minDate = min_date( $daysRange);
-
-  $newDaysRange = array();
-  $idx = 1;
-
-  for ( $date = $minDate; ; $date = DayIncDN( $date, 1 ) ){
-    for ( $idx1 = 1; $idx1 <= count( $daysRange ); $idx1 ++ ){
-      if( $daysRange[$idx1] == $date ){
-        $newDaysRange[$idx] = $date;
-        $idx++;
-        break;
-      }
-    }
-    if ($date >= $maxDate) {
-      break;
-    }        
-  }
-  return $newDaysRange;
-}
-
-function get_user_days( $daysRange, $userID ){
-  $maxDate = max_date( $daysRange );
-  $minDate = min_date( $daysRange );
-  
-  $newDaysRange = array();
-  $idx = 1;
-  
-  include __DIR__ . "/php_tori/connect.php";
-  $query = mysqli_query($link, "SELECT date FROM visiting where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
-
-  $merr=mysqli_error($link);
-  if ( !$query ) {
-    echo "<br>mysqli_error = $merr<br>";
-  }
-  else
-  {
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
-      $newDaysRange[$idx] = $row["date"];
-    }
-  }  
-  return $delayDaysRange;           
-}
-
-function get_users_current_day_in_time_by_superuser( $SUID )
-{
+function get_users_current_day_in_time_by_superuser( $SUID ){
   $users = get_users_by_superusers_and_type( $SUID, 3 );
 
   $rets = Array();
@@ -1916,22 +1157,18 @@ function get_users_current_day_in_time_by_superuser( $SUID )
   $query = mysqli_query($link, "SELECT v.user_id, v.in_time, v.adj FROM visiting v inner join employees e on v.user_id = e.id where date = '$currentDate' order by e.SURNAME"); 
 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
+  else{
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
       $regUserID = $row["user_id"];
       $regUserInTime = $row["in_time"];
       $regAdj = $row["adj"];
 
-      foreach( $users as $user )
-      {
-        if ( $user == $regUserID )
-        {
+      foreach( $users as $user ){
+        if ( $user == $regUserID ){
           $tempArray = Array();
           $tempArray[0] = $regUserID;
           $tempArray[1] = $regUserInTime;
@@ -1946,219 +1183,7 @@ function get_users_current_day_in_time_by_superuser( $SUID )
   return $rets;           
 }
 
-function get_days_with_delay( $daysRange, $userID, $user_defaultStartTime, $user_allowedDelay, &$delays )
-{
-  $defaultInTime = strtotime( $user_defaultStartTime ); 
-  $timeConsiderAsDelay = $defaultInTime + $user_allowedDelay * 60; 
-  $maxDate = max_date( $daysRange );
-  $minDate = min_date( $daysRange );
-  
-  $delayDaysRange = array();
-  $idx = 1;
-  
-  include __DIR__ . "/php_tori/connect.php";
-  $query = mysqli_query($link, "SELECT date, in_time FROM visiting where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
-
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
-    echo "<br>mysqli_error = $merr<br>";
-  }
-  else
-  {
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
-      $date = $row["date"];
-      $inTime = strtotime( $row["in_time"] );
-      if ( $inTime > $timeConsiderAsDelay )
-      {
-        $delayDaysRange[$idx] = $date;
-        $delays[$idx] = $inTime - $defaultInTime;
-        $idx ++;  
-      }  
-    }
-  }  
-  return $delayDaysRange;           
-}
-
-function get_disease_days_by_user_id( $daysRange, $userID )
-{
-  $maxDate = max_date( $daysRange );
-  $minDate = min_date( $daysRange );
-  
-  $disease = array();
-  $idx = 1;
-  
-  include __DIR__ . "/php_tori/connect.php";
-  $query = mysqli_query($link, "SELECT date FROM Disease where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
-
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
-    echo "<br>mysqli_error = $merr<br>";
-  }
-  else
-  {
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
-      $date = $row["date"];
-      $disease[$idx] = $date;
-      $idx ++;
-    }
-  } 
-  return $disease;           
-}
-
-function get_business_trip_days_by_user_id( $daysRange, $userID )
-{
-  $maxDate = max_date( $daysRange );
-  $minDate = min_date( $daysRange );
-  
-  $businessTrip = array();
-  $idx = 1;
-  
-  include __DIR__ . "/php_tori/connect.php";
-  $query = mysqli_query($link, "SELECT date FROM Business_trip where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
-
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
-    echo "<br>mysqli_error = $merr<br>";
-  }
-  else
-  {
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
-      $date = $row["date"];
-      $businessTrip[$idx] = $date;
-      $idx ++;
-    }
-  } 
-  return $businessTrip;           
-}
-
-function get_days_WO_disease( $daysRange, $diseaseDays )
-{
-  $newDaysRange = array();
-  $idx = 1;
-
-  for ( $idx1 = 1; $idx1 < count( $daysRange ); $idx1 ++ )
-  {
-    $found = 0;
-    for ( $idx2 = 1; $idx2 < count( $diseaseDays ); $idx2 ++ )
-    {
-      if ( $daysRange[$idx1] == $diseaseDays[$idx2] )
-      {
-        $found = 1;
-        break;
-      }
-    }
-    if ( $found == 0 )
-    {
-      $newDaysRange[$idx] = $daysRange[$idx1];
-      $idx ++;  
-    }
-  }
-  return $newDaysRange;
-}
-
-function get_days_WO_business_trip( $daysRange, $businessTripDays )
-{
-  $newDaysRange = array();
-  $idx = 1;
-
-  for ( $idx1 = 1; $idx1 < count( $daysRange ); $idx1 ++ )
-  {
-    $found = 0;
-    for ( $idx2 = 1; $idx2 < count( $businessTripDays ); $idx2 ++ )
-    {
-      if ( $daysRange[$idx1] == $businessTripDays[$idx2] )
-      {
-        $found = 1;
-        break;
-      }
-    }
-    if ( $found == 0 )
-    {
-      $newDaysRange[$idx] = $daysRange[$idx1];
-      $idx ++;  
-    }
-  }
-  return $newDaysRange;
-}
-
-function get_delays_by_user_days( $userDays, $userID, $user_defaultStartTime, $user_allowedDelay )	
-{
-  $maxDate = max_date( $userDays );
-  $minDate = min_date( $userDays );
-
-  $defaultInTime = strtotime( $user_defaultStartTime ); 
-  $timeConsiderAsDelay = $defaultInTime + $user_allowedDelay * 60; 
-  
-  $Delays = array();
-  $idx = 1;
-  
-  include __DIR__ . "/php_tori/connect.php";
-  $query = mysqli_query($link, "SELECT date, in_time FROM visiting where date >= '$minDate' and date <= '$maxDate' and user_id = '$userID'"); 
-
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
-    echo "<br>mysqli_error = $merr<br>";
-  }
-  else
-  {
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
-      $date = $row["date"];
-      $inTime = strtotime( $row["in_time"] );
-
-      for ( $idx2 = 1; $idx2 < count( $userDays ); $idx2 ++ )
-      {
-        if ( $date == $userDays[$idx2] )
-        {
-          if ( $inTime > $timeConsiderAsDelay )    
-          {
-            $Delays[$idx] = $inTime - $defaultInTime;
-	    break;
-          }
-        }
-      }
-    }
-  }
-  return $Delays;
-}
-
-function get_delays_by_days_range_and_user_days( $daysRange, $userDays, $currentDelays )
-{
-  $Delays = array();
-  $idx = 1;	
-
-  for ( $idx1 = 1; $idx1 < count( $daysRange ); $idx1 ++ )
-  {
-    $found = 0;
-    for ( $idx2 = 1; $idx2 < count( $userDays ); $idx2 ++ )
-    {
-      $found = 0;
-      if ( $daysRange[$idx1] == $userDays[$idx2] )  
-      {
-        $Delays[$idx] = $currentDelays[$idx2];
-        $idx ++;
-        $found = 1;
-        break;
-      } 
-    }
-    if ( $found == 0 )
-    {
-      $Delays[$idx] = 8 * 60 * 60;
-      $idx ++;
-    }
-  }
-  return $Delays;
-}
-
-function get_penalties( $userDays, $userID )
-{
+function get_penalties( $userDays, $userID ){
   $maxDate = max_date( $userDays );
   $minDate = min_date( $userDays );
 
@@ -2168,20 +1193,16 @@ function get_penalties( $userDays, $userID )
 
   $query = mysqli_query($link, "SELECT date from Penalty where date >= '$minDate' and date <= '$maxDate' and userID = '$userID'"); 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
+  else{
+    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
       $penaltyDate = $row["date"];
 
-      for ( $idx2 = 1; $idx2 < count( $userDays ); $idx2 ++ )
-      {
-        if ( $userDays[$idx2] == $penaltyDate )  
-        {
+      for ( $idx2 = 1; $idx2 < count( $userDays ); $idx2 ++ ){
+        if ( $userDays[$idx2] == $penaltyDate )  {
           $penalties[$idx] = $penaltyDate;
           $idx ++;
           break;
@@ -2192,54 +1213,6 @@ function get_penalties( $userDays, $userID )
   return $penalties;
 }
 
-function get_result_penalties( $userDays, $penalties )
-{
-  $penaltyDays = array();
-
-  for ( $idx1 = 1; $idx1 < count( $userDays ); $idx1 ++ )
-  {
-    $found = 0;
-    for ( $idx2 = 1; $idx2 < count( $penalties ); $idx2 ++ )
-    {
-      if ( $userDays[$idx1] == $penalties[$idx2] )  
-      {
-        $found = 1;
-        break;
-      }      
-    }
-    if ( $found == 1 )
-    {
-      $penaltyDays = 1000; //1000 RUR
-    }
-    else
-    {
-      $penaltyDays = 0; 
-    }
-  }
- 
-  return $penaltyDays;
-}
-
-
-function get_penalties_by_range_and_user_id( $startDate, $stopDate, $userID, $user_defaultStartTime, $user_allowedDelay )
-{
-  $daysRange = get_days_range( $startDate, $stopDate );
-  $daysRange = get_days_wo_weekends( $daysRange );
-  $daysRange = get_days_with_add_workdays( $daysRange );
-  
-  $userDays = get_user_days( $daysRange, $userID );
-  $diseaseDays = get_disease_days_by_user_id( $userDays, $userID );
-  $businessTripDays = get_business_trip_days_by_user_id( $userDays, $userID );
-
-  $userDays = get_days_WO_disease( $userDays, $diseaseDays );
-  $userDays = get_days_WO_business_trip( $userDays, $businessTripDays );
-
-  $userDaysDelays = get_delays_by_user_days( $userDays, $userID, $user_defaultStartTime, $user_allowedDelay );	
-  $userPenalties = get_penalties( $userDays, $userID );
-  $penaltyDays = get_result_penalties( $userDays, $userPenalties );
-
-}
-
 function get_user_rate( $userID ){
   include __DIR__ . "/php_tori/connect.php";
 
@@ -2248,6 +1221,7 @@ function get_user_rate( $userID ){
   $query = mysqli_query($link, "SELECT RATE FROM employees where ID = '$userID' "); 
 
   $merr=mysqli_error($link);
+
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
@@ -2260,7 +1234,6 @@ function get_user_rate( $userID ){
   return $rate; 
 }
 
-
 function get_norm_by_range_sec( $startDate, $stopDate, $userID ){
   include __DIR__ . "/php_tori/connect.php";
 
@@ -2269,6 +1242,7 @@ function get_norm_by_range_sec( $startDate, $stopDate, $userID ){
   $query = mysqli_query($link, "SELECT RATE FROM employees where ID = '$userID' ");
 
   $merr=mysqli_error($link);
+
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
@@ -2298,6 +1272,7 @@ function get_current_day_duration_sec( $userID, $defaultStartTime ){
   $query = mysqli_query($link, "SELECT in_time FROM visiting where USER_ID = '$userID' "); 
 
   $merr=mysqli_error($link);
+
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
@@ -2308,7 +1283,6 @@ function get_current_day_duration_sec( $userID, $defaultStartTime ){
   }
 
   $result = strtotime(date("H:i:s")) - strtotime( $inTime );
-  // $result = $result;
   $result = (int)$result;
 
   return $result;
@@ -2330,6 +1304,7 @@ function is_there_add_time_by_alert( $Date, $userID ){
 
   $query = mysqli_query($link, "SELECT * from ADD_TIME where STARTDATE = '$Date' and USERID = '$userID' and BYALERT = 1"); 
   $merr=mysqli_error($link);
+
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
@@ -2367,6 +1342,7 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
   $query1 = mysqli_query($link, "SELECT STARTTIME, STOPTIME FROM ADD_TIME where STARTDATE >= '$startDate' and STARTDATE <= '$stopDate' and USERID = '$userID' and APPROVED = 1"); 
 
   $merr=mysqli_error($link);
+
   if ( !$query1 ) {
     echo "<br>mysqli_error = $merr<br>";
   }
@@ -2379,11 +1355,11 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
 
   $query2 = mysqli_query($link, "SELECT date, in_time, out_time, eat_start, eat_stop, state FROM visiting where date >= '$startDate' and date <= '$stopDate' and user_id = '$userID' and state = 0"); 
   $merr=mysqli_error($link);
+
   if ( !$query2 ) {
     echo "<br>mysqli_error = $merr<br>";
   }
   else{
-
     while ( $row2 = mysqli_fetch_array($query2, MYSQLI_ASSOC) ){
       $date = $row2["date"];
 
@@ -2394,17 +1370,20 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
       $step_in_time = strtotime( $row2["in_time"] );
 
       $takeIntoAccount = 1; 
+      
       if ( isWeekEnd( $date ) ){
         $takeIntoAccount = 0;
+        
         for ( $idx = 1; $idx < count( $workDays ) + 1; $idx ++ ){ 
-	      if ( $workDays[$idx] == $date ){
-          $takeIntoAccount = 1;
-          break;
-        }
-      } 
-    }	
+	        if ( $workDays[$idx] == $date ){
+            $takeIntoAccount = 1;
+            break;
+          }
+        } 
+      }	
       else{ 
         $takeIntoAccount = 1;
+        
         for ( $idx = 1; $idx < count( $holidays ) + 1; $idx ++ ){
 	        if ( $holidays[$idx] == $date ){
             $takeIntoAccount = 0;
@@ -2415,12 +1394,14 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
          
       if ( $takeIntoAccount AND $step_in_time > $def_in_time ){
 	      $isTherePenalty = 0;
+        
         for ( $idx2 = 1; $idx2 < count( $delaysAcceptedAsValid ) + 1; $idx2 ++ ){
           if ( $delaysAcceptedAsValid[$idx2] == $date ){ 
             $isTherePenalty = 1;
             break;  
           }
         }
+        
         if ( $isTherePenalty ){
           $delay_count = $delay_count + 1;
   	      $delay_duration = $delay_duration + ( $step_in_time - $def_in_time );  
@@ -2443,29 +1424,6 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
   return $statArr;
 }
 
-function is_there_fails( $stats, $userID ){
-  for( $idx = 0; $idx < count( $stats[0] ); $idx ++ ){
-    $date = $stats[0][$idx];
-    if ( $stats[8][$idx] != 100 ){
-      if ( $stats[8][$idx] == 200 ){
-        if ( $stats[8][$idx] != 10 ){
-          if ( is_there_add_time_by_alert( $date, $userID ) != 1 ){
-            return 1;
-          }
-        }
-      } 
-      else if ( is_weakend( $date ) != 1 ){
-        if ( $stats[8][$idx] != 10 && $stats[8][$idx] != 110 ){
-          if ( is_there_add_time_by_alert( $date, $userID ) != 1 ){
-            return 1;
-          }
-        }
-      }
-    }
-  }
-  return 0;  
-}
-
 function is_there_additional_alerts( $userID ){
   $currentDate = date('Y-m-d');
 
@@ -2474,6 +1432,7 @@ function is_there_additional_alerts( $userID ){
   $query = mysqli_query($link, "SELECT * FROM ALERTS where DATE = '$currentDate' and USERID = '$userID' and VIEWED = '0'");
 
   $merr=mysqli_error($link);
+
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
@@ -2483,44 +1442,6 @@ function is_there_additional_alerts( $userID ){
     }
   }
   return 0;
-}
-
-function is_there_common_alerts( $userID ){
-  $currentDate = date('Y-m-d');           
-  $stopDate = DayDecDN( $currentDate, 1 );
-  $startDate = GetFirstQuarterDayByDate( $currentDate );
-
-  $user_rate = $_SESSION['ss_rate'];
-  $user_defaultStartTime = $_SESSION['ss_defaultStartTime'];
-  $user_allowedDelay = $_SESSION['ss_allowedDelay'];
-
-  $stats = get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $user_defaultStartTime, $user_allowedDelay, $user_rate );
-
-  $_SESSION['ss_fails_stat'] = $stats;
-
-  if ( is_there_fails( $stats, $userID ) == 1 ){ return 1; }
-
-  return is_there_additional_alerts( $userID );  
-}
-
-function tryncate_date_time_to_day_date_time( $dateTime ){
-  $dateTime = $dateTime - ((int)( $dateTime / 86400 )) * 86400;
-  return $dateTime;  
-}
-
-function timeStr_to_hours_minutes( $timeStr ){
-  $time = Array();
-  
-  $time[] = (int)( substr( $timeStr, 0, 2 ) );
-  $time[] = (int)( substr( $timeStr, 3, 2 ) );
-  $time[] = (int)( substr( $timeStr, 6, 2 ) ); 
-
-  return $time;
-}
-
-function times_to_time( $times ){
-  $time = 60*60*$times[0] + 60*$times[1] + $times[2]; 
-  return $time;
 }
 
 function is_time_defined( $time ){
@@ -2551,7 +1472,6 @@ function represent_is_time_defined( $time, $crossDayPeriod ){
 }
 
 function get_range_by_times_pair( $firstTime, $secondTime, $currentDay, $workTime, $defaultInTime, $allowedDelay, $crossDayPeriod ){
-  $currentDate = Date("Y-m-d");
 
   $result = "<h5 class=\"middleSmall\">";
 
@@ -2571,8 +1491,7 @@ function get_range_by_times_pair( $firstTime, $secondTime, $currentDay, $workTim
   if ( $validTime == 1 ) {
     $result = $result . "<h5 class=\"middleSmall\">". $firstTime. " - </h5>";  
   }
-  else 
-  {
+  else {
     $result = $result . "<h5 class=\"middleSmallGrey\">". $firstTime. " - </h5>";  
   }
 
@@ -2581,133 +1500,30 @@ function get_range_by_times_pair( $firstTime, $secondTime, $currentDay, $workTim
   $secondTime = $timeArray[0];
   $validTime  = $timeArray[1];
 
-  if ( $validTime == 1 )
-  {
+  if ( $validTime == 1 ){
     $result = $result . " <h5 class=\"middleSmall\">".$secondTime. "</h5>";  
   }
-  else
-  {
+  else{
     $result = $result . "  <h5 class=\"middleSmallGrey\"> ". $secondTime. "</h5>";  
   }
 
   return $result;  
 }
 
-function get_eat_duration_by_times( $eatStartTime, $eatStopTime, $currentDay, &$error )
-{
+function get_pause_time_duration_by_times( $addTimeInfo ){
   $result = 0;
 
-  $error = 0;
-
-  $limitTime = date("H:i:s");
-
-  if ( $currentDay == 0 )
-  {
-    $limitTime = "19:00:00";  
-  }
-
-  if ( is_time_defined( $eatStopTime ) == 1 AND is_time_defined( $eatStartTime ) == 1 )
-  {
-    $result = strtotime( $eatStopTime ) - strtotime( $eatStartTime );  
-  }
-  else if ( is_time_defined( $eatStopTime ) == 0 AND is_time_defined( $eatStartTime ) == 1 )
-  {
-    $result = strtotime($limitTime) - strtotime( $eatStartTime );  
-  }                                    
-  if ( is_time_defined( $eatStartTime ) == 1 AND is_time_defined( $eatStopTime ) == 0 AND $currentDay == 0 )
-  {
-    $error = 1;  
-  } 
-
-  return $result;
-}
-
-function get_add_time_duration_by_times( $addTimeInfo )
-{
-  $result = 0;
-
-  if ( is_time_defined( $addTimeInfo ) == 1 )
-  {
-    for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
-    {
+  if ( is_time_defined( $addTimeInfo ) == 1 ){
+    for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ ){
       $addInf = $addTimeInfo[$idx];
-      if ( $addInf[4] == 1 AND $addInf[7] == 0 ) 
-      {
-        if ( strtotime( $addInf[1] ) > strtotime( $addInf[0] ) )
-        {
+
+      if ( $addInf[7] == 1 ) {
+        if ( strtotime( $addInf[1] ) > strtotime( $addInf[0] ) ){
           $result = $result + ( strtotime( $addInf[1] ) - strtotime( $addInf[0] ) );
         }  
       }
     } 
   }  
-  return $result;
-}
-
-function get_pause_time_duration_by_times( $addTimeInfo )
-{
-  $result = 0;
-
-  if ( is_time_defined( $addTimeInfo ) == 1 )
-  {
-    for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
-    {
-      $addInf = $addTimeInfo[$idx];
-
-      if ( $addInf[7] == 1 ) 
-      {
-
-        if ( strtotime( $addInf[1] ) > strtotime( $addInf[0] ) )
-        {
-          $result = $result + ( strtotime( $addInf[1] ) - strtotime( $addInf[0] ) );
-        }  
-      }
-    } 
-  }  
-  return $result;
-}
-
-function get_day_duration_by_times( $inTime, $outTime, $eatStartTime, $currentDay, &$error )
-{
-  $result = 0;
-
-  $error = 0;
-
-  $timeRes = get_current_datetime_in_timezone();
-  $limitTime = $timeRes[1];
-
-  if ( $currentDay == 1 )
-  {
-    $limitTime = $timeRes[1];
-  }
-  else 
-  {
-    if ( is_time_defined( $outTime ) == 1 )
-    {
-      $limitTime = $outTime;
-    }
-    else
-    {
-      if ( is_time_defined( $eatStartTime ) == 1 )
-      {
-        $limitTime = $eatStartTime;
-      }
-      else
-      {
-        $limitTime = $inTime;
-      }
-    }
-  }  
-
-  if ( is_time_defined( $inTime ) == 1 )
-  {
-    $result = strtotime($limitTime) - strtotime( $inTime );
-  }
-
-  if ( is_time_defined( $inTime ) == 1 AND is_time_defined( $outTime ) == 0 AND $currentDay == 0 )
-  {
-    $error = 1;  
-  }
- 
   return $result;
 }
 
@@ -2762,8 +1578,7 @@ function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime
   return $rets;
 }
 
-function get_superuser_names_by_user_id( $ID )
-{
+function get_superuser_names_by_user_id( $ID ){
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
 
@@ -2771,14 +1586,12 @@ function get_superuser_names_by_user_id( $ID )
 
   $query = mysqli_query($link, "SELECT DISTINCT ID, FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID in ( select SUPERVISORID from GROUPS where userid = '$ID' )"); 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
-    while( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
+  else{
+    while( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
       $tempArray = Array();
       $tempArray[] = $row["SURNAME"]." ".$row["FIRSTNAME"]." ".$row["LASTNAME"];
       $tempArray[] = $row["ID"];
@@ -2788,41 +1601,35 @@ function get_superuser_names_by_user_id( $ID )
   return $ret;
 }  
 
-
-function get_superuser_name_by_id( $suID )
-{
+function get_superuser_name_by_id( $suID ){
   return get_user_name_by_id( $suID );
 }  
 
-function get_user_name_by_id( $suID )
-{
+function get_user_name_by_id( $suID ){
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
 
   $query = mysqli_query($link, "SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID='$suID'"); 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
+  else{
     $vn=mysqli_num_rows($query);
-    if ( $vn == 1 )
-    {  
+    
+    if ( $vn == 1 ){  
       $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
       return $row["SURNAME"]." ".$row["FIRSTNAME"]." ".$row["LASTNAME"];
     }
-    else
-    {
+    else{
       return "";
     }
   } 
   return "";
 }  
 
-function get_pause_agree_able_superusers_by_userID( $userID )
-{
+function get_pause_agree_able_superusers_by_userID( $userID ){
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
 
@@ -2830,8 +1637,7 @@ function get_pause_agree_able_superusers_by_userID( $userID )
 
   $rets = Array();
 
-  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) )
-  {  
+  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) ){  
     $SUID = $row0["SUPERVISORID"];
 
     $SUName = get_superuser_name_by_id( $SUID );
@@ -2846,8 +1652,7 @@ function get_pause_agree_able_superusers_by_userID( $userID )
   return $rets;
 }
 
-function get_users_by_superusers_and_type( $SUID, $type )
-{
+function get_users_by_superusers_and_type( $SUID, $type ){
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8"); 
 
@@ -2855,8 +1660,7 @@ function get_users_by_superusers_and_type( $SUID, $type )
 
   $rets = Array();
 
-  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) )
-  {  
+  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) ){  
     $UID = $row0["USERID"];
 
     $rets[] = $UID;
@@ -2864,16 +1668,14 @@ function get_users_by_superusers_and_type( $SUID, $type )
   return $rets;
 }
 
-
-function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $defauiltInTime, $allowedDelay )
-{
+function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $defauiltInTime, $allowedDelay ){
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
 
   $query0 = mysqli_query($link, "SELECT distinct id, date, supervisorID, explaneDesk, acceptorID, penaltyID, penaltyReply, status FROM Delays where date >= '$startDate' and date <= '$stopDate' and userID = '$userID' order by date desc"); 
   $merr=mysqli_error($link);
-  if ( !$query0 ) 
-  {
+  
+  if ( !$query0 ) {
     echo "<br>mysqli_error = $merr<br>";
   }
 
@@ -2881,8 +1683,7 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
 
   $retArray = Array();
 
-  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) )
-  {  
+  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) ){  
     $ID = $row0["id"];
     $delayDate = $row0["date"];
     $supervisorID = $row0["supervisorID"];
@@ -2897,31 +1698,26 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
 
     $found = 0;
 
-    if ( $query1 ) 
-    {
+    if ( $query1 ) {
       $in_time_def = strtotime( $defauiltInTime );
       $in_time_defStr = format_time_d_hhmmss_pure( $in_time_def );
       $in_time = 0;
 
-      if ( $row1 = mysqli_fetch_array($query1,MYSQLI_ASSOC) )
-      {  
+      if ( $row1 = mysqli_fetch_array($query1,MYSQLI_ASSOC) ){  
         $in_time = $row1["in_time"];
         $found = 1;
       }
 
       $delayVal = 0; 
 
-      if ( strtotime( $in_time ) > $in_time_def )
-      {
+      if ( strtotime( $in_time ) > $in_time_def ){
         $delayVal = strtotime( $in_time ) - $in_time_def;
       }
       unset( $rets );
       $rets = Array();   
       
-      if ( $found == 1 )
-      {
-
-echo "sdas";
+      if ( $found == 1 ){
+        echo "sdas";
         $rets[0] = $ID;
         $rets[1] = $supervisorID;
         $rets[2] = $agreed;
@@ -2986,10 +1782,7 @@ function get_delay_value( $in_dt, $defauiltInTime, $allowedDelay ){
   return array($isThereDelay, $delay_val);
 }
 
-
-function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
-{
-
+function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay ){
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
 
@@ -3016,15 +1809,14 @@ function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
                          order by date desc"); 
 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }                     
 
   $retArray = Array();
 
-  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-  {  
+  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
     $ID = $row["id"];
     $delayDate = $row["date"];
     $visitingIn_DT = $row["in_dt"];
@@ -3036,16 +1828,14 @@ function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
     $status = $row["status"];  
     $visitingTimeZoneSec = $row["timeZoneSec"];
 
-    if ( $query ) 
-    {
+    if ( $query ) {
       $delayArr = get_delay_value( $visitingIn_DT, $defauiltInTime, $allowedDelay );
       $isThereDelay = $delayArr[0];
       $delayValue = $delayArr[1];
 
       $rets = Array();   
      
-      if ( $isThereDelay == 1 )
-      {  
+      if ( $isThereDelay == 1 ){
         $rets[0] = $ID;
         $rets[1] = $supervisorID;
         $rets[2] = -1;
@@ -3067,8 +1857,7 @@ function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
   return $retArray;
 }
 
-function get_reasons()
-{
+function get_reasons(){
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8"); 
 
@@ -3077,15 +1866,14 @@ function get_reasons()
   $query0 = mysqli_query($link, $sqlQuery); 
 
   $merr=mysqli_error($link);
-  if ( !$query0 ) 
-  {
+  
+  if ( !$query0 ) {
     echo "<br>mysqli_error = $merr<br>";
   }                     
 
   $results = Array();
  
-  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) )
-  {
+  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) ){
     $result = Array();
       
     $result[0] = $row0["ID"];
@@ -3096,10 +1884,8 @@ function get_reasons()
 
   return $results;
 }
-
  
-function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr, $restrictDTRangeToCurrentDay )
-{
+function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr, $restrictDTRangeToCurrentDay ){
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8"); 
 
@@ -3124,6 +1910,7 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
   $query = mysqli_query($link, $sqlQuery ); 
 
   $merr=mysqli_error($link);
+  
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }                     
@@ -3160,9 +1947,9 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
     $result[9] = $row["START_DT"];  
     $result[10]= $row["SUPERVISORDESC"];  
     $result[11] = $row["REASONDESCRIPTION"];
-    if ( strtotime( $result[1] ) > strtotime( $result[0] ) )
-    {
-        $result[6] = strtotime( $result[1] ) - strtotime( $result[0] );
+
+    if ( strtotime( $result[1] ) > strtotime( $result[0] ) ){
+      $result[6] = strtotime( $result[1] ) - strtotime( $result[0] );
     }
      
     $results[] = $result;
@@ -3171,8 +1958,7 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
   return $results;
 }
 
-function get_all_add_work_info_by_user( $userID, $pauseMode )
-{
+function get_all_add_work_info_by_user( $userID, $pauseMode ){
   $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
   $paramArr = get_dbsetup_param( 'add_time_journal_deep_day' );
@@ -3192,15 +1978,14 @@ function get_all_add_work_info_by_user( $userID, $pauseMode )
                          where a.USERID = '$userID' AND a.PAUSE_MODE = '$pauseMode' and a.STOP_DT > ADDDATE( '$currentDate', INTERVAL $paramInt DAY ) order by a.START_DT DESC"); 
 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }                     
 
   $results = Array();
 
-  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-  {
+  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
     $result = Array();
     
     $result[0] = $row["START_DT"];
@@ -3213,12 +1998,10 @@ function get_all_add_work_info_by_user( $userID, $pauseMode )
     $result[6] = 0;
     $result[7] = $row["PAUSE_MODE"];
     $result[8] = $row["ID"];  
-    // $result[9] = $row["STARTDATE"];  
     $result[10]= $row["SUPERVISORDESC"];  
     $result[11] = $row["REASONDESCRIPTION"];
 
-    if ( strtotime( $result[1] ) > strtotime( $result[0] ) )
-    { 
+    if ( strtotime( $result[1] ) > strtotime( $result[0] ) ){ 
       $result[6] = strtotime( $result[1] ) - strtotime( $result[0] ); 
     }
      
@@ -3228,22 +2011,20 @@ function get_all_add_work_info_by_user( $userID, $pauseMode )
   return $results;
 }
 
-function get_add_work_info_by_user_and_day_range( $userID_, $startDate, $stopDate )
-{
+function get_add_work_info_by_user_and_day_range( $userID_, $startDate, $stopDate ){
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8"); 
 
   $query0 = mysqli_query($link, "SELECT DISTINCT ID, STARTDATE, SUIR, STARTTIME, STOPTIME, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE FROM ADD_TIME where STARTDATE >= '$startDate' and STARTDATE <= '$stopDate' and USERID = '$userID_' order by STARTDATE desc, STARTTIME desc"); 
   $merr=mysqli_error($link);
-  if ( !$query0 ) 
-  {
+  
+  if ( !$query0 ) {
     echo "<br>mysqli_error = $merr<br>";
   }
 
   $results = Array();
 
-  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) )
-  {
+  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) ){
     $result = Array();
   
     $result[0] = $row0["STARTTIME"];
@@ -3255,8 +2036,8 @@ function get_add_work_info_by_user_and_day_range( $userID_, $startDate, $stopDat
     $result[6] = 0;
     $result[7] = $row0["PAUSE_MODE"];  
     $result[8] = $row0["ID"];  
-    // $result[9] = $row0["STARTDATE"];
-    $result[10]= $row0["SUPERVISORDESC"];  
+    $result[10]= $row0["SUPERVISORDESC"];
+
     if ( strtotime( $result[1] ) > strtotime( $result[0] ) ){ $result[6] = strtotime( $result[1] ) - strtotime( $result[0] ); }
 
     $results[] = $result;
@@ -3265,8 +2046,7 @@ function get_add_work_info_by_user_and_day_range( $userID_, $startDate, $stopDat
   return $results;
 }
 
-function get_work_time_duration_by_times_ex( $inTime, $outTime, $eatStartTime, $eatStopTime, $state, $currentDay )
-{
+function get_work_time_duration_by_times_ex( $inTime, $outTime, $eatStartTime, $eatStopTime, $state, $currentDay ){
   $result = 0;
 
   $timeRes = get_current_datetime_in_timezone();
@@ -3276,16 +2056,12 @@ function get_work_time_duration_by_times_ex( $inTime, $outTime, $eatStartTime, $
   $stateStr = $state;
   $state = (int)$state;
 
-  if ( $stateStr != "NDF" )
-  {
-    if ( $state == 0 )
-    {
+  if ( $stateStr != "NDF" ){
+    if ( $state == 0 ){
       $result = strtotime( $outTime ) - strtotime( $inTime );
     }
-    else
-    {
-      if ( $currentDay == 1 )
-      {
+    else{
+      if ( $currentDay == 1 ){
         $result = strtotime( $CurrentDateTime ) - strtotime( $inTime );
       }
     }
@@ -3294,9 +2070,7 @@ function get_work_time_duration_by_times_ex( $inTime, $outTime, $eatStartTime, $
   return $result;
 }
 
-
-function get_eat_time_duration_by_times_ex( $eatStartTime, $eatStopTime, $state, $currentDay )
-{
+function get_eat_time_duration_by_times_ex( $eatStartTime, $eatStopTime, $state, $currentDay ){
   $result = 0;
 
   $timeRes = get_current_datetime_in_timezone();
@@ -3306,18 +2080,13 @@ function get_eat_time_duration_by_times_ex( $eatStartTime, $eatStopTime, $state,
   $stateStr = $state;
   $state = (int)$state;
 
-  if ( $stateStr != "NDF" )
-  {
-    if ( $state == 0 OR $state == 4 )
-    {
+  if ( $stateStr != "NDF" ){
+    if ( $state == 0 OR $state == 4 ){
       $result = strtotime( $eatStopTime ) - strtotime( $eatStartTime );
     }
-    else
-    {
-      if ( $state == 3 )
-      {
-        if ( $currentDay == 1 )
-        {
+    else{
+      if ( $state == 3 ){
+        if ( $currentDay == 1 ){
           $result = strtotime( $CurrentDateTime ) - strtotime( $eatStartTime );
         }
       }
@@ -3386,7 +2155,6 @@ function colored_result( $prefix, $realTime, $needTime, $inverse, $check, $isres
 
   $result = "<h5 class=\"$colorClass\">$prefix$resAdd1$resultStr$resAdd2"; 
 
-
   if ( $check == 1 ){
     if( $inverse == 1 ){
       if ( $realTime > $needTime ){
@@ -3408,35 +2176,28 @@ function colored_result_partial( $prefix, $realTime, $needTime, $inverse, $check
   if ( $isresult == 1 ){
     $colorClass = "bigbigbig";
   }
-  else
-  {
+  else{
     $colorClass = "middle";
   }
 
   $resAdd1 = "(";
   $resAdd2 = ")";
 
-  if( $isresult ) 
-  {
+  if( $isresult ) {
     $resAdd1 = "";
     $resAdd2 = "";
   }
 
   $result = "<h5 class=\"$colorClass\">$prefix$resAdd1$resultStr$resAdd2"; 
 
-  if ( $check == 1 )
-  {
-    if( $inverse == 1 )
-    {
-      if ( $realTime > $needTime )
-      {
+  if ( $check == 1 ){
+    if( $inverse == 1 ){
+      if ( $realTime > $needTime ){
         $result = "<h5 class=\"$colorClass"."Red\">$prefix$resAdd1$resultStr$resAdd2";
       }
     }
-    else
-    {
-      if ( $realTime < $needTime )
-      {
+    else{
+      if ( $realTime < $needTime ){
         $result = "<h5 class=\"$colorClass"."Red\">$prefix$resAdd1$resultStr$resAdd2";
       }
     }
@@ -3444,8 +2205,7 @@ function colored_result_partial( $prefix, $realTime, $needTime, $inverse, $check
   return $result;
 }
 
-function is_there_day_change( $in_dt, $eat_start_dt, $eat_stop_dt, $out_dt, $current_dt, $state )
-{
+function is_there_day_change( $in_dt, $eat_start_dt, $eat_stop_dt, $out_dt, $current_dt, $state ){
   $isThereChange = 0;
 
   $changeIn = 0;
@@ -3456,35 +2216,32 @@ function is_there_day_change( $in_dt, $eat_start_dt, $eat_stop_dt, $out_dt, $cur
   $in_d = strtotime(date("Y-m-d", strtotime($in_dt)));
   $eat_start_d = strtotime(date("Y-m-d", strtotime($eat_start_dt)));
   $eat_stop_d = strtotime(date("Y-m-d", strtotime($eat_stop_dt)));
-  $out_d = strtotime(date("Y-m-d", strtotime($out_dt)));
 
   $current_d = strtotime(date("Y-m-d", strtotime($current_dt)));
 
-  if ( $state == 2 )
-  {
+  if ( $state == 2 ){
     if ( $in_d != $current_d ){ $isThereChange = 1; }
   }
-  if ( $state == 3 )
-  {
+  
+  if ( $state == 3 ){
     if ( $in_d != $current_d ){ $isThereChange = 1; }
     if ( $eat_start_d != $current_d ){ $isThereChange = 1; }
   }
-  if ( $state == 4 )
-  {
+  
+  if ( $state == 4 ){
     if ( $in_d != $current_d ){ $isThereChange = 1; }
     if ( $eat_start_d != $current_d ){ $isThereChange = 1; }
     if ( $eat_stop_d != $current_d ){ $isThereChange = 1; }
   }
-  if ( $state == 0 )
-  {
+  
+  if ( $state == 0 ){
     if ( $in_d != $current_d ){ $isThereChange = 1; }
     if ( $eat_start_d != $current_d ){ $isThereChange = 1; }
     if ( $eat_stop_d != $current_d ){ $isThereChange = 1; }
     if ( $in_d != $current_d ){ $isThereChange = 1; }
   }
 
-  if ( $isThereChange == 1 )
-  {
+  if ( $isThereChange == 1 ){
     $changeIn = 1;
     $changeEatStart = 1;
     $changeEatStop = 1;
@@ -3493,8 +2250,7 @@ function is_there_day_change( $in_dt, $eat_start_dt, $eat_stop_dt, $out_dt, $cur
   return array( $changeIn, $changeEatStart, $changeEatStop, $changeOut, $isThereChange );
 }
 
-function is_there_day_change_betw( $in_dt, $eat_start_dt, $eat_stop_dt, $out_dt, $state )
-{
+function is_there_day_change_betw( $in_dt, $eat_start_dt, $eat_stop_dt, $out_dt, $state ){
   $isThereChange = 0;
 
   $changeIn = 0;
@@ -3507,21 +2263,19 @@ function is_there_day_change_betw( $in_dt, $eat_start_dt, $eat_stop_dt, $out_dt,
   $eat_stop_d = strtotime(date("Y-m-d", strtotime($eat_stop_dt)));
   $out_d = strtotime(date("Y-m-d", strtotime($out_dt)));
 
-  if ( $state == 3 )
-  {
+  if ( $state == 3 ){
     if ( $in_d != $eat_start_d ){ $isThereChange = 1; }
   }
-  if ( $state == 4 )
-  {
+  
+  if ( $state == 4 ){
     if ( $in_d != $eat_start_d || $in_d != $eat_stop_d ){ $isThereChange = 1; }
   }
-  if ( $state == 0 )
-  {
+  
+  if ( $state == 0 ){
     if ( $in_d != $eat_start_d || $in_d != $eat_stop_d || $in_d != $out_d){ $isThereChange = 1; }
   }
 
-  if ( $isThereChange == 1 )
-  {
+  if ( $isThereChange == 1 ){
     $changeIn = 1;
     $changeEatStart = 1;
     $changeEatStop = 1;
@@ -3531,7 +2285,7 @@ function is_there_day_change_betw( $in_dt, $eat_start_dt, $eat_stop_dt, $out_dt,
 }
 
 function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $defaultStartTimeStr, $user_allowedDelay ){
-  include_once "/var/www/tori/funcs.php";
+  include_once __DIR__ . "/funcs.php";
 
   $delayCheckEnabled = 1;
 
@@ -3552,7 +2306,6 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
 
   $user_allowedDelay = (int)$user_allowedDelay;
 
-  // $dayTypes = get_workdays_holidays_bay_range( $startDate, $stopDate );
   $currentDateArr = get_current_datetime_in_timezone();
   $currentDate = $currentDateArr[2];
 
@@ -3590,8 +2343,8 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
 
   $isCurrentDay = 0;
   $notCurrentDay = 1;
-  if ( $currentDate == $days_dates_set )
-  {
+
+  if ( $currentDate == $days_dates_set ){
     $isCurrentDay = 1;
     $notCurrentDay = 0;
   }	
@@ -3605,51 +2358,44 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
   $durations = get_durations( $days_work_start, $days_work_stop, $days_eat_start, $days_eat_stop, $days_add_info, $days_day_state, $days_day_currday );
   $crossDayPeriod = 0;//$changesArr[4];
 
-  if ( $currentDate == $days_dates_set )
-  {
+  if ( $currentDate == $days_dates_set ){
     $isCurrentDay = 1;
     $notCurrentDay = 0;
   }	
 
   $isWeekend = isWeekEnd( $days_dates_set );
   $isholiday = 0;
-  if ( $days_day_type >= 100 AND $days_day_type < 200 )
-  {
+  
+  if ( $days_day_type >= 100 AND $days_day_type < 200 ){
     $isholiday = 1;
   }
 
   $isworkForceday = 0;
-  if ( $days_day_type >= 200 )
-  {
+
+  if ( $days_day_type >= 200 ){
     $isworkForceday = 1;
   }
 
   $commonChechState = 1;
   $commonEatChechState = 1;
-  if ( $isCurrentDay == 1 )
-  {
+
+  if ( $isCurrentDay == 1 ){
     $commonChechState = 0;
   }
-  else
-  {  
-    if ( $isWeekend == 1 )
-    {
-       if ( $isworkForceday == 0 )
-       {
-         $commonChechState = 0;
-         $commonEatChechState = 0;
-       }    
+  else{  
+    if ( $isWeekend == 1 ){
+      if ( $isworkForceday == 0 ){
+        $commonChechState = 0;
+        $commonEatChechState = 0;
+      }    
     }
-    else
-    {
-      if ( $isholiday == 1 )
-      {
+    else{
+      if ( $isholiday == 1 ){
         $commonChechState = 0;
         $commonEatChechState = 0;
       }
     }
   }
-
 
   $workWOEat = $durations[0];
 
@@ -3670,8 +2416,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
   $penaltyDuration = $days_day_delay_duration;
   $penaltyDurationStr = "";
  
-  if ( $days_penalties == 1 )
-  { 
+  if ( $days_penalties == 1 ){ 
     $penaltyDurationStr = format_time_d_hhmmss_pure( $penaltyDuration );
   }
 
@@ -3679,8 +2424,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
 
   $needCheck = $notCurrentDay;
 
-  if ( $currentDate == $days_dates_set AND is_time_defined( $days_work_stop ) == 1 )
-  {
+  if ( $currentDate == $days_dates_set AND is_time_defined( $days_work_stop ) == 1 ){
     $needCheck = 1;  
   }
 
@@ -3695,7 +2439,6 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
   $resultPureTimeStr = colored_result( "", $resultTime, $dayNorm, 0, $needCheck, 1 );  
   $resultPureTimePartStr = colored_result_partial( "", $resultTime, $dayNorm, 0, $needCheck, 1 );  
 
-
   $dayColor = "#DDFFDD";
   $timeSpendImg = "img/workTimeGood.png";
   $lunchImg = "img/lunchTimeGood.png";
@@ -3706,8 +2449,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
   $remoteWorkImg = "img/remoteWorkGood.png";
   $cellaligment = "left";
 
-  if ( $dayNorm > $resultTime )
-  {
+  if ( $dayNorm > $resultTime ){
     $dayColor = "#FFDDDD";
     $timeSpendImg = "img/workTimeBad.png";
     $lunchImg = "img/lunchTimeBad.png";
@@ -3718,8 +2460,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
     $remoteWorkImg = "img/remoteWorkBad.png";
   }
 
-  if ( $currentDate == $days_dates_set OR $isWeekend OR $isholiday )
-  {
+  if ( $currentDate == $days_dates_set OR $isWeekend OR $isholiday ){
     $dayColor = "#ddeeff";
     $timeSpendImg = "img/workTimeCur.png";
     $lunchImg = "img/lunchTimeCur.png";
@@ -3753,22 +2494,18 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
     $remoteWorkImg = "img/remoteWorkGood.png";
     $cellaligment = "left";
   }
-
   
-  $workDayRange = "";
-  {
+  $workDayRange = "";{
     $workDayRange = get_range_by_times_pair( $days_work_start, $days_work_stop, $isCurrentDay, $commonChechState, $defaultStartTimeStr, $user_allowedDelay, $crossDayPeriod );
   }
 
-  $eatRange = "";
-  {
+  $eatRange = "";{
     $eatRange = get_range_by_times_pair( $days_eat_start, $days_eat_stop, $isCurrentDay, 0, $defaultStartTimeStr, $user_allowedDelay, $crossDayPeriod );
   }
 
   $valignMode = "bottom";
 
   $isThereData = 1;
-
 
   $noDataStr = "Нет сведений!";
   $noDataStyle = "middleBoldRed";
@@ -3788,8 +2525,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
 
   $prefix = "";
 
-  if ( $days_dates_set == $currentDate )
-  {
+  if ( $days_dates_set == $currentDate ){
     if ( is_time_defined( $days_work_start ) == 0 
       && is_time_defined( $days_work_stop ) == 0 
       && is_time_defined( $days_eat_start ) == 0 
@@ -3801,13 +2537,11 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
       $prefix = "<h5 class=\"" . $noDataStyle . "\">" . $noDataStr;
       $isThereData = 0;
     } 
-    else
-    {
+    else{
       $prefix = "<h5 class=\"middleBold\">Текущий день";
     }
   }
-  else
-  {
+  else{
     if ( is_time_defined( $days_work_start ) == 0 
       && is_time_defined( $days_work_stop ) == 0 
       && is_time_defined( $days_eat_start ) == 0 
@@ -3828,26 +2562,25 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
   
   $workPureContent = "<h5 class=\"bigbig\">$resultPureTimeStr ($resultPureTimePartStr)</h5>";
   
-  if ( $currentDate != $days_dates_set AND $errorDur == 1 )
-  {
+  if ( $currentDate != $days_dates_set AND $errorDur == 1 ){
     $prefix = "<h5 class=\"bigmiddleRed\">Недостаточно сведений!";
   }
 
-  if ( $isThereData == 1 )
-  {
+  if ( $isThereData == 1 ){
     $tableContent =   "<div class = \"right_table\">";
     $tableContent .=     "<div class = \"current_day\">"; 
      
     $tableContent .=       "<div class = \"report_no_padding_rep\">";
     $tableContent .=         $prefix;
     $tableContent .=       "</div>"; 
+    
     if ($prefix == "<h5 class=\"middleBold\">Текущий день"){
       $tableContent .=       "<div class = \"report_no_padding_rep\">";
       $tableContent .=         "<h5 class=\"middleSmall\">$days_timeZoneStr</h5>";
       $tableContent .=       "</div>";
     }
+    
     $tableContent .=      "</div>"; 
-
   
     $tableContent .=   "<div class = \"special_time_rep\">"; 
     $tableContent .=       "<div class = \"work_time_rep\">";
@@ -3863,6 +2596,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
     $tableContent .=            $workDayRange;
     $tableContent .=          "</div>"; 
     $tableContent .=        "</div>";
+    
     if ( $days_remoteWorkState != 0 ){
       $tableContent .=          "<div class = \"remote_work_time_rep\">";
       $tableContent .=              "<div class = \"report_no_padding_rep\" width = 15px>";
@@ -3873,6 +2607,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
       $tableContent .=              "</div>";
       $tableContent .=           "</div>";
     }
+    
     $tableContent .=   "</div>"; 
  
     $tableContent .=   "<div class = \"time_rep\">"; 
@@ -3895,8 +2630,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
 
     $tableContent .=   "<div class = \"time_rep\">";
 
-    if ( $addTimeDuration != 0 )
-    {
+    if ( $addTimeDuration != 0 ){
       $tableContent .=           "<div class = \"report_no_padding_rep\" align = \"center\" width = 15px>";
       $tableContent .=             "<img title=\"рабочее время вне офиса\" src=\"$addTimeImg\"/>";
       $tableContent .=           "</div>"; 
@@ -3904,17 +2638,16 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
       $tableContent .=             $addTimeDurationStr;
       $tableContent .=           "</div>";  
     }
-    else
-    {
+    else{
       $tableContent .=           "<div class = \"report_no_padding_rep\" align = \"left\" width = 40px style = \"display: none\">";
       $tableContent .=             "<img title=\"рабочее время вне офиса\" src=\"$addTimeImg\">";
       $tableContent .=             "<h5 class=\"middleGrey\">(__:__:__)</h5>";
       $tableContent .=           "</div>"; 
     }
+    
     $tableContent .=   "</div>";
 
-    if ( $pauseTimeDuration != 0 )
-    { 
+    if ( $pauseTimeDuration != 0 ){ 
       $tableContent .=   "<div class = \"time_rep\">"; 
       $tableContent .=     "<div class = \"report_no_padding_rep\" align = \"center\" width = 10px>";
       $tableContent .=        "<img title=\"продолжительность приостановки учета времени\" src=\"$pauseTimeImg\"/>";
@@ -3924,16 +2657,14 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
       $tableContent .=     "</div>"; 
       $tableContent .=   "</div>"; 
     }
-    else
-    {
+    else{
       $tableContent .=           "<div class = \"report_no_padding_rep\" align = \"center\" width = 60px style = \"display: none\">";
       $tableContent .=             "<img title=\"продолжительность приостановки учета времени\" src=\"$pauseTimeImg\">";
       $tableContent .=             "<h5 class=\"middleGrey\">(__:__:__)</h5>";
       $tableContent .=           "</div>";  
     } 
 
-    if ( $penaltyDuration != 0 )
-    {
+    if ( $penaltyDuration != 0 ){
     $tableContent .=   "<div class = \"time_rep\">"; 
     $tableContent .=           "<div class = \"report_no_padding_rep\" align = \"center\" width = 15px>";
     $tableContent .=             "<img title=\"штрафные санкции за опоздание по неуважительной причине\" src=\"$penaltyImg\"/>";
@@ -3943,29 +2674,26 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
     $tableContent .=           "</div>"; 
     $tableContent .=        "</div>";
     }
-    else
-    {
+    else{
       $tableContent .=           "<div class = \"report_no_padding_rep\" align = \"center\" width = 60px style = \"display: none\">";
       $tableContent .=             "<img title=\"штрафные санкции за опоздание по неуважительной причине\" src=\"$penaltyImg\" >";
       $tableContent .=             "<h5 class=\"middleGrey\">(__:__:__)</h5>";
       $tableContent .=           "</div>"; 
     }
-  $tableContent .=   "</div>"; 
+  
+    $tableContent .=   "</div>"; 
 
+    $tableContent .=   "<div class = \"result_time\">"; 
+    $tableContent .=       "<div class = \"time_rep\">"; 
+    $tableContent .=           "<div class = \"report_no_padding_rep\" align = \"left\">";
+    $tableContent .=               "$workPureContent";
+    $tableContent .=           "</div>"; 
+    $tableContent .=       "</div>"; 
+    $tableContent .=  "</div>"; 
 
-  $tableContent .=   "<div class = \"result_time\">"; 
-  $tableContent .=       "<div class = \"time_rep\">"; 
-  $tableContent .=           "<div class = \"report_no_padding_rep\" align = \"left\">";
-  $tableContent .=               "$workPureContent";
-  $tableContent .=           "</div>"; 
-  $tableContent .=       "</div>"; 
-  $tableContent .=  "</div>"; 
- 
-
-  $tableContent .= "</div>"; 
+    $tableContent .= "</div>"; 
   }
-  else
-  {
+  else{
     $tableContent  = "<table>";
     $tableContent .=   "<tr height = 95>";
     $tableContent .=     "<td width = 154px class = \"report_no_padding_rep\" align = center valign = middle>";
@@ -3976,33 +2704,27 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
   }
 
   $unformattedContent1 = $prefix;
-  // $unformattedContent2 = $workContent.$eatContent.$addTimeContent.$pauseTimeContent.$PenaltyContent.$workPureContent;
   
-   if ($prefix == "<h5 class=\"middleBold\">Текущий день"){
-   $content  = "<td class=\"report_no_padding\" bgcolor=\"$dayColor\" bordercolor=\"#888888\" valign=\"$valignMode\" align=\"$cellaligment\" width = $cellWidth>";
-   $content .=   "<div class=\"report_body_head_day\" id=\"report_body_head_day\">"; 
+  if ($prefix == "<h5 class=\"middleBold\">Текущий день"){
+    $content  = "<td class=\"report_no_padding\" bgcolor=\"$dayColor\" bordercolor=\"#888888\" valign=\"$valignMode\" align=\"$cellaligment\" width = $cellWidth>";
+    $content .=   "<div class=\"report_body_head_day\" id=\"report_body_head_day\">"; 
      //$content .=     "$unformattedContent1$unformattedContent2";
-   $content .=     "$tableContent";
-   $content .=   "<div>"; 
-   $content .= "</td>";
-   }
-   else {
+    $content .=     "$tableContent";
+    $content .=   "<div>"; 
+    $content .= "</td>";
+  }
+  else {
     $content  = "<td class=\"report_no_padding\" bgcolor=\"$dayColor\" bordercolor=\"#888888\" valign=\"top\" align=\"$cellaligment\" width = $cellWidth>";
     $content .=   "<div class=\"report_body_head_day_first\" id=\"report_body_head_day_first\">"; 
     $content .=     "$tableContent";
     $content .=   "<div>"; 
     $content .= "</td>";
-   }
+  }
     
-
   return $content;
 }
 
-function redmine_represent( $timeIn )
-{
-
-$timeInSrc = $timeIn;
- 
+function redmine_represent( $timeIn ){ 
   $hours = floor($timeIn / 3600);
   $timeIn = $timeIn - $hours * 3600;
 
@@ -4010,14 +2732,7 @@ $timeInSrc = $timeIn;
 
   $hoursStr = (string)$hours;
 
-  if ($hours < 10)
-  {
-    $hoursStr = $hoursStr;
-  }
-
   $minutesStr = (string)$minutes;
-
-  $minutesStrLen = strlen( $minutesStr );
   
   $minutesStr = substr( $minutesStr, 2, 2 );
 
@@ -4026,30 +2741,22 @@ $timeInSrc = $timeIn;
   return $result;
 }
 
-
-function get_results_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $defaultStartTimeStr, $user_allowedDelay, $resType, &$typeShowed, &$headContent )
-{
+function get_results_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $defaultStartTimeStr, $user_allowedDelay, $resType, &$typeShowed, &$headContent ){
   $days_dates_set = $stats[0][$index];
-  // echo $stats[0][0];
 
   $days_dates_results = $stats[13];
-
 
   $new_days_dates_set = DayIncDN( $days_dates_set, 1 );  
 
   $contentDT = "";
   $content = "";
 
-  foreach( $days_dates_results as $results )
-  {
-    if ( $results[1] == $new_days_dates_set AND $results[5] == $resType )
-    {   
-      if ( $typeShowed == 0 )
-      {
+  foreach( $days_dates_results as $results ){
+    if ( $results[1] == $new_days_dates_set AND $results[5] == $resType ){
+      if ( $typeShowed == 0 ){
         $typeShowed = 1;
 
-        if ( $resType == 1 OR $resType == 2 )
-        {
+        if ( $resType == 1 OR $resType == 2 ){
           $contentDT  = "<td class=\"report_no_padding\" valign=\"middle\" align=\"center\">";  
           $contentDT .=   "<div class=\"report_head_left_date_rep_period\" id=\"report_head_left_date_rep_period\">"; 
           $contentDT .=     "<h5 class=\"smallBlack\">Итог за период:<br></h5>";
@@ -4057,10 +2764,8 @@ function get_results_cell_content_by_stat( $stats, $index, $cellWidth, $userID, 
           $contentDT .=   "</div>"; 
           $contentDT .= "</td>"; 
           $headContent = $contentDT;
-        }
-        
-        else if ( $resType == 3 )
-        {
+        }   
+        else if ( $resType == 3 ){
           $contentDT  = "<td class=\"report_no_padding\" valign=\"middle\" align=\"center\">";
           $contentDT .=   "<div class=\"report_head_left_date_rep_week\" id=\"report_head_left_date_cert\">"; 
           $contentDT .=     "<h5 class=\"smallBlack\">Итог за<br>неделю";
@@ -4077,8 +2782,7 @@ function get_results_cell_content_by_stat( $stats, $index, $cellWidth, $userID, 
           $contentDT .= "</td>"; 
           $headContent = $contentDT;
         }
-        else if ( $resType == 5 )
-        {
+        else if ( $resType == 5 ){
           $QuarterNum = GetQuarterRomNumByDate( $days_dates_set );
           $contentDT  = "<td class=\"report_no_padding\" valign=\"middle\" align=\"center\">";
           $contentDT .=   "<div class=\"report_head_left_date_rep_quarter\" id=\"report_head_left_date_cert\">"; 
@@ -4087,8 +2791,7 @@ function get_results_cell_content_by_stat( $stats, $index, $cellWidth, $userID, 
           $contentDT .= "</td>"; 
           $headContent = $contentDT;
         }
-        else if ( $resType == 6 )
-        {
+        else if ( $resType == 6 ){
           $YearNum = GetCurrentYearD( $days_dates_set );
           $contentDT  = "<td class=\"report_no_padding\" valign=\"middle\" align=\"center\">";
           $contentDT .=   "<div class=\"report_head_left_date_rep_year\" id=\"report_head_left_date_cert\">"; 
@@ -4099,9 +2802,8 @@ function get_results_cell_content_by_stat( $stats, $index, $cellWidth, $userID, 
         }
       }
 
-      if ( $results[2] < $results[6]  ) 
-      {
-	$resultColor = "#FFDDDD";
+      if ( $results[2] < $results[6]  ) {
+	      $resultColor = "#FFDDDD";
         $timeSpendImg = "img/workTimeBad.png";
         $lunchImg = "img/lunchTimeBad.png";
         $addTimeImg = "img/AddworkTimeBad.png";
@@ -4113,9 +2815,8 @@ function get_results_cell_content_by_stat( $stats, $index, $cellWidth, $userID, 
         $normImg = "img/NormBad.png";
         $overloadAbsolute = $results[6] - $results[2];
       }
-      else
-      {
-	$resultColor = "#DDFFDD";
+      else{
+	      $resultColor = "#DDFFDD";
         $timeSpendImg = "img/workTimeGood.png";
         $lunchImg = "img/lunchTimeGood.png";
         $addTimeImg = "img/AddworkTimeGood.png";
@@ -4141,7 +2842,7 @@ function get_results_cell_content_by_stat( $stats, $index, $cellWidth, $userID, 
       $Val3 = (int)($results[3]); 
       $Val9 = (int)($results[9]); 
 
-$Val = $Val2 + $Val4 - $Val3 + $Val9;              
+      $Val = $Val2 + $Val4 - $Val3 + $Val9;              
       $content .=                  format_time_d_hhmmss_pure_styled( $Val );
              
       $content .=                "</div>";
@@ -4192,10 +2893,11 @@ $Val = $Val2 + $Val4 - $Val3 + $Val9;
       $ValC = (int)($results[8]);              
       $ValP = $ValC * 1000;              
       $content .=                 format_time_d_hhmmss_pure_styled( $Val );
-      if ($ValC > 0)
-      {
+      
+      if ($ValC > 0){
         $content .=                  "<h3 class=\"small1\"> [".(string)$ValC."x1000 = ".$ValP."р]</h3>";
       }       
+      
       $content .=                "</div>";
       $content .=        "</div>";
 
@@ -4217,6 +2919,7 @@ $Val = $Val2 + $Val4 - $Val3 + $Val9;
         . format_time_d_hhmmss_pure_HH($ValNormBeforeLeaves)
         . " - Норма (ч.)</h5></br>";
 
+      
       if ($ValLeaveHours > 0) {
         $content .= "<h5 class=\"middle\" title=\"Количество часов отпуска и больничного, вычтенное из нормы за выбранный период\"> "
           . format_time_d_hhmmss_pure_HH($ValLeaveHours)
@@ -4242,8 +2945,7 @@ $Val = $Val2 + $Val4 - $Val3 + $Val9;
   return $content;
 }
 
-function get_user_defStartTime_and_allowedDelay( $USERiD, &$user_defaultStartTime, &$user_allowedDelay )
-{
+function get_user_defStartTime_and_allowedDelay( $USERiD, &$user_defaultStartTime, &$user_allowedDelay ){
   include __DIR__ . "/php_tori/connect.php";  
 
   $query = mysqli_query($link, "SELECT defaultStartTime, AllowedDelayMinutes FROM employees where ID = '$USERiD' ");
@@ -4251,14 +2953,11 @@ function get_user_defStartTime_and_allowedDelay( $USERiD, &$user_defaultStartTim
   $ret = 0;
 
   $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
-  else
-  {
-    if ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
+  else{
+    if ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
       $user_defaultStartTime = $row["defaultStartTime"];
       $user_allowedDelay = $row["AllowedDelayMinutes"];
       $ret = 1;
@@ -4267,368 +2966,64 @@ function get_user_defStartTime_and_allowedDelay( $USERiD, &$user_defaultStartTim
   return $ret;  
 }
 
-function get_cell_content_result( $startDate, $stopDate, $userID, $currentDate, $month = 0 )
-{
-  include __DIR__ . "/php_tori/connect.php";
-
-  $hoursNorm = 0;
-  $minutesNorm = 0;
-
-  if ( $stopDate == $currentDate )
-  {
-
-  if ( $userID == 3 AND $month == 1 )
-  {
-    echo $stopDate."    ---     ".$startDate." ** ".$currentDate."---".$month."<br>";
-  }
-
-    $hoursNorm = hours_norm( $stopDate, $startDate, 0 );// + currentWorcDayDurationHours();
-    $minutesNorm = currentWorcDayDurationMinutes();
-  }
-  else
-  {
-
-  if ( $userID == 3 AND $month == 1 )
-  {
-    echo $stopDate."    +++     ".$startDate." ** ".$currentDate."---".$month."<br>";
-  }
-
-    $hoursNorm = hours_norm( $stopDate, $startDate, 1 );
-  }
-
-  $cellContenAr = array();
-  $cellContent = "";
-  $cellColor = "ddeeff";
-  $cellAlign = "left";
-  $cellValign = "top";
-
-  $time_duration = 0;
-
-  $query1 = mysqli_query($link, "SELECT STARTTIME, STOPTIME FROM ADD_TIME where STARTDATE >= '$startDate' and STARTDATE <= '$stopDate' and USERID = '$userID' and APPROVED = 1"); 
-
-  $merr=mysqli_error($link);
-  if ( !$query1 ) 
-  {
-    echo "<br>mysqli_error = $merr<br>";
-  }
-  else
-  {
-    while ( $row1 = mysqli_fetch_array($query1,MYSQLI_ASSOC) )
-    {
-      $add_start_time = $row1["STARTTIME"];
-      $add_stop_time = $row1["STOPTIME"];
-
-      $time_duration_add = strtotime($add_stop_time) - strtotime($add_start_time);
-
-      $time_duration += $time_duration_add;
-    }
-  }
-
-  $query = mysqli_query($link, "SELECT date, in_time, out_time, eat_start, eat_stop, state FROM visiting where date >= '$startDate' AND date <= '$stopDate' and user_id = '$userID' "); 
-
-  $vn=mysqli_num_rows($query);
-
-  $tempTime = 0;
-
-$dcc = 0;
-
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
-    echo "<br>mysqli_error = $merr<br>";
-  }
-  else
-  {
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
-      $date = $row["date"];
-      $in_time = $row["in_time"];
-      $out_time = $row["out_time"];
-      $eat_start = $row["eat_start"];
-      $eat_stop = $row["eat_stop"]; 
-      $state = $row["state"];
-
-
-      if ( $date == $currentDate )
-      {
-        $tempTime = work_day_duration_current_date_nn( $in_time, $out_time, $eat_start, $eat_stop, 0 );
-      }
-      else
-      {
-        $tempTime = work_day_duration_n( $in_time, $out_time, $eat_start, $eat_stop, 0 );
-      }
-
-      $time_duration += $tempTime;
-    }
-  }
-
-  if ( $time_duration != 0 )
-  {
-    $time_duration_str = format_time_d_hhmm( $time_duration );
-    if ( estimate_hours( $hoursNorm*60*60 + $minutesNorm*60, $time_duration ) )
-    {
-      $cellColor = "00ff00";
-      $result_time_str = "наработка = ".$time_duration_str."<br>норма = ".H_to_hhmm( $hoursNorm, $minutesNorm )."<br>переработка = ".format_time_d_hhmm( $time_duration - $hoursNorm*60*60 );
-    }
-    else  
-    {
-      $cellColor = "ff0000";
-      $result_time_str = "наработка = ".$time_duration_str."<br>норма = ".H_to_hhmm( $hoursNorm, $minutesNorm )."<br>недоработка = ".format_time_d_hhmm( $hoursNorm*60*60 - $time_duration );
-    }
-  }
-  else
-  {
-    $time_duration_str = "00:00";
-    $result_time_str = "наработка = ".$time_duration_str."<br>норма = ".H_to_hhmm( $hoursNorm, $minutesNorm )."<br>недоработка = ".format_time_d_hhmm( $hoursNorm*60*60 );
-    $cellColor = "ff0000";
-  }
-
-  $cellContenAr[1] = $result_time_str;
-  $cellContenAr[2] = $cellColor;
-  $cellContenAr[3] = "left";
-  $cellContenAr[4] = "middle";
-
-  return $cellContenAr;
-}
-  
-
-function get_cell_content( $procDate, $userID, $currentDate ){
-  $userId = $userID;
-
-  include __DIR__ . "/php_tori/connect.php";
-
-  $cellContenAr = array();
-  $cellContent = "";
-  $cellColor = "ddeeff";
-  $cellAlign = "left";
-  $cellValign = "top";
-
-  $add_time_duration = 0;
-
-  $query1 = mysqli_query($link, "SELECT STARTTIME, STOPTIME FROM ADD_TIME where STARTDATE = '$procDate' and USERID = '$userId' and APPROVED = 1");
-
-  $merr=mysqli_error($link);
-  if ( !$query1 ) {
-    echo "<br>mysqli_error = $merr<br>";
-  }
-  else{
-    while ( $row1 = mysqli_fetch_assoc($query1) ){
-      $add_start_time = $row1["STARTTIME"];
-      $add_stop_time = $row1["STOPTIME"];
-
-      $add_time_duration += strtotime($add_stop_time) - strtotime($add_start_time);
-    }
-    $add_time_duration_str = format_time_d( $add_time_duration );
-  }
-
-  $query = mysqli_query($link, "SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = '$procDate' and user_id = '$userId'");
-  $merr=mysqli_error($link);
-  if ( !$query ) {
-    echo "<br>mysqli_error = $merr<br>";
-  }
-  else{
-    if ( $currentDate == 1 ){
-      $cellContent  = "<font size=\"2\" color=\"#000000\" face=\"Arial\">Текущий рабочий день:</font><br>";
-
-      if ( mysqli_num_rows($query) == 0 AND $add_time_duration_str == 0 ){
-
-        if ( is_weakend( $procDate ) ){
-          if ( is_workday( $procDate ) ){
-            $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br><br>Нет сведений!</font>";
-            $cellAlign = "center";              
-          }
-          else{
-            $cellContent .= "<font size=\"4\" color=\"#000000\" face=\"Arial\"><br><br>Выходной</font>";
-            $cellColor = "dddddd";
-            $cellAlign = "center";
-            $cellValign = "middle";
-          }        
-        }
-        else{
-          if ( !is_holiday( $procDate ) ){
-            $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br><br>Нет сведений!</font>";
-            $cellAlign = "center";              
-          }
-          else{
-            $cellContent .= "<font size=\"4\" color=\"#000000\" face=\"Arial\"><br><br>Праздничный день!</font>";
-            $cellColor = "dddddd";
-            $cellAlign = "center"; 
-            $cellValign = "middle";             
-          }        
-        }
-      }
-      else{
-        if ( mysqli_num_rows($query) != 0 ){
-	        $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
-          $in_time = $row["in_time"];
-          $out_time = $row["out_time"];
-          $eat_start = $row["eat_start"];
-          $eat_stop = $row["eat_stop"]; 
-        }
-        else{
-          $in_time = "00:00:00";
-          $out_time = $row["out_time"];
-          $eat_start = $row["eat_start"];
-          $eat_stop = $row["eat_stop"]; 
-        }
-
-          $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Раб.в.</font>[".represent_time( $in_time )." - ".represent_time( $out_time )."]<br>";
-          $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Обед </font>[".represent_time( $eat_start )." - ".represent_time( $eat_stop )."]<br>";
-          if ( $add_time_duration != 0 ) $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Работа вне офиса: </font> ".$add_time_duration_str."<br>";
-          else $cellContent .= "<br>";
-
-          $cellContent .= "<br><font size=\"2\" color=\"#444444\" face=\"Arial black\">Итог: </font>".work_day_duration_current_date( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration )."<br>";
-      }
-    }
-    else{
-      if ( mysqli_num_rows($query) == 0 AND $add_time_duration == 0 ){
-        if ( is_weakend( $procDate ) ){
-          if ( is_workday( $procDate ) ){
-            $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br><br>Нет сведений!</font>";
-            $cellAlign = "center";              
-          }
-          else{
-            $cellContent .= "<font size=\"4\" color=\"#000000\" face=\"Arial\"><br><br>Выходной</font>";
-            $cellColor = "dddddd";
-            $cellAlign = "center";  
-            $cellValign = "middle";            
-          }        
-        }
-        else{
-          if ( !is_holiday( $procDate ) ){
-            $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br><br>Нет сведений!</font>";
-            $cellAlign = "center";              
-          }
-          else{
-            $cellContent .= "<font size=\"4\" color=\"#000000\" face=\"Arial\"><br><br>Праздничный день!</font>";
-            $cellColor = "dddddd";
-            $cellAlign = "center";    
-            $cellValign = "middle";          
-          }        
-        }
-      }
-      else{
-        if ( mysqli_num_rows($query) != 0 ){
-	        $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
-          $in_time = $row["in_time"];
-          $out_time = $row["out_time"];
-          $eat_start = $row["eat_start"];
-          $eat_stop = $row["eat_stop"];
-        }
-        else{
-          $in_time = "00:00:00";
-          $out_time = "00:00:00";
-          $eat_start = "00:00:00";
-          $eat_stop = "00:00:00";
-        }
-          $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Раб.в.</font>[".represent_time( $in_time )." - ".represent_time( $out_time )."]<br>";
-          $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Обед </font>[".represent_time( $eat_start )." - ".represent_time( $eat_stop )."]<br>";
-          
-          $offs = 0;
-
-          if ( $add_time_duration != 0 ) $cellContent .= "<font size=\"1\" color=\"#000000\" face=\"Arial\">Работа вне офиса: </font> ".$add_time_duration_str."<br>";
-          else $offs = 1;
-
-          $wdDuration = work_day_duration( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration );
-           
-          if ( $wdDuration != "-1" ){
-            $cellColor = "99ff99";
-            if ( $offs == 1 )  $cellContent .= "<br>";
-            $cellContent .= "<br><font size=\"2\" color=\"#444444\" face=\"Arial black\">Итог: </font>".$wdDuration."<br>";
-          }
-          else{
-            $cellContent .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\"><br>Недостаточно сведений!</font>";
-            $cellColor = "ffccccc";
-        }
-      }
-    }
-  }
-  $cellContenAr[1] = $cellContent;
-  $cellContenAr[2] = $cellColor;
-  $cellContenAr[3] = $cellAlign;
-  $cellContenAr[4] = $cellValign;
-
-  return $cellContenAr;
-}
-
-
-function GetWeekDayD( $date_one )
-{
+function GetWeekDayD( $date_one ){
   $curWeekDay = date('w',strtotime( $date_one ));
-  if ( $curWeekDay == 0 )
+  if ( $curWeekDay == 0 ){
     $curWeekDay = 7;
-
+  }
   return $curWeekDay;
 }
 
-function is_first_week_day( $date_one )
-{
+function is_first_week_day( $date_one ){
   if ( date('w',strtotime( $date_one )) == 1 )
     return 1;
   else
     return 0;
 }
 
-function is_first_month_day( $date_one )
-{
+function is_first_month_day( $date_one ){
   if ( date('d',strtotime( $date_one )) == "01" )
     return 1;
   else
     return 0;
 }
 
-function is_first_quarter_day( $date_one )
-{
+function is_first_quarter_day( $date_one ){
   $day = (int)(GetMonthDayD( $date_one ));
   $month = (int)(GetMonthD( $date_one ));
 
-  if ( $day != 1 )
-  {
+  if ( $day != 1 ){
     return 0;
   }
-  if ( $month != 1 AND $month != 4 AND $month != 7 AND $month != 10 )
-  {
+  
+  if ( $month != 1 AND $month != 4 AND $month != 7 AND $month != 10 ){
     return 0;
   }
   return 1;
 }
 
-function is_first_year_day( $date_one )
-{
+function is_first_year_day( $date_one ){
   if ( date('d',strtotime( $date_one )) == "01" AND date('m',strtotime( $date_one )) == "01" )
     return 1;
   else
     return 0;
 }
 
-function GetMonthDayD( $date_one )
-{
+function GetMonthDayD( $date_one ){
   return date('d',strtotime( $date_one ));
 }
 
-function GetMonthD( $date_one )
-{
+function GetMonthD( $date_one ){
   return date('m',strtotime( $date_one ));
 }
 
-function GetCurrentYearD( $date_one )
-{
+function GetCurrentYearD( $date_one ){
   return date('Y',strtotime( $date_one ));
 }
 
-function GetCurrentTime()
-{
-  return date("H:i:s");
-}
-
-function GetCurrentDate()
-{
+function GetCurrentDate(){
   return date("Y-m-d");
 }
-
-function GetWorkDayStartTime(){
-  return date("H:i:s", mktime(10, 00, 00, 0, 0, 0 ) );
-} 
 
 function GetFirstYearDay( $year ){
   return date("Y-m-d", mktime(00, 00, 00, 1, 1, $year));
@@ -4647,18 +3042,6 @@ function GetFirstMonthDayEx( $date ){
 
 function GetFirstQuarterDayEx( $date ){
   return MonthDecDN( $date, 3 );
-}
-
-function GetFirstQuarterDayByDate( $date ){
-  $firstQuarterMonth = GetFirstQuarterMonth( $date );
-  $currentMonth = (int)GetMonthD( $date );
-
-  $offset = $currentMonth - $firstQuarterMonth;
-
-  if ( $offset != 0 ){
-    $date = MonthDecDN( $date, $offset );
-  }
-  return GetFirstMonthDayEx( $date );
 }
 
 function GetWeekDayNameD( $day ){
@@ -4709,8 +3092,7 @@ function GetMonthNameByDate( $date ){
     return "Декабрь";
 }
 
-function GetQuarterRomNumByDate( $date )
-{
+function GetQuarterRomNumByDate( $date ){
   $month = (int)(GetMonthD( $date ));
 
   if ( $month >= 1 AND $month <= 3 )
@@ -4726,47 +3108,25 @@ function GetQuarterRomNumByDate( $date )
     return "IV";
 }
 
-function GetFirstQuarterMonth( $date )
-{
-  $month = (int)(GetMonthD( $date ));
-
-  if ( $month >= 1 AND $month <= 3 )
-    return "1";
-
-  if ( $month >= 4 AND $month <= 6 )
-    return "4";
-
-  if ( $month >= 7 AND $month <= 9 )
-    return "7";
-
-  if ( $month >= 10 AND $month <= 12 )
-    return "10";
-}
-
-function HourIncDN( $time, $cnt )
-{
+function HourIncDN( $time, $cnt ){
   return date("H:i:s", strtotime( "+$cnt hour", strtotime( $time ) ) );
 }
 
-function MinuteIncDN( $time, $cnt )
-{
+function MinuteIncDN( $time, $cnt ){
   return date("H:i:s", strtotime( "+$cnt minute", strtotime( $time ) ) );
 }
 
-function SecondIncDN( $time, $cnt )
-{
+function SecondIncDN( $time, $cnt ){
   return date("H:i:s", strtotime( "+$cnt second", strtotime( $time ) ) );
 }
 
-function timeStrToParts( $time, &$hour, &$min, &$sec )
-{
+function timeStrToParts( $time, &$hour, &$min, &$sec ){
   $hour = (int)( substr( $time, 0, 2 ) );
   $min  = (int)( substr( $time, 3, 2 ) );
   $sec  = (int)( substr( $time, 6, 2 ) );
 }
 
-function inc_time_by_time( $inTime, $offsetTime )
-{
+function inc_time_by_time( $inTime, $offsetTime ){
   $hour = 0;
   $min  = 0;
   $sec  = 0;
@@ -4780,34 +3140,16 @@ function inc_time_by_time( $inTime, $offsetTime )
   return $inTime;
 }
 
-function dec_time_by_time( $inTime, $offsetTime )
-{
-  $hour = 0;
-  $min  = 0;
-  $sec  = 0;
-
-  timeStrToParts( $offsetTime, $hour, $min, $sec );
-
-  if ( $hour > 0 ){ $inTime = HourIncDN( $inTime, (-1)*$hour ); }
-  if ( $min > 0 ){ $inTime = MinuteIncDN( $inTime, (-1)*$min ); }
-  if ( $sec > 0 ){ $inTime = SecondIncDN( $inTime, (-1)*$sec ); }
-
-  return $inTime;
-}
-
-function DayIncDN( $day, $cnt )
-{
+function DayIncDN( $day, $cnt ){
   set_time_limit(120);
   return date("Y-m-d", strtotime( "+$cnt day", strtotime( $day ) ) );
 }
 
-function DayDecDN( $day, $cnt )
-{
+function DayDecDN( $day, $cnt ){
   return date("Y-m-d", strtotime( "-$cnt day", strtotime( $day ) ) );
 }
 
-function set_to_first_month_day( $date )
-{
+function set_to_first_month_day( $date ){
   $dayNum = GetMonthDayD( $date ) - 1;
 
   $date = DayDecDN( $date, $dayNum ); 
@@ -4815,20 +3157,17 @@ function set_to_first_month_day( $date )
   return $date;
 }
 
-function MonthDecDN( $day, $cnt )
-{
+function MonthDecDN( $day, $cnt ){
   if ( $cnt == 0 )
     return $day;
   return date("Y-m-d", strtotime( "-$cnt month", strtotime( $day ) ) );
 }
 
-function GetFirstMonthDay( $date )
-{
+function GetFirstMonthDay( $date ){
   return date("Y-m-d", mktime(00, 00, 00, GetMonthD( $date ), 1, GetCurrentYearD( $date ) ));
 }
 
-function GetLastMonthDay( $date )
-{
+function GetLastMonthDay( $date ){
   $tempDate = MonthDecDN( $date, -1 );
   $tempDate = GetFirstMonthDay( $tempDate );
   $tempDate = DayDecDN( $tempDate, 1 );
@@ -4836,21 +3175,18 @@ function GetLastMonthDay( $date )
   return date("Y-m-d", mktime(00, 00, 00, GetMonthD( $tempDate ), GetMonthDayD( $tempDate ), GetCurrentYearD( $tempDate ) ));
 }
 
-function getMaskedUID( $symcnt, $uid )
-{
+function getMaskedUID( $symcnt, $uid ){
   $valStr = "";
   $uidStr = (string)$uid;
   $uidStrMaxLen = 3;
   $uidStrLen = strlen($uidStr);
   $addCnt = $uidStrMaxLen - $uidStrLen;
   
-  for ($i = 0; $i < $addCnt; $i ++ )
-  {
+  for ($i = 0; $i < $addCnt; $i ++ ){
     $uidStr = "0".$uidStr;
   }       
 
-  for ($i = 0; $i < $symcnt; $i ++ )
-  {
+  for ($i = 0; $i < $symcnt; $i ++ ){
     $val = rand(0, 9);
     $valStr = $valStr . (string)$val;
   }
@@ -4878,8 +3214,7 @@ function getMaskedUID( $symcnt, $uid )
   return $valStrRes;
 }
 
-function extractUidFromMaskedUID( $maskedStr )
-{
+function extractUidFromMaskedUID( $maskedStr ){
   $maskedStrIdPart4 = substr( $maskedStr, 0, 10 );
   $maskedStrIdPart3 = substr( $maskedStr, 12, 7 );
   $maskedStrIdPart2 = substr( $maskedStr, 21, 9 );
@@ -4901,8 +3236,7 @@ function extractUidFromMaskedUID( $maskedStr )
   $uidVal = -1;
   $valid = 0;
 
-  if ( strcasecmp($msgHash, $maskedHashStrCheck) == 0 ) 
-  {
+  if ( strcasecmp($msgHash, $maskedHashStrCheck) == 0 ) {
     $uidStr = substr($maskedIdStrCheck, 10, 3 );
     $uidVal = (int)$uidStr;
     $valid = 1;
@@ -4911,18 +3245,16 @@ function extractUidFromMaskedUID( $maskedStr )
   return array( $valid, $uidVal );
 }
 
-function shift_dt_by_transition_time( $dateTime, $transTime, $shiftDir )
-{
+function shift_dt_by_transition_time( $dateTime, $transTime, $shiftDir ){
   $transTimeH = (int)date("H", strtotime($transTime));
   $transTimeM = (int)date("i", strtotime($transTime));
   $transTimeS = (int)date("s", strtotime($transTime));
 
-  if ( $shiftDir == 1 )
-  {
+  if ( $shiftDir == 1 ){
     $dateTime = date("Y-m-d H:i:s", strtotime( "+$transTimeH hour +$transTimeM minute +$transTimeS second", strtotime( $dateTime ) ) );
   }
-  if ( $shiftDir == -1 )
-  {
+  
+  if ( $shiftDir == -1 ){
     $dateTime = date("Y-m-d H:i:s", strtotime( "-$transTimeH hour -$transTimeM minute -$transTimeS second", strtotime( $dateTime ) ) );
   }
     
@@ -4983,8 +3315,7 @@ function get_and_update_start_time_status( $userID ){
   return array( $isThereDelay, $ss_defaultStartTime, $ss_allowedDelay, $ss_defaultStartTimeWithDelay, $ss_defaultStartTimeWithDelayVal, $ss_RemoteWork );
 }
 
-function apply_staff_leaves_to_days_norm($link, $userID, $startDate, $stopDate, $days_dates_set, $days_norm)
-{
+function apply_staff_leaves_to_days_norm($link, $userID, $startDate, $stopDate, $days_dates_set, $days_norm){
   $userID = mysqli_real_escape_string($link, $userID);
   $startDateEsc = mysqli_real_escape_string($link, $startDate);
   $stopDateEsc = mysqli_real_escape_string($link, $stopDate);
@@ -4999,6 +3330,7 @@ function apply_staff_leaves_to_days_norm($link, $userID, $startDate, $stopDate, 
   ");
 
   $merr = mysqli_error($link);
+  
   if (!$query) {
     echo "<br>mysqli_error = $merr<br>";
     return $days_norm;
@@ -5028,8 +3360,7 @@ function apply_staff_leaves_to_days_norm($link, $userID, $startDate, $stopDate, 
   return $days_norm;
 }
 
-function get_staff_leave_events_by_days($link, $userID, $startDate, $stopDate, $days_dates_set)
-{
+function get_staff_leave_events_by_days($link, $userID, $startDate, $stopDate, $days_dates_set){
   $leaveEvents = array_fill(0, count($days_dates_set), "NDF");
 
   $userID = mysqli_real_escape_string($link, $userID);
@@ -5067,8 +3398,7 @@ function get_staff_leave_events_by_days($link, $userID, $startDate, $stopDate, $
   return $leaveEvents;
 }
 
-function get_work_dayoff_types_by_range($link, $startDate, $stopDate)
-{
+function get_work_dayoff_types_by_range($link, $startDate, $stopDate){
   $result = array();
 
   $startDate = mysqli_real_escape_string($link, $startDate);

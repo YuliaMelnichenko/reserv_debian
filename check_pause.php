@@ -20,26 +20,24 @@ echo "</head>";
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
-function auth()
-{	
+function auth(){	
 	var login  = document.getElementById('login').value;
 	var passwd = document.getElementById('passwd').value;
 
 	$.post('ajax/auth.php', {login: login, passwd: passwd}, RetSWT);
 
-  function RetSWT(dat) 
-	{  
+  function RetSWT(dat) {  
 //alert( 2 );
 		if ( dat.length > 100 )
 			alert( dat );
       window.location=self.location;
-	  }  
+	}  
 }
 
-function set_focus()
-{	
+function set_focus(){	
 	document.getElementById("auth_btn").focus();
 }
+
 </script>
 
 <?php
@@ -48,14 +46,12 @@ echo "<div align=\"center\">";
 
 $ip = $_SERVER['REMOTE_ADDR'];
 
-if ( $ip == "192.168.100.50" or $ip == "192.168.100.69" )
-{ 
+if ( $ip == "192.168.100.50" or $ip == "192.168.100.69" ){ 
   $_SESSION['ss_id'] = -1; 
   move_to_last_location(); 
 }
 
-if ( !isset($_SESSION['ss_id']) )
-{
+if ( !isset($_SESSION['ss_id']) ){
   $_SESSION['ss_mode'] = 0;
   $first_num = rand(1,20);
   $second_num = rand(1,20);
@@ -91,8 +87,7 @@ if ( !isset($_SESSION['ss_id']) )
   echo "</table>";
   echo "</div>";
 }
-else
-{
+else{
   move_to_last_location();
 }
 

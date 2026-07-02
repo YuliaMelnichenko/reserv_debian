@@ -1,38 +1,3 @@
-function scheduleTimeRegistrationPeriodReload() {
-  return;
-
-  if (!window.toriStopDTStr) {
-    return;
-  }
-
-  var stopTime = new Date(window.toriStopDTStr.replace(' ', 'T')).getTime();
-
-  if (!stopTime || isNaN(stopTime)) {
-    console.log('Некорректный toriStopDTStr:', window.toriStopDTStr);
-    return;
-  }
-
-  var now = Date.now();
-  var delay = stopTime - now + 3000;
-
-  console.log('toriStopDTStr:', window.toriStopDTStr);
-  console.log('reload delay ms:', delay);
-
-  if (delay <= 0) {
-    console.log('Период уже завершен, автоперезагрузка отменена.');
-    return;
-  }
-
-  if (delay > 86400000) {
-    console.log('До конца периода больше суток, автоперезагрузка отменена.');
-    return;
-  }
-
-  setTimeout(function() {
-    location.reload();
-  }, delay);
-}
-
 function unset_cookie(){
   $.post('ajax/delete_cookie.php', RetSWT1 );
   function RetSWT1(dat1) {

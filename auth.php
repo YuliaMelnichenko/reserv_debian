@@ -3,10 +3,9 @@ ob_start();
 
 session_start();
 
-$ip=$_SERVER['REMOTE_ADDR'];
+$ip = $_SERVER['REMOTE_ADDR'];
 
 echo $ip;
-
 
 include __DIR__ . "/funcs.php";
 ?>
@@ -27,20 +26,13 @@ echo "</head>";
 <script type="text/javascript" src="js/tory.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
-function check_cookie()
-{
+function check_cookie(){
   $.post('ajax/get_login_from_cookie.php', RetSWT1 );
-  function RetSWT1(dat1) 
-  {
-    //alert(dat1);    
-    if ( dat1 != "" )
-    {
+  function RetSWT1(dat1) {
+    if ( dat1 != "" ){
       $.post('ajax/get_passwd_from_cookie.php', RetSWT2 );
-      function RetSWT2(dat2) 
-      {
-        //alert(dat2);    
-        if ( dat2 != "" )
-        {
+      function RetSWT2(dat2) {
+        if ( dat2 != "" ){
           document.getElementById('login').value = dat1;
           document.getElementById('passwd').value = dat2;
           auth();
@@ -56,10 +48,8 @@ function auth() {
 
   if ( document.getElementById('autologin').checked ) {
     $.post('ajax/set_cookie.php', {login: login, passwd: passwd}, RetSWT1 );
-    function RetSWT1(dat1) 
-    {   // alert(dat1);
-      if ( dat1 == 0 )
-      {
+    function RetSWT1(dat1) {
+      if ( dat1 == 0 ){
         alert( "Ошибка сохранения авторизационных данных. Проверьте настройки или смените браузер" );
       }
     }
@@ -74,16 +64,15 @@ function auth() {
       unset_cookie();
       document.getElementById('login').value = '';
       document.getElementById('passwd').value = '';
-      // document.getElementById('autologin').checked = false;
     }
   });
 }
 
-function set_focus()
-{	
+function set_focus(){	
   document.getElementById("auth_btn").focus();
 }
 </script>
+
 <?php
 echo "<body bgcolor=\"#ffffff\" onload=\"set_focus();\">";
                                                               
@@ -91,8 +80,7 @@ echo "<div align=\"center\">";
 
 $ip = $_SERVER['REMOTE_ADDR'];
 
-if ( !isset($_SESSION['ss_id']) )
-{
+if ( !isset($_SESSION['ss_id']) ){
   $_SESSION['ss_mode'] = 0;
   $first_num = rand(1,20);
   $second_num = rand(1,20);
@@ -150,8 +138,7 @@ if ( !isset($_SESSION['ss_id']) )
   echo "</table>";
   echo "</div>";
 }
-else
-{
+else{
   move_to_last_location();
 }
 
@@ -169,4 +156,3 @@ check_cookie();
 echo "</body>";
 echo "</html>";  
 ?>
-
