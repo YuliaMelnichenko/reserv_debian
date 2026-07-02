@@ -352,6 +352,9 @@ function auth()
     header('Location: auth.php');
     exit;
   }
+
+  require_once __DIR__ . '/inc/access.php';
+  require_csrf_for_unsafe_request(false);
 }  
 
 function get_dbsetup_param( $paramName ) {

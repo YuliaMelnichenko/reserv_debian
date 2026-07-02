@@ -3,6 +3,9 @@ ob_start();
 
 session_start();
 
+require_once __DIR__ . '/inc/access.php';
+csrf_ensure_token();
+
 $ip=$_SERVER['REMOTE_ADDR'];
 
 echo $ip;

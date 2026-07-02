@@ -1,3 +1,85 @@
+// Attach the session CSRF token to every same-origin state-changing request.
+(function(window, document) {
+  'use strict';
+
+  function getCookie(name) {
+    var prefix = name + '=';
+    var cookies = document.cookie ? document.cookie.split(';') : [];
+
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = cookies[i].replace(/^\s+/, '');
+
+      if (cookie.indexOf(prefix) === 0) {
+        return decodeURIComponent(cookie.substring(prefix.length));
+      }
+    }
+
+    return '';
+  }
+
+  function isUnsafeMethod(method) {
+    return !/^(GET|HEAD|OPTIONS)$/i.test(method || 'GET');
+  }
+
+  function isSameOrigin(url) {
+    var anchor = document.createElement('a');
+    anchor.href = url;
+
+    return anchor.protocol === window.location.protocol
+      && anchor.host === window.location.host;
+  }
+
+  if (window.XMLHttpRequest) {
+    var originalOpen = window.XMLHttpRequest.prototype.open;
+    var originalSend = window.XMLHttpRequest.prototype.send;
+
+    window.XMLHttpRequest.prototype.open = function(method, url) {
+      this.toriRequestMethod = method;
+      this.toriRequestUrl = url;
+      return originalOpen.apply(this, arguments);
+    };
+
+    window.XMLHttpRequest.prototype.send = function() {
+      var token = getCookie('TORI_CSRF_TOKEN');
+
+      if (
+        token
+        && isUnsafeMethod(this.toriRequestMethod)
+        && isSameOrigin(this.toriRequestUrl)
+      ) {
+        this.setRequestHeader('X-CSRF-Token', token);
+      }
+
+      return originalSend.apply(this, arguments);
+    };
+  }
+
+  if (window.fetch) {
+    var originalFetch = window.fetch;
+
+    window.fetch = function(input, options) {
+      var requestOptions = options ? Object.assign({}, options) : {};
+      var requestUrl = typeof input === 'string' ? input : input.url;
+      var requestMethod = requestOptions.method
+        || (typeof input !== 'string' && input.method)
+        || 'GET';
+      var token = getCookie('TORI_CSRF_TOKEN');
+
+      if (token && isUnsafeMethod(requestMethod) && isSameOrigin(requestUrl)) {
+        var headers = new Headers(
+          requestOptions.headers
+          || (typeof input !== 'string' ? input.headers : undefined)
+          || {}
+        );
+        headers.set('X-CSRF-Token', token);
+        requestOptions.headers = headers;
+      }
+
+      return originalFetch.call(window, input, requestOptions);
+    };
+  }
+})(window, document);
+
 function unset_cookie(){
   $.post('ajax/delete_cookie.php', RetSWT1 );
   function RetSWT1(dat1) {

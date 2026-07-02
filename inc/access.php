@@ -21,11 +21,106 @@ function deny_ajax_access($statusCode, $message)
     exit;
 }
 
+function access_request_is_https()
+{
+    if (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off') {
+        return true;
+    }
+
+    if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+        $forwardedProto = strtolower(trim(explode(',', $_SERVER['HTTP_X_FORWARDED_PROTO'])[0]));
+
+        if ($forwardedProto === 'https') {
+            return true;
+        }
+    }
+
+    return isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443;
+}
+
+function csrf_set_cookie($token)
+{
+    setcookie('TORI_CSRF_TOKEN', $token, array(
+        'expires' => 0,
+        'path' => '/',
+        'secure' => access_request_is_https(),
+        'httponly' => false,
+        'samesite' => 'Strict',
+    ));
+
+    $_COOKIE['TORI_CSRF_TOKEN'] = $token;
+}
+
+function csrf_ensure_token()
+{
+    if (
+        empty($_SESSION['csrf_token'])
+        || !is_string($_SESSION['csrf_token'])
+        || strlen($_SESSION['csrf_token']) < 64
+    ) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+
+    $token = $_SESSION['csrf_token'];
+    $cookieToken = isset($_COOKIE['TORI_CSRF_TOKEN'])
+        ? (string) $_COOKIE['TORI_CSRF_TOKEN']
+        : '';
+
+    if ($cookieToken === '' || !hash_equals($token, $cookieToken)) {
+        csrf_set_cookie($token);
+    }
+
+    return $token;
+}
+
+function csrf_rotate_token()
+{
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    csrf_set_cookie($_SESSION['csrf_token']);
+
+    return $_SESSION['csrf_token'];
+}
+
+function csrf_request_is_unsafe()
+{
+    $method = strtoupper(isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET');
+    return !in_array($method, array('GET', 'HEAD', 'OPTIONS'), true);
+}
+
+function require_csrf_for_unsafe_request($ajaxRequest = false)
+{
+    if (!csrf_request_is_unsafe()) {
+        csrf_ensure_token();
+        return;
+    }
+
+    $expectedToken = csrf_ensure_token();
+    $providedToken = isset($_SERVER['HTTP_X_CSRF_TOKEN'])
+        ? (string) $_SERVER['HTTP_X_CSRF_TOKEN']
+        : (isset($_POST['_csrf']) ? (string) $_POST['_csrf'] : '');
+
+    if ($providedToken !== '' && hash_equals($expectedToken, $providedToken)) {
+        return;
+    }
+
+    if ($ajaxRequest) {
+        deny_ajax_access(403, 'CSRF_TOKEN_INVALID');
+    }
+
+    http_response_code(403);
+    header('Content-Type: text/plain; charset=utf-8');
+    header('Cache-Control: no-store');
+    echo 'Invalid request token';
+    exit;
+}
+
 function require_ajax_auth()
 {
     if (!access_session_is_valid()) {
         deny_ajax_access(401, 'AUTH_REQUIRED');
     }
+
+    require_csrf_for_unsafe_request(true);
 }
 
 function access_current_user_is_director()
@@ -149,6 +244,8 @@ function require_page_auth(){
         header('Location: auth.php');
         exit;
     }
+
+    require_csrf_for_unsafe_request(false);
 }
 
 function require_page_director()
