@@ -2,6 +2,10 @@
 ob_start();
 
 session_start();
+
+require_once __DIR__ . '/inc/access.php';
+csrf_ensure_token();
+
 echo "<div id=\"pause_div\">";
 ?>
 
@@ -18,6 +22,7 @@ echo "</head>";
 ?>
 
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
+<script type="text/javascript" src="js/tory.js"></script>
 <script type="text/javascript" charset="utf-8"> 
 
 function auth()

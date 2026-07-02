@@ -5,6 +5,13 @@ session_start();
 
 require_once __DIR__ . '/inc/access.php';
 require_page_auth();
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+  http_response_code(405);
+  header('Allow: POST');
+  exit;
+}
+
 echo "<html>";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";

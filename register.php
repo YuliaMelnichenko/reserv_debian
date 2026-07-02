@@ -159,6 +159,7 @@ if (isset( $_POST['r_button']) ) {
 echo "<h6>Для регистации заполните необходимые сведения</h6>";
 
 echo "<form action=\"register.php\" method=\"post\">";
+echo '<input type="hidden" name="_csrf" value="' . htmlspecialchars(csrf_ensure_token(), ENT_QUOTES, 'UTF-8') . '">';
 echo "<table><tr>";
 echo "<td class=\"rg\">Логин</td>";
 echo "<td class=\"rg\"><input name=\"r_login\" style=\"width:255px;\" type=\"text\" value=\"\"></td>";

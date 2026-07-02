@@ -7,7 +7,8 @@ header("Cache-Control: post-check=0, pre-check=0", false);
                 
 include __DIR__ . "/../php_tori/connect.php";
 include_once __DIR__ . "/../funcs.php";
-require_once __DIR__ . "/../inc/database.php";
+require_once __DIR__ . "/../inc/access.php";
+require_csrf_for_unsafe_request(true);
 
 $__login = trim((string) ($_POST['login'] ?? ''));
 $__passwd = md5(md5(trim((string) ($_POST['passwd'] ?? ''))));
@@ -52,6 +53,7 @@ else
     $_SESSION['ss_delay_show_save'] = 0;
     $_SESSION['ss_UserTimeZoneMins'] = $row["userTimeZoneMins"];
     $_SESSION['ss_sessid'] = session_id();
+    csrf_rotate_token();
     $retArr = get_current_datetime_in_timezone();
     $_SESSION['ss_UserTimeZoneStr'] = $retArr[5];
     $ss_dayTransitionTime = $row["dayTransitionTime"];
