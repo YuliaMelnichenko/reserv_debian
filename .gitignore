@@ -1,0 +1,9 @@
+.env
+*.swp
+
+# Local tooling and sensitive utility scripts
+.idea/
+.vscode/
+Thumbs.db
+tpwd.php
+test.php
