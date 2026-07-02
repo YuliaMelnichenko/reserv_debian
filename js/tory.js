@@ -1,38 +1,3 @@
-function scheduleTimeRegistrationPeriodReload() {
-  return;
-
-  if (!window.toriStopDTStr) {
-    return;
-  }
-
-  var stopTime = new Date(window.toriStopDTStr.replace(' ', 'T')).getTime();
-
-  if (!stopTime || isNaN(stopTime)) {
-    console.log('Некорректный toriStopDTStr:', window.toriStopDTStr);
-    return;
-  }
-
-  var now = Date.now();
-  var delay = stopTime - now + 3000;
-
-  console.log('toriStopDTStr:', window.toriStopDTStr);
-  console.log('reload delay ms:', delay);
-
-  if (delay <= 0) {
-    console.log('Период уже завершен, автоперезагрузка отменена.');
-    return;
-  }
-
-  if (delay > 86400000) {
-    console.log('До конца периода больше суток, автоперезагрузка отменена.');
-    return;
-  }
-
-  setTimeout(function() {
-    location.reload();
-  }, delay);
-}
-
 function unset_cookie(){
   $.post('ajax/delete_cookie.php', RetSWT1 );
   function RetSWT1(dat1) {
@@ -463,20 +428,6 @@ function show_add_time_table( showTable ){
   } 
 }
 
-function upl_add_time(){
-  if ( document.getElementById('ta_start_date_time') && document.getElementById('ta_stop_date_time') && document.getElementById('ta_base') && document.getElementById('ta_desc') ){
-    var ta_start_date_time = document.getElementById('ta_start_date_time').value;
-    var ta_stop_date_time = document.getElementById('ta_stop_date_time').value;
-    var ta_base = document.getElementById('ta_base').value;
-    var ta_desc = document.getElementById('ta_desc').value;
-
-    $.post('ajax/time_appender.php', {ta_start_date_time: ta_start_date_time, ta_stop_date_time: ta_stop_date_time, ta_base: ta_base, ta_desc: ta_desc}, RetSWT);
-    function RetSWT(dat) {
-      window.location=self.location;
-    }
-  }
-}
-
 function show_delay_page(){
   if ( document.getElementById('delay_approvement') ){
     $.post('ajax/get_delay_page_mode.php', RetSWT1);
@@ -644,55 +595,6 @@ function show_add_times_by_user( user ){
       }  
     }
   }   	
-}
-
-function show_add_time_notification(){  
-  $.post('ajax/get_add_times_notification_table.php', RetSWT1);
-  function RetSWT1(dat1) {
-    document.getElementById('add_time_content').innerHTML = dat1;
-
-    if ( document.getElementById('add_time_approvement_table_users') ){ 
-      tableWidth = document.getElementById('add_time_approvement_table_users').offsetWidth + 10;
-
-      widthStr = 'width:' + tableWidth + 'px';
-
-      document.getElementById('add_time_content').setAttribute("style",widthStr);
-
-      set_add_time_notificationc_count();
-
-      $.post('ajax/get_time_approvment_header_content.php', { width: tableWidth, offs: 12 }, RetSWT2);
-      function RetSWT2(dat2) {
-        document.getElementById('addTimeHeader').innerHTML = dat2;
-      } 
-    }
-  }
-}   	
-
-function show_add_time_notification(){  
-  if ( document.getElementById('add_time_content') ){  
-    document.getElementById('dateTimeField').style.display='none';
-
-    $.post('ajax/get_add_times_notification_table.php', RetSWT1);
-    function RetSWT1(dat1) {
-      document.getElementById('add_time_content').innerHTML = dat1;
-
-      if ( document.getElementById('add_time_approvement_table_users') ){ 
-        tableWidth = document.getElementById('add_time_approvement_table_users').offsetWidth + 10;
-
-        widthStr = 'width:' + tableWidth + 'px';
-
-        document.getElementById('add_time_content').setAttribute("style",widthStr);
-
-        set_add_time_notificationc_count();
-
-        $.post('ajax/get_time_approvment_header_content.php', { width: tableWidth, offs: 12 }, RetSWT2);
-        function RetSWT2(dat2) {
-          document.getElementById('addTimeHeader').innerHTML = dat2;
-        } 
-      }
-    }
-    document.getElementById('dateTimeField').style.display='block';
-  }
 }
 
 function add_time_go_back(){  
@@ -1026,28 +928,6 @@ function delete_gym_schedule(date_train, start_time, stop_time) {
   }
 }
 
-function part_time_show(){
-  if ( document.getElementById('add_time_part_date') && document.getElementById('add_time_part_start_time') && document.getElementById('add_time_part_stop_time') && document.getElementById('add_time_part_base') && document.getElementById('add_time_part_desc') ){
-    var add_time_part_date = document.getElementById('add_time_part_date').value;
-    var add_time_part_start_time = document.getElementById('add_time_part_start_time').value;
-    var add_time_part_stop_time = document.getElementById('add_time_part_stop_time').value;
-    var add_time_part_base = document.getElementById('add_time_part_base').value;
-    var add_time_part_desk = document.getElementById('add_time_part_desc').value;
- 
-    $.post('ajax/add_time_part.php', {add_time_part_date: add_time_part_date, add_time_part_start_time: add_time_part_start_time, add_time_part_stop_time: add_time_part_stop_time, add_time_part_base: add_time_part_base, add_time_part_desk: add_time_part_desk }, RetSWT);
-    function RetSWT(dat) {  
-      if ( dat == 1 ){ 
-        $.post('ajax/get_add_times.php', {},RetSWT1);
-        function RetSWT1(dat1) { 
-          document.getElementById('delay_explanation_add_time_part').style.display='none';
-          document.getElementById('delay_explanation_add_time').innerHTML = dat1;
-          document.getElementById('delay_explanation_add_time').style.display='block';
-        }
-      }
-    }
-  }   
-}
-
 function part_time_del( itemId ){
   var perform=confirm('запись будет удалена. Продолжить?')
   if ( perform == true ){
@@ -1112,52 +992,6 @@ function check_pause_state( force ){
       }
     }
   }
-}
-
-function check_pause_state1( force ){
-  $.post('ajax/is_there_pause.php', RetSWT);
-  function RetSWT(dat) {
-	alert(dat);
-
-    if ( dat == 0 ){
-      if ( force == 1 ){
-        window.location=self.location;
-      }
-      else{
-        return;
-      }
-    } 
-    else if ( dat == 1 ){
-      $.post('ajax/get_pause_stop_content.php', RetSWT1);
-      function RetSWT1(dat1) {
-        $("body").html(dat1);  
-      }
-    }
-    else if ( dat == 2 ){
-      $.post('ajax/finalize_pause.php', RetSWT2);
-      function RetSWT2(dat2) {
-        if ( dat2 == 1 ){
-          $.post('ajax/get_pause_result_content.php', RetSWT3 );
-          function RetSWT3(dat3) {
-            if ( document.getElementById('delay_explanation_add_time') ){
-              document.getElementById('pause_result_head').innerHTML = dat3;
-              document.getElementById('pause_result_head').style.display='block';
-
-              if ( document.getElementById('resultContentTable') ){
-                tableHeight = document.getElementById('resultContentTable').offsetHeight + 15;
-                
-                if ( tableHeight > 500 ){
-                  tableHeight = 500;
-                }  
-
-                document.getElementById('pause_result_head').style.height = tableHeight + "px"; 
-              }
-            }
-          }
-        }
-      }
-    }
-  }                       
 }
 
 function set_pause_header(){
@@ -1426,12 +1260,6 @@ function close_sport_pause(){
   }
 }
 
-function close_birth_window () {
-  if (document.getElementsByClassName('birth_person')) {
-    document.getElementsByClassName('birth_person').style.display='none';
-  }
-}
-
 function make_div_scroll(){
   var horizScrollVal = document.getElementById('report_window').scrollLeft;
   document.getElementById('report_window_head').scrollLeft = horizScrollVal;
@@ -1443,11 +1271,6 @@ function make_div_scroll(){
 function make_div_scroll_single(){
   var vertScrollVal = document.getElementById('report_window_single').scrollTop;
   document.getElementById('report_window_left').scrollTop = vertScrollVal;
-}
-
-function make_div_scroll_sport() {
-  var vertScrollVal = document.getElementById('delete_button_cont').scrollTop;
-  document.getElementById('delete_button_cont').scrollTop = vertScrollVal;
 }
 
 document.addEventListener("DOMContentLoaded", () => {

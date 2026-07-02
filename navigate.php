@@ -9,9 +9,6 @@ function log_out(){
   }
 }
 
-function show_alerts(){
-  location.href='alerts.php';   
-}
 </script>
 
 <?php

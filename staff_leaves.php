@@ -705,30 +705,6 @@ echo "</div>";
         modal.style.display = 'flex';
     }
 
-    function confirmDelete (id) {
-        if (!confirm('Вы уверены, что хотите удалить запись?')) return;
-
-        fetch('staff_leaves.php', {
-            method: 'POST',
-            body: new URLSearchParams({
-                action: 'delete',
-                record_id: id
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                showToast("✅ запись удалена");
-            } else {
-                alert('' + data.message);
-            }
-        })
-        .catch(err => {
-            console.error('Ошибка запроса: ', err);
-            alert('Сервер недоступен');
-        });
-    }
-
     function loadArchive() {
         currentType = 'Архив';
 

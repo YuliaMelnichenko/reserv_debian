@@ -19,26 +19,6 @@ echo "<body bgcolor=\"#ffffff\" >";
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
-function ta_accept( recID )
-{	
-	alert('ahtung!!!');
-
-	$.post('ajax/time_accept.php', {recID: recID}, RetSWT);                           
-        function RetSWT(dat) 
-	{  
-    		window.location=self.location;
-	}
-}
-
-function ta_refuse( recID )
-{	
-	$.post('ajax/time_refuse.php', {recID: recID}, RetSWT);                           
-        function RetSWT(dat) 
-	{  
-    		window.location=self.location;
-	}
-}
-
 function ta_delete( delID )
 {	
 	var perform=confirm('Запись будет удалена. Продолжить?')
