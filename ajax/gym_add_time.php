@@ -22,7 +22,7 @@ $query0 = mysqli_query($link, "SELECT max(ID) FROM gym_schedule");
 $newID = 0;
 
 if ( !$query0 ) {
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 } 
 else if ($row = mysqli_fetch_array($query0)) {
   $newID = $row[0] + 1;

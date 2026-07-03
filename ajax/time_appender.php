@@ -30,7 +30,7 @@ $newID = 0;
 $merr=mysqli_error($link);
 if ( !$query0 ) 
 {
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 }
 else
 {
@@ -43,6 +43,6 @@ $query = db_execute($link, 'INSERT INTO ADD_TIME (ID, USERID, STARTDATE, STOPDAT
 $merr=mysqli_error($link);
 if (!$query)
 {
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 }
 ?>

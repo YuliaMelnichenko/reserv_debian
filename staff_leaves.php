@@ -186,7 +186,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'archive') {
     $stmt = mysqli_prepare($link, $sql);
 
     if (!$stmt) {
-        echo json_encode(['error' => mysqli_error($link)]);
+        echo json_encode(['error' => database_error_message($link, __FILE__ . ':' . __LINE__)]);
         exit;
     }
 
@@ -198,7 +198,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'archive') {
     $result = mysqli_stmt_get_result($stmt);
 
     if (!$result) {
-        echo json_encode(['error' => mysqli_error($link)]);
+        echo json_encode(['error' => database_error_message($link, __FILE__ . ':' . __LINE__)]);
         exit;
     }
 

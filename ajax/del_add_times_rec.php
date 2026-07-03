@@ -18,7 +18,7 @@ $query = db_execute($link, 'DELETE FROM ADD_TIME WHERE ID = ?', 'i', array($delI
 $merr=mysqli_error($link);
 if ( !$query ) 
 {
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 } 
 echo $delID;                         
 ?>

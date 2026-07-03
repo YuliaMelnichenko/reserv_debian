@@ -111,7 +111,7 @@ $query = mysqli_query($link, "SELECT * FROM ALERTS where DATE = '$currentDate' a
 
 $merr=mysqli_error($link);
 if ( !$query ){
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 }
 else{
   while ( $row = mysqli_fetch_assoc($query) ){

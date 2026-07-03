@@ -36,7 +36,7 @@ if ( isset($_POST['userID']) AND isset($_POST['messageMode']) )
   $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else if ( $row = mysqli_fetch_array($query0) )
   {
@@ -49,7 +49,7 @@ if ( isset($_POST['userID']) AND isset($_POST['messageMode']) )
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "MYSQL : $merr";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {

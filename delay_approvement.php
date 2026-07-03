@@ -81,7 +81,7 @@ mysqli_set_charset($link, "utf8");
 $query = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = '$userID_' AND TYPE = 3 order by USERID"); 
 if (!$query)
 {
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 }
 else
 {

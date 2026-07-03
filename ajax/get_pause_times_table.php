@@ -51,7 +51,7 @@ $query = mysqli_query($link, "SELECT * FROM ADD_TIME
                       ORDER BY ID DESC"); 
 
 if (!$query) {
-  echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 

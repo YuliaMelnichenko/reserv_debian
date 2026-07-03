@@ -52,7 +52,7 @@ $query = db_query($link, "
 ", 'ii', array($visitID, $userID));
 
 if (!$query) {
-  echo "Ошибка БД: " . mysqli_error($link);
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
@@ -88,7 +88,7 @@ $res = db_execute($link, "
 ", 'sii', array($newOutTime, $visitID, $userID));
 
 if (!$res) {
-  echo "Ошибка БД: " . mysqli_error($link);
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 

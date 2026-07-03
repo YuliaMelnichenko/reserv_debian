@@ -58,7 +58,7 @@ include_once __DIR__ . "/php_tori/connect.php";
   $query = mysqli_query($link, "SELECT * FROM work_dayoff order by date asc"); 
   $merr=mysqli_error($link);
   if ( !$query ) {
-    echo "<br>mysql_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else{
     $vn=mysqli_num_rows($query);
@@ -97,7 +97,7 @@ include_once __DIR__ . "/php_tori/connect.php";
     $merr = mysqli_error($link);
 
     if ( !$query2 ) {
-      echo "<br>mysql_error = $merr<br>";
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
     }
     else{
       $vn2=mysqli_num_rows($query2);
@@ -120,7 +120,7 @@ include_once __DIR__ . "/php_tori/connect.php";
     $query2 = mysqli_query($link, "SELECT * FROM employees where ID = '$temp_id'"); 
     $merr=mysqli_error($link);
     if ( !$query2 ) {
-      echo "<br>mysql_error = $merr<br>";
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
     }
     else{
       $vn2=mysqli_num_rows($query2);
@@ -259,7 +259,7 @@ include_once __DIR__ . "/php_tori/connect.php";
         $query3 = mysqli_query($link, "SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = '$date_one' and user_id = '$ids[$i]' "); 
         $merr=mysqli_error($link);
         if ( !$query3 ) {
-          echo "<br>mysql_error = $merr<br>";
+          echo database_error_message($link, __FILE__ . ':' . __LINE__);
         }
         else{
           $vn3=mysqli_num_rows($query3);

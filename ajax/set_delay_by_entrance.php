@@ -33,7 +33,7 @@ $query = db_query($link, "SELECT * FROM Delays WHERE userID = ? AND date = ?", '
 $merr=mysqli_error($link);
 if ( !$query ) 
 {
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
@@ -47,7 +47,7 @@ if ( $vn == 0 )
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else if ( $row = mysqli_fetch_array($query) )
   {
@@ -58,7 +58,7 @@ if ( $vn == 0 )
   $merr=mysqli_error($link);
   if (!$query)
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {

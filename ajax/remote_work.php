@@ -162,7 +162,7 @@ try {
     $openRow = mysqli_fetch_assoc($chRes);
 
 } catch (Throwable $e) {
-    echo "<div style='padding: 10px; color:#900;'>Error: " . htmlspecialchars($e->getMessage()) . "</div>";
+    echo "<div style='padding: 10px; color:#900;'>" . html_escape(application_error_message(__FILE__ . ':' . __LINE__, $e->getMessage())) . "</div>";
     exit;
 }
 
