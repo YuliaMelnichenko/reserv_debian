@@ -33,7 +33,7 @@ if (isset( $_POST['r_button']) ) {
 
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {
@@ -131,7 +131,7 @@ if (isset( $_POST['r_button']) ) {
 
         $merr = mysqli_error($link);
         if (!$res) { 
-          echo $merr;
+          echo database_error_message($link, __FILE__ . ':' . __LINE__);
           $err[] = $merr; 
           mysqli_query($link, "ROLLBACK");	
         }

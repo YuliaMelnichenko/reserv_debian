@@ -34,7 +34,7 @@ $res = mysqli_query($link, "DELETE FROM gym_schedule WHERE USERID='$userID' AND 
 $merr = mysqli_error($link);
 
 if ( !$res ) {
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 } 
 
 $query = mysqli_query($link, "SELECT USERID, START_DT FROM ADD_TIME WHERE DESCRIPTION = '$desc' AND STOP_DT = '0000-00-00 00:00:00'");

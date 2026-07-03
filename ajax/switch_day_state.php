@@ -76,7 +76,7 @@ function sync_time_registration_state_from_db($link, $userID, $startDTStr, $stop
   ");
 
   if (!$query) {
-    echo mysqli_error($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 
@@ -119,7 +119,7 @@ function get_current_visit_row($link, $userID, $visitID, $startDTStr, $stopDTStr
   ");
 
   if (!$query) {
-    echo mysqli_error($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 
@@ -230,7 +230,7 @@ if ($nextState == 1) {
     ");
 
     if (!$openCheck) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -251,7 +251,7 @@ if ($nextState == 1) {
     $query = mysqli_query($link, "SELECT a.ID FROM visiting a WHERE a.ID = (SELECT max(ID) FROM visiting)");
 
     if (!$query) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -294,7 +294,7 @@ if ($nextState == 1) {
     ");
 
     if (!$res) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -326,7 +326,7 @@ if ($nextState == 1) {
     ");
 
     if (!$res) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -363,7 +363,7 @@ if ($nextState == 1) {
     ");
 
     if (!$res) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -416,7 +416,7 @@ if ($nextState == 1) {
     ");
 
     if (!$res) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -428,7 +428,7 @@ if ($nextState == 1) {
     ");
 
     if (!$res2) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -482,7 +482,7 @@ if ($nextState != 1) {
     ");
 
     if (!$res) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -510,7 +510,7 @@ if ($nextState != 1) {
     ");
 
     if (!$res) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -535,7 +535,7 @@ if ($nextState != 1) {
     ");
 
     if (!$res) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -569,7 +569,7 @@ if ($nextState != 1) {
     ");
 
     if (!$res) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 

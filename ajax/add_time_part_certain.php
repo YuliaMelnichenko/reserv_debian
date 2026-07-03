@@ -42,7 +42,7 @@ $query = db_execute(
 $merr=mysqli_error($link);
 
 if (!$query){
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 }
 else{
   if ( isset($_SESSION['ss_ch_delay_ID']) ){
@@ -59,7 +59,7 @@ else{
     $merr1 = mysqli_error($link);
 
     if (!$query1){
-      echo "<br>mysql_error = $merr<br>";
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
     }    
     else{
       echo "1";

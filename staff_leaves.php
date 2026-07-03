@@ -279,7 +279,8 @@ function fetchStaffLeavesArchiveRows($link, $employeeId, $event, $filterStartDat
     $stmt = mysqli_prepare($link, $sql);
 
     if (!$stmt) {
-        throw new Exception(mysqli_error($link));
+        echo json_encode(['error' => database_error_message($link, __FILE__ . ':' . __LINE__)]);
+        exit;
     }
 
     if (count($params) > 0) {
@@ -290,7 +291,8 @@ function fetchStaffLeavesArchiveRows($link, $employeeId, $event, $filterStartDat
     $result = mysqli_stmt_get_result($stmt);
 
     if (!$result) {
-        throw new Exception(mysqli_error($link));
+        echo json_encode(['error' => database_error_message($link, __FILE__ . ':' . __LINE__)]);
+        exit;
     }
 
     $rows = [];

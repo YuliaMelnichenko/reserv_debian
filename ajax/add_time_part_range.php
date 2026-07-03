@@ -69,7 +69,7 @@ mysqli_set_charset($link, "utf8");
 $supervisor_query = db_query($link, "SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 AND USERID = ? LIMIT 1", 'i', array($userID_));
 
 if (!$supervisor_query) {
-  echo "<br>mysql_error = " . mysqli_error($link) . "<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
@@ -83,7 +83,7 @@ $query0 = mysqli_query($link, "SELECT max(ID) FROM ADD_TIME");
 $newID = 1;
 
 if (!$query0) {
-  echo "<br>mysql_error = " . mysqli_error($link) . "<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 else if ($row = mysqli_fetch_array($query0)) {

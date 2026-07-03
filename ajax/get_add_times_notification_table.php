@@ -40,7 +40,7 @@ $query = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISO
  
 if (!$query)
 {
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 }
 else
 {

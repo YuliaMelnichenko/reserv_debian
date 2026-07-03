@@ -1,6 +1,8 @@
 <?php
 // session_start();
 
+require_once __DIR__ . '/inc/errors.php';
+
 function get_current_datetime_in_timezone(){
   $valid = 0;
 
@@ -90,7 +92,7 @@ $query = mysqli_query($link, "
 ");
 
   if (!$query) {
-    echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
     return;
   }
 
@@ -393,7 +395,7 @@ function get_sv_name_by_userid( $user_id )
   $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {
@@ -413,7 +415,7 @@ function get_sv_name_by_userid( $user_id )
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {
@@ -450,7 +452,7 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
       }
       $merr=mysqli_error($link);
       if ( !$query0 ) {
-        echo "<br>mysqli_error = $merr<br>";
+        echo database_error_message($link, __FILE__ . ':' . __LINE__);
       }
       else{
         $vn=mysqli_num_rows($query0);
@@ -473,7 +475,7 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
       }
       $merr=mysqli_error($link);
       if ( !$query0 ) {
-        echo "<br>mysqli_error = $merr<br>";
+        echo database_error_message($link, __FILE__ . ':' . __LINE__);
       }
       else{
         $vn=mysqli_num_rows($query0);
@@ -519,7 +521,7 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
     $merr=mysqli_error($link);
     if ( !$query ) 
     {
-      echo "<br>mysqli_error = $merr<br>";
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
     }
     else
     {
@@ -549,7 +551,7 @@ function get_name_by_userid( $user_id )
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {
@@ -708,7 +710,7 @@ function GetHourNormByMonth( $date, $rate ){
   $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {
@@ -742,7 +744,7 @@ function am_i_superuser( $userID ) {
   $query = mysqli_query($link, "SELECT * FROM GROUPS WHERE SUPERVISORID='$userID' and TYPE <> -1"); 
   $merr = mysqli_error($link);
   if ( !$query ) {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
     return 0;
   }
 
@@ -789,7 +791,7 @@ function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotifi
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
     return 0;
   }
   else
@@ -833,7 +835,7 @@ function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNoti
 
   if ( !$query ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
     return 0;
   }
   else
@@ -872,7 +874,7 @@ function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNot
   $merr = mysqli_error($link);
 
   if ( !$query ) {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
     return 0;
   }
   else {
@@ -911,7 +913,7 @@ function get_notification_count( $user_id ){
 
   $merr=mysqli_error($link);
   if ( !$query ) {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else{
     return mysqli_num_rows($query);
@@ -941,7 +943,7 @@ function get_delay_notification_count( $user_id ){
 
   $merr=mysqli_error($link);
   if ( !$query ) {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else{
     return mysqli_num_rows($query);
@@ -959,7 +961,7 @@ function get_penalty_id(){
 
   $merr=mysqli_error($link);
   if ( !$query0 ) {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else if ( $row = mysqli_fetch_array($query0) ){
     $newID = $row[0] + 1;
@@ -1119,7 +1121,7 @@ function get_workdays_holidays_bay_range( $startDate, $stopDate )
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {
@@ -1146,7 +1148,7 @@ function get_holidays()
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {
@@ -1169,7 +1171,7 @@ function get_work_day()
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {
@@ -1322,7 +1324,7 @@ function get_users_current_day_in_time_by_superuser( $SUID )
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {
@@ -1363,7 +1365,7 @@ function get_penalties( $userDays, $userID )
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {
@@ -1395,7 +1397,7 @@ function get_user_rate( $userID ){
 
   $merr=mysqli_error($link);
   if ( !$query ) {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else{
     if ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
@@ -1416,7 +1418,7 @@ function get_norm_by_range_sec( $startDate, $stopDate, $userID ){
 
   $merr=mysqli_error($link);
   if ( !$query ) {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else{
     while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
@@ -1445,7 +1447,7 @@ function get_current_day_duration_sec( $userID, $defaultStartTime ){
 
   $merr=mysqli_error($link);
   if ( !$query ) {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else{
     while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
@@ -1477,7 +1479,7 @@ function is_there_add_time_by_alert( $Date, $userID ){
   $query = mysqli_query($link, "SELECT * from ADD_TIME where STARTDATE = '$Date' and USERID = '$userID' and BYALERT = 1"); 
   $merr=mysqli_error($link);
   if ( !$query ) {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else{
     $vn=mysqli_num_rows($query);
@@ -1514,7 +1516,7 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
 
   $merr=mysqli_error($link);
   if ( !$query1 ) {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else{
     while ( $row1 = mysqli_fetch_array($query1, MYSQLI_ASSOC) ){
@@ -1526,7 +1528,7 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
   $query2 = mysqli_query($link, "SELECT date, in_time, out_time, eat_start, eat_stop, state FROM visiting where date >= '$startDate' and date <= '$stopDate' and user_id = '$userID' and state = 0"); 
   $merr=mysqli_error($link);
   if ( !$query2 ) {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else{
 
@@ -1598,7 +1600,7 @@ function is_there_additional_alerts( $userID ){
 
   $merr=mysqli_error($link);
   if ( !$query ) {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else{
     while ( $row1 = mysqli_fetch_array($query, MYSQLI_ASSOC) ){  
@@ -1763,7 +1765,7 @@ function get_superuser_names_by_user_id( $ID )
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {
@@ -1793,7 +1795,7 @@ function get_user_name_by_id( $suID )
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {
@@ -1864,7 +1866,7 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
   $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
 
   $found = 0;
@@ -2008,7 +2010,7 @@ function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }                     
 
   $retArray = Array();
@@ -2069,7 +2071,7 @@ function get_reasons()
   $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }                     
 
   $results = Array();
@@ -2115,7 +2117,7 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
 
   $merr=mysqli_error($link);
   if ( !$query ) {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }                     
 
   $results = Array();
@@ -2184,7 +2186,7 @@ function get_all_add_work_info_by_user( $userID, $pauseMode )
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }                     
 
   $results = Array();
@@ -2227,7 +2229,7 @@ function get_add_work_info_by_user_and_day_range( $userID_, $startDate, $stopDat
   $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
 
   $results = Array();
@@ -3243,7 +3245,7 @@ function get_user_defStartTime_and_allowedDelay( $USERiD, &$user_defaultStartTim
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {
@@ -3597,7 +3599,7 @@ function get_and_update_start_time_status( $userID ){
   $merr = mysqli_error($link);
 
   if ( !$query ) {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else{
     $vn=mysqli_num_rows($query);
@@ -3655,7 +3657,7 @@ function apply_staff_leaves_to_days_norm($link, $userID, $startDate, $stopDate, 
 
   $merr = mysqli_error($link);
   if (!$query) {
-    echo "<br>mysqli_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
     return $days_norm;
   }
 
@@ -3701,7 +3703,7 @@ function get_staff_leave_events_by_days($link, $userID, $startDate, $stopDate, $
   ");
 
   if (!$query) {
-    echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
     return $leaveEvents;
   }
 
@@ -3738,7 +3740,7 @@ function get_work_dayoff_types_by_range($link, $startDate, $stopDate)
   ");
 
   if (!$query) {
-    echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
     return $result;
   }
 

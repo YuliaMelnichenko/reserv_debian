@@ -25,7 +25,7 @@ $query = db_execute(
 $merr = mysqli_error($link);
 if (!$query)
 {
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 }
 else
 {
@@ -33,7 +33,7 @@ $query = db_execute($link, 'UPDATE ADD_TIME SET STOPTIME = ? WHERE id = ?', 'si'
 
   if (!$query)
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   { 

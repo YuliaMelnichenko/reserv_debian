@@ -28,7 +28,7 @@ $query = db_execute($link, 'UPDATE visiting SET take_pause = 1 WHERE id = ? AND 
 $merr=mysqli_error($link);
 
 if (!$query){
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 }
 else{
   mysqli_set_charset($link, "utf8");
@@ -38,7 +38,7 @@ $query = db_execute($link, "INSERT INTO ADD_TIME (ADDDATE, SUIR, USERID, START_D
   $merr=mysqli_error($link);
   if (!$query)
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {    

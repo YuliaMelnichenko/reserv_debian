@@ -24,7 +24,7 @@ $query = mysqli_query($link, "SELECT ID, SUIR, STARTTIME, DESCRIPTION FROM ADD_T
 $merr=mysqli_error($link);
 if (!$query)
 {
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 }
 else
 {

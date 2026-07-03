@@ -33,7 +33,7 @@ if ( $ACCEPTMODE == -1 )
     $merr=mysqli_error($link);
     if ( !$query ) 
     {
-      echo "<br>mysql_error = $merr<br>";
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       $errorThere = 1;
     }
   }
@@ -43,7 +43,7 @@ if ( $ACCEPTMODE == -1 )
     $merr=mysqli_error($link);
     if ( !$query ) 
     {
-      echo "<br>mysql_error = $merr<br>";
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       $errorThere = 1;
     }
     $newPenID = $PENALTYID;
@@ -57,7 +57,7 @@ else
     $merr=mysqli_error($link);
     if ( !$query ) 
     {
-      echo "<br>mysql_error = $merr<br>";
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       $errorThere = 1;
     }
     $newPenID = -1;
@@ -69,7 +69,7 @@ if ( $errorThere == 0 )
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
 }
 ?>

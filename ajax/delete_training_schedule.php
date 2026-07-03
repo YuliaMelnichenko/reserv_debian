@@ -27,7 +27,7 @@ $res = db_execute(
 $merr = mysqli_error($link);
 
 if ( !$res ) {
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 } 
 else {
   echo "2";

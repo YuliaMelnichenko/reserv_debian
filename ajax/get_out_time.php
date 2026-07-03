@@ -35,7 +35,7 @@ $query = mysqli_query($link, "
 ");
 
 if (!$query) {
-  echo "Ошибка БД: " . mysqli_error($link);
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 

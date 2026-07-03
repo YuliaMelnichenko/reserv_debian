@@ -17,7 +17,7 @@ $query = mysqli_query($link, "SELECT take_pause FROM visiting WHERE id = '$ss_vi
 $merr=mysqli_error($link);
 if (!$query)
 {
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 }
 else
 {

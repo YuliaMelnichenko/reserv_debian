@@ -58,7 +58,7 @@ if ( $insertMode == 1 )
   $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else if ( $row = mysqli_fetch_array($query0) )
   {
@@ -78,7 +78,7 @@ if ( $insertMode == 1 )
   $merr=mysqli_error($link);
   if (!$query)
   {
-    echo "<br>mysql_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else
   {
@@ -102,7 +102,7 @@ else
     $merr=mysqli_error($link);
     if (!$query)
     {
-      echo "<br>mysql_error = $merr<br>";
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
     }
     else
     {

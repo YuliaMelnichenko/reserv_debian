@@ -36,7 +36,7 @@ if ( isset($_SESSION['ss_id']) )
     $merr=mysqli_error($link);
     if (!$res)
     { 
-      echo $merr; 
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
     }
     else
       $_SESSION['ss_state'] = 2;
@@ -48,7 +48,7 @@ if ( isset($_SESSION['ss_id']) )
     $merr=mysqli_error($lin);
     if (!$res)
     { 
-      echo $merr; 
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
     }
     else
       $_SESSION['ss_state'] = 3;
@@ -60,7 +60,7 @@ if ( isset($_SESSION['ss_id']) )
     $merr=mysqli_error($link);
     if (!$res)
     { 
-      echo $merr; 
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
     }
     else
       $_SESSION['ss_state'] = 4;
@@ -72,7 +72,7 @@ if ( isset($_SESSION['ss_id']) )
     $merr=mysqli_error($link);
     if (!$res)
     { 
-      echo $merr; 
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
     }
     else
       $_SESSION['ss_state'] = 0;
