@@ -1,7 +1,5 @@
 <?php
-session_start();
-
-
+require_once __DIR__ . '/../inc/session.php';
 require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

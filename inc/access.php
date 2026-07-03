@@ -3,10 +3,7 @@
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/output.php';
 require_once __DIR__ . '/errors.php';
-
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
+require_once __DIR__ . '/session.php';
 
 function access_session_is_valid()
 {
@@ -23,32 +20,13 @@ function deny_ajax_access($statusCode, $message)
     exit;
 }
 
-function access_request_is_https()
-{
-    if (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off') {
-        return true;
-    }
-
-    if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
-        $forwardedProto = strtolower(trim(explode(',', $_SERVER['HTTP_X_FORWARDED_PROTO'])[0]));
-
-        if ($forwardedProto === 'https') {
-            return true;
-        }
-    }
-
-    return isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443;
-}
-
 function csrf_set_cookie($token)
 {
-    setcookie('TORI_CSRF_TOKEN', $token, array(
-        'expires' => 0,
-        'path' => '/',
-        'secure' => access_request_is_https(),
-        'httponly' => false,
-        'samesite' => 'Strict',
-    ));
+    setcookie(
+        'TORI_CSRF_TOKEN',
+        $token,
+        app_cookie_options(0, '/', false, 'Strict')
+    );
 
     $_COOKIE['TORI_CSRF_TOKEN'] = $token;
 }

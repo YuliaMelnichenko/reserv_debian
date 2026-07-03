@@ -1,5 +1,9 @@
 <?php
 
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
+ini_set('log_errors', '1');
+
 function application_error_message($context, $details = '')
 {
     $safeDetails = str_replace(array("\r", "\n"), ' ', (string) $details);

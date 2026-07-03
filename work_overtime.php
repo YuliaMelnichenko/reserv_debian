@@ -1,7 +1,6 @@
 <?php 
 ob_start();
-session_start();
-
+require_once __DIR__ . '/inc/session.php';
 ////////////////////////////////////////////////////////
 include_once __DIR__ . "/funcs.php";
 include __DIR__ . "/php_tori/connect.php";
@@ -52,8 +51,6 @@ function formatHours($hours) {
 if (isset($_GET['action']) && $_GET['action'] === 'load') {
     header('Content-Type: application/json; charset=utf-8');
 
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
     error_reporting(E_ALL);
 
     try {
