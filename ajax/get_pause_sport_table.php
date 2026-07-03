@@ -60,7 +60,7 @@ else {
         $surname = $row2["surname"];
     
         echo "<tr bgcolor=\"#ddffff\" bordercolor=\"#888888\" height=\"60px\">";
-        echo "<td width=490 class=\"add_time_sport\" valign=\"middle\" align=\"center\"><h2 class=\"full_name, sport\">$surname "." $firstname "." $lastname</h2></td>";
+echo "<td width=490 class=\"add_time_sport\" valign=\"middle\" align=\"center\"><h2 class=\"full_name, sport\">" . html_escape($surname . " " . $firstname . " " . $lastname) . "</h2></td>";
         echo "<td width=200 class=\"add_time_sport\" valign=\"middle\" align=\"center\"><h2 class=\"sport\">$time</h2></td>";
         echo "</tr>";
     }
@@ -234,7 +234,7 @@ else {
             }
         }
         echo "<tr bordercolor=\"#888888\" height=\"40px\">";
-        echo "<td width=450 class=\"add_time_sport\" valign=\"middle\" align=\"left\" style=\"padding-left:5px\"><h5>$surname4 "." $firstname4 "." $lastname4</h5></td>";
+echo "<td width=450 class=\"add_time_sport\" valign=\"middle\" align=\"left\" style=\"padding-left:5px\"><h5>" . html_escape($surname4 . " " . $firstname4 . " " . $lastname4) . "</h5></td>";
         echo "<td width=100 class=\"add_time_sport\" valign=\"middle\" align=\"left\" style=\"padding-left:35px\">$output_date</td>";
         echo "<td width=100 class=\"add_time_sport\" valign=\"middle\" align=\"center\"><h5>$time</h5></td>";
         echo "</tr>";

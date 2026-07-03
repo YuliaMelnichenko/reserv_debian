@@ -118,14 +118,14 @@ for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
   }
 
   echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-  echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"center\"><h5 class=\"small\">$ta_start_dt</h5></td>";
-  echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"center\"><h5 class=\"small\">$ta_stop_dt</h5></td>";
+echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_dt) . "</h5></td>";
+echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_stop_dt) . "</h5></td>";
   echo "<td class=\"add_time\" width=85  valign=\"middle\" align=\"center\"><h5 class=\"small\">".$time_duration."</h5></td>";
-  echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_reason_description."</h5></td>";
-  echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_description."</h5></td>";
+echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_reason_description) . "</h5></td>";
+echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
 
-  echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\">"."<h5 class = \"small\">$superUserName</h5>"."</td>";
-  echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_SUdescription."</h5></td>";
+echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
+echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_SUdescription) . "</h5></td>";
   echo "<td class=\"add_time\" width=115 bgcolor=\"$bgcolor\" valign=\"middle\" align=\"center\">$approvedStr</td>";
   echo "<td class=\"add_time\" width=105 valign=\"middle\" align=\"center\">";
     echo "<button style=\"font-size: 80%; width:100px; height:25px; background-color:#f8d888; border:1px solid #888888;\" $buttonAdd1 $buttonAdd2 $buttonAdd3 name=\"nextBtn\">Удалить</button>";

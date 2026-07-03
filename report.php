@@ -1,6 +1,8 @@
 <?php
 ob_start();
 session_start();
+
+require_once __DIR__ . '/inc/output.php';
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -145,7 +147,7 @@ include_once __DIR__ . "/php_tori/connect.php";
   echo "<td><h5 class=\"fio\">Дата</h5></td>";
   
   for ( $i = 0; $i < count($ids); $i++ ){
-    echo "<td><h5 class=\"fio\">".$surn[$i]." ".$fname[$i]." ".$lname[$i]."</h5></td>";
+    echo "<td><h5 class=\"fio\">" . html_escape($surn[$i] . " " . $fname[$i] . " " . $lname[$i]) . "</h5></td>";
   }
   echo "</tr>";
 

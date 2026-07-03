@@ -96,7 +96,7 @@ else
         echo "<h5 class=\"small1\">$delayValStr</h5>";
       echo "</td>";  
       echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\" width = 240>";
-        echo "<h5 class=\"small1\">$explaneDesk</h5>"."</font>";
+echo "<h5 class=\"small1\">" . html_escape($explaneDesk) . "</h5></font>";
       echo "</td>";  
       echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"center\" width = 150>";
         echo "$statusStr";

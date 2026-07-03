@@ -94,11 +94,11 @@ echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
         }
 
         echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-        echo "<td nowrap class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$ta_start_date."</h5></td>";
-        echo "<td nowrap class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$ta_start_time." - ".$ta_stop_time."</h5></td>";
+echo "<td nowrap class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_date) . "</h5></td>";
+echo "<td nowrap class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_time . " - " . $ta_stop_time) . "</h5></td>";
         echo "<td nowrap class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$time_duration."</h5></td>";
-        echo "<td width=160 class=\"nopadding_s\" valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_description."</h5></td>";
-        echo "<td width=140 class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class = \"small\">$superUserName</h5>"."</td>";
+echo "<td width=160 class=\"nopadding_s\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
+echo "<td width=140 class=\"nopadding_s\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
         echo "</tr>";
       }
 

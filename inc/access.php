@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/output.php';
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();

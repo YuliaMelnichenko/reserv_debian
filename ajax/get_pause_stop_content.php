@@ -97,7 +97,7 @@ else
                         echo "<h5 class=\"big\">комментарий</h5>";
                       echo "</td>";
                       echo "<td class=\"report_no_padding\" valign=\"middle\" align=\"left\">";
-                        echo "<h5 class=\"big\">$desk</h5>";
+echo "<h5 class=\"big\">" . html_escape($desk) . "</h5>";
                       echo "</td>";
                     echo "</tr>";
                   echo "</table>";

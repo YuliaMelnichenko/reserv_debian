@@ -88,11 +88,11 @@ while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
   }
   	
   echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-  echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">$ta_start_date</h5></td>";
-  echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">$ta_stop_date</h5></td>";
+echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_date) . "</h5></td>";
+echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_stop_date) . "</h5></td>";
   echo "<td width=80  class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$time_duration."</h5></td>";
-  echo "<td width=160 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_description."</h5></td>";
-  echo "<td width=190 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">".$superUserName."</h5></td>";
+echo "<td width=160 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
+echo "<td width=190 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
   echo "</tr>";
 }
 

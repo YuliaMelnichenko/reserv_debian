@@ -58,8 +58,6 @@ if ( isset($_POST['userID']) AND isset($_POST['messageMode']) )
   }  
 }
 
-echo $_POST['userID']."  ".$_POST['messageMode']."  ";
-
 echo "0";
 
 ?>

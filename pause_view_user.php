@@ -164,11 +164,11 @@ echo "<table id=\"pause_approvement_table\" border=0>";
         }
 
         echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-        echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$ta_start_dt."</h5></td>";
-        echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$ta_stop_dt."</h5></td>";
+        echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_dt) . "</h5></td>";
+        echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_stop_dt) . "</h5></td>";
         echo "<td width=85 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$time_duration."</h5></td>";
-        echo "<td width=140 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_description."</h5></td>";
-        echo "<td width=200 class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class = \"small\">$superUserName</h5>"."</td>";
+        echo "<td width=140 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
+        echo "<td width=200 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
         echo "</tr>";
       }
 

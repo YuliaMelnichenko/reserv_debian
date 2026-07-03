@@ -126,8 +126,8 @@ foreach( $delays as $delay )
   echo "<td width=185 valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$delDefInTime >> $delDefInTimeWithDelay (+ $delAllowedDelay мин.)</h5>"."</td>";
   echo "<td width=95 valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$delDurationStr</h5>"."</td>";
   echo "<td width=140 valign=\"middle\" align=\"left\">"."<h5 class=\"small\">$delComment</h5>"."</td>";
-  echo "<td width=200 bgcolor=\"$agreedColor\" valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$superUserName</h5>"."</td>";
-  echo "<td width=200 valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$acceptorName</h5>"."</td>";
+echo "<td width=200 bgcolor=\"$agreedColor\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
+echo "<td width=200 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($acceptorName) . "</h5></td>";
   echo "<td width=120 valign=\"middle\" align=\"left\">"."<h5 class=\"small\">$delAcceptorReply</h5>"."</td>";
   echo "<td width=130 bgcolor=\"$cellColor\" valign=\"middle\" align=\"center\">"."<h5>$approvedStr</h5>"."</td>";
   echo "<td width=160 valign=\"middle\" align=\"center\">";
