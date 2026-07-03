@@ -17,8 +17,13 @@
     "",
     app_cookie_options($expires, '/ajax')
   );
+  $retSetLegacyPass = setcookie(
+    "TORIPASSWORD",
+    "",
+    app_cookie_options($expires)
+  );
 
-  if ( $retSetName == 1 AND $retSetPass == 1 )
+  if ( $retSetName == 1 AND $retSetPass == 1 AND $retSetLegacyPass == 1 )
   {
     echo "1";  
   }

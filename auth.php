@@ -33,20 +33,9 @@ function check_cookie()
   $.post('ajax/get_login_from_cookie.php', RetSWT1 );
   function RetSWT1(dat1) 
   {
-    //alert(dat1);    
     if ( dat1 != "" )
     {
-      $.post('ajax/get_passwd_from_cookie.php', RetSWT2 );
-      function RetSWT2(dat2) 
-      {
-        //alert(dat2);    
-        if ( dat2 != "" )
-        {
-          document.getElementById('login').value = dat1;
-          document.getElementById('passwd').value = dat2;
-          auth();
-        }
-      }    
+      document.getElementById('login').value = dat1;
     }
   }
 }
@@ -56,14 +45,17 @@ function auth() {
   var passwd = document.getElementById('passwd').value;
 
   if ( document.getElementById('autologin').checked ) {
-    $.post('ajax/set_cookie.php', {login: login, passwd: passwd}, RetSWT1 );
+    $.post('ajax/set_cookie.php', {login: login}, RetSWT1 );
     function RetSWT1(dat1) 
-    {   // alert(dat1);
+    {
       if ( dat1 == 0 )
       {
-        alert( "Ошибка сохранения авторизационных данных. Проверьте настройки или смените браузер" );
+        alert( "Ошибка сохранения логина. Проверьте настройки или смените браузер" );
       }
     }
+  }
+  else {
+    unset_cookie();
   }
 
   $.post('ajax/auth.php', {login: login, passwd: passwd}, function(dat) {
@@ -128,7 +120,7 @@ if ( !isset($_SESSION['ss_id']) )
         echo "<input class=\"no_padding\"  checked style=\"font-size: 100%; width:14px; height:14px; background-color:#ddeeff; border:0px solid #888888;\" type=\"checkbox\" id=\"autologin\" value=\"1\" >";
       echo "</td>";
       echo "<td bgcolor=\"#ddeeff\" valign=\"top\" align=\"left\" width = 400>";
-        echo "<h5 class=\"middle\">запомнить</h5>";
+        echo "<h5 class=\"middle\">запомнить логин</h5>";
       echo "</td>";
     echo "</tr>";
     echo "<tr>";

@@ -297,33 +297,6 @@ function time_to_second( $timeStr )
     return $timeVal;
 }   
 
-function set_cookie( $userName, $userPass )
-{
-  $duration = time() + 3600 * 24 * 31;  
-
-  $retSetName = setcookie("TORIUSERNAME", $userName, app_cookie_options($duration));
-  $retSetPass = setcookie("TORIPASSWORD", $userPass, app_cookie_options($duration));
-
-  if ( $retSetName == 1 AND $retSetPass == 1 )
-  {
-    return 1;
-  }
-  return 0;
-}
-
-function delete_cookie()
-{
-  $expires = time() - 3600;
-  $retSetName = setcookie("TORIUSERNAME", "", app_cookie_options($expires));
-  $retSetPass = setcookie("TORIPASSWORD", "", app_cookie_options($expires));
-
-  if ( $retSetName == 1 AND $retSetPass == 1 )
-  {
-    return 1;
-  }
-  return 0;
-}
-
 function save_last_location( $location ){
   $_SESSION['ss_last_location'] = $location;
 }  

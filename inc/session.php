@@ -49,4 +49,23 @@ function start_app_session()
     session_start();
 }
 
+function clear_legacy_password_cookies()
+{
+    $expires = time() - 3600;
+    $passwordCookies = array(
+        'T_O_R_I_PASSWORD' => '/ajax',
+        'TORIPASSWORD' => '/',
+    );
+
+    foreach ($passwordCookies as $name => $path) {
+        if (!isset($_COOKIE[$name])) {
+            continue;
+        }
+
+        setcookie($name, '', app_cookie_options($expires, $path));
+        unset($_COOKIE[$name]);
+    }
+}
+
 start_app_session();
+clear_legacy_password_cookies();
