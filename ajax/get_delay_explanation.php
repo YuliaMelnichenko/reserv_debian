@@ -84,7 +84,7 @@ echo "<table cellpadding=\"0\" cellspacing=\"0\" border=1 bordercolor=\"#888888\
       echo "</select>";      
     echo "</td>";
     echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
-     echo "<textarea $disableStr id=\"delayExplanation\" style=\"width:240px; resize: none;\" cols=\"33\" rows=\"2\">".$explaneDesk."</textarea>";
+     echo "<textarea $disableStr id=\"delayExplanation\" style=\"width:240px; resize: none;\" cols=\"33\" rows=\"2\">" . html_escape($explaneDesk) . "</textarea>";
     echo "</td>";
   echo "</tr>";
 echo "</table>"; 

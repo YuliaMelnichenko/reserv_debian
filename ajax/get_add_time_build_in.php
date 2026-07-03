@@ -129,10 +129,10 @@ else
         echo "<h5 class=\"small1\">$startTime - $stopTime<br>= $timeDurationStr"."</h5>";
       echo "</td>";  
       echo "<td width = 120 class=\"nopadding_s\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\">";
-        echo "<h5 class=\"small1\">$reasonStr"."</h5>";
+echo "<h5 class=\"small1\">" . html_escape($reasonStr) . "</h5>";
       echo "</td>";  
       echo "<td width = 148 class=\"nopadding_s\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\">";
-        echo "<h5 class=\"small1\">$description"."</h5>";
+echo "<h5 class=\"small1\">" . html_escape($description) . "</h5>";
       echo "</td>";  
       echo "<td nowrap width = 120 class=\"nopadding_s\" bgcolor=\"$bgcolor\" bordercolor=\"#888888\" valign=\"middle\" align=\"center\">";
         echo $approvedStr;
@@ -169,10 +169,10 @@ else
         echo "<h5 class=\"small1\">($timeDurationStr)<br>[$startTime-$stopTime]"."</h5>";
       echo "</td>";  
       echo "<td width = 120 class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\">";
-        echo "<h5 class=\"small\">$reasonStr"."</h5>";
+echo "<h5 class=\"small\">" . html_escape($reasonStr) . "</h5>";
       echo "</td>";  
       echo "<td width = 120 class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\">";
-        echo "<h5 class=\"small1\">$description"."</h5>";
+echo "<h5 class=\"small1\">" . html_escape($description) . "</h5>";
       echo "</td>";  
       echo "<td nowrap width = 120 class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
         echo "<h5 class=\"middle\">$approvedStr"."</h5>";
@@ -182,4 +182,4 @@ else
 
   echo "</table>";
 }
-?>                                                                  
+?>

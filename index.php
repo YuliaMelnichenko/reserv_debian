@@ -575,7 +575,7 @@ if (
             echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Сотрудник</span>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"top\" align=\"center\" width = $width22>";
-            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$row0["surname"]." ".$row0["firstname"]." ".$row0["lastname"]."</span>";  
+            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">" . html_escape($row0["surname"] . " " . $row0["firstname"] . " " . $row0["lastname"]) . "</span>";
           echo "</td>";  
         echo "</tr>";     
 
@@ -800,7 +800,7 @@ if (
     $employee_arr = array_merge($bosses_arr, $employee_arr); 
 
     function get_phone_info($id_empl, $phone, $personal_phone, $corporate_phone, $email_empl) {
-      $tooltipId = 'u' . $id_empl . '-contacts';
+      $tooltipId = 'u' . (int) $id_empl . '-contacts';
       $contacts = [];
       $contacts[] = "Телефон внутренний: " . htmlspecialchars($phone);
 
@@ -980,7 +980,7 @@ if (
       $email = $employee_arr[$i][11];
 
       echo "<div class=\"activity\">";
-      echo "<h5 class=\"activ_text\" data-phone-tooltip=\"u$personal_id-contacts\">" . $name . "</h5>";
+      echo "<h5 class=\"activ_text\" data-phone-tooltip=\"u" . (int) $personal_id . "-contacts\">" . html_escape($name) . "</h5>";
 
       if ($dat_in == "") {
         echo "";

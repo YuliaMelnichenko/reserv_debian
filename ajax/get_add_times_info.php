@@ -91,10 +91,10 @@ foreach( $addRets as $addRet )
       echo "<h5 class=\"small1\">($timeDurationStr)<br>[$startTime-$stopTime]"."</h5>";
     echo "</td>";  
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\" width = 165>";
-      echo "<h5 class=\"small1\">$reasonStr"."</h5>";
+echo "<h5 class=\"small1\">" . html_escape($reasonStr) . "</h5>";
     echo "</td>";  
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\" width = 210>";
-      echo "<h5 class=\"small1\">$description"."</h5>";
+echo "<h5 class=\"small1\">" . html_escape($description) . "</h5>";
     echo "</td>";  
     echo "<td bgcolor=\"$bgColor\" bordercolor=\"#888888\" valign=\"middle\" align=\"center\" width = 100>";
       echo "<h5 class=\"$fontSt\">$approvedStr"."</h5>";

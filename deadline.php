@@ -341,7 +341,7 @@ auth();
             echo "<font size=\"2\" color=\"#000000\" face=\"Arial\">Сотрудник"."</font>";
           echo "</td>";  
           echo "<td class=\"nopadding_s\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"center\" width = $width22>";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>".$row0["SURNAME"]." ".$row0["FIRSTNAME"]." ".$row0["LASTNAME"]."</b></font><br>";
+      echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>" . html_escape($row0["SURNAME"] . " " . $row0["FIRSTNAME"] . " " . $row0["LASTNAME"]) . "</b></font><br>";
           echo "</td>";  
         echo "</tr>";
         echo "<tr>";

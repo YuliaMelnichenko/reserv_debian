@@ -113,7 +113,7 @@ else
           echo "<h5 class=\"small1\">$delayValStr</h5>";
         echo "</td>";  
         echo "<td  width = 263 bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\">";
-          echo "<h5 class=\"small1\">$explaneDesk</h5>"."</font>";
+echo "<h5 class=\"small1\">" . html_escape($explaneDesk) . "</h5></font>";
         echo "</td>";  
         echo "<td nowrap  width = 120 class=\"nopadding_s\" bgcolor=\"$bgcolor\" bordercolor=\"#888888\" valign=\"middle\" align=\"center\">";
           echo "$statusStr";
@@ -122,4 +122,4 @@ else
     }
   echo "</table>";
 }
-?>                                                                   
+?>

@@ -201,35 +201,35 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
         }
 
         echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-        echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"center\"><h5 class=\"small\">".$ta_start_dt."</h5></td>";
-        echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"center\"><h5 class=\"small\">".$ta_stop_dt."</h5></td>";
+        echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_dt) . "</h5></td>";
+        echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_stop_dt) . "</h5></td>";
         echo "<td class=\"add_time\" width=85 valign=\"middle\" align=\"center\"><h5 class=\"small\">".$time_duration."</h5></td>";
-        echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_reason_description."</h5></td>";
-        echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_description."</h5></td>";
-        echo "<td class=\"add_time\" width=200 valign=\"middle\" align=\"center\">"."<h5 class = \"small\">$superUserName</h5>"."</td>";
-        echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_SUdescription."</h5></td>";
+        echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_reason_description) . "</h5></td>";
+        echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
+        echo "<td class=\"add_time\" width=200 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
+        echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_SUdescription) . "</h5></td>";
         echo "<td class=\"add_time\" width=115 bgcolor=\"$bgcolor\" valign=\"middle\" align=\"center\">$approvedStr</td>";
         echo "<td class=\"add_time\" width=70 valign=\"middle\" align=\"center\">";
 
           echo "<table border=0>";
             echo "<tr>";
               echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
-                echo "<button onclick=\"accept_add_time_for_user( '$ta_id', '$ta_SUdescription' );\" $accBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                echo "<button onclick=\"accept_add_time_for_user(" . (int) $ta_id . ", " . html_escape(js_encode($ta_SUdescription)) . ");\" $accBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
                   echo "<img title=\"Принять\" src=\"img/$accBtnImg\">";
                 echo "</button>";
               echo "</td>";
               echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=0>";
-                echo "<button onclick=\"refuse_add_time_for_user('$ta_id', '$ta_SUdescription' );\" $refBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                echo "<button onclick=\"refuse_add_time_for_user(" . (int) $ta_id . ", " . html_escape(js_encode($ta_SUdescription)) . ");\" $refBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
                   echo "<img title=\"Отклонить\" src=\"img/$refBtnImg\">";
                 echo "</button>";
               echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
                 if ( $delRestore == 1 ){
-                  echo "<button onclick=\"mark_as_deleted_add_time_for_user( '$ta_id' ); location.reload();\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                  echo "<button onclick=\"mark_as_deleted_add_time_for_user(" . (int) $ta_id . "); location.reload();\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
                     echo "<img title=\"Удалить\" src=\"img/delete_small.bmp\">";
                   echo "</button>";
                 }
                 else{
-                  echo "<button onclick=\"mark_as_undeleted_add_time_for_user( '$ta_id' ); location.reload();\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                  echo "<button onclick=\"mark_as_undeleted_add_time_for_user(" . (int) $ta_id . "); location.reload();\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
                     echo "<img title=\"Восстановить\" src=\"img/restore_small.bmp\">";
                   echo "</button>";
                 }
