@@ -265,16 +265,7 @@ echo "<div align=\"left\">";
 include_once __DIR__ . "/funcs.php";
 include __DIR__ . "/short_stat.php";
 
-$ip = $_SERVER['REMOTE_ADDR'];
-
-if ( $ip == "192.168.100.50" or $ip == "192.168.100.69" ){
-  $_SESSION['rep_start_stop_date_mode'] = 2;	
-  save_last_location( "my_report_scr.php" );
-}
-else{
-  save_last_location( "index.php" );
-}
-
+save_last_location( "index.php" );
 auth();
 
 ////////////////////////////////////////////////////////
