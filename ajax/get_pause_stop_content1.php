@@ -1,7 +1,5 @@
 <?php
-session_start();
-
-
+require_once __DIR__ . '/../inc/session.php';
 require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
 header("Content-type: text/plain; charset=utf-8");
@@ -17,7 +15,6 @@ include_once __DIR__ . "/../php_tori/connect.php";
 mysqli_set_charset($link, "utf8"); 
 
 error_reporting(E_ALL | E_STRICT) ;
-ini_set('display_errors', 'On');
 
 $query = mysqli_query($link, "SELECT ID, SUIR, STARTTIME, DESCRIPTION FROM ADD_TIME WHERE STARTDATE = '$currentDate' AND USERID = '$userID' AND PAUSE_MODE = 1 )");
 

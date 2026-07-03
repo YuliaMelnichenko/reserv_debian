@@ -2,7 +2,7 @@
 
 date_default_timezone_set("Asia/Novosibirsk");
 ob_start();
-session_start();
+require_once __DIR__ . '/inc/session.php';
 include_once __DIR__ . "/start.php";
 ?>
 

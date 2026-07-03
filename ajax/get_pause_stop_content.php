@@ -1,7 +1,5 @@
 <?php
-session_start();
-
-
+require_once __DIR__ . '/../inc/session.php';
 require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
 header("Content-type: text/plain; charset=utf-8");
@@ -21,7 +19,6 @@ $currentDateTime = $dtResult[1];
 mysqli_set_charset($link, "utf8");
 
 error_reporting(E_ALL | E_STRICT) ;
-ini_set('display_errors', 'On');
 
 $query = mysqli_query($link, "SELECT ID, SUIR, START_DT, DESCRIPTION FROM ADD_TIME WHERE ADDDATE = '$currentDate' AND USERID = '$userID' AND PAUSE_MODE = 1 ORDER BY ADDDATE DESC, START_DT DESC LIMIT 1");
 

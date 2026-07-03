@@ -1,7 +1,6 @@
 <?php
 ob_start();
-session_start();
-
+require_once __DIR__ . '/inc/session.php';
 ////////////////////////////////////////////////////////
 include_once __DIR__ . "/funcs.php";
 include __DIR__ . "/php_tori/connect.php";

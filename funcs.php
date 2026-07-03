@@ -2,6 +2,7 @@
 // session_start();
 
 require_once __DIR__ . '/inc/errors.php';
+require_once __DIR__ . '/inc/session.php';
 
 function get_current_datetime_in_timezone(){
   $valid = 0;
@@ -300,8 +301,8 @@ function set_cookie( $userName, $userPass )
 {
   $duration = time() + 3600 * 24 * 31;  
 
-  $retSetName = setcookie( "TORIUSERNAME", $userName, $duration );
-  $retSetPass = setcookie( "TORIPASSWORD", $userPass, $duration );
+  $retSetName = setcookie("TORIUSERNAME", $userName, app_cookie_options($duration));
+  $retSetPass = setcookie("TORIPASSWORD", $userPass, app_cookie_options($duration));
 
   if ( $retSetName == 1 AND $retSetPass == 1 )
   {
@@ -312,8 +313,9 @@ function set_cookie( $userName, $userPass )
 
 function delete_cookie()
 {
-  $retSetName = setcookie( "TORIUSERNAME", "" );
-  $retSetPass = setcookie( "TORIPASSWORD", "" );
+  $expires = time() - 3600;
+  $retSetName = setcookie("TORIUSERNAME", "", app_cookie_options($expires));
+  $retSetPass = setcookie("TORIPASSWORD", "", app_cookie_options($expires));
 
   if ( $retSetName == 1 AND $retSetPass == 1 )
   {
