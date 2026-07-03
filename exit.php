@@ -5,6 +5,7 @@
 
   $expires = time() - 3600;
   setcookie("T_O_R_I_PASSWORD", "", app_cookie_options($expires, '/ajax'));
+  setcookie("TORIPASSWORD", "", app_cookie_options($expires));
   setcookie("T_O_R_I_USERNAME", "", app_cookie_options($expires, '/ajax'));
   setcookie("TORI_CSRF_TOKEN", "", app_cookie_options($expires, '/', false, 'Strict'));
 
