@@ -2,7 +2,8 @@
 ob_start();
 session_start();
 
-require_once __DIR__ . '/inc/output.php';
+require_once __DIR__ . '/inc/access.php';
+require_page_auth();
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -21,21 +22,7 @@ require_once __DIR__ . '/inc/output.php';
 $report_start_date = "2013-01-01";
 $report_stop_date = "2013-08-01";
 
-$ip = $_SERVER['REMOTE_ADDR'];
-
-$read_mode = 0;
-
-if ( $ip == "192.168.100.50" OR $ip == "192.168.100.52" OR $ip == "192.168.100.54" OR $ip == "192.168.100.55" OR $ip == "192.100.100.55" )
-  $read_mode = 1;
-else{
-  if ( isset($_SESSION['ss_id']) )
-    $read_mode = 2;
-  else{
-    echo "Доступ запрещен!<br><br>";
-    echo "Для продолжения необходима авторизация на <a href=\"index.php\" class=\"ml\">на главной странице</a>";
-    die();                                                   
-  }
-}
+$read_mode = access_current_user_is_director() ? 1 : 2;
 
 include_once __DIR__ . "/funcs.php";
 
