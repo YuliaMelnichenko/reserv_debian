@@ -11,9 +11,16 @@ $userID_ = $_SESSION['ss_id'];
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-$startDate = $_POST['startDate'];
-$stopDate = $_POST['stopDate'];
-$userID = $_POST['userID'];
+$startDate = (string) ($_POST['startDate'] ?? '');
+$stopDate = (string) ($_POST['stopDate'] ?? '');
+$userID = (int) ($_POST['userID'] ?? 0);
+
+if ($userID <= 0) {
+  deny_ajax_access(400, 'INVALID_USER');
+}
+
+require_ajax_self_or_superuser($userID);
+
 $user_defaultStartTime = 0;
 $user_allowedDelay = 0;
 

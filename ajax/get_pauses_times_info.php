@@ -12,9 +12,15 @@ $currentDate = date('Y-m-d');
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-$startDate = $_POST['startDate'];
-$stopDate = $_POST['stopDate'];
-$userID = $_POST['userID'];
+$startDate = (string) ($_POST['startDate'] ?? '');
+$stopDate = (string) ($_POST['stopDate'] ?? '');
+$userID = (int) ($_POST['userID'] ?? 0);
+
+if ($userID <= 0) {
+  deny_ajax_access(400, 'INVALID_USER');
+}
+
+require_ajax_self_or_superuser($userID);
 
 $addRets = get_add_work_info_by_user_and_day_range( $userID, $startDate, $stopDate );
 
