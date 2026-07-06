@@ -51,8 +51,6 @@ function formatHours($hours) {
 if (isset($_GET['action']) && $_GET['action'] === 'load') {
     header('Content-Type: application/json; charset=utf-8');
 
-    error_reporting(E_ALL);
-
     try {
         $hours = isset($_GET['hours']) ? floatval($_GET['hours']) : 9.0;
         $period = $_GET['period'] ?? 'quarter';
@@ -62,7 +60,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
             $end = $_GET['end'] ?? '';
 
             if (!$start || !$end) {
-                throw new Exception('Не заданы даты для ручного ввода');
+                throw new InvalidArgumentException('Не заданы даты для ручного ввода');
             }
 
             $qstart = date('Y-m-d 00:00:00', strtotime($start));
@@ -138,7 +136,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
                                            $hours          // 10 (порог в часах)
         );
         
-        mysqli_stmt_execute($stmt);
+        if (!mysqli_stmt_execute($stmt)) {
+            throw new RuntimeException('Ошибка выполнения запроса: ' . mysqli_stmt_error($stmt));
+        }
 
         $res = mysqli_stmt_get_result($stmt);
 
@@ -154,9 +154,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
         }
 
         echo json_encode(['status' => 'success', 'data' => $rows, 'quarter_start' => $qstart, 'quarter_end' => $qend]);
-    } catch (Exception $e) {
-        error_log('Ошибка загрузки списка переработок: ' . $e->getMessage());
+    } catch (InvalidArgumentException $e) {
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    } catch (Throwable $e) {
+        echo application_json_error('Overtime list at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
     exit;
 }
@@ -167,7 +168,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
 
     try {
         $empId = intval($_GET['id']);
-        if ($empId <= 0) throw new Exception('Некорректный ID сотрудника');
+        if ($empId <= 0) throw new InvalidArgumentException('Некорректный ID сотрудника');
 
         $hours = isset($_GET['hours']) ? floatval($_GET['hours']) : 9.0;
         if ($hours <= 0) $hours = 9.0;
@@ -179,7 +180,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
             $end = $_GET['end'] ?? '';
 
             if (!$start || !$end) {
-                throw new Exception('Не заданы даты для ручного ввода');
+                throw new InvalidArgumentException('Не заданы даты для ручного ввода');
             }
             $qstart = date('Y-m-d 00:00:00', strtotime($start));
             $qend = date('Y-m-d 23:59:59', strtotime($end));
@@ -251,7 +252,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
                                            $hours                  // порог в часах
         );
 
-        mysqli_stmt_execute($stmt);
+        if (!mysqli_stmt_execute($stmt)) {
+            throw new RuntimeException('Ошибка выполнения запроса: ' . mysqli_stmt_error($stmt));
+        }
         $res = mysqli_stmt_get_result($stmt);
 
         $rows = [];
@@ -270,9 +273,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
             'quarter_start' => $qstart,
             'quarter_end' => $qend
         ]);
-    } catch (Exception $e) {
-        error_log('Ошибка деталей переработок: ' . $e->getMessage());
+    } catch (InvalidArgumentException $e) {
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    } catch (Throwable $e) {
+        echo application_json_error('Overtime details at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
     exit;
 }

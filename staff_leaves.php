@@ -233,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'add') {
         $event = $_POST['event'] ?? '';
     
         if (!$userId || !$start || !$stop || !$event) {
-            throw new Exception('не все поля заполнены');
+            throw new InvalidArgumentException('Не все поля заполнены');
         }
 
         $stmt = mysqli_prepare($link, "SELECT surname, firstname FROM employees WHERE id = ? LIMIT 1");
@@ -242,11 +242,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'add') {
         }
 
         mysqli_stmt_bind_param($stmt, 'i', $userId);
-        mysqli_stmt_execute($stmt);
+        if (!mysqli_stmt_execute($stmt)) {
+            throw new RuntimeException('Ошибка получения сотрудника: ' . mysqli_stmt_error($stmt));
+        }
 
         $result = mysqli_stmt_get_result($stmt);
         if(!$row = mysqli_fetch_assoc($result)) {
-            throw new Exception('Сотрудник не найден');
+            throw new InvalidArgumentException('Сотрудник не найден');
         }
 
         $fio = $row['surname'] . ' ' . $row['firstname'];
@@ -261,14 +263,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'add') {
         $t = $event;
 
         $stmt = mysqli_prepare($link, "INSERT INTO staff_leaves (user_id, fio, start_date, stop_date, event) VALUES (?, ?, ?, ?, ?)");
+        if (!$stmt) {
+            throw new RuntimeException('Ошибка подготовки добавления: ' . mysqli_error($link));
+        }
 
         mysqli_stmt_bind_param($stmt, 'issss', $u, $f, $s, $e, $t);
-        mysqli_stmt_execute($stmt);
+        if (!mysqli_stmt_execute($stmt)) {
+            throw new RuntimeException('Ошибка добавления: ' . mysqli_stmt_error($stmt));
+        }
 
         echo json_encode(['status' => 'success']);
-    } catch (Exception $e) {
-        error_log('Ошибка добавления: ' . $e->getMessage());
+    } catch (InvalidArgumentException $e) {
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    } catch (Throwable $e) {
+        echo application_json_error('Staff leave creation at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
     exit;
 }
@@ -283,7 +291,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'update') {
         $event = $_POST['event'] ?? '';
 
         if (!$id || !$start || !$stop) {
-            throw new Exception('Поля заполнены некорректно');
+            throw new InvalidArgumentException('Поля заполнены некорректно');
         }
 
         $stmt = mysqli_prepare($link, "UPDATE staff_leaves SET start_date = ?, stop_date = ?, event = ? WHERE id = ? ");
@@ -295,13 +303,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'update') {
         mysqli_stmt_bind_param($stmt, 'sssi', $start, $stop, $event, $id);
 
         if (!mysqli_stmt_execute($stmt)) {
-            throw new Exception("Ошибка выполнения запроса: " . mysqli_error($link));
+            throw new RuntimeException("Ошибка выполнения запроса: " . mysqli_stmt_error($stmt));
         }
 
         echo json_encode(['status' => 'success']);
-    } catch (Exception $e) {
-        error_log('Ошибка редактирования: ' . $e->getMessage());
+    } catch (InvalidArgumentException $e) {
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    } catch (Throwable $e) {
+        echo application_json_error('Staff leave update at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
     exit;
 }
@@ -311,7 +320,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'delete') {
 
     try {
         $id = intval($_POST['record_id'] ?? 0);
-        if (!$id) throw new Exception('Некорректный ID');
+        if (!$id) throw new InvalidArgumentException('Некорректный ID');
 
         $stmt = mysqli_prepare($link, "DELETE FROM staff_leaves WHERE id = ?");
 
@@ -322,13 +331,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'delete') {
         mysqli_stmt_bind_param($stmt, 'i', $id);
 
         if (!mysqli_stmt_execute($stmt)) {
-            throw new Exception("Ошибка удаления: " . mysqli_error($link));
+            throw new RuntimeException("Ошибка удаления: " . mysqli_stmt_error($stmt));
         }
 
         echo json_encode(['status' => 'success']);
-    } catch (Exception $e) {
-        error_log('Ошибка удаления: ' . $e->getMessage());
+    } catch (InvalidArgumentException $e) {
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    } catch (Throwable $e) {
+        echo application_json_error('Staff leave deletion at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
 
     exit;

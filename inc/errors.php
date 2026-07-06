@@ -1,5 +1,6 @@
 <?php
 
+error_reporting(E_ALL);
 ini_set('display_errors', '0');
 ini_set('display_startup_errors', '0');
 ini_set('log_errors', '1');
@@ -25,4 +26,15 @@ function database_error_message($link, $context)
     }
 
     return application_error_message('Database error at ' . $context, $details);
+}
+
+function application_json_error($context, $details = '')
+{
+    return json_encode(
+        array(
+            'status' => 'error',
+            'message' => application_error_message($context, $details),
+        ),
+        JSON_UNESCAPED_UNICODE
+    );
 }
