@@ -238,3 +238,46 @@ function require_page_director()
         exit;
     }
 }
+
+function access_current_user_has_id($allowedUserIDs)
+{
+    return isset($_SESSION['ss_id'])
+        && in_array((int) $_SESSION['ss_id'], $allowedUserIDs, true);
+}
+
+function access_current_user_can_manage_staff_leaves()
+{
+    return access_current_user_has_id(array(1, 2, 3, 30, 31, 50, 148, 500));
+}
+
+function access_current_user_can_view_work_overtime()
+{
+    return access_current_user_has_id(array(1, 148));
+}
+
+function deny_page_access()
+{
+    http_response_code(403);
+    header('Content-Type: text/plain; charset=utf-8');
+    header('Cache-Control: no-store');
+    echo 'Access denied';
+    exit;
+}
+
+function require_page_staff_leaves_access()
+{
+    require_page_auth();
+
+    if (!access_current_user_can_manage_staff_leaves()) {
+        deny_page_access();
+    }
+}
+
+function require_page_work_overtime_access()
+{
+    require_page_auth();
+
+    if (!access_current_user_can_view_work_overtime()) {
+        deny_page_access();
+    }
+}
