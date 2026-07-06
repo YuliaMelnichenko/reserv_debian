@@ -290,3 +290,43 @@ function require_page_superuser()
         deny_page_access();
     }
 }
+
+function access_current_user_supervises_user($targetUserID, $groupType)
+{
+    if (access_current_user_is_director()) {
+        return true;
+    }
+
+    $targetUserID = (int) $targetUserID;
+    $groupType = (string) $groupType;
+
+    if ($targetUserID <= 0 || $groupType === '') {
+        return false;
+    }
+
+    $link = access_open_database();
+
+    if (!$link) {
+        return false;
+    }
+
+    $result = db_query(
+        $link,
+        'SELECT 1 FROM GROUPS WHERE SUPERVISORID = ? AND USERID = ? AND TRIM(TYPE) = ? LIMIT 1',
+        'iis',
+        array((int) $_SESSION['ss_id'], $targetUserID, $groupType)
+    );
+    $allowed = $result && mysqli_fetch_assoc($result);
+    mysqli_close($link);
+
+    return (bool) $allowed;
+}
+
+function require_page_supervisor_for_user($targetUserID, $groupType)
+{
+    require_page_auth();
+
+    if (!access_current_user_supervises_user($targetUserID, $groupType)) {
+        deny_page_access();
+    }
+}
