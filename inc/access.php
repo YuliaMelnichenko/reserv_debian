@@ -281,3 +281,12 @@ function require_page_work_overtime_access()
         deny_page_access();
     }
 }
+
+function require_page_superuser()
+{
+    require_page_auth();
+
+    if (!access_current_user_is_superuser()) {
+        deny_page_access();
+    }
+}
