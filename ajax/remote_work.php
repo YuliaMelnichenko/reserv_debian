@@ -28,8 +28,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Найдём открытую запись (stop_dt IS NULL) для этого пользователя за сегодня
             $findSql = "SELECT id FROM remote_work WHERE user_id = ? AND DATE(start_dt) = CURDATE() AND stop_dt IS NULL ORDER BY id DESC LIMIT 1";
             $findStmt = mysqli_prepare($link, $findSql);
+            if (!$findStmt) {
+                throw new RuntimeException('Ошибка подготовки поиска удаленной работы: ' . mysqli_error($link));
+            }
+
             mysqli_stmt_bind_param($findStmt, "i", $userID);
-            mysqli_stmt_execute($findStmt);
+            if (!mysqli_stmt_execute($findStmt)) {
+                throw new RuntimeException('Ошибка поиска удаленной работы: ' . mysqli_stmt_error($findStmt));
+            }
+
             $findRes = mysqli_stmt_get_result($findStmt);
             $row = mysqli_fetch_assoc($findRes);
 
@@ -41,6 +48,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $remoteId = intval($row['id']);
             $updSql = "UPDATE remote_work SET stop_dt = NOW() WHERE id = ? LIMIT 1";
             $updStmt = mysqli_prepare($link, $updSql);
+            if (!$updStmt) {
+                throw new RuntimeException('Ошибка подготовки завершения удаленной работы: ' . mysqli_error($link));
+            }
+
             mysqli_stmt_bind_param($updStmt, "i", $remoteId);
 
             if (!mysqli_stmt_execute($updStmt)) {
@@ -61,11 +72,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
 
+            $supervisorSql = "SELECT 1 FROM GROUPS WHERE USERID = ? AND SUPERVISORID = ? AND TRIM(TYPE) = '3' LIMIT 1";
+            $supervisorStmt = mysqli_prepare($link, $supervisorSql);
+            if (!$supervisorStmt) {
+                throw new RuntimeException('Ошибка подготовки проверки руководителя: ' . mysqli_error($link));
+            }
+
+            mysqli_stmt_bind_param($supervisorStmt, "ii", $userID, $supervisor_id);
+            if (!mysqli_stmt_execute($supervisorStmt)) {
+                throw new RuntimeException('Ошибка проверки руководителя: ' . mysqli_stmt_error($supervisorStmt));
+            }
+
+            mysqli_stmt_store_result($supervisorStmt);
+            if (mysqli_stmt_num_rows($supervisorStmt) === 0) {
+                http_response_code(403);
+                echo json_encode(["status" => "error", "message" => "Выбранный руководитель недоступен"]);
+                exit;
+            }
+
             // Проверяем, что запись на сегодня ещё не создана (и нет незакрытой)
             $checkSql = "SELECT id FROM remote_work WHERE user_id = ? AND DATE(start_dt) = CURDATE() AND stop_dt IS NULL LIMIT 1";
             $checkStmt = mysqli_prepare($link, $checkSql);
+            if (!$checkStmt) {
+                throw new RuntimeException('Ошибка подготовки проверки удаленной работы: ' . mysqli_error($link));
+            }
+
             mysqli_stmt_bind_param($checkStmt, "i", $userID);
-            mysqli_stmt_execute($checkStmt);
+            if (!mysqli_stmt_execute($checkStmt)) {
+                throw new RuntimeException('Ошибка проверки удаленной работы: ' . mysqli_stmt_error($checkStmt));
+            }
+
             $checkRes = mysqli_stmt_get_result($checkStmt);
 
             if (mysqli_num_rows($checkRes) > 0) {
@@ -76,6 +112,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Вставляем запись: start_dt = NOW(), stop_dt NULL
             $sql = "INSERT INTO remote_work (user_id, supervisor_id, start_dt) VALUES (?, ?, NOW())";
             $stmt = mysqli_prepare($link, $sql);
+            if (!$stmt) {
+                throw new RuntimeException('Ошибка подготовки удаленной работы: ' . mysqli_error($link));
+            }
+
             mysqli_stmt_bind_param($stmt, "ii", $userID, $supervisor_id);
 
             if (!mysqli_stmt_execute($stmt)) {
@@ -95,30 +135,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo application_json_error('Remote work request at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
         exit;
     }
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finish_remote_by_out'])) {
-    if (!$userID) {
-        echo json_encode(["status" => "error", "message" => "No session userID"]);
-        exit;
-    } 
-
-    $sql = "UPDATE remote_work SET stop_dt = NOW() WHERE user_id = ? AND stop_dt IS NULL";
-
-    $stmt = mysqli_prepare($link, $sql);
-    if (!$stmt) {
-        echo application_json_error('Remote work automatic finish preparation at ' . __FILE__ . ':' . __LINE__, mysqli_error($link));
-        exit;
-    }
-
-    mysqli_stmt_bind_param($stmt, "i", $userID);
-    if (!mysqli_stmt_execute($stmt)) {
-        echo application_json_error('Remote work automatic finish at ' . __FILE__ . ':' . __LINE__, mysqli_stmt_error($stmt));
-        exit;
-    }
-
-    echo json_encode(["status" => "success"]);
-    exit;
 }
 
 // -------------------- GET (FORM) -------------------- //
@@ -142,8 +158,15 @@ try {
     ";
 
     $stmt = mysqli_prepare($link, $sql);
+    if (!$stmt) {
+        throw new RuntimeException('Ошибка подготовки списка руководителей: ' . mysqli_error($link));
+    }
+
     mysqli_stmt_bind_param($stmt, "i", $userID);
-    mysqli_stmt_execute($stmt);
+    if (!mysqli_stmt_execute($stmt)) {
+        throw new RuntimeException('Ошибка получения списка руководителей: ' . mysqli_stmt_error($stmt));
+    }
+
     $res = mysqli_stmt_get_result($stmt);
 
     $supervisors = [];
@@ -158,8 +181,15 @@ try {
                      WHERE rw.user_id = ? AND DATE(rw.start_dt) = CURDATE() AND rw.stop_dt IS NULL
                      ORDER BY rw.id DESC LIMIT 1";
     $chStmt = mysqli_prepare($link, $checkOpenSql);
+    if (!$chStmt) {
+        throw new RuntimeException('Ошибка подготовки проверки удаленной работы: ' . mysqli_error($link));
+    }
+
     mysqli_stmt_bind_param($chStmt, "i", $userID);
-    mysqli_stmt_execute($chStmt);
+    if (!mysqli_stmt_execute($chStmt)) {
+        throw new RuntimeException('Ошибка проверки удаленной работы: ' . mysqli_stmt_error($chStmt));
+    }
+
     $chRes = mysqli_stmt_get_result($chStmt);
     $openRow = mysqli_fetch_assoc($chRes);
 
