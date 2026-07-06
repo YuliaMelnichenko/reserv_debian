@@ -1,5 +1,4 @@
 <?php
-error_reporting(E_ALL);
 require_once __DIR__ . '/../inc/session.php';
 require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
@@ -45,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             mysqli_stmt_bind_param($updStmt, "i", $remoteId);
 
             if (!mysqli_stmt_execute($updStmt)) {
-                echo json_encode(["status" => "error", "message" => "Ошибка при завершении: " . mysqli_stmt_error($updStmt)]);
+                echo application_json_error('Remote work finish at ' . __FILE__ . ':' . __LINE__, mysqli_stmt_error($updStmt));
                 exit;
             }
 
@@ -80,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             mysqli_stmt_bind_param($stmt, "ii", $userID, $supervisor_id);
 
             if (!mysqli_stmt_execute($stmt)) {
-                echo json_encode(["status" => "error", "message" => "Ошибка сохранения: " . mysqli_stmt_error($stmt)]);
+                echo application_json_error('Remote work creation at ' . __FILE__ . ':' . __LINE__, mysqli_stmt_error($stmt));
                 exit;
             }
 
@@ -93,8 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
 
     } catch (Throwable $e) {
-        http_response_code(500);
-        echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+        echo application_json_error('Remote work request at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
         exit;
     }
 }
@@ -105,11 +103,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finish_remote_by_out'
         exit;
     } 
 
-    $sql = "UPDATE remote_work SET stop_dt = NOW() WHERE user_id = ? AND stop+dt IS NULL";
+    $sql = "UPDATE remote_work SET stop_dt = NOW() WHERE user_id = ? AND stop_dt IS NULL";
 
     $stmt = mysqli_prepare($link, $sql);
+    if (!$stmt) {
+        echo application_json_error('Remote work automatic finish preparation at ' . __FILE__ . ':' . __LINE__, mysqli_error($link));
+        exit;
+    }
+
     mysqli_stmt_bind_param($stmt, "i", $userID);
-    mysqli_stmt_execute($stmt);
+    if (!mysqli_stmt_execute($stmt)) {
+        echo application_json_error('Remote work automatic finish at ' . __FILE__ . ':' . __LINE__, mysqli_stmt_error($stmt));
+        exit;
+    }
 
     echo json_encode(["status" => "success"]);
     exit;

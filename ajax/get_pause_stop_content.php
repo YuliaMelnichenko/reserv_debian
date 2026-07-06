@@ -18,8 +18,6 @@ $currentDateTime = $dtResult[1];
 
 mysqli_set_charset($link, "utf8");
 
-error_reporting(E_ALL | E_STRICT) ;
-
 $query = mysqli_query($link, "SELECT ID, SUIR, START_DT, DESCRIPTION FROM ADD_TIME WHERE ADDDATE = '$currentDate' AND USERID = '$userID' AND PAUSE_MODE = 1 ORDER BY ADDDATE DESC, START_DT DESC LIMIT 1");
 
 

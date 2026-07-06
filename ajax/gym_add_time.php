@@ -16,11 +16,13 @@ include __DIR__ . "/../php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
 
+$err = "";
 $query0 = mysqli_query($link, "SELECT max(ID) FROM gym_schedule"); 
 $newID = 0;
 
 if ( !$query0 ) {
   echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  exit;
 } 
 else if ($row = mysqli_fetch_array($query0)) {
   $newID = $row[0] + 1;
@@ -31,7 +33,7 @@ $query = db_execute($link, 'INSERT INTO gym_schedule (ID, USERID, DATE_TRAIN, ST
 $merr=mysqli_error($link);
 
 if (!$query) {
-  $err .= "mysql_error = $merr<br>";
+  $err = database_error_message($link, __FILE__ . ':' . __LINE__);
 }
 else {
   $newID = $newID + 1;

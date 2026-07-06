@@ -140,7 +140,7 @@ foreach ($newDaysRange as $rDay) {
     (?, ?, ?, ?, ?, ?, ?, ?, '', 0, 0, ?)", 'isiissssi', array($newID, $currentDate, $sv_ID, $userID_, $start, $stop, $add_time_part_base, $add_time_part_desk, $byAlert));
 
   if (!$query) {
-    $err .= "mysql_error = " . mysqli_error($link) . "<br>";
+    $err = database_error_message($link, __FILE__ . ':' . __LINE__);
     break;
   }
 
