@@ -3,10 +3,11 @@ ob_start();
 require_once __DIR__ . '/inc/session.php';
 ////////////////////////////////////////////////////////
 include_once __DIR__ . "/funcs.php";
+require_once __DIR__ . '/inc/access.php';
+save_last_location( "time_add.php" );
+require_page_staff_leaves_access();
 include __DIR__ . "/php_tori/connect.php";
 mysqli_set_charset($link, "utf8");
-save_last_location( "time_add.php" );
-auth();
 ////////////////////////////////////////////////////////
 
 if (isset($_GET['action']) && $_GET['action'] === 'get' && isset($_GET['id'])) {
