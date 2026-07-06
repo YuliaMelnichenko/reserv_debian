@@ -17,6 +17,26 @@ $ss_visiting_ID = $_SESSION['ss_visiting_ID'];
 $superUserID = (int) ($_POST['superuserID'] ?? -1);
 $description = (string) ($_POST['desk'] ?? '');
 
+if ($superUserID <= 0) {
+  deny_ajax_access(400, 'INVALID_SUPERVISOR');
+}
+
+$supervisorQuery = db_query(
+  $link,
+  "SELECT 1 FROM GROUPS WHERE USERID = ? AND SUPERVISORID = ? AND TRIM(TYPE) = '3' LIMIT 1",
+  'ii',
+  array($userID, $superUserID)
+);
+
+if (!$supervisorQuery) {
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+if (mysqli_num_rows($supervisorQuery) === 0) {
+  deny_ajax_access(403, 'FORBIDDEN_SUPERVISOR');
+}
+
 $dtResult = get_current_datetime_in_timezone();
 
 $currentDate = $dtResult[2];

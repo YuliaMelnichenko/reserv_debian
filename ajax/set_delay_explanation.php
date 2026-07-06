@@ -19,6 +19,28 @@ $currentDate = $currentDateArr[2];
 $superuserID = (int) ($_POST['delayExplanationSU'] ?? -1);
 $delayExplanation = (string) ($_POST['delayExplanation'] ?? '');
 
+if ($superuserID !== -1) {
+  if ($superuserID <= 0) {
+    deny_ajax_access(400, 'INVALID_SUPERVISOR');
+  }
+
+  $supervisorQuery = db_query(
+    $link,
+    'SELECT 1 FROM GROUPS WHERE USERID = ? AND SUPERVISORID = ? LIMIT 1',
+    'ii',
+    array($userID_, $superuserID)
+  );
+
+  if (!$supervisorQuery) {
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
+  }
+
+  if (mysqli_num_rows($supervisorQuery) === 0) {
+    deny_ajax_access(403, 'FORBIDDEN_SUPERVISOR');
+  }
+}
+
 $mode = 0;
 
 if ( isset( $_POST['mode'] ) AND $_POST['mode'] == 1 )
@@ -36,6 +58,11 @@ else
   $query0 = db_query($link, 'SELECT ID, STATUS FROM Delays WHERE ID = ? AND userID = ?', 'ii', array($delayID, $userID_));
 }
 
+if (!$query0) {
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
 $insertMode = 1;
 $status = 0;
 
@@ -48,8 +75,6 @@ while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) )
   $insertMode = 0;
 }
 
-echo "__ $currentDate\n";
-
 if ( $insertMode == 1 )
 {
   $query0 = mysqli_query($link, "SELECT max(ID) FROM Delays"); 
@@ -57,6 +82,7 @@ if ( $insertMode == 1 )
   if ( !$query0 ) 
   {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
   }
   else if ( $row = mysqli_fetch_array($query0) )
   {
