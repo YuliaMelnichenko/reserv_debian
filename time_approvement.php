@@ -1,6 +1,10 @@
 <?php
 ob_start();
 require_once __DIR__ . '/inc/session.php';
+require_once __DIR__ . '/inc/access.php';
+include_once __DIR__ . "/funcs.php";
+save_last_location( "time_approvement.php" );
+require_page_superuser();
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -34,12 +38,6 @@ function ta_delete( delID )
 </script>
 
 <?php
-////////////////////////////////////////////////////////
-include_once __DIR__ . "/funcs.php";
-save_last_location( "time_approvement.php" );
-auth();
-////////////////////////////////////////////////////////
-
 $SUID = $_SESSION['ss_id']; 
 
 echo "<div align=\"left\">";

@@ -1,6 +1,10 @@
 <?php
 ob_start();
 require_once __DIR__ . '/inc/session.php';
+require_once __DIR__ . '/inc/access.php';
+include_once __DIR__ . "/funcs.php";
+save_last_location( "pause_view.php" );
+require_page_superuser();
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -35,14 +39,6 @@ var timerId=setInterval( "update_clock()", 1000 );
 </script> 
 
 <?php
-////////////////////////////////////////////////////////
-
-include_once __DIR__ . "/funcs.php";
-
-save_last_location( "delay_approvement.php" );
-auth();
-////////////////////////////////////////////////////////
-
 $mid = $_GET['mid'];
 
 $resArr = extractUidFromMaskedUID( $mid );
