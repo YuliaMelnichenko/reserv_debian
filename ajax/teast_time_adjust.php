@@ -6,8 +6,14 @@ header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
-$userID = $_POST['userID'];
-$inTime = $_POST['inTime'];
+$userID = (int) ($_POST['userID'] ?? 0);
+$inTime = (string) ($_POST['inTime'] ?? '');
+
+if ($userID <= 0) {
+  deny_ajax_access(400, 'INVALID_USER');
+}
+
+require_ajax_self_or_superuser($userID);
 
 $user_defaultStartTime = 0;
 $user_allowedDelay = 0;
@@ -28,4 +34,4 @@ else
   echo 0;
 }  
                          
-?>                                                                   
+?>

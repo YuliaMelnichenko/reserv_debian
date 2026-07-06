@@ -11,16 +11,21 @@ include_once __DIR__ . "/../php_tori/connect.php";
 
 $_SESSION['delay_page_mode'] = 2;
 
-$userID = $_POST['user'];
+$userID = isset($_POST['user']) ? (int) $_POST['user'] : 0;
 
-if ( $userID != -1 )
+if ( $userID == -1 )
 { 
-  $_SESSION['delay_page_user_id'] = $userID;
+  $userID = isset($_SESSION['delay_page_user_id'])
+    ? (int) $_SESSION['delay_page_user_id']
+    : 0;
 }
-else
-{ 
-  $userID = $_SESSION['delay_page_user_id'];
+
+if ($userID <= 0) {
+  deny_ajax_access(400, 'INVALID_USER');
 }
+
+require_ajax_self_or_superuser($userID);
+$_SESSION['delay_page_user_id'] = $userID;
 
 $user_defaultStartTime = "10:00:00";
 $user_allowedDelay = 30;
