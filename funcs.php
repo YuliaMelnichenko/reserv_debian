@@ -527,25 +527,20 @@ function format_time_hour_min( $short_time_ ){
 
 function format_time_differs_from_norm_hour_min( $short_time_, $norm ){
   $hours = (int)($short_time_/(3600)); 
-
   $mins	= (int)($short_time_/(60) - $hours*(60));
-
   $secs = (int)($short_time_ - $hours*(3600) - $mins*(60) );
   
   if ( $secs > 30 )
     $short_time_ = $short_time_ - $secs + 60;
 
   $hours = (int)($short_time_/(3600));
-
   $mins	= (int)($short_time_/(60) - $hours*(60));
-
   $minutes_ = $hours*60 + $mins - $norm*60;
 
   if ( $minutes_ < 0 )
     $minutes_ = $minutes_ * ( -1 );  
 
   $hours = (int)($minutes_/(60));
-
   $mins = (int)($minutes_ - $hours*(60));
 
   if ( $hours < 10 )
@@ -617,7 +612,6 @@ function GetHourNormByMonth( $date, $rate ){
   $duration = 0;
 
   $query0 = mysqli_query($link, "SELECT dur40, dur36, dur24 FROM factory_calendar WHERE date='$date'"); 
-
   $merr=mysqli_error($link);
   
   if ( !$query0 ) {
@@ -674,9 +668,7 @@ function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotifi
   $deletedNotificationCount = 0;
 
   $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
-
   $paramArr = get_dbsetup_param( 'delay_journal_deep_day' );
-  
   $paramInt = (-1)*$paramArr[1];
   
   mysqli_set_charset($link, "utf8");
@@ -695,7 +687,7 @@ function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotifi
                         and
                           a.date > ADDDATE( '$currentDate', INTERVAL -180 DAY )");
 
-  $merr=mysqli_error($link);
+  $merr = mysqli_error($link);
   
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
@@ -733,7 +725,7 @@ function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNoti
 
   $query = mysqli_query($link, "SELECT * from ADD_TIME where USERID='$user_id' and PAUSE_MODE = 1"); 
 
-  $merr=mysqli_error($link);
+  $merr = mysqli_error($link);
 
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
@@ -801,15 +793,13 @@ function get_notification_count( $user_id ){
   include __DIR__ . "/php_tori/connect.php";
 
   $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
-
   $paramArr = get_dbsetup_param( 'add_time_journal_deep_day' );
-  
   $paramInt = (-1)*$paramArr[1];
   
   $query = mysqli_query($link, "SELECT * FROM ADD_TIME WHERE approved=0 AND pause_mode=0 AND STOP_DT > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )
                         and userid in (SELECT USERID FROM GROUPS WHERE SUPERVISORID='$user_id' and type=0)"); 
 
-  $merr=mysqli_error($link);
+  $merr = mysqli_error($link);
   
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
@@ -859,7 +849,7 @@ function get_penalty_id(){
 
   $newID = 0;
 
-  $merr=mysqli_error($link);
+  $merr = mysqli_error($link);
   
   if ( !$query0 ) {
     echo "<br>mysqli_error = $merr<br>";
@@ -1156,7 +1146,7 @@ function get_users_current_day_in_time_by_superuser( $SUID ){
 
   $query = mysqli_query($link, "SELECT v.user_id, v.in_time, v.adj FROM visiting v inner join employees e on v.user_id = e.id where date = '$currentDate' order by e.SURNAME"); 
 
-  $merr=mysqli_error($link);
+  $merr = mysqli_error($link);
   
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
@@ -1220,7 +1210,7 @@ function get_user_rate( $userID ){
 
   $query = mysqli_query($link, "SELECT RATE FROM employees where ID = '$userID' "); 
 
-  $merr=mysqli_error($link);
+  $merr = mysqli_error($link);
 
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
@@ -1241,7 +1231,7 @@ function get_norm_by_range_sec( $startDate, $stopDate, $userID ){
 
   $query = mysqli_query($link, "SELECT RATE FROM employees where ID = '$userID' ");
 
-  $merr=mysqli_error($link);
+  $merr = mysqli_error($link);
 
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
@@ -1271,7 +1261,7 @@ function get_current_day_duration_sec( $userID, $defaultStartTime ){
 
   $query = mysqli_query($link, "SELECT in_time FROM visiting where USER_ID = '$userID' "); 
 
-  $merr=mysqli_error($link);
+  $merr = mysqli_error($link);
 
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
@@ -1303,13 +1293,13 @@ function is_there_add_time_by_alert( $Date, $userID ){
   include __DIR__ . "/php_tori/connect.php";
 
   $query = mysqli_query($link, "SELECT * from ADD_TIME where STARTDATE = '$Date' and USERID = '$userID' and BYALERT = 1"); 
-  $merr=mysqli_error($link);
+  $merr = mysqli_error($link);
 
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
   }
   else{
-    $vn=mysqli_num_rows($query);
+    $vn = mysqli_num_rows($query);
     if ( $vn == 1 ){
       return 1;
     }
@@ -1341,7 +1331,7 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
 
   $query1 = mysqli_query($link, "SELECT STARTTIME, STOPTIME FROM ADD_TIME where STARTDATE >= '$startDate' and STARTDATE <= '$stopDate' and USERID = '$userID' and APPROVED = 1"); 
 
-  $merr=mysqli_error($link);
+  $merr = mysqli_error($link);
 
   if ( !$query1 ) {
     echo "<br>mysqli_error = $merr<br>";
@@ -1354,7 +1344,7 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
   }
 
   $query2 = mysqli_query($link, "SELECT date, in_time, out_time, eat_start, eat_stop, state FROM visiting where date >= '$startDate' and date <= '$stopDate' and user_id = '$userID' and state = 0"); 
-  $merr=mysqli_error($link);
+  $merr = mysqli_error($link);
 
   if ( !$query2 ) {
     echo "<br>mysqli_error = $merr<br>";
@@ -1431,7 +1421,7 @@ function is_there_additional_alerts( $userID ){
 
   $query = mysqli_query($link, "SELECT * FROM ALERTS where DATE = '$currentDate' and USERID = '$userID' and VIEWED = '0'");
 
-  $merr=mysqli_error($link);
+  $merr = mysqli_error($link);
 
   if ( !$query ) {
     echo "<br>mysqli_error = $merr<br>";
