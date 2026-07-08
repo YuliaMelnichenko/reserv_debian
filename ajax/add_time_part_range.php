@@ -62,8 +62,6 @@ function get_days_range_inclusive($startDate, $stopDate){
   return $days;
 }
 
-mysqli_set_charset($link, "utf8");
-
 $supervisor_query = db_query($link, "SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 AND USERID = ? LIMIT 1", 'i', array($userID_));
 
 if (!$supervisor_query) {
@@ -75,17 +73,6 @@ $sv_ID = 0;
 
 if ($row = mysqli_fetch_array($supervisor_query, MYSQLI_ASSOC)) {
   $sv_ID = $row["SUPERVISORID"];
-}
-
-$query0 = mysqli_query($link, "SELECT max(ID) FROM ADD_TIME");
-$newID = 1;
-
-if (!$query0) {
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
-  exit;
-}
-else if ($row = mysqli_fetch_array($query0)) {
-  $newID = (int)$row[0] + 1;
 }
 
 $daysRange = get_days_range_inclusive($add_time_part_start_date, $add_time_part_stop_date);
@@ -123,6 +110,11 @@ if (count($newDaysRange) == 0) {
   exit;
 }
 
+if (!mysqli_begin_transaction($link)) {
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
 $err = "";
 
 foreach ($newDaysRange as $rDay) {
@@ -135,22 +127,27 @@ foreach ($newDaysRange as $rDay) {
   }
 
   $query = db_execute($link, "INSERT INTO ADD_TIME
-    (ID, ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE, BYALERT)
+    (ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE, BYALERT)
     VALUES
-    (?, ?, ?, ?, ?, ?, ?, ?, '', 0, 0, ?)", 'isiissssi', array($newID, $currentDate, $sv_ID, $userID_, $start, $stop, $add_time_part_base, $add_time_part_desk, $byAlert));
+    (?, ?, ?, ?, ?, ?, ?, '', 0, 0, ?)", 'siissssi', array($currentDate, $sv_ID, $userID_, $start, $stop, $add_time_part_base, $add_time_part_desk, $byAlert));
 
   if (!$query) {
     $err = database_error_message($link, __FILE__ . ':' . __LINE__);
     break;
   }
-
-  $newID = $newID + 1;
 }
 
 if ($err == "") {
+  if (!mysqli_commit($link)) {
+    mysqli_rollback($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
+  }
+
   echo "1";
 }
 else {
+  mysqli_rollback($link);
   echo $err;
 }
 ?>
