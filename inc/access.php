@@ -330,3 +330,86 @@ function require_page_supervisor_for_user($targetUserID, $groupType)
         deny_page_access();
     }
 }
+
+function require_ajax_supervisor_for_user($targetUserID, $groupType)
+{
+    require_ajax_auth();
+
+    if (!access_current_user_supervises_user($targetUserID, $groupType)) {
+        deny_ajax_access(403, 'FORBIDDEN');
+    }
+}
+
+function require_ajax_add_time_supervisor($recordID, $groupType = 0)
+{
+    require_ajax_auth();
+    $recordID = (int) $recordID;
+
+    if ($recordID <= 0) {
+        deny_ajax_access(400, 'INVALID_RECORD');
+    }
+
+    $link = access_open_database();
+
+    if (!$link) {
+        deny_ajax_access(500, 'DATABASE_ERROR');
+    }
+
+    $result = db_query(
+        $link,
+        'SELECT USERID FROM ADD_TIME WHERE ID = ? LIMIT 1',
+        'i',
+        array($recordID)
+    );
+
+    if (!$result) {
+        mysqli_close($link);
+        deny_ajax_access(500, 'DATABASE_ERROR');
+    }
+
+    $row = mysqli_fetch_assoc($result);
+    mysqli_close($link);
+
+    if (!$row) {
+        deny_ajax_access(404, 'NOT_FOUND');
+    }
+
+    require_ajax_supervisor_for_user((int) $row['USERID'], $groupType);
+}
+
+function require_ajax_delay_supervisor($recordID, $groupType = 3)
+{
+    require_ajax_auth();
+    $recordID = (int) $recordID;
+
+    if ($recordID <= 0) {
+        deny_ajax_access(400, 'INVALID_RECORD');
+    }
+
+    $link = access_open_database();
+
+    if (!$link) {
+        deny_ajax_access(500, 'DATABASE_ERROR');
+    }
+
+    $result = db_query(
+        $link,
+        'SELECT userID FROM Delays WHERE ID = ? LIMIT 1',
+        'i',
+        array($recordID)
+    );
+
+    if (!$result) {
+        mysqli_close($link);
+        deny_ajax_access(500, 'DATABASE_ERROR');
+    }
+
+    $row = mysqli_fetch_assoc($result);
+    mysqli_close($link);
+
+    if (!$row) {
+        deny_ajax_access(404, 'NOT_FOUND');
+    }
+
+    require_ajax_supervisor_for_user((int) $row['userID'], $groupType);
+}
