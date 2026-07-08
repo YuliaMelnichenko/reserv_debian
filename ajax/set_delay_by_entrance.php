@@ -15,7 +15,7 @@ else
   $userId = (int) $_SESSION['ss_id'];
 }
 
-require_ajax_self_or_superuser($userId);
+require_ajax_self_or_supervisor($userId, 3);
 
 $ss_delay_duration = (int)$_SESSION['ss_delay_duration'];
 

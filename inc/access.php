@@ -340,6 +340,22 @@ function require_ajax_supervisor_for_user($targetUserID, $groupType)
     }
 }
 
+function require_ajax_self_or_supervisor($targetUserID, $groupType)
+{
+    require_ajax_auth();
+    $targetUserID = (int) $targetUserID;
+
+    if ($targetUserID <= 0) {
+        deny_ajax_access(400, 'INVALID_USER');
+    }
+
+    if ($targetUserID === (int) $_SESSION['ss_id']) {
+        return;
+    }
+
+    require_ajax_supervisor_for_user($targetUserID, $groupType);
+}
+
 function require_ajax_add_time_supervisor($recordID, $groupType = 0)
 {
     require_ajax_auth();

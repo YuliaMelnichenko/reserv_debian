@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../inc/session.php';
 require_once __DIR__ . '/../inc/access.php';
-require_ajax_superuser();
+require_ajax_auth();
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -10,6 +10,12 @@ if ( isset($_POST['userID']) AND isset($_POST['inTime']) )
 {
   $userID = (int)($_POST['userID']);
   $newInTime = trim($_POST['inTime']);
+
+  if ($userID <= 0) {
+    deny_ajax_access(400, 'INVALID_USER');
+  }
+
+  require_ajax_supervisor_for_user($userID, 3);
 
   if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/', $newInTime)) {
     echo "-13";
