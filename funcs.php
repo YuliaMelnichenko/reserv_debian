@@ -2,6 +2,7 @@
 // session_start();
 
 require_once __DIR__ . '/inc/errors.php';
+require_once __DIR__ . '/inc/database.php';
 require_once __DIR__ . '/inc/session.php';
 
 function get_current_datetime_in_timezone(){
@@ -1667,7 +1668,17 @@ function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime
 
   $rets = Array();
 
-  $query0 = mysqli_query($link, "SELECT distinct id, supervisorID, explaneDesk, acceptorID, penaltyID, penaltyReply, status FROM Delays where date = '$currentDate' and userID = '$userID_'"); 
+  $query0 = db_query(
+    $link,
+    'SELECT DISTINCT id, supervisorID, explaneDesk, acceptorID, penaltyID, penaltyReply, status FROM Delays WHERE date = ? AND userID = ?',
+    'si',
+    array($currentDate, (int)$userID_)
+  );
+
+  if (!$query0) {
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    return $rets;
+  }
 
   while ( $row0 = mysqli_fetch_assoc($query0) ){
     $ID = $row0["id"];
@@ -1679,7 +1690,17 @@ function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime
     $penaltyReply = $row0["penaltyReply"];
     $status = $row0["status"];
     
-    $query1 = mysqli_query($link, "SELECT in_dt FROM visiting where user_id = '$userID_' and date = '$currentDate' in_dt > ADDDATE( '$currentDate', INTERVAL -1 DAY )"); 
+    $query1 = db_query(
+      $link,
+      'SELECT in_dt FROM visiting WHERE user_id = ? AND in_dt >= ? AND in_dt < ADDDATE(?, INTERVAL 1 DAY) ORDER BY in_dt ASC LIMIT 1',
+      'iss',
+      array((int)$userID_, $currentDate, $currentDate)
+    );
+
+    if (!$query1) {
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+      return $rets;
+    }
  
     $in_time_def = strtotime( $defauiltInTime );
     $in_time = 0;
