@@ -13,7 +13,7 @@ if ($userID <= 0) {
   deny_ajax_access(400, 'INVALID_USER');
 }
 
-require_ajax_self_or_superuser($userID);
+require_ajax_self_or_supervisor($userID, 3);
 
 $user_defaultStartTime = 0;
 $user_allowedDelay = 0;
