@@ -25,47 +25,59 @@ include_once __DIR__ . "/../php_tori/connect.php";
 $currentDateArr = get_current_datetime_in_timezone();
 $currentDate = $currentDateArr[2];
 
-mysqli_set_charset($link, "utf8");
-
-$query = db_query($link, "SELECT * FROM Delays WHERE userID = ? AND date = ?", 'is', array($userId, $currentDate));
-$merr=mysqli_error($link);
-if ( !$query ) 
-{
+if (!mysqli_begin_transaction($link)) {
   echo database_error_message($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
-$vn=mysqli_num_rows($query);
+$idQuery = db_query($link, 'SELECT ID FROM Delays ORDER BY ID DESC LIMIT 1 FOR UPDATE');
 
-if ( $vn == 0 )
+if (!$idQuery) {
+  mysqli_rollback($link);
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+$lastDelay = mysqli_fetch_assoc($idQuery);
+$newID = $lastDelay ? (int)$lastDelay['ID'] + 1 : 1;
+
+$query = db_query(
+  $link,
+  'SELECT ID FROM Delays WHERE userID = ? AND date = ? FOR UPDATE',
+  'is',
+  array($userId, $currentDate)
+);
+
+if (!$query) {
+  mysqli_rollback($link);
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+$delayExists = mysqli_num_rows($query) > 0;
+
+if (!$delayExists)
 {
-  $newID = 0;
-
-  $query = mysqli_query($link, "SELECT max(ID) FROM Delays"); 
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
-  }
-  else if ( $row = mysqli_fetch_array($query) )
-  {
-    $newID = $row[0] + 1;
-  }
-
   $query = db_execute($link, "INSERT INTO Delays VALUES (?, ?, ?, ?, -1, 'Без объяснения', -1, -1, '', 0)", 'isii', array($newID, $currentDate, $ss_delay_duration, $userId));
-  $merr=mysqli_error($link);
+
   if (!$query)
   {
+    mysqli_rollback($link);
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
-  }
-  else
-  {
-    echo "insert";
-    $_SESSION['ss_ch_delay_ID'] = $newID; 	
+    exit;
   }          
 }
-else
-{
+
+if (!mysqli_commit($link)) {
+  mysqli_rollback($link);
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+if (!$delayExists) {
+  echo "insert";
+  $_SESSION['ss_ch_delay_ID'] = $newID;
+} else {
   echo "exist";
 }
 ?>
