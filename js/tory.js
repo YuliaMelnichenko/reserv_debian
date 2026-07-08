@@ -977,6 +977,9 @@ function save_entry (currentDay, startTime) {
               alert( "Тренировка запланирована!" );
               location.reload();
             }
+            else if ( dat2 == 1 ) {
+              alert( "На данное время превышен лимит записи! Выберите другую дату/время." );
+            }
             else {
               alert( "Ошибка" );
             }
