@@ -927,23 +927,6 @@ function get_delay_notification_count( $user_id ){
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function get_penalty_id(){
-  include __DIR__ . "/php_tori/connect.php";
-
-  $query0 = mysqli_query($link, "SELECT max(ID) FROM Penalty"); 
-
-  $newID = 0;
-
-  $merr=mysqli_error($link);
-  if ( !$query0 ) {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
-  }
-  else if ( $row = mysqli_fetch_array($query0) ){
-    $newID = $row[0] + 1;
-  }
-  return $newID;
-}
-
 function time_defined( $time_ ){
   if ( $time_ == "00:00:00" ){
     return 0;
