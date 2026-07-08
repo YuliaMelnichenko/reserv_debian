@@ -32,33 +32,43 @@ if ( isset($_POST['userID']) AND isset($_POST['messageMode']) )
 
   $messageModeStr = $messageModeStr.get_user_name_by_id( $superUserID );
 
-  $query0 = mysqli_query($link, "SELECT max(ID) FROM ALERTS"); 
- 
-  $newID = 0;
-
-  $merr=mysqli_error($link);
-  if ( !$query0 ) 
-  {
+  if (!mysqli_begin_transaction($link)) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
-  }
-  else if ( $row = mysqli_fetch_array($query0) )
-  {
-    $newID = $row[0] + 1;
+    exit;
   }
 
-  mysqli_set_charset($link, "utf8"); 
-  
-  $query = mysqli_query($link, "INSERT INTO ALERTS VALUES ( '$newID', '$currentDate', '$userID', '$superUserID', '$messageModeStr', '0')"); 
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
+  $query = db_query($link, 'SELECT ID FROM ALERTS ORDER BY ID DESC LIMIT 1 FOR UPDATE');
+
+  if (!$query) {
+    mysqli_rollback($link);
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
   }
-  else
-  {
-    echo "1";
-    exit; 
-  }  
+
+  $lastAlert = mysqli_fetch_assoc($query);
+  $newID = $lastAlert ? (int)$lastAlert['ID'] + 1 : 1;
+
+  $query = db_execute(
+    $link,
+    'INSERT INTO ALERTS VALUES (?, ?, ?, ?, ?, 0)',
+    'isiis',
+    array($newID, $currentDate, $userID, (int)$superUserID, $messageModeStr)
+  );
+
+  if (!$query) {
+    mysqli_rollback($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
+  }
+
+  if (!mysqli_commit($link)) {
+    mysqli_rollback($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
+  }
+
+  echo "1";
+  exit;
 }
 
 echo "0";
