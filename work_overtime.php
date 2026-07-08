@@ -383,17 +383,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
     <title>Выгрузка переработок — текущий квартал</title>
     <link rel="stylesheet" href="style/style.css">
     <link rel="stylesheet" href="style/main.css">
-    <style>
-        .search-block { margin: 10px 0; display:flex; gap:8px; align-items:center; }
-        .search-block input[type=number]{ width:100px; padding:4px; }
-        #results_table { width:100%; border-collapse: collapse; }
-        #results_table th, #results_table td { border:1px solid #ccc; padding:6px; }
-        #modal_details { display:none; position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); background:#fff; border:1px solid #888; padding:12px; z-index:1000; width:400px; max-height:70vh; overflow:auto; box-shadow:0 4px 12px rgba(0,0,0,0.2); }
-        #modal_overlay { display:none; position:fixed; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:900; }
-        .btn { cursor:pointer; padding:3px 6px; border:1px solid #888; background:#f0f0f0; }
-        .btn-primary { background:#f8d888; }
-        .btn-danger { background:#ff7979; color:#fff; }
-    </style>
 </head>
 <body>
 

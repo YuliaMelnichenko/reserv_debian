@@ -229,6 +229,410 @@ function datetimestr_to_day_start_stop_DT_ex_str($dateTimeStr, $dayTransitionTim
   );
 }
 
+function get_accounting_error_status_name($status){
+  $status = (int)$status;
+
+  if ($status == 0) {
+    return "Нет данных";
+  }
+
+  if ($status == 1) {
+    return "На рассмотрении";
+  }
+
+  if ($status == 2) {
+    return "Принято";
+  }
+
+  if ($status == 3) {
+    return "Отклонено";
+  }
+
+  if ($status == 4) {
+    return "Удалено";
+  }
+
+  return "Неизвестно";
+}
+
+function get_accounting_errors_default_depth_days(){
+  return 180;
+}
+
+function is_accounting_error_work_day($link, $date){
+  $dateEsc = mysqli_real_escape_string($link, $date);
+
+  $query = mysqli_query($link, "
+    SELECT type
+    FROM work_dayoff
+    WHERE date = '$dateEsc'
+    LIMIT 1
+  ");
+
+  if (!$query) {
+    echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+    return 0;
+  }
+
+  if (mysqli_num_rows($query) > 0) {
+    $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
+    $type = (int)$row["type"];
+
+    if ($type == 0) {
+      return 0;
+    }
+
+    if ($type == 1 || $type == 2) {
+      return 1;
+    }
+  }
+
+  $weekDay = (int)date("N", strtotime($date));
+
+  if ($weekDay >= 1 && $weekDay <= 5) {
+    return 1;
+  }
+
+  return 0;
+}
+
+function has_user_visiting_data_on_date($link, $userID, $date){
+  $userID = mysqli_real_escape_string($link, $userID);
+  $dateStart = mysqli_real_escape_string($link, $date . " 00:00:00");
+  $dateStop = mysqli_real_escape_string($link, date("Y-m-d", strtotime($date . " +1 day")) . " 00:00:00");
+
+  $query = mysqli_query($link, "
+    SELECT ID
+    FROM visiting
+    WHERE user_id = '$userID'
+      AND in_dt >= '$dateStart'
+      AND in_dt < '$dateStop'
+      AND in_dt IS NOT NULL
+      AND in_dt != '0000-00-00 00:00:00'
+    LIMIT 1
+  ");
+
+  if (!$query) {
+    echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+    return 0;
+  }
+
+  if (mysqli_num_rows($query) > 0) {
+    return 1;
+  }
+
+  return 0;
+}
+
+function has_user_add_time_data_on_date($link, $userID, $date){
+  $userID = mysqli_real_escape_string($link, $userID);
+  $dateStart = mysqli_real_escape_string($link, $date . " 00:00:00");
+  $dateStop = mysqli_real_escape_string($link, date("Y-m-d", strtotime($date . " +1 day")) . " 00:00:00");
+
+  $query = mysqli_query($link, "
+    SELECT ID
+    FROM ADD_TIME
+    WHERE USERID = '$userID'
+      AND START_DT >= '$dateStart'
+      AND START_DT < '$dateStop'
+      AND START_DT IS NOT NULL
+      AND START_DT != '0000-00-00 00:00:00'
+      AND REASON IN (1, 2, 3, 4, 5)
+    LIMIT 1
+  ");
+
+  if (!$query) {
+    echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+    return 0;
+  }
+
+  if (mysqli_num_rows($query) > 0) {
+    return 1;
+  }
+
+  return 0;
+}
+
+function has_user_staff_leave_on_date($link, $userID, $date){
+  $userID = mysqli_real_escape_string($link, $userID);
+  $dateEsc = mysqli_real_escape_string($link, $date);
+
+  $query = mysqli_query($link, "
+    SELECT id
+    FROM staff_leaves
+    WHERE user_id = '$userID'
+      AND start_date <= '$dateEsc'
+      AND stop_date >= '$dateEsc'
+      AND event IN ('Отпуск', 'Больничный', 'Командировка')
+    LIMIT 1
+  ");
+
+  if (!$query) {
+    echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+    return 0;
+  }
+
+  if (mysqli_num_rows($query) > 0) {
+    return 1;
+  }
+
+  return 0;
+}
+
+function is_accounting_error_day_for_user($link, $userID, $date){
+  if (is_accounting_error_work_day($link, $date) != 1) {
+    return 0;
+  }
+
+  if (has_user_visiting_data_on_date($link, $userID, $date) == 1) {
+    return 0;
+  }
+
+  if (has_user_add_time_data_on_date($link, $userID, $date) == 1) {
+    return 0;
+  }
+
+  if (has_user_staff_leave_on_date($link, $userID, $date) == 1) {
+    return 0;
+  }
+
+  return 1;
+}
+
+function insert_accounting_error_if_not_exists($link, $userID, $date){
+  $userID = mysqli_real_escape_string($link, $userID);
+  $dateEsc = mysqli_real_escape_string($link, $date);
+
+  $query = mysqli_query($link, "
+    INSERT INTO accounting_errors (
+      USERID,
+      ERROR_DATE,
+      STATUS,
+      CREATED_DT
+    )
+    SELECT
+      '$userID',
+      '$dateEsc',
+      0,
+      NOW()
+    FROM DUAL
+    WHERE NOT EXISTS (
+      SELECT ID
+      FROM accounting_errors
+      WHERE USERID = '$userID'
+        AND ERROR_DATE = '$dateEsc'
+      LIMIT 1
+    )
+  ");
+
+  if (!$query) {
+    echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+    return 0;
+  }
+
+  return mysqli_affected_rows($link);
+}
+
+function delete_not_actual_empty_accounting_errors($link, $userID, $depthDays){
+  $userID = mysqli_real_escape_string($link, $userID);
+  $depthDays = (int)$depthDays;
+
+  if ($depthDays <= 0) {
+    $depthDays = get_accounting_errors_default_depth_days();
+  }
+
+  $startDate = date("Y-m-d", strtotime("-$depthDays days"));
+  $stopDate = date("Y-m-d", strtotime("-1 day"));
+
+  $startDateEsc = mysqli_real_escape_string($link, $startDate);
+  $stopDateEsc = mysqli_real_escape_string($link, $stopDate);
+
+  $query = mysqli_query($link, "
+    SELECT ID, ERROR_DATE
+    FROM accounting_errors
+    WHERE USERID = '$userID'
+      AND STATUS = 0
+      AND ERROR_DATE >= '$startDateEsc'
+      AND ERROR_DATE <= '$stopDateEsc'
+  ");
+
+  if (!$query) {
+    echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+    return 0;
+  }
+
+  $deletedCount = 0;
+
+  while ($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
+    $errorID = (int)$row["ID"];
+    $errorDate = $row["ERROR_DATE"];
+
+    if (is_accounting_error_day_for_user($link, $userID, $errorDate) == 0) {
+      $errorIDEsc = mysqli_real_escape_string($link, $errorID);
+
+      $deleteQuery = mysqli_query($link, "
+        DELETE FROM accounting_errors
+        WHERE ID = '$errorIDEsc'
+          AND USERID = '$userID'
+          AND STATUS = 0
+        LIMIT 1
+      ");
+
+      if ($deleteQuery) {
+        $deletedCount += mysqli_affected_rows($link);
+      }
+    }
+  }
+
+  return $deletedCount;
+}
+
+function sync_accounting_errors_for_user($link, $userID, $depthDays){
+  $depthDays = (int)$depthDays;
+
+  if ($depthDays <= 0) {
+    $depthDays = get_accounting_errors_default_depth_days();
+  }
+
+  delete_not_actual_empty_accounting_errors($link, $userID, $depthDays);
+
+  $today = date("Y-m-d");
+  $startTimestamp = strtotime($today . " -$depthDays days");
+  $stopTimestamp = strtotime($today . " -1 day");
+
+  if ($startTimestamp === false || $stopTimestamp === false) {
+    return 0;
+  }
+
+  $insertedCount = 0;
+
+  for ($dayTimestamp = $startTimestamp; $dayTimestamp <= $stopTimestamp; $dayTimestamp = strtotime("+1 day", $dayTimestamp)) {
+    $date = date("Y-m-d", $dayTimestamp);
+
+    if (is_accounting_error_day_for_user($link, $userID, $date) == 1) {
+      $insertedCount += insert_accounting_error_if_not_exists($link, $userID, $date);
+    }
+  }
+
+  return $insertedCount;
+}
+
+function get_accounting_errors_count($link, $userID){
+  $depthDays = get_accounting_errors_default_depth_days();
+
+  sync_accounting_errors_for_user($link, $userID, $depthDays);
+
+  $userID = mysqli_real_escape_string($link, $userID);
+  $startDate = mysqli_real_escape_string($link, date("Y-m-d", strtotime("-$depthDays days")));
+
+  $query = mysqli_query($link, "
+    SELECT COUNT(*) AS CNT
+    FROM accounting_errors
+    WHERE USERID = '$userID'
+      AND ERROR_DATE >= '$startDate'
+      AND STATUS IN (0, 1, 3)
+  ");
+
+  if (!$query) {
+    echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+    return 0;
+  }
+
+  $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
+
+  return (int)$row["CNT"];
+}
+
+function get_accounting_errors_notification_count($link, $supervisorID){
+  $supervisorID = mysqli_real_escape_string($link, $supervisorID);
+  $depthDays = get_accounting_errors_default_depth_days();
+  $startDate = mysqli_real_escape_string($link, date("Y-m-d", strtotime("-$depthDays days")));
+
+  $queryUsers = mysqli_query($link, "
+    SELECT DISTINCT USERID
+    FROM GROUPS
+    WHERE SUPERVISORID = '$supervisorID'
+      AND TYPE = 3
+    ORDER BY USERID
+  ");
+
+  if (!$queryUsers) {
+    echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+    return 0;
+  }
+
+  while ($rowUser = mysqli_fetch_array($queryUsers, MYSQLI_ASSOC)) {
+    sync_accounting_errors_for_user($link, $rowUser["USERID"], $depthDays);
+  }
+
+  $query = mysqli_query($link, "
+    SELECT COUNT(*) AS CNT
+    FROM accounting_errors ae
+    INNER JOIN GROUPS g ON g.USERID = ae.USERID
+    WHERE g.SUPERVISORID = '$supervisorID'
+      AND g.TYPE = 3
+      AND ae.ERROR_DATE >= '$startDate'
+      AND ae.STATUS = 1
+  ");
+
+  if (!$query) {
+    echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+    return 0;
+  }
+
+  $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
+
+  return (int)$row["CNT"];
+}
+
+function get_accounting_errors_counts_by_user($link, $userID, &$totalCount, &$acceptedCount, &$refusedCount, &$deletedCount, &$newCount){
+  $depthDays = get_accounting_errors_default_depth_days();
+
+  sync_accounting_errors_for_user($link, $userID, $depthDays);
+
+  $userID = mysqli_real_escape_string($link, $userID);
+  $startDate = mysqli_real_escape_string($link, date("Y-m-d", strtotime("-$depthDays days")));
+
+  $totalCount = 0;
+  $acceptedCount = 0;
+  $refusedCount = 0;
+  $deletedCount = 0;
+  $newCount = 0;
+
+  $query = mysqli_query($link, "
+    SELECT STATUS, COUNT(*) AS CNT
+    FROM accounting_errors
+    WHERE USERID = '$userID'
+      AND ERROR_DATE >= '$startDate'
+    GROUP BY STATUS
+  ");
+
+  if (!$query) {
+    echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+    return;
+  }
+
+  while ($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
+    $status = (int)$row["STATUS"];
+    $count = (int)$row["CNT"];
+
+    $totalCount += $count;
+
+    if ($status == 1) {
+      $newCount += $count;
+    }
+    else if ($status == 2) {
+      $acceptedCount += $count;
+    }
+    else if ($status == 3) {
+      $refusedCount += $count;
+    }
+    else if ($status == 4) {
+      $deletedCount += $count;
+    }
+  }
+}
+
 function datetimestr_to_day_start_stop_DT_ex_str_idx($dateTimeStr, $dayTransitionTime){
   if ($dayTransitionTime == "" || $dayTransitionTime == "NDF") {
     $dayTransitionTime = "00:00:00";
