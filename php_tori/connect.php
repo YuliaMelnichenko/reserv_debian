@@ -20,10 +20,9 @@ $link = mysqli_connect(
     $env['DB_HOST'],
     $env['DB_USER'],
     $env['DB_PASS'],
-    $env['DB_NAME']
+    $env['DB_NAME'],
+    isset($env['DB_PORT']) ? (int) $env['DB_PORT'] : 3306
 );
-
-mysqli_set_charset($link, "utf8");
 
 if ($link == false) {
     echo application_error_message(
@@ -32,4 +31,6 @@ if ($link == false) {
     );
     exit;
 }
+
+mysqli_set_charset($link, "utf8");
 ?>

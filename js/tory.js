@@ -80,8 +80,24 @@
   }
 })(window, document);
 
-function unset_cookie(){
-  $.post('ajax/delete_cookie.php', RetSWT1 );
+function unset_cookie(csrfToken){
+  var token = csrfToken || window.TORI_CSRF_TOKEN || '';
+
+  if (!token) {
+    var prefix = 'TORI_CSRF_TOKEN=';
+    var cookies = document.cookie ? document.cookie.split(';') : [];
+
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = cookies[i].replace(/^\s+/, '');
+
+      if (cookie.indexOf(prefix) === 0) {
+        token = decodeURIComponent(cookie.substring(prefix.length));
+        break;
+      }
+    }
+  }
+
+  $.post('ajax/delete_cookie.php', {_csrf: token}, RetSWT1 );
   function RetSWT1(dat1) {
     console.log(dat1);
   }    

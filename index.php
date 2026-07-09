@@ -4,11 +4,13 @@ date_default_timezone_set("Asia/Novosibirsk");
 ob_start();
 require_once __DIR__ . '/inc/session.php';
 include_once __DIR__ . "/start.php";
+include_once __DIR__ . "/funcs.php";
+auth();
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
-<script type="text/javascript" src="js/tory.js"></script> 
+<script type="text/javascript" src="js/tory.js?v=20260709"></script>
 <script type="text/javascript" charset="utf-8"> 
 
 var timerIdSessValid=setInterval( "check_sess()", 500000 );
@@ -472,9 +474,6 @@ echo "<div align=\"left\">";
 ////////////////////////////////////////////////////////
 include_once __DIR__ . "/funcs.php";
 include __DIR__ . "/php_tori/connect.php";
-
-$ip = $_SERVER['REMOTE_ADDR'];
-auth();
 
 if (
   isset($_SESSION['ss_id']) &&

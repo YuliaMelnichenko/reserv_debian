@@ -2504,8 +2504,6 @@ function is_there_day_change_betw( $in_dt, $eat_start_dt, $eat_stop_dt, $out_dt,
 }
 
 function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $defaultStartTimeStr, $user_allowedDelay ){
-  include_once "/var/www/tori/funcs.php";
-
   $delayCheckEnabled = 1;
 
   if (
