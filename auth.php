@@ -4,7 +4,7 @@ require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 csrf_ensure_token();
 
-include __DIR__ . "/funcs.php";
+include_once __DIR__ . "/funcs.php";
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -20,8 +20,10 @@ echo "</head>";
 ?>
 
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
-<script type="text/javascript" src="js/tory.js"></script> 
+<script type="text/javascript" src="js/tory.js?v=20260709"></script>
 <script type="text/javascript" charset="utf-8"> 
+
+var toriCsrfToken = <?php echo json_encode(csrf_ensure_token()); ?>;
 
 function check_cookie()
 {
@@ -40,7 +42,7 @@ function auth() {
   var passwd = document.getElementById('passwd').value;
 
   if ( document.getElementById('autologin').checked ) {
-    $.post('ajax/set_cookie.php', {login: login}, RetSWT1 );
+    $.post('ajax/set_cookie.php', {login: login, _csrf: toriCsrfToken}, RetSWT1 );
     function RetSWT1(dat1) 
     {
       if ( dat1 == 0 )
@@ -50,16 +52,16 @@ function auth() {
     }
   }
   else {
-    unset_cookie();
+    unset_cookie(toriCsrfToken);
   }
 
-  $.post('ajax/auth.php', {login: login, passwd: passwd}, function(dat) {
+  $.post('ajax/auth.php', {login: login, passwd: passwd, _csrf: toriCsrfToken}, function(dat) {
     console.log("Server answer: ", dat);
     if (dat.trim() === "OK") {
       window.location = self.location;
     } else {
       alert("Error: " + dat );
-      unset_cookie();
+      unset_cookie(toriCsrfToken);
       document.getElementById('login').value = '';
       document.getElementById('passwd').value = '';
       // document.getElementById('autologin').checked = false;

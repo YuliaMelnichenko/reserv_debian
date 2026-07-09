@@ -129,7 +129,8 @@ function access_open_database()
         $env['DB_HOST'],
         $env['DB_USER'],
         $env['DB_PASS'],
-        $env['DB_NAME']
+        $env['DB_NAME'],
+        isset($env['DB_PORT']) ? (int) $env['DB_PORT'] : 3306
     );
 
     if (!$link) {
