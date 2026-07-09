@@ -491,6 +491,7 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
 
   $usersRate=array();
   $usersFIO=array();
+  $usersNameParts=array();
   
   foreach ( $newUserIDs as $ID )
   {
@@ -507,7 +508,16 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
       {  
         $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
  	      $usersRate[] = $row["rate"];
-        $usersFIO[] = $row["surname"]." <span style=\"color:#94A097\"> </br>".$row["firstname"]." </br>".$row["lastname"]." </span>";
+        $surname = isset($row["surname"]) ? $row["surname"] : "";
+        $firstname = isset($row["firstname"]) ? $row["firstname"] : "";
+        $lastname = isset($row["lastname"]) ? $row["lastname"] : "";
+
+        $usersFIO[] = trim($surname . " " . $firstname . " " . $lastname);
+        $usersNameParts[] = array(
+          "surname" => $surname,
+          "firstname" => $firstname,
+          "lastname" => $lastname,
+        );
       }
     }
   }
@@ -517,6 +527,7 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
   $usersInfo[0] = $newUserIDs;
   $usersInfo[1] = $usersFIO;
   $usersInfo[2] = $usersRate;
+  $usersInfo[8] = $usersNameParts;
 
   return $usersInfo;
 }  

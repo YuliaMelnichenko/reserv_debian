@@ -474,9 +474,24 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
               echo "<tr>";
                 for ( $userNum = 0; $userNum < $userCnt; $userNum ++ ){
                   $userFIO = $usersInfo[1][$userNum];
+                  $userNameParts = isset($usersInfo[8][$userNum])
+                    ? $usersInfo[8][$userNum]
+                    : array(
+                      "surname" => $userFIO,
+                      "firstname" => "",
+                      "lastname" => "",
+                    );
                   echo "<td class=\"report_no_padding\" bgcolor=\"#ffffff\" valign=\"middle\" align=\"center\" width = $cellWidth>";
                     echo "<div class=\"report_head_name\">";
-          echo "<h5>" . html_escape($userFIO) . "</h5>";
+                      echo "<div class=\"report_head_fio\">";
+                        echo "<div class=\"report_head_surname\">" . html_escape($userNameParts["surname"]) . "</div>";
+                        echo "<div class=\"report_head_patronymic\">";
+                          echo html_escape($userNameParts["firstname"]);
+                          if ($userNameParts["lastname"] !== "") {
+                            echo "<br>" . html_escape($userNameParts["lastname"]);
+                          }
+                        echo "</div>";
+                      echo "</div>";
                     echo "</div>";
                   echo "</td>";  
                 }
