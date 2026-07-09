@@ -13,69 +13,56 @@ include __DIR__ . "/../php_tori/connect.php";
 function change_time ($user) {
   include __DIR__ . "/../php_tori/connect.php";
   include_once __DIR__ . "/../funcs.php";
-  
+
   mysqli_set_charset($link, "utf8");
 
   $currentTime = date("H:i:s");
   $currentDayNumber = GetWeekDayD(date("Y-m-d"));
+  $daysBack = ($currentDayNumber == "1") ? 3 : 1;
 
   $content = "";
 
-  if ($currentDayNumber == "1") {
-    $threeDaysAgo = mysqli_query($link, "SELECT out_dt, eat_start_dt, eat_stop_dt FROM visiting WHERE user_id = '$user' and DATE(in_dt) = DATE(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY))");
-    $row2 = mysqli_fetch_assoc($threeDaysAgo);
+  $visitQuery = db_query(
+    $link,
+    "SELECT ID, out_dt, eat_start_dt, eat_stop_dt
+     FROM visiting
+     WHERE user_id = ?
+       AND DATE(in_dt) = DATE(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL $daysBack DAY))
+     ORDER BY in_dt DESC, ID DESC
+     LIMIT 1",
+    'i',
+    array((int)$user)
+  );
 
-    if (!$row2) {
-      return $content;
-    }
-
-    $out_value1 = $row2["out_dt"];
-    $eat_start_value1 = $row2["eat_start_dt"];
-    $eat_stop_value1 = $row2["eat_stop_dt"];
-
-    if ( $eat_start_value1 !== "0000-00-00 00:00:00" && $eat_stop_value1 == "0000-00-00 00:00:00" ){
-      $content .= change_out_time ( $out_value1, $currentTime );
-      $content .= change_eat_stop_time ( $currentTime);
-    }
-    else {
-      $content .= change_out_time ( $out_value1, $currentTime );
-    }
+  if (!$visitQuery || mysqli_num_rows($visitQuery) == 0) {
+    return $content;
   }
-  else {
-    $yesterday = mysqli_query($link, "SELECT out_dt, eat_start_dt, eat_stop_dt FROM visiting WHERE user_id = '$user' and DATE(in_dt) = DATE(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY))");
 
-    $row9 = mysqli_fetch_assoc($yesterday);
+  $row = mysqli_fetch_assoc($visitQuery);
+  $visitID = (int)$row["ID"];
+  $out_value = isset($row["out_dt"])
+    ? $row["out_dt"]
+    : "0000-00-00 00:00:00";
 
-    if (!$row9) {
-      return $content;
-    }
+  $eat_start_value = isset($row["eat_start_dt"])
+    ? $row["eat_start_dt"]
+    : "0000-00-00 00:00:00";
 
-    $out_value = isset($row9["out_dt"])
-      ? $row9["out_dt"]
-      : "0000-00-00 00:00:00";
+  $eat_stop_value = isset($row["eat_stop_dt"])
+    ? $row["eat_stop_dt"]
+    : "0000-00-00 00:00:00";
 
-    $eat_start_value = isset($row9["eat_start_dt"])
-      ? $row9["eat_start_dt"]
-      : "0000-00-00 00:00:00";
+  $content .= "<input type=\"hidden\" id=\"change_visit_id\" value=\"$visitID\">";
+  $content .= "<tr>";
+  $content .= change_out_time( $out_value, $currentTime );
+  $content .= "</tr>";
 
-    $eat_stop_value = isset($row9["eat_stop_dt"])
-      ? $row9["eat_stop_dt"]
-      : "0000-00-00 00:00:00";
-        
-    if ( $eat_start_value !== "0000-00-00 00:00:00" && $eat_stop_value == "0000-00-00 00:00:00" ){
-      $content .= "<tr>";
-      $content .= change_out_time( $out_value, $currentTime );
-      $content .= "</tr>";
-      $content .= "<tr>";
-      $content .= change_eat_stop_time( $currentTime);
-      $content .= "</tr>";
-    }
-    else {
-      $content .= "<tr>";
-      $content .= change_out_time( $out_value, $currentTime );
-      $content .= "</tr>";
-    }
+  if ( $eat_start_value !== "0000-00-00 00:00:00" && $eat_stop_value == "0000-00-00 00:00:00" ){
+    $content .= "<tr>";
+    $content .= change_eat_stop_time( $currentTime);
+    $content .= "</tr>";
   }
+
   return $content;
 }
 
