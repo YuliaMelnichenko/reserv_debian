@@ -1,14 +1,11 @@
 <?php
 ob_start();
 require_once __DIR__ . '/inc/session.php';
-////////////////////////////////////////////////////////
 include_once __DIR__ . "/funcs.php";
 require_once __DIR__ . '/inc/access.php';
-save_last_location( "time_add.php" );
+save_last_location("time_add.php");
 require_page_staff_leaves_access();
 include __DIR__ . "/php_tori/connect.php";
-mysqli_set_charset($link, "utf8");
-////////////////////////////////////////////////////////
 
 if (isset($_GET['action']) && $_GET['action'] === 'get' && isset($_GET['id'])) {
     header('Content-Type: application/json');
@@ -279,8 +276,7 @@ function fetchStaffLeavesArchiveRows($link, $employeeId, $event, $filterStartDat
     $stmt = mysqli_prepare($link, $sql);
 
     if (!$stmt) {
-        echo json_encode(['error' => database_error_message($link, __FILE__ . ':' . __LINE__)]);
-        exit;
+        throw new Exception(mysqli_error($link));
     }
 
     if (count($params) > 0) {
@@ -291,8 +287,7 @@ function fetchStaffLeavesArchiveRows($link, $employeeId, $event, $filterStartDat
     $result = mysqli_stmt_get_result($stmt);
 
     if (!$result) {
-        echo json_encode(['error' => database_error_message($link, __FILE__ . ':' . __LINE__)]);
-        exit;
+        throw new Exception(mysqli_error($link));
     }
 
     $rows = [];
@@ -557,10 +552,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'archive') {
         );
 
         echo json_encode($rows, JSON_UNESCAPED_UNICODE);
-    } catch (Exception $e) {
-        echo json_encode([
-            'error' => $e->getMessage()
-        ], JSON_UNESCAPED_UNICODE);
+    } catch (Throwable $e) {
+        echo application_json_error('Staff leave archive at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
 
     exit;
@@ -601,11 +594,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'archive_excel_preview') {
             'rows' => $rows,
             'preview_limit' => 50
         ]);
-    } catch (Exception $e) {
-        echo json_encode([
-            'status' => 'error',
-            'message' => $e->getMessage()
-        ]);
+    } catch (Throwable $e) {
+        echo application_json_error('Staff leave archive preview at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
 
     exit;
@@ -636,19 +626,19 @@ if (isset($_GET['action']) && $_GET['action'] === 'archive_excel_export') {
         $eventTitle = getArchiveEventTitle($event);
 
         sendStaffLeavesArchiveXlsx($rows, $periodTitle, $employeeTitle, $eventTitle, $exportTime);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         while (ob_get_level()) {
             ob_end_clean();
         }
 
         header("Content-type: text/plain; charset=utf-8");
-        echo "Ошибка выгрузки: " . $e->getMessage();
+        echo application_error_message('Staff leave XLSX export at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
 
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'add') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add') {
     header('Content-Type: application/json');
 
     try {
@@ -658,7 +648,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'add') {
         $event = $_POST['event'] ?? '';
     
         if (!$userId || !$start || !$stop || !$event) {
-            throw new InvalidArgumentException('Не все поля заполнены');
+            throw new Exception('не все поля заполнены');
         }
 
         $stmt = mysqli_prepare($link, "SELECT surname, firstname FROM employees WHERE id = ? LIMIT 1");
@@ -667,13 +657,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'add') {
         }
 
         mysqli_stmt_bind_param($stmt, 'i', $userId);
-        if (!mysqli_stmt_execute($stmt)) {
-            throw new RuntimeException('Ошибка получения сотрудника: ' . mysqli_stmt_error($stmt));
-        }
+        mysqli_stmt_execute($stmt);
 
         $result = mysqli_stmt_get_result($stmt);
         if(!$row = mysqli_fetch_assoc($result)) {
-            throw new InvalidArgumentException('Сотрудник не найден');
+            throw new Exception('Сотрудник не найден');
         }
 
         $fio = $row['surname'] . ' ' . $row['firstname'];
@@ -688,25 +676,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'add') {
         $t = $event;
 
         $stmt = mysqli_prepare($link, "INSERT INTO staff_leaves (user_id, fio, start_date, stop_date, event) VALUES (?, ?, ?, ?, ?)");
-        if (!$stmt) {
-            throw new RuntimeException('Ошибка подготовки добавления: ' . mysqli_error($link));
-        }
 
         mysqli_stmt_bind_param($stmt, 'issss', $u, $f, $s, $e, $t);
-        if (!mysqli_stmt_execute($stmt)) {
-            throw new RuntimeException('Ошибка добавления: ' . mysqli_stmt_error($stmt));
-        }
+        mysqli_stmt_execute($stmt);
 
         echo json_encode(['status' => 'success']);
-    } catch (InvalidArgumentException $e) {
+    } catch (Exception $e) {
+        error_log('Ошибка добавления: ' . $e->getMessage());
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
-    } catch (Throwable $e) {
-        echo application_json_error('Staff leave creation at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'update') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update') {
     header('Content-Type: application/json');
 
     try {
@@ -716,7 +698,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'update') {
         $event = $_POST['event'] ?? '';
 
         if (!$id || !$start || !$stop) {
-            throw new InvalidArgumentException('Поля заполнены некорректно');
+            throw new Exception('Поля заполнены некорректно');
         }
 
         $stmt = mysqli_prepare($link, "UPDATE staff_leaves SET start_date = ?, stop_date = ?, event = ? WHERE id = ? ");
@@ -728,24 +710,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'update') {
         mysqli_stmt_bind_param($stmt, 'sssi', $start, $stop, $event, $id);
 
         if (!mysqli_stmt_execute($stmt)) {
-            throw new RuntimeException("Ошибка выполнения запроса: " . mysqli_stmt_error($stmt));
+            throw new Exception("Ошибка выполнения запроса: " . mysqli_error($link));
         }
 
         echo json_encode(['status' => 'success']);
-    } catch (InvalidArgumentException $e) {
+    } catch (Exception $e) {
+        error_log('Ошибка редактирования: ' . $e->getMessage());
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
-    } catch (Throwable $e) {
-        echo application_json_error('Staff leave update at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'delete') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
     header('Content-Type: application/json');
 
     try {
         $id = intval($_POST['record_id'] ?? 0);
-        if (!$id) throw new InvalidArgumentException('Некорректный ID');
+        if (!$id) throw new Exception('Некорректный ID');
 
         $stmt = mysqli_prepare($link, "DELETE FROM staff_leaves WHERE id = ?");
 
@@ -756,14 +737,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'delete') {
         mysqli_stmt_bind_param($stmt, 'i', $id);
 
         if (!mysqli_stmt_execute($stmt)) {
-            throw new RuntimeException("Ошибка удаления: " . mysqli_stmt_error($stmt));
+            throw new Exception("Ошибка удаления: " . mysqli_error($link));
         }
 
         echo json_encode(['status' => 'success']);
-    } catch (InvalidArgumentException $e) {
+    } catch (Exception $e) {
+        error_log('Ошибка удаления: ' . $e->getMessage());
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
-    } catch (Throwable $e) {
-        echo application_json_error('Staff leave deletion at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
 
     exit;
@@ -1168,8 +1148,32 @@ echo "</div>";
         modal.style.display = 'flex';
     }
 
-    function loadArchive() {
-        currentType = 'Архив';
+    function confirmDelete (id) {
+        if (!confirm('Вы уверены, что хотите удалить запись?')) return;
+
+        fetch('staff_leaves.php', {
+            method: 'POST',
+            body: new URLSearchParams({
+                action: 'delete',
+                record_id: id
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showToast("✅ запись удалена");
+            } else {
+                alert('' + data.message);
+            }
+        })
+        .catch(err => {
+            console.error('Ошибка запроса: ', err);
+            alert('Сервер недоступен');
+        });
+    }
+
+function loadArchive() {
+    currentType = 'Архив';
 
     document.querySelectorAll('#event_buttons button.event-switch').forEach(btn => {
         btn.classList.remove('active');

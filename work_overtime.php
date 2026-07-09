@@ -1,14 +1,11 @@
 <?php 
 ob_start();
 require_once __DIR__ . '/inc/session.php';
-////////////////////////////////////////////////////////
 include_once __DIR__ . "/funcs.php";
 require_once __DIR__ . '/inc/access.php';
-save_last_location( "time_add.php" );
+save_last_location("time_add.php");
 require_page_work_overtime_access();
 include __DIR__ . "/php_tori/connect.php";
-mysqli_set_charset($link, "utf8");
-////////////////////////////////////////////////////////
 
 function getPeriodBounds (string $period): array {
     $today = date('Y-m-d 23:59:59');
@@ -61,7 +58,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
             $end = $_GET['end'] ?? '';
 
             if (!$start || !$end) {
-                throw new InvalidArgumentException('Не заданы даты для ручного ввода');
+                throw new Exception('Не заданы даты для ручного ввода');
             }
 
             $qstart = date('Y-m-d 00:00:00', strtotime($start));
@@ -173,7 +170,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
         }
 
         mysqli_stmt_bind_param($stmt, 
-                                'dssssssssssd', 
+                                'dssssssssssd',
                                     $hours, // 1
                                     $qstart, $qend, // 2-3 visiting (union)
                                         $qstart, $qend, // 4-5 add_time (union)
@@ -183,9 +180,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
                                         $hours          // 12 threshold
         );
         
-        if (!mysqli_stmt_execute($stmt)) {
-            throw new RuntimeException('Ошибка выполнения запроса: ' . mysqli_stmt_error($stmt));
-        }
+        mysqli_stmt_execute($stmt);
 
         $res = mysqli_stmt_get_result($stmt);
 
@@ -201,8 +196,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
         }
 
         echo json_encode(['status' => 'success', 'data' => $rows, 'quarter_start' => $qstart, 'quarter_end' => $qend]);
-    } catch (InvalidArgumentException $e) {
-        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
     } catch (Throwable $e) {
         echo application_json_error('Overtime list at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
@@ -215,7 +208,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
 
     try {
         $empId = intval($_GET['id']);
-        if ($empId <= 0) throw new InvalidArgumentException('Некорректный ID сотрудника');
+        if ($empId <= 0) throw new Exception('Некорректный ID сотрудника');
 
         $hours = isset($_GET['hours']) ? floatval($_GET['hours']) : 9.0;
         if ($hours <= 0) $hours = 9.0;
@@ -227,7 +220,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
             $end = $_GET['end'] ?? '';
 
             if (!$start || !$end) {
-                throw new InvalidArgumentException('Не заданы даты для ручного ввода');
+                throw new Exception('Не заданы даты для ручного ввода');
             }
             $qstart = date('Y-m-d 00:00:00', strtotime($start));
             $qend = date('Y-m-d 23:59:59', strtotime($end));
@@ -261,7 +254,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
                 
                 SELECT DATE(START_DT) AS work_date
                 FROM ADD_TIME
-                WHERE USERID = ? 
+                WHERE USERID = ?
                 AND START_DT >= ? AND START_DT < ?
                 AND REASON IN (1, 2, 3, 4, 5)
                 AND START_DT IS NOT NULL
@@ -313,7 +306,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
                 SELECT DATE(START_DT) AS work_date,
                     ROUND(SUM(TIME_TO_SEC(TIMEDIFF(STOP_DT, START_DT))) / 3600, 2) AS pause_hours
                 FROM ADD_TIME
-                WHERE USERID = ? 
+                WHERE USERID = ?
                 AND START_DT >= ? AND START_DT < ?
                 AND REASON = -1
                 AND START_DT IS NOT NULL
@@ -337,7 +330,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
         }
 
         mysqli_stmt_bind_param($stmt, 
-                                'issississississd', 
+                                'issississississd',
                                     $empId, $qstart, $qend, // visiting (union)
                                         $empId, $qstart, $qend, // add_time positive (union)
                                         $empId, $qstart, $qend, // visiting (join)
@@ -346,9 +339,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
                                         $hours                  // threshold
         );
 
-        if (!mysqli_stmt_execute($stmt)) {
-            throw new RuntimeException('Ошибка выполнения запроса: ' . mysqli_stmt_error($stmt));
-        }
+        mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);
 
         $rows = [];
@@ -368,8 +359,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
             'quarter_start' => $qstart,
             'quarter_end' => $qend
         ]);
-    } catch (InvalidArgumentException $e) {
-        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
     } catch (Throwable $e) {
         echo application_json_error('Overtime details at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
@@ -441,7 +430,7 @@ echo "<h5 class=\"dark\"><br>/Выгрузка сотрудников по пе�
 <div id="modal_details">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
         <div id="modal_title" style="font-weight: 700;">Сотрудник: </div>
-        <button id="modal_close" class="btn btn_danger">✖️</button>
+        <button id="modal_close" class="btn btn-danger">✖️</button>
     </div>
     <table id="details_table" style="width: 90%; border-collapse: collapse;">
         <thead>
@@ -455,7 +444,7 @@ echo "<h5 class=\"dark\"><br>/Выгрузка сотрудников по пе�
     </table>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="lib/jquery/jquery.js"></script>
 <script>
 $(document).ready(function () {
     function loadList(hours) {
@@ -567,7 +556,7 @@ function showDetails(empId, hours, fioEncoded) {
                             <td style="border: 1px solid #ccc; padding: 6px;">${formatDate(r.date)}</td>
                             <td style="border: 1px solid #ccc; padding: 6px;">${r.hours_total}</td>
                             <td style="border: 1px solid #ccc; padding: 6px;">
-                                ${r.outside_hours === '-' ? '' : r.outside_hours}
+                                ${r.outside_hours === '—' ? '' : r.outside_hours}
                             </td>
                         </tr>`;
             });

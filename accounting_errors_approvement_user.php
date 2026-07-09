@@ -1,6 +1,8 @@
 <?php
 ob_start();
-session_start();
+require_once __DIR__ . '/inc/session.php';
+require_once __DIR__ . '/inc/access.php';
+require_page_auth();
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -21,19 +23,7 @@ echo "<body bgcolor=\"#ffffff\" >";
 <?php
 include_once __DIR__ . "/funcs.php";
 save_last_location("accounting_errors_approvement.php");
-auth();
-
-if (am_i_superuser($_SESSION['ss_id']) != 1) {
-  echo "<h5 class=\"big\">Доступ запрещен</h5>";
-  echo "</body>";
-  echo "</html>";
-  exit;
-}
-
 include __DIR__ . "/php_tori/connect.php";
-mysqli_set_charset($link, "utf8");
-
-$supervisorID = $_SESSION['ss_id'];
 
 if (!isset($_GET["mid"])) {
   echo "<h5 class=\"big\">Ошибка: не передан сотрудник.</h5>";
@@ -42,7 +32,7 @@ if (!isset($_GET["mid"])) {
   exit;
 }
 
-$mid = $_GET["mid"];
+$mid = (string)$_GET["mid"];
 $resArr = extractUidFromMaskedUID($mid);
 
 if ($resArr[0] != 1) {
@@ -53,31 +43,13 @@ if ($resArr[0] != 1) {
 }
 
 $userID = (int)$resArr[1];
-
-$supervisorIDEsc = mysqli_real_escape_string($link, $supervisorID);
-$userIDEsc = mysqli_real_escape_string($link, $userID);
-
-$accessQuery = mysqli_query($link, "
-  SELECT USERID
-  FROM GROUPS
-  WHERE SUPERVISORID = '$supervisorIDEsc'
-    AND USERID = '$userIDEsc'
-    AND TYPE = 3
-  LIMIT 1
-");
-
-if (!$accessQuery || mysqli_num_rows($accessQuery) == 0) {
-  echo "<h5 class=\"big\">Доступ к сотруднику запрещен.</h5>";
-  echo "</body>";
-  echo "</html>";
-  exit;
-}
+require_page_supervisor_for_user($userID, 3);
 
 $depthDays = get_accounting_errors_default_depth_days();
 
 sync_accounting_errors_for_user($link, $userID, $depthDays);
 
-$userName = get_user_name_by_id($userID);
+$userName = html_escape(get_user_name_by_id($userID));
 
 echo "<div align=\"left\">";
 
@@ -117,18 +89,19 @@ echo "<table border=0>";
             echo "<td class=\"add_time\" valign=\"middle\" align=\"center\" width=150><h5 class=\"big\">Действия</h5></td>";
           echo "</tr>";
 
-          $startDate = mysqli_real_escape_string($link, date("Y-m-d", strtotime("-$depthDays days")));
-
-          $query = mysqli_query($link, "
-            SELECT ID, ERROR_DATE, STATUS, USER_COMMENT, SUPERVISOR_COMMENT, SUPERVISORID, USER_REPLY_DT, SUPERVISOR_REPLY_DT
-            FROM accounting_errors
-            WHERE USERID = '$userIDEsc'
-              AND ERROR_DATE >= '$startDate'
-            ORDER BY ERROR_DATE DESC
-          ");
+          $startDate = date("Y-m-d", strtotime("-$depthDays days"));
+          $query = db_query(
+            $link,
+            'SELECT ID, ERROR_DATE, STATUS, USER_COMMENT, SUPERVISOR_COMMENT, SUPERVISORID, USER_REPLY_DT, SUPERVISOR_REPLY_DT
+             FROM accounting_errors
+             WHERE USERID = ? AND ERROR_DATE >= ?
+             ORDER BY ERROR_DATE DESC',
+            'is',
+            array($userID, $startDate)
+          );
 
           if (!$query) {
-            echo "<tr><td colspan=5><h5 class=\"middle\">mysqli_error = " . mysqli_error($link) . "</h5></td></tr>";
+            echo "<tr><td colspan=5><h5 class=\"middle\">Не удалось загрузить ошибки учета.</h5></td></tr>";
           }
           else {
             $color = "#ddffff";

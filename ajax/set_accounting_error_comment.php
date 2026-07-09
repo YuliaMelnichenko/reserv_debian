@@ -1,85 +1,76 @@
 <?php
-session_start();
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
-
-if (!isset($_SESSION['ss_id'])) {
-  echo "Ошибка: сессия истекла. Обновите страницу.";
-  exit;
-}
-
-if (!isset($_POST['error_id']) || !isset($_POST['comment'])) {
-  echo "Ошибка: не переданы данные комментария.";
-  exit;
-}
-
-include_once __DIR__ . "/../funcs.php";
-include_once __DIR__ . "/../php_tori/connect.php";
-
-mysqli_set_charset($link, "utf8");
+header('Content-Type: text/plain; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate');
 
 $userID = (int)$_SESSION['ss_id'];
-$errorID = (int)$_POST['error_id'];
-$comment = trim($_POST['comment']);
+$errorID = (int)($_POST['error_id'] ?? 0);
+$comment = trim((string)($_POST['comment'] ?? ''));
 
 if ($errorID <= 0) {
-  echo "Ошибка: некорректная запись ошибки учета.";
-  exit;
+    deny_ajax_access(400, 'Некорректная запись ошибки учета.');
 }
 
-if ($comment == "") {
-  echo "Ошибка: комментарий не может быть пустым.";
-  exit;
+if ($comment === '' || strlen($comment) > 4000) {
+    deny_ajax_access(400, 'Комментарий должен содержать от 1 до 4000 символов.');
 }
 
-$userIDEsc = mysqli_real_escape_string($link, $userID);
-$errorIDEsc = mysqli_real_escape_string($link, $errorID);
-$commentEsc = mysqli_real_escape_string($link, $comment);
+include __DIR__ . '/../php_tori/connect.php';
 
-$checkQuery = mysqli_query($link, "
-  SELECT ID, STATUS
-  FROM accounting_errors
-  WHERE ID = '$errorIDEsc'
-    AND USERID = '$userIDEsc'
-  LIMIT 1
-");
-
-if (!$checkQuery) {
-  echo mysqli_error($link);
-  exit;
+if (!mysqli_begin_transaction($link)) {
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
 }
 
-if (mysqli_num_rows($checkQuery) == 0) {
-  echo "Ошибка: запись ошибки учета не найдена.";
-  exit;
+$result = db_query(
+    $link,
+    'SELECT STATUS FROM accounting_errors WHERE ID = ? AND USERID = ? LIMIT 1 FOR UPDATE',
+    'ii',
+    array($errorID, $userID)
+);
+
+if (!$result) {
+    mysqli_rollback($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
 }
 
-$row = mysqli_fetch_array($checkQuery, MYSQLI_ASSOC);
-$status = (int)$row["STATUS"];
+$row = mysqli_fetch_assoc($result);
 
-if ($status == 2 || $status == 4) {
-  echo "Ошибка: комментарий нельзя изменить, потому что запись уже принята или удалена.";
-  exit;
+if (!$row) {
+    mysqli_rollback($link);
+    deny_ajax_access(404, 'Запись ошибки учета не найдена.');
 }
 
-$query = mysqli_query($link, "
-  UPDATE accounting_errors
-  SET USER_COMMENT = '$commentEsc',
-      STATUS = 1,
-      USER_REPLY_DT = NOW()
-  WHERE ID = '$errorIDEsc'
-    AND USERID = '$userIDEsc'
-    AND STATUS IN (0, 1, 3)
-  LIMIT 1
-");
+$status = (int)$row['STATUS'];
 
-if (!$query) {
-  echo mysqli_error($link);
-  exit;
+if (in_array($status, array(2, 4), true)) {
+    mysqli_rollback($link);
+    deny_ajax_access(409, 'Комментарий нельзя изменить после принятия или удаления записи.');
 }
 
-echo "1";
-exit;
-?>
+$updated = db_execute(
+    $link,
+    'UPDATE accounting_errors
+     SET USER_COMMENT = ?, STATUS = 1, USER_REPLY_DT = NOW()
+     WHERE ID = ? AND USERID = ? AND STATUS IN (0, 1, 3)',
+    'sii',
+    array($comment, $errorID, $userID)
+);
+
+if (!$updated) {
+    mysqli_rollback($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
+}
+
+if (!mysqli_commit($link)) {
+    mysqli_rollback($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
+}
+
+echo '1';

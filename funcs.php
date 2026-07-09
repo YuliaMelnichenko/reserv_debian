@@ -4,6 +4,7 @@
 require_once __DIR__ . '/inc/errors.php';
 require_once __DIR__ . '/inc/database.php';
 require_once __DIR__ . '/inc/session.php';
+require_once __DIR__ . '/inc/accounting_errors.php';
 
 function get_current_datetime_in_timezone(){
   $valid = 0;
