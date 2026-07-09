@@ -1035,15 +1035,39 @@ div.report_head_date {
 }
 
 div.report_head_name {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   text-align: center;
   vertical-align: baseline;
-  align-items: center;
   position: static;
   width: 165px; 
   height:53px; 
   background: #FEFEFE; 
   overflow: hidden; 
   padding:0px;
+}
+
+.report_head_fio {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 53px;
+  line-height: 1.15;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+}
+
+.report_head_surname {
+  color: #000000;
+  font-weight: 700;
+}
+
+.report_head_patronymic {
+  color: #94A097;
+  font-weight: 400;
 }
 
 div.report_head_left_date_cert {
