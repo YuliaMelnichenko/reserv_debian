@@ -1,18 +1,29 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
 if ( isset($_POST['userID']) AND isset($_POST['messageMode']) )
 {
-  include_once __DIR__ . "/../funcs.php";
-  include_once __DIR__ . "/../php_tori/connect.php";
-
   $userID = (int)($_POST['userID']);
   $messageMode = (int)($_POST['messageMode']);
   $superUserID = $_SESSION['ss_id']; 
+
+  if ($userID <= 0) {
+    deny_ajax_access(400, 'INVALID_USER');
+  }
+
+  if (!in_array($messageMode, array(1, 2), true)) {
+    deny_ajax_access(400, 'INVALID_MODE');
+  }
+
+  require_ajax_supervisor_for_user($userID, 3);
+
+  include_once __DIR__ . "/../funcs.php";
+  include_once __DIR__ . "/../php_tori/connect.php";
 
   $currentDate = date('Y-m-d');
   
@@ -21,41 +32,44 @@ if ( isset($_POST['userID']) AND isset($_POST['messageMode']) )
 
   $messageModeStr = $messageModeStr.get_user_name_by_id( $superUserID );
 
-  $newStartTime = $newInTime; 
-  $newEatStartTime = "";
-  $newEatStopTime = "";
-
-
-  $query0 = mysqli_query($link, "SELECT max(ID) FROM ALERTS"); 
- 
-  $newID = 0;
-
-  $merr=mysqli_error($link);
-  if ( !$query0 ) 
-  {
-    echo "<br>mysql_error = $merr<br>";
-  }
-  else if ( $row = mysqli_fetch_array($query0) )
-  {
-    $newID = $row[0] + 1;
+  if (!mysqli_begin_transaction($link)) {
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
   }
 
-  mysqli_set_charset($link, "utf8"); 
-  
-  $query = mysqli_query($link, "INSERT INTO ALERTS VALUES ( '$newID', '$currentDate', '$userID', '$superUserID', '$messageModeStr', '0')"); 
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
-    echo "MYSQL : $merr";
+  $query = db_query($link, 'SELECT ID FROM ALERTS ORDER BY ID DESC LIMIT 1 FOR UPDATE');
+
+  if (!$query) {
+    mysqli_rollback($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
   }
-  else
-  {
-    echo "1";
-    exit; 
-  }  
+
+  $lastAlert = mysqli_fetch_assoc($query);
+  $newID = $lastAlert ? (int)$lastAlert['ID'] + 1 : 1;
+
+  $query = db_execute(
+    $link,
+    'INSERT INTO ALERTS VALUES (?, ?, ?, ?, ?, 0)',
+    'isiis',
+    array($newID, $currentDate, $userID, (int)$superUserID, $messageModeStr)
+  );
+
+  if (!$query) {
+    mysqli_rollback($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
+  }
+
+  if (!mysqli_commit($link)) {
+    mysqli_rollback($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
+  }
+
+  echo "1";
+  exit;
 }
-
-echo $_POST['userID']."  ".$_POST['messageMode']."  ";
 
 echo "0";
 

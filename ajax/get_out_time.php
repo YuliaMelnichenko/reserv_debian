@@ -1,6 +1,7 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -32,7 +33,7 @@ $query = mysqli_query($link, "
 ");
 
 if (!$query) {
-  echo "Ошибка БД: " . mysqli_error($link);
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 

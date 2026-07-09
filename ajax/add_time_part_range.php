@@ -1,6 +1,7 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -10,7 +11,7 @@ if (!isset($_SESSION['ss_id'])) {
   exit;
 }
 
-$userID_ = $_SESSION['ss_id'];
+$userID_ = (int)$_SESSION['ss_id'];
 $currentDate = date('Y-m-d');
 
 $add_time_part_start_date = isset($_POST['add_time_part_start_date']) ? $_POST['add_time_part_start_date'] : "";
@@ -61,20 +62,10 @@ function get_days_range_inclusive($startDate, $stopDate){
   return $days;
 }
 
-mysqli_set_charset($link, "utf8");
-
-$add_time_part_start_date = mysqli_real_escape_string($link, $add_time_part_start_date);
-$add_time_part_stop_date = mysqli_real_escape_string($link, $add_time_part_stop_date);
-$add_time_part_start_time = mysqli_real_escape_string($link, $add_time_part_start_time);
-$add_time_part_stop_time = mysqli_real_escape_string($link, $add_time_part_stop_time);
-$add_time_part_base = mysqli_real_escape_string($link, $add_time_part_base);
-$add_time_part_desk = mysqli_real_escape_string($link, $add_time_part_desk);
-$userID_ = mysqli_real_escape_string($link, $userID_);
-
-$supervisor_query = mysqli_query($link, "SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 AND USERID = '$userID_' LIMIT 1");
+$supervisor_query = db_query($link, "SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 AND USERID = ? LIMIT 1", 'i', array($userID_));
 
 if (!$supervisor_query) {
-  echo "<br>mysql_error = " . mysqli_error($link) . "<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
@@ -82,17 +73,6 @@ $sv_ID = 0;
 
 if ($row = mysqli_fetch_array($supervisor_query, MYSQLI_ASSOC)) {
   $sv_ID = $row["SUPERVISORID"];
-}
-
-$query0 = mysqli_query($link, "SELECT max(ID) FROM ADD_TIME");
-$newID = 1;
-
-if (!$query0) {
-  echo "<br>mysql_error = " . mysqli_error($link) . "<br>";
-  exit;
-}
-else if ($row = mysqli_fetch_array($query0)) {
-  $newID = (int)$row[0] + 1;
 }
 
 $daysRange = get_days_range_inclusive($add_time_part_start_date, $add_time_part_stop_date);
@@ -130,6 +110,11 @@ if (count($newDaysRange) == 0) {
   exit;
 }
 
+if (!mysqli_begin_transaction($link)) {
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
 $err = "";
 
 foreach ($newDaysRange as $rDay) {
@@ -141,27 +126,28 @@ foreach ($newDaysRange as $rDay) {
     break;
   }
 
-  $rDayEsc = mysqli_real_escape_string($link, $rDay);
-  $startEsc = mysqli_real_escape_string($link, $start);
-  $stopEsc = mysqli_real_escape_string($link, $stop);
-
-  $query = mysqli_query($link, "INSERT INTO ADD_TIME 
-    (ID, ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE, BYALERT)
+  $query = db_execute($link, "INSERT INTO ADD_TIME
+    (ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE, BYALERT)
     VALUES
-    ('$newID', '$currentDate', '$sv_ID', '$userID_', '$startEsc', '$stopEsc', '$add_time_part_base', '$add_time_part_desk', '', '0', '0', '$byAlert')");
+    (?, ?, ?, ?, ?, ?, ?, '', 0, 0, ?)", 'siissssi', array($currentDate, $sv_ID, $userID_, $start, $stop, $add_time_part_base, $add_time_part_desk, $byAlert));
 
   if (!$query) {
-    $err .= "mysql_error = " . mysqli_error($link) . "<br>";
+    $err = database_error_message($link, __FILE__ . ':' . __LINE__);
     break;
   }
-
-  $newID = $newID + 1;
 }
 
 if ($err == "") {
+  if (!mysqli_commit($link)) {
+    mysqli_rollback($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
+  }
+
   echo "1";
 }
 else {
+  mysqli_rollback($link);
   echo $err;
 }
 ?>

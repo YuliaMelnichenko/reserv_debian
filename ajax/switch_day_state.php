@@ -1,6 +1,7 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -73,7 +74,7 @@ function sync_time_registration_state_from_db($link, $userID, $startDTStr, $stop
   ");
 
   if (!$query) {
-    echo mysqli_error($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 
@@ -116,7 +117,7 @@ function get_current_visit_row($link, $userID, $visitID, $startDTStr, $stopDTStr
   ");
 
   if (!$query) {
-    echo mysqli_error($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 
@@ -206,33 +207,60 @@ if ($nextState == 1) {
     $_SESSION['ss_visiting_ID'] = 0;
     $ss_visiting_ID = 0;
 
-    $openCheck = mysqli_query($link, "
+    if (!mysqli_begin_transaction($link)) {
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+      exit;
+    }
+
+    $idQuery = db_query($link, 'SELECT ID FROM visiting ORDER BY ID DESC LIMIT 1 FOR UPDATE');
+
+    if (!$idQuery) {
+      $errorMessage = database_error_message($link, __FILE__ . ':' . __LINE__);
+      mysqli_rollback($link);
+      echo $errorMessage;
+      exit;
+    }
+
+    $lastVisit = mysqli_fetch_assoc($idQuery);
+    $newID = $lastVisit ? (int)$lastVisit['ID'] + 1 : 1;
+
+    $openCheck = db_query($link, "
       SELECT ID, in_dt, state
       FROM visiting
-      WHERE user_id = '$id'
+      WHERE user_id = ?
         AND state != 0
         AND (
           (
-            in_dt >= '$startDTStr'
-            AND in_dt < '$stopDTStr'
+            in_dt >= ?
+            AND in_dt < ?
           )
           OR
           (
-            in_dt < '$startDTStr'
-            AND TIMESTAMPDIFF(SECOND, '$startDTStr', '$dateTimeStr') <= $maxOpenShiftSeconds
+            in_dt < ?
+            AND TIMESTAMPDIFF(SECOND, ?, ?) <= ?
           )
         )
       ORDER BY in_dt DESC, ID DESC
       LIMIT 1
-    ");
+      FOR UPDATE
+    ", 'isssssi', array($id, $startDTStr, $stopDTStr, $startDTStr, $startDTStr, $dateTimeStr, $maxOpenShiftSeconds));
 
     if (!$openCheck) {
-      echo mysqli_error($link);
+      $errorMessage = database_error_message($link, __FILE__ . ':' . __LINE__);
+      mysqli_rollback($link);
+      echo $errorMessage;
       exit;
     }
 
     if (mysqli_num_rows($openCheck) > 0) {
       $openRow = mysqli_fetch_array($openCheck, MYSQLI_ASSOC);
+
+      if (!mysqli_commit($link)) {
+        $errorMessage = database_error_message($link, __FILE__ . ':' . __LINE__);
+        mysqli_rollback($link);
+        echo $errorMessage;
+        exit;
+      }
 
       $_SESSION['ss_state'] = (int)$openRow["state"];
       $_SESSION['ss_visiting_ID'] = (int)$openRow["ID"];
@@ -245,26 +273,11 @@ if ($nextState == 1) {
       exit;
     }
 
-    $query = mysqli_query($link, "SELECT a.ID FROM visiting a WHERE a.ID = (SELECT max(ID) FROM visiting)");
-
-    if (!$query) {
-      echo mysqli_error($link);
-      exit;
-    }
-
-    $newID = 1;
-    $vn = mysqli_num_rows($query);
-
-    if ($vn != 0) {
-      $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
-      $newID = (int)$row["ID"] + 1;
-    }
-
     error_log(
   "TORI_SWITCH_INSERT user=$id next=$nextState state=$ss_state visit=$ss_visiting_ID now=$dateTimeStr"
 );
 
-    $res = mysqli_query($link, "
+    $res = db_execute($link, "
       INSERT INTO visiting (
         ID,
         user_id,
@@ -277,9 +290,9 @@ if ($nextState == 1) {
         dayTransitionTime
       )
       SELECT DISTINCT
-        '$newID',
-        '$id',
-        '$dateTimeStr',
+        ?,
+        ?,
+        ?,
         '0000-00-00 00:00:00',
         '0000-00-00 00:00:00',
         '0000-00-00 00:00:00',
@@ -287,11 +300,20 @@ if ($nextState == 1) {
         b.RemoteWork,
         b.dayTransitionTime
       FROM employees b
-      WHERE b.ID = '$id'
-    ");
+      WHERE b.ID = ?
+    ", 'iisi', array($newID, $id, $dateTimeStr, $id));
 
     if (!$res) {
-      echo mysqli_error($link);
+      $errorMessage = database_error_message($link, __FILE__ . ':' . __LINE__);
+      mysqli_rollback($link);
+      echo $errorMessage;
+      exit;
+    }
+
+    if (!mysqli_commit($link)) {
+      $errorMessage = database_error_message($link, __FILE__ . ':' . __LINE__);
+      mysqli_rollback($link);
+      echo $errorMessage;
       exit;
     }
 
@@ -323,7 +345,7 @@ if ($nextState == 1) {
     ");
 
     if (!$res) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -360,7 +382,7 @@ if ($nextState == 1) {
     ");
 
     if (!$res) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -413,7 +435,7 @@ if ($nextState == 1) {
     ");
 
     if (!$res) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -425,7 +447,7 @@ if ($nextState == 1) {
     ");
 
     if (!$res2) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -479,7 +501,7 @@ if ($nextState != 1) {
     ");
 
     if (!$res) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -507,7 +529,7 @@ if ($nextState != 1) {
     ");
 
     if (!$res) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -532,7 +554,7 @@ if ($nextState != 1) {
     ");
 
     if (!$res) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -566,7 +588,7 @@ if ($nextState != 1) {
     ");
 
     if (!$res) {
-      echo mysqli_error($link);
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 

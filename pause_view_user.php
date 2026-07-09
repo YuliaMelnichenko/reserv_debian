@@ -1,6 +1,26 @@
 <?php
 ob_start();
-session_start();
+require_once __DIR__ . '/inc/session.php';
+require_once __DIR__ . '/inc/access.php';
+include_once __DIR__ . "/funcs.php";
+save_last_location( "pause_view.php" );
+$mid = (string) ($_GET['mid'] ?? '');
+
+if ($mid === '') {
+  header('Location: pause_view.php');
+  exit;
+}
+
+$resArr = extractUidFromMaskedUID($mid);
+$uidValid = (int) $resArr[0];
+$userID = (int) $resArr[1];
+
+if ($uidValid === 0 || $userID <= 0) {
+  header('Location: pause_view.php');
+  exit;
+}
+
+require_page_supervisor_for_user($userID, 4);
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -35,25 +55,6 @@ var timerId=setInterval( "update_clock()", 1000 );
 </script> 
 
 <?php
-////////////////////////////////////////////////////////
-
-include_once __DIR__ . "/funcs.php";
-
-save_last_location( "delay_approvement.php" );
-auth();
-////////////////////////////////////////////////////////
-
-$mid = $_GET['mid'];
-
-$resArr = extractUidFromMaskedUID( $mid );
-$uidValid = $resArr[0];
-$userID = $resArr[1];
-
-if ( $uidValid == 0 )
-{
-  header('Location: '.'pause_view.php');    
-}
-
 echo "<div align=\"left\">";
 
 include_once __DIR__ . "/php_tori/connect.php";
@@ -164,11 +165,11 @@ echo "<table id=\"pause_approvement_table\" border=0>";
         }
 
         echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-        echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$ta_start_dt."</h5></td>";
-        echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$ta_stop_dt."</h5></td>";
+        echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_dt) . "</h5></td>";
+        echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_stop_dt) . "</h5></td>";
         echo "<td width=85 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$time_duration."</h5></td>";
-        echo "<td width=140 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_description."</h5></td>";
-        echo "<td width=200 class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class = \"small\">$superUserName</h5>"."</td>";
+        echo "<td width=140 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
+        echo "<td width=200 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
         echo "</tr>";
       }
 

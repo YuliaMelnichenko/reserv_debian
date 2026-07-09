@@ -2,7 +2,7 @@
 
 date_default_timezone_set("Asia/Novosibirsk");
 ob_start();
-session_start();
+require_once __DIR__ . '/inc/session.php';
 include_once __DIR__ . "/start.php";
 ?>
 
@@ -575,7 +575,7 @@ if (
             echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Сотрудник</span>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"top\" align=\"center\" width = $width22>";
-            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$row0["surname"]." ".$row0["firstname"]." ".$row0["lastname"]."</span>";  
+            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">" . html_escape($row0["surname"] . " " . $row0["firstname"] . " " . $row0["lastname"]) . "</span>";
           echo "</td>";  
         echo "</tr>";     
 
@@ -706,7 +706,8 @@ if (
             "",
             "",
             $b['id'],
-            $b['bday']
+            $b['bday'],
+            ""
           ];
         }
       }
@@ -717,6 +718,23 @@ if (
     echo "<td bgcolor=\"$bg_style\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
     echo "<h5 class=\"dark0\"><br>/присутствие сотрудников<br><br></h5>";
     echo "<div id=\"employee_activity\">";
+
+    $accountingErrorUserIDs = array();
+    list($accountingErrorsStartDate) = accounting_errors_get_range(get_accounting_errors_default_depth_days());
+    $accountingErrorsResult = db_query(
+      $link,
+      'SELECT DISTINCT USERID FROM accounting_errors WHERE ERROR_DATE >= ? AND STATUS IN (0, 1, 3)',
+      's',
+      array($accountingErrorsStartDate)
+    );
+
+    if ($accountingErrorsResult) {
+      while ($accountingError = mysqli_fetch_assoc($accountingErrorsResult)) {
+        $accountingErrorUserIDs[(int)$accountingError['USERID']] = true;
+      }
+    } else {
+      database_error_message($link, __FILE__ . ':' . __LINE__);
+    }
 
     $employee_arr = array();
 
@@ -735,11 +753,33 @@ if (
       $time = "0000-00-00 00:00:00";
 
       mysqli_set_charset($link, "utf8");
-      $query5 = mysqli_query($link, "SELECT v.in_dt, v.eat_start_dt, v.eat_stop_dt, v.out_dt, e.surname FROM visiting v JOIN employees e ON v.user_id = e.id WHERE DATE(v.in_dt) = CURDATE() AND v.user_id = '$id_empl'");
+      $query5 = db_query(
+        $link,
+        'SELECT in_dt, eat_start_dt, eat_stop_dt, out_dt FROM visiting WHERE DATE(in_dt) = CURDATE() AND user_id = ? ORDER BY in_dt DESC, ID DESC LIMIT 1',
+        'i',
+        array($id_empl)
+      );
+
+      if (!$query5) {
+        echo database_error_message($link, __FILE__ . ':' . __LINE__);
+        exit;
+      }
+
       $row5 = mysqli_fetch_assoc($query5);
 
-      $query7 = mysqli_query($link, "SELECT a.START_DT, a.STOP_DT, e.surname FROM ADD_TIME a JOIN employees e ON a.USERID = e.id WHERE DATE(a.START_DT) = CURDATE() AND a.USERID = '$id_empl' AND  a.STOP_DT IS NULL ORDER BY a.START_DT DESC LIMIT 1");
-      $row7 = mysqli_fetch_array($query7);
+      $query7 = db_query(
+        $link,
+        "SELECT START_DT, STOP_DT FROM ADD_TIME WHERE DATE(START_DT) = CURDATE() AND USERID = ? AND (STOP_DT IS NULL OR STOP_DT = '0000-00-00 00:00:00') ORDER BY START_DT DESC, ID DESC LIMIT 1",
+        'i',
+        array($id_empl)
+      );
+
+      if (!$query7) {
+        echo database_error_message($link, __FILE__ . ':' . __LINE__);
+        exit;
+      }
+
+      $row7 = mysqli_fetch_assoc($query7);
 
       $remote_sql = "SELECT id, start_dt, stop_dt FROM remote_work WHERE user_id = ? AND DATE(start_dt) = CURDATE() ORDER BY id DESC LIMIT 1";
 
@@ -750,32 +790,44 @@ if (
       $remote_row = mysqli_fetch_assoc($remote_res);
       $isRemoteNow = ($remote_row && is_null($remote_row['stop_dt']));
 
-      $in_dt = $row5["in_dt"];
-      $eat_start_dt = $row5["eat_start_dt"];
-      $eat_stop_dt = $row5["eat_stop_dt"];
-      $out_dt = $row5["out_dt"];
-      $start_dt_AT = $row7["START_DT"];
-      $stop_dt_AT = $row7["STOP_DT"];
+      $hasVisit = is_array($row5);
+      $in_dt = $hasVisit ? (string)$row5["in_dt"] : "";
+      $eat_start_dt = $hasVisit ? (string)$row5["eat_start_dt"] : "";
+      $eat_stop_dt = $hasVisit ? (string)$row5["eat_stop_dt"] : "";
+      $out_dt = $hasVisit ? (string)$row5["out_dt"] : "";
+      $hasOpenAddTime = is_array($row7);
 
-      $time_in = date("H:i", strtotime($in_dt));
-      $time_out = date("H:i", strtotime($out_dt));
+      $time_in = ($in_dt !== "" && $in_dt !== $time) ? date("H:i", strtotime($in_dt)) : "";
+      $time_out = ($out_dt !== "" && $out_dt !== $time) ? date("H:i", strtotime($out_dt)) : "";
 
-      if (($eat_start_dt != $time && $eat_stop_dt === $time) || ($start_dt_AT != $time && $stop_dt_AT === $time)) {
+      $isLunchPause = $hasVisit
+        && $eat_start_dt !== ""
+        && $eat_start_dt !== $time
+        && ($eat_stop_dt === "" || $eat_stop_dt === $time);
+      $hasGoneHome = $hasVisit
+        && $in_dt !== ""
+        && $in_dt !== $time
+        && $out_dt !== ""
+        && $out_dt !== $time;
+
+      if ($isLunchPause || $hasOpenAddTime) {
         $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Обед/приостановка времени\" src=\"img/pause_time.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday, $email_empl));
-      } elseif (mysqli_num_rows($query5) > 0 && $in_dt != $time && $out_dt != $time) {
-        $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Ушел домой\" src=\"img/go_home.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday, $email_empl));
+        $presenceSortOrder = 1;
       } elseif ($isRemoteNow) {
         $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Работает удаленно\" src=\"img/remoteWorkIcon2.png\" style=\"margin: 1px 0\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday, $email_empl));
-      } elseif (mysqli_num_rows($query5) === 0) {
+        $presenceSortOrder = 1;
+      } elseif (!$hasVisit) {
         $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"На работу не приходил\" src=\"img/home.png\" style=\"margin: 1px 0\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday, $email_empl));
+        $presenceSortOrder = 0;
+      } elseif ($hasGoneHome) {
+        $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Ушел домой\" src=\"img/go_home.png\">";
+        $presenceSortOrder = 2;
       } else {
         $img = "<img class=\"work-status\" data-emp=\"$id_empl\" style=\"margin: 1px 0\" title=\"На рабочем месте\" src=\"img/in_work2.png\">";
-        array_push($employee_arr, array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday, $email_empl));
+        $presenceSortOrder = 1;
       }
+
+      $employee_arr[] = array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday, $email_empl, $presenceSortOrder);
     }
 
     $employee_arr = array_filter($employee_arr, function($item) {
@@ -783,16 +835,13 @@ if (
     });
 
     function sort_employee ($a, $b) {
-      if (is_null($a[4]) && is_null($b[4])) {
-        return mb_strtolower($a[0], 'UTF-8') <=> mb_strtolower($b[0], 'UTF-8');
+      $presenceComparison = (int)$a[12] <=> (int)$b[12];
+
+      if ($presenceComparison !== 0) {
+        return $presenceComparison;
       }
-      if ($a[3] === "<img style=\"margin: 1px 0\" title=\"На рабочем месте\" src=\"img/in_work2.png\">" && $b[3] === "<img style=\"margin: 1px 0\" title=\"На рабочем месте\" src=\"img/in_work2.png\">") {
-        return mb_strtolower($a[0], 'UTF-8') <=> mb_strtolower($b[0], 'UTF-8');
-      }
-      if ($a[3] === "<img title=\"Ушел домой\" src=\"img/go_home.png\">" && $b[3] === "<img title=\"Ушел домой\" src=\"img/go_home.png\">") {
-        return mb_strtolower($a[0], 'UTF-8') <=> mb_strtolower($b[0], 'UTF-8');
-      }
-      return $a[5] <=> $b[5];
+
+      return mb_strtolower($a[0], 'UTF-8') <=> mb_strtolower($b[0], 'UTF-8');
     }
 
     usort($employee_arr, "sort_employee");
@@ -800,7 +849,7 @@ if (
     $employee_arr = array_merge($bosses_arr, $employee_arr); 
 
     function get_phone_info($id_empl, $phone, $personal_phone, $corporate_phone, $email_empl) {
-      $tooltipId = 'u' . $id_empl . '-contacts';
+      $tooltipId = 'u' . (int) $id_empl . '-contacts';
       $contacts = [];
       $contacts[] = "Телефон внутренний: " . htmlspecialchars($phone);
 
@@ -978,9 +1027,13 @@ if (
       $personal_id = $employee_arr[$i][9];
       $birth = $employee_arr[$i][10];
       $email = $employee_arr[$i][11];
+      $hasAccountingErrors = isset($accountingErrorUserIDs[(int)$personal_id]);
+      $accountingErrorIcon = $hasAccountingErrors
+        ? "<img class=\"accounting-error-attention\" src=\"img/attention.png\" title=\"Есть ошибки учета времени\" alt=\"Ошибки учета\">"
+        : "";
 
       echo "<div class=\"activity\">";
-      echo "<h5 class=\"activ_text\" data-phone-tooltip=\"u$personal_id-contacts\">" . $name . "</h5>";
+      echo "<h5 class=\"activ_text\" data-phone-tooltip=\"u" . (int) $personal_id . "-contacts\">" . html_escape($name) . $accountingErrorIcon . "</h5>";
 
       if ($dat_in == "") {
         echo "";

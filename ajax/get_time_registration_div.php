@@ -1,6 +1,7 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 date_default_timezone_set("Asia/Novosibirsk");
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
@@ -413,7 +414,7 @@ $query = mysqli_query($link, "
 ");
 
 if (!$query) {
-  echo "mysqli_error = " . mysqli_error($link);
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
   exit;
 }
  

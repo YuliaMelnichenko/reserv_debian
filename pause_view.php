@@ -1,6 +1,10 @@
 <?php
 ob_start();
-session_start();
+require_once __DIR__ . '/inc/session.php';
+require_once __DIR__ . '/inc/access.php';
+include_once __DIR__ . "/funcs.php";
+save_last_location( "pause_view.php" );
+require_page_superuser();
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -21,13 +25,6 @@ echo "<body bgcolor=\"#ffffff\" >";
 </script>
 
 <?php
-////////////////////////////////////////////////////////
-
-include_once __DIR__ . "/funcs.php";
-save_last_location( "delay_approvement.php" );
-auth();
-////////////////////////////////////////////////////////
-
 $userID_ = $_SESSION['ss_id']; 
 
 echo "<div align=\"left\">";
@@ -73,7 +70,7 @@ echo "<table border=0>";
     $query = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = '$userID_' AND TYPE = 4 "); 
     if (!$query)
     {
-      echo "<br>mysql_error = $merr<br>";
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
     }
     else
     {

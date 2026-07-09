@@ -1,14 +1,11 @@
 <?php
 ob_start();
-session_start();
-
-////////////////////////////////////////////////////////
+require_once __DIR__ . '/inc/session.php';
 include_once __DIR__ . "/funcs.php";
+require_once __DIR__ . '/inc/access.php';
+save_last_location("time_add.php");
+require_page_staff_leaves_access();
 include __DIR__ . "/php_tori/connect.php";
-mysqli_set_charset($link, "utf8");
-save_last_location( "time_add.php" );
-auth();
-////////////////////////////////////////////////////////
 
 if (isset($_GET['action']) && $_GET['action'] === 'get' && isset($_GET['id'])) {
     header('Content-Type: application/json');
@@ -147,17 +144,85 @@ function getArchivePeriodDates($periodType, $startDateManual, $stopDateManual) {
     return ["", ""];
 }
 
-if (isset($_GET['action']) && $_GET['action'] === 'archive') {
-    header('Content-Type: application/json');
+function formatArchiveDateRu($dateStr) {
+    if ($dateStr == "") {
+        return "";
+    }
 
-    $employeeId = intval($_GET['employee_id'] ?? 0);
-    $event = $_GET['event'] ?? '';
-    $periodType = intval($_GET['period_type'] ?? 0);
-    $startDateManual = $_GET['start_date'] ?? '';
-    $stopDateManual = $_GET['stop_date'] ?? '';
+    $time = strtotime($dateStr);
 
-    list($filterStartDate, $filterStopDate) = getArchivePeriodDates($periodType, $startDateManual, $stopDateManual);
+    if ($time === false) {
+        return $dateStr;
+    }
 
+    return date("d.m.Y", $time);
+}
+
+function getArchivePeriodFilterName($periodType) {
+    switch ((int)$periodType) {
+        case 1:
+            return "С начала недели";
+        case 2:
+            return "С начала месяца";
+        case 3:
+            return "За предыдущий месяц";
+        case 4:
+            return "С начала квартала";
+        case 5:
+            return "За предыдущий квартал";
+        case 7:
+            return "Задать вручную";
+        default:
+            return "Все даты";
+    }
+}
+
+function getArchivePeriodTitle($periodType, $filterStartDate, $filterStopDate) {
+    $periodName = getArchivePeriodFilterName($periodType);
+
+    if ($periodName == "Все даты") {
+        return $periodName;
+    }
+
+    if ($filterStartDate == "" || $filterStopDate == "") {
+        return $periodName;
+    }
+
+    return $periodName . " (" . formatArchiveDateRu($filterStartDate) . " - " . formatArchiveDateRu($filterStopDate) . ")";
+}
+
+function getArchiveEventTitle($event) {
+    if ($event == "") {
+        return "Все события";
+    }
+
+    return $event;
+}
+
+function getArchiveEmployeeTitle($link, $employeeId) {
+    if ($employeeId <= 0) {
+        return "Все сотрудники";
+    }
+
+    $stmt = mysqli_prepare($link, "SELECT surname, firstname FROM employees WHERE id = ? LIMIT 1");
+
+    if (!$stmt) {
+        return "Выбранный сотрудник";
+    }
+
+    mysqli_stmt_bind_param($stmt, 'i', $employeeId);
+    mysqli_stmt_execute($stmt);
+
+    $result = mysqli_stmt_get_result($stmt);
+
+    if ($row = mysqli_fetch_assoc($result)) {
+        return $row['surname'] . ' ' . $row['firstname'];
+    }
+
+    return "Выбранный сотрудник";
+}
+
+function buildStaffLeavesArchiveQuery($employeeId, $event, $filterStartDate, $filterStopDate, &$types, &$params) {
     $where = ["stop_date < CURDATE()"];
     $params = [];
     $types = "";
@@ -181,13 +246,37 @@ if (isset($_GET['action']) && $_GET['action'] === 'archive') {
         $types .= "ss";
     }
 
-    $sql = "SELECT * FROM staff_leaves WHERE " . implode(" AND ", $where) . " ORDER BY fio ASC, start_date DESC, stop_date DESC";
+    return " WHERE " . implode(" AND ", $where);
+}
+
+function fetchStaffLeavesArchiveRows($link, $employeeId, $event, $filterStartDate, $filterStopDate, $limit) {
+    $types = "";
+    $params = [];
+
+    $whereSql = buildStaffLeavesArchiveQuery(
+        $employeeId,
+        $event,
+        $filterStartDate,
+        $filterStopDate,
+        $types,
+        $params
+    );
+
+    $sql = "
+        SELECT *
+        FROM staff_leaves
+        $whereSql
+        ORDER BY fio ASC, start_date DESC, stop_date DESC
+    ";
+
+    if ($limit > 0) {
+        $sql .= " LIMIT " . (int)$limit;
+    }
 
     $stmt = mysqli_prepare($link, $sql);
 
     if (!$stmt) {
-        echo json_encode(['error' => mysqli_error($link)]);
-        exit;
+        throw new Exception(mysqli_error($link));
     }
 
     if (count($params) > 0) {
@@ -198,8 +287,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'archive') {
     $result = mysqli_stmt_get_result($stmt);
 
     if (!$result) {
-        echo json_encode(['error' => mysqli_error($link)]);
-        exit;
+        throw new Exception(mysqli_error($link));
     }
 
     $rows = [];
@@ -211,6 +299,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'archive') {
 
         $rows[] = [
             'id' => $row['id'],
+            'user_id' => $row['user_id'],
+            'fio' => $row['fio'],
             'name' => $row['fio'],
             'start_date' => $row['start_date'],
             'stop_date' => $row['stop_date'],
@@ -219,12 +309,336 @@ if (isset($_GET['action']) && $_GET['action'] === 'archive') {
         ];
     }
 
-    echo json_encode($rows);
+    return $rows;
+}
+
+function escapeExcelValue($value) {
+    return htmlspecialchars((string)$value, ENT_QUOTES, "UTF-8");
+}
+
+function escapeXlsxValue($value) {
+    return htmlspecialchars((string)$value, ENT_XML1 | ENT_QUOTES, "UTF-8");
+}
+
+function getXlsxColumnName($columnIndex) {
+    $columnName = "";
+
+    while ($columnIndex > 0) {
+        $mod = ($columnIndex - 1) % 26;
+        $columnName = chr(65 + $mod) . $columnName;
+        $columnIndex = (int)(($columnIndex - $mod) / 26);
+    }
+
+    return $columnName;
+}
+
+function buildXlsxCell($rowIndex, $columnIndex, $value, $styleIndex = 0) {
+    $cellRef = getXlsxColumnName($columnIndex) . $rowIndex;
+    $styleAttr = $styleIndex > 0 ? ' s="' . (int)$styleIndex . '"' : "";
+
+    return '<c r="' . $cellRef . '" t="inlineStr"' . $styleAttr . '><is><t>' . escapeXlsxValue($value) . '</t></is></c>';
+}
+
+function buildXlsxRow($rowIndex, $values, $styleIndex = 0) {
+    $cells = "";
+
+    for ($i = 0; $i < count($values); $i++) {
+        $cells .= buildXlsxCell($rowIndex, $i + 1, $values[$i], $styleIndex);
+    }
+
+    return '<row r="' . $rowIndex . '">' . $cells . '</row>';
+}
+
+function sendStaffLeavesArchiveXlsx($rows, $periodTitle, $employeeTitle, $eventTitle, $exportTime) {
+    if (!class_exists('ZipArchive')) {
+        throw new Exception("На сервере не установлен PHP ZipArchive. Для безопасной выгрузки .xlsx нужен пакет php-zip.");
+    }
+
+    $sheetRows = "";
+    $sheetRows .= buildXlsxRow(1, Array("Архив отсутствий сотрудников"), 1);
+    $sheetRows .= buildXlsxRow(2, Array("Временной промежуток", $periodTitle), 2);
+    $sheetRows .= buildXlsxRow(3, Array("Сотрудник", $employeeTitle), 2);
+    $sheetRows .= buildXlsxRow(4, Array("Событие", $eventTitle), 2);
+    $sheetRows .= buildXlsxRow(5, Array("Дата выгрузки", $exportTime), 2);
+    $sheetRows .= buildXlsxRow(6, Array(""));
+    $sheetRows .= buildXlsxRow(7, Array("ФИО", "Дата начала", "Дата окончания", "Кол-во дней", "Событие"), 3);
+
+    $rowIndex = 8;
+
+    foreach ($rows as $row) {
+        $sheetRows .= buildXlsxRow(
+            $rowIndex,
+            Array(
+                $row["name"],
+                formatArchiveDateRu($row["start_date"]),
+                formatArchiveDateRu($row["stop_date"]),
+                $row["total_days"],
+                $row["event"]
+            ),
+            0
+        );
+
+        $rowIndex++;
+    }
+
+    $mergeCells = '
+        <mergeCells count="5">
+            <mergeCell ref="A1:E1"/>
+            <mergeCell ref="B2:E2"/>
+            <mergeCell ref="B3:E3"/>
+            <mergeCell ref="B4:E4"/>
+            <mergeCell ref="B5:E5"/>
+        </mergeCells>
+    ';
+
+    $sheetXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+    <cols>
+        <col min="1" max="1" width="34" customWidth="1"/>
+        <col min="2" max="2" width="16" customWidth="1"/>
+        <col min="3" max="3" width="16" customWidth="1"/>
+        <col min="4" max="4" width="14" customWidth="1"/>
+        <col min="5" max="5" width="18" customWidth="1"/>
+    </cols>
+    <sheetData>' . $sheetRows . '</sheetData>
+    ' . $mergeCells . '
+</worksheet>';
+
+    $contentTypesXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+    <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+    <Default Extension="xml" ContentType="application/xml"/>
+    <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+    <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+    <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+    <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
+    <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
+</Types>';
+
+    $relsXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+    <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+    <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
+    <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
+</Relationships>';
+
+    $workbookXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+    <sheets>
+        <sheet name="Архив" sheetId="1" r:id="rId1"/>
+    </sheets>
+</workbook>';
+
+    $workbookRelsXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+    <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+    <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>';
+
+    $stylesXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+    <fonts count="3">
+        <font><sz val="10"/><name val="Arial"/></font>
+        <font><b/><sz val="14"/><name val="Arial"/></font>
+        <font><b/><sz val="10"/><name val="Arial"/></font>
+    </fonts>
+    <fills count="4">
+        <fill><patternFill patternType="none"/></fill>
+        <fill><patternFill patternType="gray125"/></fill>
+        <fill><patternFill patternType="solid"><fgColor rgb="FFEEEEEE"/><bgColor indexed="64"/></patternFill></fill>
+        <fill><patternFill patternType="solid"><fgColor rgb="FFD9EAD3"/><bgColor indexed="64"/></patternFill></fill>
+    </fills>
+    <borders count="2">
+        <border><left/><right/><top/><bottom/><diagonal/></border>
+        <border>
+            <left style="thin"><color rgb="FF888888"/></left>
+            <right style="thin"><color rgb="FF888888"/></right>
+            <top style="thin"><color rgb="FF888888"/></top>
+            <bottom style="thin"><color rgb="FF888888"/></bottom>
+            <diagonal/>
+        </border>
+    </borders>
+    <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+    <cellXfs count="4">
+        <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1"/>
+        <xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>
+        <xf numFmtId="0" fontId="2" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>
+        <xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>
+    </cellXfs>
+    <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>';
+
+    $createdIso = date("c");
+
+    $coreXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <dc:title>Архив отсутствий сотрудников</dc:title>
+    <dc:creator>TORI</dc:creator>
+    <cp:lastModifiedBy>TORI</cp:lastModifiedBy>
+    <dcterms:created xsi:type="dcterms:W3CDTF">' . escapeXlsxValue($createdIso) . '</dcterms:created>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">' . escapeXlsxValue($createdIso) . '</dcterms:modified>
+</cp:coreProperties>';
+
+    $appXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
+    <Application>TORI</Application>
+</Properties>';
+
+    $tmpFile = tempnam(sys_get_temp_dir(), "staff_leaves_xlsx_");
+
+    if ($tmpFile === false) {
+        throw new Exception("Не удалось создать временный файл XLSX.");
+    }
+
+    $zip = new ZipArchive();
+
+    if ($zip->open($tmpFile, ZipArchive::OVERWRITE) !== true) {
+        throw new Exception("Не удалось открыть временный ZIP-файл XLSX.");
+    }
+
+    $zip->addFromString("[Content_Types].xml", $contentTypesXml);
+    $zip->addFromString("_rels/.rels", $relsXml);
+    $zip->addFromString("docProps/core.xml", $coreXml);
+    $zip->addFromString("docProps/app.xml", $appXml);
+    $zip->addFromString("xl/workbook.xml", $workbookXml);
+    $zip->addFromString("xl/_rels/workbook.xml.rels", $workbookRelsXml);
+    $zip->addFromString("xl/styles.xml", $stylesXml);
+    $zip->addFromString("xl/worksheets/sheet1.xml", $sheetXml);
+    $zip->close();
+
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+
+    $fileName = "staff_leaves_archive_" . date("Y-m-d_H-i-s") . ".xlsx";
+
+    header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    header("Content-Disposition: attachment; filename=\"$fileName\"");
+    header("Content-Length: " . filesize($tmpFile));
+    header("Cache-Control: max-age=0");
+    header("Pragma: public");
+
+    readfile($tmpFile);
+    unlink($tmpFile);
+}
+
+if (isset($_GET['action']) && $_GET['action'] === 'archive') {
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+
+    header('Content-Type: application/json; charset=utf-8');
+
+    try {
+        $employeeId = intval($_GET['employee_id'] ?? 0);
+        $event = $_GET['event'] ?? '';
+        $periodType = intval($_GET['period_type'] ?? 0);
+        $startDateManual = $_GET['start_date'] ?? '';
+        $stopDateManual = $_GET['stop_date'] ?? '';
+
+        list($filterStartDate, $filterStopDate) = getArchivePeriodDates(
+            $periodType,
+            $startDateManual,
+            $stopDateManual
+        );
+
+        $rows = fetchStaffLeavesArchiveRows(
+            $link,
+            $employeeId,
+            $event,
+            $filterStartDate,
+            $filterStopDate,
+            0
+        );
+
+        echo json_encode($rows, JSON_UNESCAPED_UNICODE);
+    } catch (Throwable $e) {
+        echo application_json_error('Staff leave archive at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
+    }
 
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'add') {
+if (isset($_GET['action']) && $_GET['action'] === 'archive_excel_preview') {
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+
+    header('Content-Type: application/json; charset=utf-8');
+
+    try {
+        $employeeId = intval($_GET['employee_id'] ?? 0);
+        $event = $_GET['event'] ?? '';
+        $periodType = intval($_GET['period_type'] ?? 0);
+        $startDateManual = $_GET['start_date'] ?? '';
+        $stopDateManual = $_GET['stop_date'] ?? '';
+
+        list($filterStartDate, $filterStopDate) = getArchivePeriodDates($periodType, $startDateManual, $stopDateManual);
+
+        $rows = fetchStaffLeavesArchiveRows(
+            $link,
+            $employeeId,
+            $event,
+            $filterStartDate,
+            $filterStopDate,
+            50
+        );
+
+        echo json_encode([
+            'status' => 'success',
+            'filters' => [
+                'period' => getArchivePeriodTitle($periodType, $filterStartDate, $filterStopDate),
+                'employee' => getArchiveEmployeeTitle($link, $employeeId),
+                'event' => getArchiveEventTitle($event)
+            ],
+            'rows' => $rows,
+            'preview_limit' => 50
+        ]);
+    } catch (Throwable $e) {
+        echo application_json_error('Staff leave archive preview at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
+    }
+
+    exit;
+}
+
+if (isset($_GET['action']) && $_GET['action'] === 'archive_excel_export') {
+    try {
+        $employeeId = intval($_GET['employee_id'] ?? 0);
+        $event = $_GET['event'] ?? '';
+        $periodType = intval($_GET['period_type'] ?? 0);
+        $startDateManual = $_GET['start_date'] ?? '';
+        $stopDateManual = $_GET['stop_date'] ?? '';
+        $exportTime = $_GET['export_time'] ?? date("d.m.Y H:i:s");
+
+        list($filterStartDate, $filterStopDate) = getArchivePeriodDates($periodType, $startDateManual, $stopDateManual);
+
+        $rows = fetchStaffLeavesArchiveRows(
+            $link,
+            $employeeId,
+            $event,
+            $filterStartDate,
+            $filterStopDate,
+            0
+        );
+
+        $periodTitle = getArchivePeriodTitle($periodType, $filterStartDate, $filterStopDate);
+        $employeeTitle = getArchiveEmployeeTitle($link, $employeeId);
+        $eventTitle = getArchiveEventTitle($event);
+
+        sendStaffLeavesArchiveXlsx($rows, $periodTitle, $employeeTitle, $eventTitle, $exportTime);
+    } catch (Throwable $e) {
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+
+        header("Content-type: text/plain; charset=utf-8");
+        echo application_error_message('Staff leave XLSX export at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
+    }
+
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add') {
     header('Content-Type: application/json');
 
     try {
@@ -274,7 +688,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'add') {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'update') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update') {
     header('Content-Type: application/json');
 
     try {
@@ -307,7 +721,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'update') {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'delete') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
     header('Content-Type: application/json');
 
     try {
@@ -378,7 +792,7 @@ echo "<div id=\"event_buttons\">";
         echo "</button>";
     echo "</div>";
 echo "</div>";
-echo "<div id=\"archive_filters\" style=\"display:none; margin: 8px 0; padding: 6px; background:#eef5ff; border:1px solid #888888;\">";
+echo "<div id=\"archive_filters\">";
 
     echo "<span style=\"font-family: Arial,sans; font-size: 13px; font-weight: 700; margin-right:5px;\">Сотрудник:</span>";
     echo "<select id=\"archive_employee_filter\" class=\"flat\" style=\"width:160px; margin-right:15px;\">";
@@ -414,6 +828,10 @@ echo "<div id=\"archive_filters\" style=\"display:none; margin: 8px 0; padding: 
     echo "</select>";
 
     echo "<button class=\"button_style\" style=\"font-size: 90%; width:90px; height:23px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"loadArchive();\">Обновить</button>";
+    echo "<button class=\"button_style\" title=\"Выгрузить архив в Excel\" style=\"font-size: 90%; width:80px; height:23px; margin-left:40px; background-color:#d9ead3; border:1px solid #888888;\" onclick=\"openArchiveExcelPreview();\">";
+        echo "<img src=\"img/excel.svg\" alt=\"Excel\" height=\"16\" style=\"vertical-align:middle; margin-right:3px;\" onerror=\"this.style.display='none';\">";
+    echo "Excel";
+    echo "</button>";
 
 echo "</div>";
 ?>
@@ -476,6 +894,28 @@ echo "</div>";
     </form>
 </div>
 
+<div id="archiveExcelPreviewOverlay" style="display:none;">
+    <div id="archiveExcelPreviewWindow">
+        <div id="archiveExcelPreviewHeader">
+            <span>Предпросмотр выгрузки в Excel</span>
+            <button type="button" onclick="closeArchiveExcelPreview()">×</button>
+        </div>
+
+        <div id="archiveExcelPreviewFilters"></div>
+
+        <div id="archiveExcelPreviewNote">
+            В предпросмотре показаны первые 50 строк. В Excel будут выгружены все строки с учетом текущих фильтров.
+        </div>
+
+        <div id="archiveExcelPreviewTable"></div>
+
+        <div id="archiveExcelPreviewActions">
+            <button type="button" onclick="downloadArchiveExcel()">Выгрузить в Excel</button>
+            <button type="button" onclick="closeArchiveExcelPreview()">Отмена</button>
+        </div>
+    </div>
+</div>
+
 <script>
     let currentType = 'Отпуск';
 
@@ -535,6 +975,9 @@ echo "</div>";
                 saveBtn.disabled = false;
             });
         });
+
+        initArchiveFilterEvents();
+        loadLeaves(currentType);
     });
 
     function renderLeaveRowsWithMergedNames(tbody, data) {
@@ -705,42 +1148,184 @@ echo "</div>";
         modal.style.display = 'flex';
     }
 
-    function loadArchive() {
-        currentType = 'Архив';
+    function confirmDelete (id) {
+        if (!confirm('Вы уверены, что хотите удалить запись?')) return;
 
-        document.querySelectorAll('#event_buttons button.event-switch').forEach(btn => {
-            btn.classList.remove('active');
+        fetch('staff_leaves.php', {
+            method: 'POST',
+            body: new URLSearchParams({
+                action: 'delete',
+                record_id: id
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showToast("✅ запись удалена");
+            } else {
+                alert('' + data.message);
+            }
+        })
+        .catch(err => {
+            console.error('Ошибка запроса: ', err);
+            alert('Сервер недоступен');
         });
+    }
 
-        document.getElementById('btn_archive').classList.add('active');
-        document.getElementById('archive_filters').style.display = 'block';
+function loadArchive() {
+    currentType = 'Архив';
 
+    document.querySelectorAll('#event_buttons button.event-switch').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    document.getElementById('btn_archive').classList.add('active');
+    document.getElementById('archive_filters').style.display = 'block';
+
+    if (!validateArchiveFilters(false)) {
+        const table = document.getElementById('leave_table');
+
+        if (table) {
+            const tbody = table.querySelector('tbody');
+
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="6" align="center">Выберите даты ручного периода</td></tr>';
+            }
+
+            table.style.display = 'table';
+        }
+
+        return;
+    }
+
+    const params = new URLSearchParams(getArchiveFilterParams());
+    params.append('action', 'archive');
+
+    fetch('staff_leaves.php?' + params.toString())
+        .then(res => res.text())
+        .then(text => {
+            let data;
+
+            try {
+                data = JSON.parse(text);
+            } catch (err) {
+                console.error('Ошибка JSON:', err);
+                console.warn('Ответ сервера:', text);
+
+                alert(
+                    'Ошибка загрузки архива. Сервер вернул не JSON:\n\n' +
+                    text.substring(0, 1000)
+                );
+
+                return;
+            }
+
+            if (data.error) {
+                alert('Ошибка: ' + data.error);
+                return;
+            }
+
+            const table = document.getElementById('leave_table');
+
+            if (!table) {
+                alert('Ошибка: таблица архива leave_table не найдена.');
+                return;
+            }
+
+            const tbody = table.querySelector('tbody');
+
+            if (!tbody) {
+                alert('Ошибка: tbody таблицы архива не найден.');
+                return;
+            }
+
+            tbody.innerHTML = '';
+
+            if (!Array.isArray(data) || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" align="center">Нет записей</td></tr>';
+                table.style.display = 'table';
+                return;
+            }
+
+            renderLeaveRowsWithMergedNames(tbody, data);
+            table.style.display = 'table';
+        })
+        .catch(err => {
+            console.error('Ошибка запроса архива:', err);
+            alert('Ошибка запроса архива: ' + err);
+        });
+}
+
+function getArchiveFilterParams() {
         const employeeId = document.getElementById('archive_employee_filter').value;
         const event = document.getElementById('archive_event_filter').value;
         const periodType = document.getElementById('archive_period_filter').value;
         const startDate = document.getElementById('archive_start_date_filter').value;
         const stopDate = document.getElementById('archive_stop_date_filter').value;
 
-        if (periodType == 7) {
-            if (!startDate || !stopDate) {
-                alert('Укажите дату начала и дату окончания периода.');
-                return;
-            }
-
-            if (startDate > stopDate) {
-                alert('Дата начала периода не может быть позже даты окончания.');
-                return;
-            }
-        }
-
-        const params = new URLSearchParams({
-            action: 'archive',
+        return {
             employee_id: employeeId,
             event: event,
             period_type: periodType,
             start_date: startDate,
             stop_date: stopDate
+        };
+    }
+
+    function validateArchiveFilters(showAlert = true) {
+        const periodType = document.getElementById('archive_period_filter').value;
+        const startDate = document.getElementById('archive_start_date_filter').value;
+        const stopDate = document.getElementById('archive_stop_date_filter').value;
+
+        if (periodType == 7) {
+            if (!startDate || !stopDate) {
+                if (showAlert) {
+                    alert('Укажите дату начала и дату окончания периода.');
+                }
+
+                return false;
+            }
+
+            if (startDate > stopDate) {
+                if (showAlert) {
+                    alert('Дата начала периода не может быть позже даты окончания.');
+                }
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function initArchiveFilterEvents() {
+        const filterIds = [
+            'archive_employee_filter',
+            'archive_event_filter',
+            'archive_start_date_filter',
+            'archive_stop_date_filter'
+        ];
+
+        filterIds.forEach(id => {
+            const element = document.getElementById(id);
+
+            if (element) {
+                element.addEventListener('change', () => {
+                    if (currentType === 'Архив') {
+                        loadArchive();
+                    }
+                });
+            }
         });
+    }
+
+    function openArchiveExcelPreview() {
+        if (!validateArchiveFilters()) {
+            return;
+        }
+
+        const params = new URLSearchParams(getArchiveFilterParams());
+        params.append('action', 'archive_excel_preview');
 
         fetch('staff_leaves.php?' + params.toString())
             .then(res => res.text())
@@ -748,23 +1333,93 @@ echo "</div>";
                 try {
                     const data = JSON.parse(text);
 
-                    if (data.error) {
-                        alert('Ошибка: ' + data.error);
+                    if (data.status !== 'success') {
+                        alert('Ошибка: ' + data.message);
                         return;
                     }
 
-                    const table = document.getElementById('leave_table');
-                    const tbody = table.querySelector('tbody');
-                    tbody.innerHTML = "";
-
-                    renderLeaveRowsWithMergedNames(tbody, data);
-
-                    table.style.display = 'table';
+                    renderArchiveExcelPreview(data);
+                    document.getElementById('archiveExcelPreviewOverlay').style.display = 'flex';
                 } catch (err) {
                     console.error('Ошибка JSON: ', err);
                     console.warn('Ответ сервера: ', text);
+                    alert('Ошибка формирования предпросмотра. Проверь консоль.');
                 }
             });
+    }
+
+    function renderArchiveExcelPreview(data) {
+        let filtersHtml = '';
+
+        filtersHtml += '<table class="archive-excel-filter-table">';
+        filtersHtml += '<tr><td><b>Временной промежуток</b></td><td>' + escapeHtml(data.filters.period) + '</td></tr>';
+        filtersHtml += '<tr><td><b>Сотрудник</b></td><td>' + escapeHtml(data.filters.employee) + '</td></tr>';
+        filtersHtml += '<tr><td><b>Событие</b></td><td>' + escapeHtml(data.filters.event) + '</td></tr>';
+        filtersHtml += '</table>';
+
+        document.getElementById('archiveExcelPreviewFilters').innerHTML = filtersHtml;
+
+        let tableHtml = '';
+
+        tableHtml += '<table class="archive-excel-preview-table">';
+        tableHtml += '<thead>';
+        tableHtml += '<tr>';
+        tableHtml += '<th>ФИО</th>';
+        tableHtml += '<th>Дата начала</th>';
+        tableHtml += '<th>Дата окончания</th>';
+        tableHtml += '<th>Кол-во дней</th>';
+        tableHtml += '<th>Событие</th>';
+        tableHtml += '</tr>';
+        tableHtml += '</thead>';
+        tableHtml += '<tbody>';
+
+        if (!Array.isArray(data.rows) || data.rows.length === 0) {
+            tableHtml += '<tr><td colspan="5" align="center">Нет данных для выгрузки</td></tr>';
+        } else {
+            data.rows.forEach(row => {
+                tableHtml += '<tr>';
+                tableHtml += '<td>' + escapeHtml(row.name) + '</td>';
+                tableHtml += '<td>' + formatDate(row.start_date) + '</td>';
+                tableHtml += '<td>' + formatDate(row.stop_date) + '</td>';
+                tableHtml += '<td>' + escapeHtml(row.total_days) + '</td>';
+                tableHtml += '<td>' + escapeHtml(row.event) + '</td>';
+                tableHtml += '</tr>';
+            });
+        }
+
+        tableHtml += '</tbody>';
+        tableHtml += '</table>';
+
+        document.getElementById('archiveExcelPreviewTable').innerHTML = tableHtml;
+    }
+
+    function closeArchiveExcelPreview() {
+        document.getElementById('archiveExcelPreviewOverlay').style.display = 'none';
+    }
+
+    function getUserExportTimeString() {
+        const now = new Date();
+        const pad = value => String(value).padStart(2, '0');
+
+        return pad(now.getDate()) + '.' +
+            pad(now.getMonth() + 1) + '.' +
+            now.getFullYear() + ' ' +
+            pad(now.getHours()) + ':' +
+            pad(now.getMinutes()) + ':' +
+            pad(now.getSeconds());
+    }
+
+    function downloadArchiveExcel() {
+        if (!validateArchiveFilters()) {
+            return;
+        }
+
+        const params = new URLSearchParams(getArchiveFilterParams());
+        params.append('action', 'archive_excel_export');
+        params.append('export_time', getUserExportTimeString());
+
+        window.location = 'staff_leaves.php?' + params.toString();
+        closeArchiveExcelPreview();
     }
 
     function toggleArchiveManualPeriod() {
@@ -775,6 +1430,10 @@ echo "</div>";
             manualPeriod.style.display = 'inline';
         } else {
             manualPeriod.style.display = 'none';
+        }
+
+        if (currentType === 'Архив') {
+            loadArchive();
         }
     }
 

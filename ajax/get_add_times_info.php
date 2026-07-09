@@ -1,6 +1,7 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -11,9 +12,15 @@ $currentDate = date('Y-m-d');
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-$startDate = $_POST['startDate'];
-$stopDate = $_POST['stopDate'];
-$userID = $_POST['userID'];
+$startDate = (string) ($_POST['startDate'] ?? '');
+$stopDate = (string) ($_POST['stopDate'] ?? '');
+$userID = (int) ($_POST['userID'] ?? 0);
+
+if ($userID <= 0) {
+  deny_ajax_access(400, 'INVALID_USER');
+}
+
+require_ajax_self_or_superuser($userID);
 
 $addRets = get_add_work_info_by_user_and_day_range( $userID, $startDate, $stopDate );
 
@@ -88,10 +95,10 @@ foreach( $addRets as $addRet )
       echo "<h5 class=\"small1\">($timeDurationStr)<br>[$startTime-$stopTime]"."</h5>";
     echo "</td>";  
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\" width = 165>";
-      echo "<h5 class=\"small1\">$reasonStr"."</h5>";
+echo "<h5 class=\"small1\">" . html_escape($reasonStr) . "</h5>";
     echo "</td>";  
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\" width = 210>";
-      echo "<h5 class=\"small1\">$description"."</h5>";
+echo "<h5 class=\"small1\">" . html_escape($description) . "</h5>";
     echo "</td>";  
     echo "<td bgcolor=\"$bgColor\" bordercolor=\"#888888\" valign=\"middle\" align=\"center\" width = 100>";
       echo "<h5 class=\"$fontSt\">$approvedStr"."</h5>";

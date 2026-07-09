@@ -1,6 +1,7 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -10,16 +11,21 @@ include_once __DIR__ . "/../php_tori/connect.php";
 
 $_SESSION['delay_page_mode'] = 2;
 
-$userID = $_POST['user'];
+$userID = isset($_POST['user']) ? (int) $_POST['user'] : 0;
 
-if ( $userID != -1 )
+if ( $userID == -1 )
 { 
-  $_SESSION['delay_page_user_id'] = $userID;
+  $userID = isset($_SESSION['delay_page_user_id'])
+    ? (int) $_SESSION['delay_page_user_id']
+    : 0;
 }
-else
-{ 
-  $userID = $_SESSION['delay_page_user_id'];
+
+if ($userID <= 0) {
+  deny_ajax_access(400, 'INVALID_USER');
 }
+
+require_ajax_self_or_superuser($userID);
+$_SESSION['delay_page_user_id'] = $userID;
 
 $user_defaultStartTime = "10:00:00";
 $user_allowedDelay = 30;
@@ -151,13 +157,13 @@ echo "<table id=\"delay_approvement_table\" border=0>";
         }
 
         echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-          echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$retDelay_start_date</h5>"."</td>";
-          echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$retDelay_start_time</h5>"."</td>";
+          echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($retDelay_start_date) . "</h5></td>";
+          echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($retDelay_start_time) . "</h5></td>";
           echo "<td width=85 class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$time_duration</h5>"."</td>";
-          echo "<td width=160 class=\"add_time\" valign=\"middle\" align=\"left\">"."<h5 class=\"small\">$retDelay_description</h5>"."</td>";
-          echo "<td width=140 bgcolor=\"$bgcolor1\" class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class = \"small\">$superUserName</h5>"."</td>";
-          echo "<td width=140 class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class = \"small\">$acceptorName</h5>"."</td>";
-          echo "<td width=160 class=\"add_time\" valign=\"middle\" align=\"left\">"."<h5 class=\"small\">$retDelay_acceptor_description</h5>"."</td>";
+          echo "<td width=160 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($retDelay_description) . "</h5></td>";
+          echo "<td width=140 bgcolor=\"$bgcolor1\" class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
+          echo "<td width=140 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($acceptorName) . "</h5></td>";
+          echo "<td width=160 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($retDelay_acceptor_description) . "</h5></td>";
           echo "<td width=130 bgcolor=\"$bgcolor\" class=\"add_time\" valign=\"middle\" align=\"center\">$content1</td>";
 
           echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
@@ -165,12 +171,12 @@ echo "<table id=\"delay_approvement_table\" border=0>";
             echo "<table border=0>";
               echo "<tr>";
                 echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
-                  echo "<button onclick=\"accept_delay_for_user( '$retDelay_id', '$retDelay_acceptor_description', '$retDelay_penalty_id', '$retDelay_start_date', '$userID' );\" $accBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                  echo "<button onclick=\"accept_delay_for_user(" . (int) $retDelay_id . ", " . html_escape(js_encode($retDelay_acceptor_description)) . ", " . (int) $retDelay_penalty_id . ", " . html_escape(js_encode($retDelay_start_date)) . ", " . (int) $userID . ");\" $accBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
                     echo "<img title=\"Принять\" src=\"img/$accBtnImg\">";                   
                   echo "</button>";
                 echo "</td>";
                 echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
-                  echo "<button onclick=\"refuse_delay_for_user('$retDelay_id', '$retDelay_acceptor_description', '$retDelay_penalty_id', '$retDelay_start_date', '$userID' );\" $refBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                  echo "<button onclick=\"refuse_delay_for_user(" . (int) $retDelay_id . ", " . html_escape(js_encode($retDelay_acceptor_description)) . ", " . (int) $retDelay_penalty_id . ", " . html_escape(js_encode($retDelay_start_date)) . ", " . (int) $userID . ");\" $refBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
                     echo "<img title=\"Отклонить\" src=\"img/$refBtnImg\">";                   
                   echo "</button>";
                 echo "</td>";
@@ -179,13 +185,13 @@ echo "<table id=\"delay_approvement_table\" border=0>";
                 echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
                   if ( $delRestore == 1 )
                   { 
-                    echo "<button onclick=\"mark_as_deleted_delay_for_user( '$retDelay_id' );\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                    echo "<button onclick=\"mark_as_deleted_delay_for_user(" . (int) $retDelay_id . ");\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
                       echo "<img title=\"Удалить\" src=\"img/delete_small.bmp\">";                   
                     echo "</button>";
                   }
                   else
                   {
-                    echo "<button onclick=\"mark_as_undeleted_delay_for_user( '$retDelay_id' );\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                    echo "<button onclick=\"mark_as_undeleted_delay_for_user(" . (int) $retDelay_id . ");\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
                       echo "<img title=\"Восстановить\" src=\"img/restore_small.bmp\">";                   
                     echo "</button>";
                   }

@@ -1,6 +1,7 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -48,7 +49,7 @@ $query = mysqli_query($link, "SELECT * FROM ADD_TIME
                       ORDER BY ID DESC"); 
 
 if (!$query) {
-  echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
@@ -85,11 +86,11 @@ while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
   }
   	
   echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-  echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">$ta_start_date</h5></td>";
-  echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">$ta_stop_date</h5></td>";
+echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_date) . "</h5></td>";
+echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_stop_date) . "</h5></td>";
   echo "<td width=80  class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$time_duration."</h5></td>";
-  echo "<td width=160 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_description."</h5></td>";
-  echo "<td width=190 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">".$superUserName."</h5></td>";
+echo "<td width=160 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
+echo "<td width=190 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
   echo "</tr>";
 }
 

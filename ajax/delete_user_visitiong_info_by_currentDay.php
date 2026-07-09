@@ -1,6 +1,7 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -9,15 +10,22 @@ if ( isset($_POST['userID']) )
 {
   $userID = (int)($_POST['userID']);
   $currentDate = date('Y-m-d');
-  
-  $newStartTime = $newInTime; 
-  $newEatStartTime = "";
-  $newEatStopTime = "";
+
+  if ($userID <= 0) {
+    deny_ajax_access(400, 'INVALID_USER');
+  }
+
+  require_ajax_supervisor_for_user($userID, 3);
 
   include_once __DIR__ . "/../funcs.php";
   include_once __DIR__ . "/../php_tori/connect.php";
 
-  $query = mysqli_query($link, "DELETE FROM visiting WHERE date = '$currentDate' AND user_id = '$userID'"); 
+  $query = db_execute(
+    $link,
+    'DELETE FROM visiting WHERE date = ? AND user_id = ?',
+    'si',
+    array($currentDate, $userID)
+  );
   $merr = mysqli_error($link);
   if ( !$query ) 
   {

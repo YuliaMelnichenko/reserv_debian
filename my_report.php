@@ -1,7 +1,7 @@
 <?php
 date_default_timezone_set("Asia/Novosibirsk");
 ob_start();
-session_start();
+require_once __DIR__ . '/inc/session.php';
 include_once __DIR__ . "/start.php";
 if (
     !isset($_SESSION['rep_start_date']) ||
@@ -476,7 +476,7 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
                   $userFIO = $usersInfo[1][$userNum];
                   echo "<td class=\"report_no_padding\" bgcolor=\"#ffffff\" valign=\"middle\" align=\"center\" width = $cellWidth>";
                     echo "<div class=\"report_head_name\">";
-                      echo "<h5>".$userFIO."</h5>";
+          echo "<h5>" . html_escape($userFIO) . "</h5>";
                     echo "</div>";
                   echo "</td>";  
                 }

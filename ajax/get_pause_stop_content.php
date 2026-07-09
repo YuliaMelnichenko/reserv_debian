@@ -1,6 +1,7 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -17,16 +18,13 @@ $currentDateTime = $dtResult[1];
 
 mysqli_set_charset($link, "utf8");
 
-error_reporting(E_ALL | E_STRICT) ;
-ini_set('display_errors', 'On');
-
 $query = mysqli_query($link, "SELECT ID, SUIR, START_DT, DESCRIPTION FROM ADD_TIME WHERE ADDDATE = '$currentDate' AND USERID = '$userID' AND PAUSE_MODE = 1 ORDER BY ADDDATE DESC, START_DT DESC LIMIT 1");
 
 
 $merr=mysqli_error($link);
 if (!$query)
 {
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 }
 else
 {
@@ -94,7 +92,7 @@ else
                         echo "<h5 class=\"big\">комментарий</h5>";
                       echo "</td>";
                       echo "<td class=\"report_no_padding\" valign=\"middle\" align=\"left\">";
-                        echo "<h5 class=\"big\">$desk</h5>";
+echo "<h5 class=\"big\">" . html_escape($desk) . "</h5>";
                       echo "</td>";
                     echo "</tr>";
                   echo "</table>";

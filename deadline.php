@@ -1,6 +1,6 @@
 <?php
 ob_start();
-session_start();
+require_once __DIR__ . '/inc/session.php';
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -265,16 +265,7 @@ echo "<div align=\"left\">";
 include_once __DIR__ . "/funcs.php";
 include __DIR__ . "/short_stat.php";
 
-$ip = $_SERVER['REMOTE_ADDR'];
-
-if ( $ip == "192.168.100.50" or $ip == "192.168.100.69" ){
-  $_SESSION['rep_start_stop_date_mode'] = 2;	
-  save_last_location( "my_report_scr.php" );
-}
-else{
-  save_last_location( "index.php" );
-}
-
+save_last_location( "index.php" );
 auth();
 
 ////////////////////////////////////////////////////////
@@ -341,7 +332,7 @@ auth();
             echo "<font size=\"2\" color=\"#000000\" face=\"Arial\">Сотрудник"."</font>";
           echo "</td>";  
           echo "<td class=\"nopadding_s\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"center\" width = $width22>";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>".$row0["SURNAME"]." ".$row0["FIRSTNAME"]." ".$row0["LASTNAME"]."</b></font><br>";
+      echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>" . html_escape($row0["SURNAME"] . " " . $row0["FIRSTNAME"] . " " . $row0["LASTNAME"]) . "</b></font><br>";
           echo "</td>";  
         echo "</tr>";
         echo "<tr>";
