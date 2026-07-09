@@ -25,16 +25,27 @@ function check_sess(){
   }
 }
 
+function hide_day_change_layers(){
+  var layerDiv = document.getElementById('layer_div');
+  var layerQuestionDiv = document.getElementById('layer_question_div');
+
+  if ( layerDiv ){
+    layerDiv.style.display='none';
+  }
+
+  if ( layerQuestionDiv ){
+    layerQuestionDiv.style.display='none';
+  }
+}
+
 function check_day_change(){
-  document.getElementById('layer_div').style.display='none';
-  document.getElementById('layer_question_div').style.display='none';
+  hide_day_change_layers();
 
   $.post('ajax/check_day_change.php', RetSWT);
   function RetSWT(dat){
     if ( dat == 1 ){
       clearInterval( timerIdDayChange );
-      document.getElementById('layer_div').style.display='none';
-      document.getElementById('layer_question_div').style.display='none';
+      hide_day_change_layers();
     }
   }
 }
@@ -46,8 +57,7 @@ function day_continue_confirm()
   $.post('ajax/day_continue_confirm.php', RetSWT);
   function RetSWT(dat) 
   {
-    document.getElementById('layer_div').style.display='none';
-    document.getElementById('layer_question_div').style.display='none';
+    hide_day_change_layers();
 
     window.location=self.location;
   }   
@@ -58,8 +68,7 @@ function day_continue_reject()
   $.post('ajax/day_continue_reject.php', RetSWT);
   function RetSWT(dat) 
   {
-    document.getElementById('layer_div').style.display='none';
-    document.getElementById('layer_question_div').style.display='none';
+    hide_day_change_layers();
 
     window.location=self.location;
   }   
@@ -1177,7 +1186,6 @@ echo "</div>";
 
 ?>
 
-<script type="text/javascript" src="lib/jquery/jquery.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
 build_in_delay_expl();
