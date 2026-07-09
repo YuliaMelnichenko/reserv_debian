@@ -60,13 +60,6 @@ include __DIR__ . "/php_tori/connect.php";
           echo "<h5 class=\"dark\"><br>/уведомления по работе вне офиса<br><br></h5>";
         echo "</div>";
 
-$filterRange = get_request_date_filter_range();
-$filterStartDate = $filterRange[0];
-$filterStopDate = $filterRange[1];
-
-echo "<h5 class=\"big\"> Период просмотра: " . date("d.m.Y", strtotime($filterStartDate)) . " - " . date("d.m.Y", strtotime($filterStopDate)) . " </h5>";
-render_notification_date_filter($filterStartDate, $filterStopDate);
-
 echo "<div class=\"notification-table-scroll notification-table-scroll-wide\">";
 echo "<table id = \"add_time_approvement_table_users\" class = \"add_time\" border=1>";
 echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
@@ -100,10 +93,10 @@ else
     $refusedNotificationCount = 0;
     $deletedNotificationCount = 0;
     $newNotificationCount = 0;
-    get_add_time_notif_counts( $userID, $notificationCount, $acceptedNotificationCount, $refusedNotificationCount, $deletedNotificationCount, $newNotificationCount, $filterStartDate, $filterStopDate );
+    get_add_time_notif_counts( $userID, $notificationCount, $acceptedNotificationCount, $refusedNotificationCount, $deletedNotificationCount, $newNotificationCount );
 
     $mid = getMaskedUID( 32, $userID );
-    $userUrl = append_date_filter_to_url("time_approvement_user.php?mid=$mid", $filterStartDate, $filterStopDate);
+    $userUrl = "time_approvement_user.php?mid=$mid";
     $uhref = "location.href='$userUrl'";
 
     $cellStype = "middle";

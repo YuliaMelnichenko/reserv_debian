@@ -17,6 +17,9 @@ $filterRange = normalize_date_filter_range(
 $filterStartDate = $filterRange[0];
 $filterStopDate = $filterRange[1];
 list($filterStartDateTime, $filterStopDateTime) = get_date_filter_datetime_bounds($filterStartDate, $filterStopDate);
+$startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME');
+$stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME');
+$rangeFilter = add_time_range_filter_sql('a', $filterStartDateTime, $filterStopDateTime);
 
 echo "<div class=\"notification-table-scroll notification-table-scroll-medium\">";
 echo "<table class=\"add_time\" border=1>";
@@ -35,19 +38,14 @@ $color3 = "#ffffff";
 
 mysqli_set_charset($link, "utf8");
 
-$query = mysqli_query($link, "SELECT * FROM ADD_TIME 
-                      WHERE   
-                      USERID='$userID_'
-                        AND
-                      (
-                        STOP_DT >= '$filterStartDateTime'
-                        OR STOP_DT = '0000-00-00 00:00:00'
-                      )
-                        AND
-                      START_DT <= '$filterStopDateTime'
-                        AND 
-                      pause_mode = 1
-                      ORDER BY ID DESC"); 
+$query = mysqli_query($link, "SELECT a.*,
+                      $startExpr AS START_DT_EFFECTIVE,
+                      $stopExpr AS STOP_DT_EFFECTIVE
+                      FROM ADD_TIME a
+                      WHERE a.USERID='$userID_'
+                        AND a.PAUSE_MODE = 1
+                        AND $rangeFilter
+                      ORDER BY START_DT_EFFECTIVE DESC, a.ID DESC");
 
 if (!$query) {
   echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -57,8 +55,8 @@ if (!$query) {
 while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
   $ta_id = $row["ID"];
   $ta_suir = $row["SUIR"];
-  $ta_start_date = $row["START_DT"];
-  $ta_stop_date = $row["STOP_DT"];
+  $ta_start_date = $row["START_DT_EFFECTIVE"];
+  $ta_stop_date = $row["STOP_DT_EFFECTIVE"];
   $ta_reason = $row["REASON"];
   $ta_description = $row["DESCRIPTION"];
   $ta_approved = $row["APPROVED"];

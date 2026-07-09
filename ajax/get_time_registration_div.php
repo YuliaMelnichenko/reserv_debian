@@ -52,14 +52,21 @@ function change_time ($user) {
     ? $row["eat_stop_dt"]
     : "0000-00-00 00:00:00";
 
-  $content .= "<input type=\"hidden\" id=\"change_visit_id\" value=\"$visitID\">";
-  $content .= "<tr>";
-  $content .= change_out_time( $out_value, $currentTime );
-  $content .= "</tr>";
+  $hasOpenLunch = ($eat_start_value !== "0000-00-00 00:00:00" && $eat_stop_value == "0000-00-00 00:00:00");
 
-  if ( $eat_start_value !== "0000-00-00 00:00:00" && $eat_stop_value == "0000-00-00 00:00:00" ){
+  $content .= "<input type=\"hidden\" id=\"change_visit_id\" value=\"$visitID\">";
+
+  if ( $hasOpenLunch ){
     $content .= "<tr>";
     $content .= change_eat_stop_time( $currentTime);
+    $content .= "</tr>";
+    $content .= "<tr>";
+    $content .= change_out_time_disabled( $out_value, $currentTime );
+    $content .= "</tr>";
+  }
+  else {
+    $content .= "<tr>";
+    $content .= change_out_time( $out_value, $currentTime );
     $content .= "</tr>";
   }
 
@@ -80,6 +87,23 @@ function change_out_time ( $out_value, $currentTime ) {
       $content .= "</td>";
     }
   }
+  return $content;
+}
+
+function change_out_time_disabled ( $out_value, $currentTime ) {
+  $content = "";
+
+  if ( $out_value == "0000-00-00 00:00:00" ) {
+    if ( $currentTime >= "09:00:00" && $currentTime < "19:30:00" ) {
+      $content .= "<td class=\"nopadding_s\">";
+      $content .= "<h5 class=\"change_time\">Добавить время ухода?</h5>";
+      $content .= "</td>";
+      $content .= "<td class=\"nopadding_s\" bgcolor=\"#DDDDDD\" width=80 align=\"center\">";
+      $content .= "<button id=\"add_out_time_disabled\" disabled title=\"Сначала добавьте время прихода с обеда.\" style=\"font-size: 80%; padding: 0px 0px 0px 0px; background-color:#dddddd; border:1px solid #888888; cursor:not-allowed;\"><img src=\"img/red.png\"></button>";
+      $content .= "</td>";
+    }
+  }
+
   return $content;
 }
 
