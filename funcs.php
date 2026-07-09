@@ -743,9 +743,66 @@ function get_current_quarter_date_filter_range($date = null)
   return array($startDate, date('Y-m-d', $time));
 }
 
-function normalize_date_filter_range($startDate = null, $stopDate = null)
+function get_date_filter_period_range($period, $date = null)
 {
-  list($defaultStartDate, $defaultStopDate) = get_current_quarter_date_filter_range();
+  if ($date === null || $date == "" || strtotime($date) === false) {
+    $date = date('Y-m-d');
+  }
+
+  $time = strtotime($date);
+
+  if ($period == "1") {
+    $weekDay = (int)date('N', $time);
+    return array(date('Y-m-d', strtotime('-' . ($weekDay - 1) . ' days', $time)), date('Y-m-d', $time));
+  }
+
+  if ($period == "2") {
+    return array(date('Y-m-01', $time), date('Y-m-d', $time));
+  }
+
+  if ($period == "3") {
+    $previousMonth = strtotime('first day of previous month', $time);
+    return array(date('Y-m-01', $previousMonth), date('Y-m-t', $previousMonth));
+  }
+
+  if ($period == "5") {
+    $month = (int)date('n', $time);
+    $year = (int)date('Y', $time);
+    $quarter = (int)ceil($month / 3) - 1;
+
+    if ($quarter <= 0) {
+      $quarter = 4;
+      $year--;
+    }
+
+    $startMonth = ($quarter - 1) * 3 + 1;
+    $startDate = sprintf('%04d-%02d-01', $year, $startMonth);
+
+    return array($startDate, date('Y-m-t', strtotime($startDate . ' +2 months')));
+  }
+
+  return get_current_quarter_date_filter_range($date);
+}
+
+function get_request_date_filter_period()
+{
+  $period = isset($_GET['period']) ? (string)$_GET['period'] : "4";
+  $allowedPeriods = array("1", "2", "3", "4", "5", "7");
+
+  if (!in_array($period, $allowedPeriods, true)) {
+    $period = "4";
+  }
+
+  return $period;
+}
+
+function normalize_date_filter_range($startDate = null, $stopDate = null, $period = null)
+{
+  if ($period !== null && $period != "7") {
+    return get_date_filter_period_range($period);
+  }
+
+  list($defaultStartDate, $defaultStopDate) = get_date_filter_period_range("4");
 
   if ($startDate === null || $startDate == "" || strtotime($startDate) === false) {
     $startDate = $defaultStartDate;
@@ -769,10 +826,11 @@ function normalize_date_filter_range($startDate = null, $stopDate = null)
 
 function get_request_date_filter_range()
 {
+  $period = get_request_date_filter_period();
   $startDate = isset($_GET['start_date']) ? $_GET['start_date'] : null;
   $stopDate = isset($_GET['stop_date']) ? $_GET['stop_date'] : null;
 
-  return normalize_date_filter_range($startDate, $stopDate);
+  return normalize_date_filter_range($startDate, $stopDate, $period);
 }
 
 function get_date_filter_datetime_bounds($startDate, $stopDate)
@@ -794,17 +852,8 @@ function append_date_filter_to_url($url, $startDate, $stopDate)
 
 function render_notification_date_filter($startDate, $stopDate, $hiddenFields = array())
 {
-  $resetUrl = strtok($_SERVER['REQUEST_URI'], '?');
-
-  if (count($hiddenFields) > 0) {
-    $resetParams = array();
-
-    foreach ($hiddenFields as $name => $value) {
-      $resetParams[] = rawurlencode($name) . '=' . rawurlencode($value);
-    }
-
-    $resetUrl .= '?' . implode('&', $resetParams);
-  }
+  $period = get_request_date_filter_period();
+  $manualDisplay = ($period == "7") ? "inline-flex" : "none";
 
   echo "<form class=\"notification-filter\" method=\"get\">";
 
@@ -812,11 +861,42 @@ function render_notification_date_filter($startDate, $stopDate, $hiddenFields = 
     echo "<input type=\"hidden\" name=\"" . html_escape($name) . "\" value=\"" . html_escape($value) . "\">";
   }
 
-  echo "<label>Период с <input type=\"date\" name=\"start_date\" value=\"" . html_escape($startDate) . "\"></label>";
+  echo "<label>Период: <select name=\"period\" class=\"flat\" onchange=\"notificationFilterToggleManual(this)\">";
+  echo "<option value=\"1\"" . ($period == "1" ? " selected" : "") . ">С начала недели</option>";
+  echo "<option value=\"2\"" . ($period == "2" ? " selected" : "") . ">С начала месяца</option>";
+  echo "<option value=\"3\"" . ($period == "3" ? " selected" : "") . ">С начала предыдущего месяца</option>";
+  echo "<option value=\"4\"" . ($period == "4" ? " selected" : "") . ">С начала квартала</option>";
+  echo "<option value=\"5\"" . ($period == "5" ? " selected" : "") . ">Предыдущий квартал</option>";
+  echo "<option value=\"7\"" . ($period == "7" ? " selected" : "") . ">Задать вручную</option>";
+  echo "</select></label>";
+  echo "<span class=\"notification-filter-manual\" style=\"display:$manualDisplay\">";
+  echo "<label>с <input type=\"date\" name=\"start_date\" value=\"" . html_escape($startDate) . "\"></label>";
   echo "<label>по <input type=\"date\" name=\"stop_date\" value=\"" . html_escape($stopDate) . "\"></label>";
+  echo "</span>";
   echo "<button type=\"submit\" class=\"button_style\">Показать</button>";
-  echo "<a class=\"notification-filter-reset\" href=\"" . html_escape($resetUrl) . "\">Текущий квартал</a>";
+  echo "<script>function notificationFilterToggleManual(select){var form=select.form;var block=form?form.querySelector('.notification-filter-manual'):null;if(block){block.style.display=select.value==='7'?'inline-flex':'none';}}</script>";
   echo "</form>";
+}
+
+function add_time_datetime_sql($dateTimeColumn, $dateColumn, $timeColumn)
+{
+  return "CASE
+    WHEN $dateTimeColumn IS NOT NULL AND $dateTimeColumn <> '0000-00-00 00:00:00' THEN $dateTimeColumn
+    WHEN $dateColumn IS NOT NULL AND $dateColumn <> '0000-00-00'
+      AND $timeColumn IS NOT NULL AND $timeColumn <> '' AND $timeColumn <> '00:00:00'
+      THEN IF(LOCATE('-', $timeColumn) > 0, $timeColumn, CONCAT($dateColumn, ' ', $timeColumn))
+    ELSE '0000-00-00 00:00:00'
+  END";
+}
+
+function add_time_range_filter_sql($alias, $startDateTime, $stopDateTime)
+{
+  $startExpr = add_time_datetime_sql("$alias.START_DT", "$alias.STARTDATE", "$alias.STARTTIME");
+  $stopExpr = add_time_datetime_sql("$alias.STOP_DT", "$alias.STARTDATE", "$alias.STOPTIME");
+
+  return "($startExpr <> '0000-00-00 00:00:00'
+    AND ($stopExpr >= '$startDateTime' OR $stopExpr = '0000-00-00 00:00:00')
+    AND $startExpr <= '$stopDateTime')";
 }
 
 function am_i_superuser( $userID ) {
@@ -908,8 +988,14 @@ function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNoti
   $currentDayNotificationCount = 0;
   $currentDate = date('Y-m-d');
   list($startDateTime, $stopDateTime) = get_date_filter_datetime_bounds($startDate, $stopDate);
+  $rangeFilter = add_time_range_filter_sql('a', $startDateTime, $stopDateTime);
+  $startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME');
 
-  $query = mysqli_query($link, "SELECT * from ADD_TIME where USERID='$user_id' and PAUSE_MODE = 1 and (STOP_DT >= '$startDateTime' or STOP_DT = '0000-00-00 00:00:00') and START_DT <= '$stopDateTime'");
+  $query = mysqli_query($link, "SELECT $startExpr AS START_DT_EFFECTIVE
+                                FROM ADD_TIME a
+                                WHERE a.USERID='$user_id'
+                                  AND a.PAUSE_MODE = 1
+                                  AND $rangeFilter");
 
   $merr=mysqli_error($link);
 
@@ -922,7 +1008,7 @@ function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNoti
   {
     while ( $row1 = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {
-      $startDate = $row1["START_DT"];
+      $startDate = $row1["START_DT_EFFECTIVE"];
 
       if ( date('Y-m-d', strtotime($startDate)) == $currentDate )
       {       
@@ -944,8 +1030,13 @@ function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNot
   $deletedNotificationCount = 0;
 
   list($startDateTime, $stopDateTime) = get_date_filter_datetime_bounds($startDate, $stopDate);
+  $rangeFilter = add_time_range_filter_sql('a', $startDateTime, $stopDateTime);
 
-  $query = mysqli_query($link, "SELECT APPROVED FROM ADD_TIME WHERE PAUSE_MODE = 0 AND USERID = '$user_id' AND (STOP_DT >= '$startDateTime' OR STOP_DT = '0000-00-00 00:00:00') AND START_DT <= '$stopDateTime'");
+  $query = mysqli_query($link, "SELECT APPROVED
+                                FROM ADD_TIME a
+                                WHERE a.PAUSE_MODE = 0
+                                  AND a.USERID = '$user_id'
+                                  AND $rangeFilter");
 
   $merr = mysqli_error($link);
 
@@ -2243,18 +2334,27 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
 function get_all_add_work_info_by_user( $userID, $pauseMode, $startDate = null, $stopDate = null )
 {
   list($startDateTime, $stopDateTime) = get_date_filter_datetime_bounds($startDate, $stopDate);
+  $startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME');
+  $stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME');
+  $rangeFilter = add_time_range_filter_sql('a', $startDateTime, $stopDateTime);
   
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
 
-  $query = mysqli_query($link, "SELECT DISTINCT a.ID, a.START_DT, a.STOP_DT, a.SUIR, a.REASON, b.DESCRIPTION as REASONDESCRIPTION, a.DESCRIPTION, a.SUPERVISORDESC, 
+  $query = mysqli_query($link, "SELECT DISTINCT a.ID,
+                         $startExpr AS START_DT_EFFECTIVE,
+                         $stopExpr AS STOP_DT_EFFECTIVE,
+                         a.SUIR, a.REASON, b.DESCRIPTION as REASONDESCRIPTION, a.DESCRIPTION, a.SUPERVISORDESC,
                          a.APPROVED, a.PAUSE_MODE
                          FROM 
                          ADD_TIME a
                          JOIN 
                          REASONS b
                          ON a.REASON = b.ID
-                         where a.USERID = '$userID' AND a.PAUSE_MODE = '$pauseMode' and (a.STOP_DT >= '$startDateTime' or a.STOP_DT = '0000-00-00 00:00:00') and a.START_DT <= '$stopDateTime' order by a.START_DT DESC");
+                         where a.USERID = '$userID'
+                           AND a.PAUSE_MODE = '$pauseMode'
+                           AND $rangeFilter
+                         order by START_DT_EFFECTIVE DESC");
 
   $merr=mysqli_error($link);
   if ( !$query ) 
@@ -2268,8 +2368,8 @@ function get_all_add_work_info_by_user( $userID, $pauseMode, $startDate = null, 
   {
     $result = Array();
     
-    $result[0] = $row["START_DT"];
-    $result[1] = $row["STOP_DT"];
+    $result[0] = $row["START_DT_EFFECTIVE"];
+    $result[1] = $row["STOP_DT_EFFECTIVE"];
 
     $result[2] = $row["REASON"];
     $result[3] = $row["DESCRIPTION"];

@@ -47,13 +47,6 @@ echo "<table border=0>";
           echo "<h5 nowrap class=\"dark\"><br>/уведомления по приостановкам учета времени<br><br></h5>";
         echo "</div>";
 
-    $filterRange = get_request_date_filter_range();
-    $filterStartDate = $filterRange[0];
-    $filterStopDate = $filterRange[1];
-
-    echo "<h5 class=\"big\"> Период просмотра: " . date("d.m.Y", strtotime($filterStartDate)) . " - " . date("d.m.Y", strtotime($filterStopDate)) . " </h5>";
-    render_notification_date_filter($filterStartDate, $filterStopDate);
-
     echo "<div class=\"notification-table-scroll notification-table-scroll-narrow\">";
     echo "<table id = \"pause_approvement_table_users\" class=\"add_time\" border=1>";
     echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
@@ -81,15 +74,12 @@ echo "<table border=0>";
         $userName = get_user_name_by_id($userID);
 
         $mid = getMaskedUID( 32, $userID );
-        $userUrl = append_date_filter_to_url("pause_view_user.php?mid=$mid", $filterStartDate, $filterStopDate);
+        $userUrl = "pause_view_user.php?mid=$mid";
         $uhref = "location.href='$userUrl'";
 
         $notificationCount = 0;
         $currentDayNotificationCount = 0;
-        get_pause_notif_counts( $userID, $notificationCount, $currentDayNotificationCount, $filterStartDate, $filterStopDate );
-
-        $cellStype = "middle";
-        if ( $newNotificationCount > 0 ){ $cellStype = "middleBlue1"; }
+        get_pause_notif_counts( $userID, $notificationCount, $currentDayNotificationCount );
 
         echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
         echo "<td width = 250 class=\"add_time\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$userName</h5>"."</td>";

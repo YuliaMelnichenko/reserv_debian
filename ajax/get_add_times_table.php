@@ -56,6 +56,7 @@ for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
   $ta_id = $addInf[8];
   $ta_start_dt = $addInf[0];
   $ta_stop_dt = $addInf[1];
+  $ta_duration = $addInf[6];
 
   $ta_reason_description = $addInf[11];
   $ta_description = $addInf[3];
@@ -84,7 +85,7 @@ for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
     $approvedStr = "<h5 class=\"middleBold_r\">принято</h5>";
   }   
 
-  $time_duration = format_time_( strtotime($ta_stop_dt) - strtotime($ta_start_dt) );
+  $time_duration = $ta_duration > 0 ? format_time_( $ta_duration ) : "";
   	
   if ( $colorMode == 0 )
   {

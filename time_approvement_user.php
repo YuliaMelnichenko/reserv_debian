@@ -173,7 +173,7 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
           $approvedStr = "<h5 class=\"middleBold_r\">удалено</h5>";
         }
 
-        $time_duration = format_time_( strtotime($ta_stop_dt) - strtotime($ta_start_dt) );
+        $time_duration = $ta_duration > 0 ? format_time_( $ta_duration ) : "";
 
         if ( $colorMode == 0 ){
           $color = $color1;
