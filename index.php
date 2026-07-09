@@ -719,6 +719,23 @@ if (
     echo "<h5 class=\"dark0\"><br>/присутствие сотрудников<br><br></h5>";
     echo "<div id=\"employee_activity\">";
 
+    $accountingErrorUserIDs = array();
+    list($accountingErrorsStartDate) = accounting_errors_get_range(get_accounting_errors_default_depth_days());
+    $accountingErrorsResult = db_query(
+      $link,
+      'SELECT DISTINCT USERID FROM accounting_errors WHERE ERROR_DATE >= ? AND STATUS IN (0, 1, 3)',
+      's',
+      array($accountingErrorsStartDate)
+    );
+
+    if ($accountingErrorsResult) {
+      while ($accountingError = mysqli_fetch_assoc($accountingErrorsResult)) {
+        $accountingErrorUserIDs[(int)$accountingError['USERID']] = true;
+      }
+    } else {
+      database_error_message($link, __FILE__ . ':' . __LINE__);
+    }
+
     $employee_arr = array();
 
     while ($row6 = mysqli_fetch_assoc($query6)) {
@@ -1010,9 +1027,13 @@ if (
       $personal_id = $employee_arr[$i][9];
       $birth = $employee_arr[$i][10];
       $email = $employee_arr[$i][11];
+      $hasAccountingErrors = isset($accountingErrorUserIDs[(int)$personal_id]);
+      $accountingErrorIcon = $hasAccountingErrors
+        ? "<img class=\"accounting-error-attention\" src=\"img/attention.png\" title=\"Есть ошибки учета времени\" alt=\"Ошибки учета\">"
+        : "";
 
       echo "<div class=\"activity\">";
-      echo "<h5 class=\"activ_text\" data-phone-tooltip=\"u" . (int) $personal_id . "-contacts\">" . html_escape($name) . "</h5>";
+      echo "<h5 class=\"activ_text\" data-phone-tooltip=\"u" . (int) $personal_id . "-contacts\">" . html_escape($name) . $accountingErrorIcon . "</h5>";
 
       if ($dat_in == "") {
         echo "";

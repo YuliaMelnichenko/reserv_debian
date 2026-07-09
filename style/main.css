@@ -2781,6 +2781,13 @@ h5.activ_text {
   width: 240px;
 }
 
+.accounting-error-attention {
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  vertical-align: -2px;
+}
+
 h5.activ_time {
   font-family: Arial, sans;
   font-size: 12px;
