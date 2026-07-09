@@ -4,6 +4,7 @@
 require_once __DIR__ . '/inc/errors.php';
 require_once __DIR__ . '/inc/database.php';
 require_once __DIR__ . '/inc/session.php';
+require_once __DIR__ . '/inc/output.php';
 require_once __DIR__ . '/inc/accounting_errors.php';
 
 function get_current_datetime_in_timezone(){
@@ -726,6 +727,98 @@ function DayInc( $day )
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+function get_current_quarter_date_filter_range($date = null)
+{
+  if ($date === null || $date == "" || strtotime($date) === false) {
+    $date = date('Y-m-d');
+  }
+
+  $time = strtotime($date);
+  $year = (int)date('Y', $time);
+  $month = (int)date('n', $time);
+  $quarter = (int)ceil($month / 3);
+  $startMonth = ($quarter - 1) * 3 + 1;
+  $startDate = sprintf('%04d-%02d-01', $year, $startMonth);
+
+  return array($startDate, date('Y-m-d', $time));
+}
+
+function normalize_date_filter_range($startDate = null, $stopDate = null)
+{
+  list($defaultStartDate, $defaultStopDate) = get_current_quarter_date_filter_range();
+
+  if ($startDate === null || $startDate == "" || strtotime($startDate) === false) {
+    $startDate = $defaultStartDate;
+  }
+
+  if ($stopDate === null || $stopDate == "" || strtotime($stopDate) === false) {
+    $stopDate = $defaultStopDate;
+  }
+
+  $startDate = date('Y-m-d', strtotime($startDate));
+  $stopDate = date('Y-m-d', strtotime($stopDate));
+
+  if (strtotime($startDate) > strtotime($stopDate)) {
+    $tmpDate = $startDate;
+    $startDate = $stopDate;
+    $stopDate = $tmpDate;
+  }
+
+  return array($startDate, $stopDate);
+}
+
+function get_request_date_filter_range()
+{
+  $startDate = isset($_GET['start_date']) ? $_GET['start_date'] : null;
+  $stopDate = isset($_GET['stop_date']) ? $_GET['stop_date'] : null;
+
+  return normalize_date_filter_range($startDate, $stopDate);
+}
+
+function get_date_filter_datetime_bounds($startDate, $stopDate)
+{
+  list($startDate, $stopDate) = normalize_date_filter_range($startDate, $stopDate);
+
+  return array($startDate . ' 00:00:00', $stopDate . ' 23:59:59');
+}
+
+function append_date_filter_to_url($url, $startDate, $stopDate)
+{
+  $separator = (strpos($url, '?') === false) ? '?' : '&';
+
+  return $url
+    . $separator
+    . 'start_date=' . rawurlencode($startDate)
+    . '&stop_date=' . rawurlencode($stopDate);
+}
+
+function render_notification_date_filter($startDate, $stopDate, $hiddenFields = array())
+{
+  $resetUrl = strtok($_SERVER['REQUEST_URI'], '?');
+
+  if (count($hiddenFields) > 0) {
+    $resetParams = array();
+
+    foreach ($hiddenFields as $name => $value) {
+      $resetParams[] = rawurlencode($name) . '=' . rawurlencode($value);
+    }
+
+    $resetUrl .= '?' . implode('&', $resetParams);
+  }
+
+  echo "<form class=\"notification-filter\" method=\"get\">";
+
+  foreach ($hiddenFields as $name => $value) {
+    echo "<input type=\"hidden\" name=\"" . html_escape($name) . "\" value=\"" . html_escape($value) . "\">";
+  }
+
+  echo "<label>Период с <input type=\"date\" name=\"start_date\" value=\"" . html_escape($startDate) . "\"></label>";
+  echo "<label>по <input type=\"date\" name=\"stop_date\" value=\"" . html_escape($stopDate) . "\"></label>";
+  echo "<button type=\"submit\" class=\"button_style\">Показать</button>";
+  echo "<a class=\"notification-filter-reset\" href=\"" . html_escape($resetUrl) . "\">Текущий квартал</a>";
+  echo "</form>";
+}
+
 function am_i_superuser( $userID ) {
   include __DIR__ . "/php_tori/connect.php";
 
@@ -744,7 +837,7 @@ function am_i_superuser( $userID ) {
   return 0;
 }
 
-function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotificationCount, &$refusedNotificationCount, &$deletedNotificationCount, &$newNotificationCount )
+function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotificationCount, &$refusedNotificationCount, &$deletedNotificationCount, &$newNotificationCount, $startDate = null, $stopDate = null )
 {
   include __DIR__ . "/php_tori/connect.php";
 
@@ -754,11 +847,7 @@ function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotifi
   $refusedNotificationCount = 0;
   $deletedNotificationCount = 0;
 
-  $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
-
-  $paramArr = get_dbsetup_param( 'delay_journal_deep_day' );
-  
-  $paramInt = (-1)*$paramArr[1];
+  list($startDate, $stopDate) = normalize_date_filter_range($startDate, $stopDate);
   
   mysqli_set_charset($link, "utf8");
 
@@ -774,7 +863,9 @@ function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotifi
                         and
                           b.remoteWorkState = 0
                         and
-                          a.date > ADDDATE( '$currentDate', INTERVAL -180 DAY )");
+                          a.date >= '$startDate'
+                        and
+                          a.date <= '$stopDate'");
 
   $merr=mysqli_error($link);
   if ( !$query ) 
@@ -809,15 +900,16 @@ function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotifi
   return 1;
 }
 
-function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNotificationCount )
+function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNotificationCount, $startDate = null, $stopDate = null )
 {
   include __DIR__ . "/php_tori/connect.php";
 
   $notificationCount = 0;
   $currentDayNotificationCount = 0;
   $currentDate = date('Y-m-d');
+  list($startDateTime, $stopDateTime) = get_date_filter_datetime_bounds($startDate, $stopDate);
 
-  $query = mysqli_query($link, "SELECT * from ADD_TIME where USERID='$user_id' and PAUSE_MODE = 1"); 
+  $query = mysqli_query($link, "SELECT * from ADD_TIME where USERID='$user_id' and PAUSE_MODE = 1 and (STOP_DT >= '$startDateTime' or STOP_DT = '0000-00-00 00:00:00') and START_DT <= '$stopDateTime'");
 
   $merr=mysqli_error($link);
 
@@ -832,7 +924,7 @@ function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNoti
     {
       $startDate = $row1["START_DT"];
 
-      if ( $startDate == $currentDate )
+      if ( date('Y-m-d', strtotime($startDate)) == $currentDate )
       {       
         $currentDayNotificationCount ++;  
       }
@@ -842,7 +934,7 @@ function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNoti
   return 1;
 }
 
-function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNotificationCount, &$refusedNotificationCount, &$deletedNotificationCount, &$newNotificationCount ){
+function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNotificationCount, &$refusedNotificationCount, &$deletedNotificationCount, &$newNotificationCount, $startDate = null, $stopDate = null ){
   include __DIR__ . "/php_tori/connect.php";
   
   $notificationCount = 0;
@@ -851,13 +943,9 @@ function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNot
   $refusedNotificationCount = 0;
   $deletedNotificationCount = 0;
 
-  $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
+  list($startDateTime, $stopDateTime) = get_date_filter_datetime_bounds($startDate, $stopDate);
 
-  $paramArr = get_dbsetup_param( 'add_time_journal_deep_day' );
-  
-  $paramInt = (-1)*$paramArr[1];
-
-  $query = mysqli_query($link, "SELECT APPROVED FROM ADD_TIME WHERE PAUSE_MODE = 0 AND USERID = '$user_id' AND STOP_DT > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )"); 
+  $query = mysqli_query($link, "SELECT APPROVED FROM ADD_TIME WHERE PAUSE_MODE = 0 AND USERID = '$user_id' AND (STOP_DT >= '$startDateTime' OR STOP_DT = '0000-00-00 00:00:00') AND START_DT <= '$stopDateTime'");
 
   $merr = mysqli_error($link);
 
@@ -1971,18 +2059,13 @@ function get_delay_value( $in_dt, $defauiltInTime, $allowedDelay ){
 }
 
 
-function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
+function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay, $startDate = null, $stopDate = null )
 {
 
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
 
-  $currentDateArr = get_current_datetime_in_timezone();
-  $currentDate = $currentDateArr[2];
-
-  $paramArr = get_dbsetup_param( 'delay_journal_deep_day' );
-  
-  $paramInt = (-1)*$paramArr[1];
+  list($startDate, $stopDate) = normalize_date_filter_range($startDate, $stopDate);
   
   $query = mysqli_query($link, "SELECT distinct a.id, a.date, b.in_dt, a.supervisorID, a.explaneDesk, a.acceptorID, a.penaltyID, a.penaltyReply, a.status, b.timeZoneSec
                          FROM Delays a 
@@ -1994,7 +2077,9 @@ function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
                          where 
                            a.userID = '$userID' 
                              and
-                           a.date > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )
+                           a.date >= '$startDate'
+                             and
+                           a.date <= '$stopDate'
                              and
                            b.remoteWorkState = 0
                          order by date desc"); 
@@ -2155,13 +2240,9 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
   return $results;
 }
 
-function get_all_add_work_info_by_user( $userID, $pauseMode )
+function get_all_add_work_info_by_user( $userID, $pauseMode, $startDate = null, $stopDate = null )
 {
-  $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
-
-  $paramArr = get_dbsetup_param( 'add_time_journal_deep_day' );
-  
-  $paramInt = (-1)*$paramArr[1];
+  list($startDateTime, $stopDateTime) = get_date_filter_datetime_bounds($startDate, $stopDate);
   
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
@@ -2173,7 +2254,7 @@ function get_all_add_work_info_by_user( $userID, $pauseMode )
                          JOIN 
                          REASONS b
                          ON a.REASON = b.ID
-                         where a.USERID = '$userID' AND a.PAUSE_MODE = '$pauseMode' and a.STOP_DT > ADDDATE( '$currentDate', INTERVAL $paramInt DAY ) order by a.START_DT DESC"); 
+                         where a.USERID = '$userID' AND a.PAUSE_MODE = '$pauseMode' and (a.STOP_DT >= '$startDateTime' or a.STOP_DT = '0000-00-00 00:00:00') and a.START_DT <= '$stopDateTime' order by a.START_DT DESC");
 
   $merr=mysqli_error($link);
   if ( !$query ) 
@@ -2845,7 +2926,9 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
     $tableContent .=            $workDayRange;
     $tableContent .=          "</div>"; 
     $tableContent .=        "</div>";
-    if ( $days_remoteWorkState != 0 ){
+    $showLegacyRemoteWorkStateInReport = 0;
+
+    if ( $showLegacyRemoteWorkStateInReport == 1 && $days_remoteWorkState != 0 && $days_remoteWorkState != "NDF" ){
       $tableContent .=          "<div class = \"remote_work_time_rep\">";
       $tableContent .=              "<div class = \"report_no_padding_rep\" width = 15px>";
       $tableContent .=                  "<img title=\"удаленный режим работы\" src=\"$remoteWorkImg\"/>";

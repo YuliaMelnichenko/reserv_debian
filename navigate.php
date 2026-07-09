@@ -78,6 +78,10 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
 
   $accountingErrorsCount = 0;
 
+  if (!isset($link) || !$link) {
+    include __DIR__ . "/php_tori/connect.php";
+  }
+
   if (isset($link) && $link) {
     $accountingErrorsSyncDate = isset($_SESSION['accounting_errors_sync_date'])
       ? (string)$_SESSION['accounting_errors_sync_date']

@@ -25,6 +25,9 @@ echo "<body bgcolor=\"#ffffff\" >";
 
 <?php
 $userID_ = (int)$_SESSION['ss_id'];
+$filterRange = get_request_date_filter_range();
+$filterStartDate = $filterRange[0];
+$filterStopDate = $filterRange[1];
 echo "<div align=\"left\">";
 
 echo "<table border=0>";
@@ -42,10 +45,8 @@ echo "<table border=0>";
       echo "</div>";
 
       $depthDays = get_accounting_errors_default_depth_days();
-      $today = date("d-m-Y");
-      $dateForm = date("d.m.Y", strtotime("-$depthDays days"));
-
-      echo "<h5 class=\"big\"> Глубина просмотра журнала ($depthDays дней): $dateForm - $today </h5>";
+      echo "<h5 class=\"big\"> Период просмотра: " . date("d.m.Y", strtotime($filterStartDate)) . " - " . date("d.m.Y", strtotime($filterStopDate)) . " </h5>";
+      render_notification_date_filter($filterStartDate, $filterStopDate);
 
       echo "<div id=\"accountingErrorsApprovementTableScroll\">";
         echo "<table class=\"add_time\" id=\"accounting_errors_approvement_table_users\" border=1>";
@@ -86,14 +87,17 @@ echo "<table border=0>";
                 $acceptedNotificationCount,
                 $refusedNotificationCount,
                 $deletedNotificationCount,
-                $newNotificationCount
+                $newNotificationCount,
+                $filterStartDate,
+                $filterStopDate
               );
 
               $rowCount++;
 
               $userName = html_escape(get_user_name_by_id($userID));
               $muid = getMaskedUID(32, $userID);
-              $uhref = "location.href='accounting_errors_approvement_user.php?mid=$muid'";
+              $userUrl = append_date_filter_to_url("accounting_errors_approvement_user.php?mid=$muid", $filterStartDate, $filterStopDate);
+              $uhref = "location.href='$userUrl'";
 
               $cellStype = "middle";
 

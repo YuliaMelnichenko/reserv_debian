@@ -74,18 +74,24 @@ mysqli_set_charset($link, "utf8");
         echo "</div>";
 
       $userName = get_user_name_by_id($userID);
+      $filterRange = get_request_date_filter_range();
+      $filterStartDate = $filterRange[0];
+      $filterStopDate = $filterRange[1];
+      $backUrl = append_date_filter_to_url("time_approvement.php", $filterStartDate, $filterStopDate);
 
-      $addTimeInfo = get_all_add_work_info_by_user( $userID, 0 );
+      $addTimeInfo = get_all_add_work_info_by_user( $userID, 0, $filterStartDate, $filterStopDate );
 
       if ( count( $addTimeInfo ) == 0 ){
         echo "<table id=\"add_time_approvement_table\" border=0>";
           echo "<tr>";
             echo "<td valign=\"middle\" width=1074 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";
             echo "<td width=10 valign=\"middle\" align=\"right\">";
-              echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='time_approvement.php';\"><h5>Назад</h5></button>";
+              echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='$backUrl';\"><h5>Назад</h5></button>";
             echo "</td>";
           echo "</tr>";
         echo "</table>";
+        echo "<h5 class=\"big\"> Период просмотра: " . date("d.m.Y", strtotime($filterStartDate)) . " - " . date("d.m.Y", strtotime($filterStopDate)) . " </h5>";
+        render_notification_date_filter($filterStartDate, $filterStopDate, array("mid" => $mid));
         echo "<h5><br>Нет сведений!</h5>";
         echo "</td>";               
         echo "<tr>";
@@ -100,15 +106,22 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
         echo "<tr>";
           echo "<td valign=\"middle\" width=1074 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";
           echo "<td width=10 valign=\"middle\" align=\"right\">";
-            echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='time_approvement.php';\"><h5>Назад</h5></button>";
+            echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='$backUrl';\"><h5>Назад</h5></button>";
           echo "</td>";
         echo "</tr>";
       echo "</table>";
     echo "</td>";
   echo "</tr>";
   echo "<tr>";
+    echo "<td class=\"nopadding_s\">";
+      echo "<h5 class=\"big\"> Период просмотра: " . date("d.m.Y", strtotime($filterStartDate)) . " - " . date("d.m.Y", strtotime($filterStopDate)) . " </h5>";
+      render_notification_date_filter($filterStartDate, $filterStopDate, array("mid" => $mid));
+    echo "</td>";
+  echo "</tr>";
+  echo "<tr>";
     echo "<td class=\"nopadding\" valign=\"middle\" align=\"left\">";
 
+      echo "<div class=\"notification-table-scroll notification-table-scroll-full\">";
       echo "<table border=1>";
       echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
 
@@ -246,6 +259,7 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
       }
 
       echo "</table>";
+      echo "</div>";
     echo "</td>";
   echo "</tr>";
 echo "</table>";

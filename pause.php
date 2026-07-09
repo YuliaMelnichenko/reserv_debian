@@ -16,8 +16,8 @@ echo "</head>";
 echo "<body bgcolor=\"#ffffff\" >";
 ?>
 
-<script type="text/javascript" src="lib/jquery/jquery.js"></script> 
-<script type="text/javascript" src="js/tory.js"></script> 
+<script type="text/javascript" src="lib/jquery/jquery.js"></script>
+<script type="text/javascript" src="js/tory.js?v=20260709-filter"></script>
 
 <?php
 ////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ auth();
 ////////////////////////////////////////////////////////
 
 echo "<div id=\"delay_explanation_head\">";
-echo "</div>"; 
+echo "</div>";
 
 echo "<div align=\"left\">";
 
@@ -38,33 +38,37 @@ echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"lef
 
 include_once __DIR__ . "/navigate.php";
 
-echo "</td>";    
-   
+echo "</td>";
+
 $wholeWidth = 700;
 
 echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
 
 echo "<h5 class=\"dark\"><br>/приостановки учета времени<br><br></h5>";
+$filterRange = get_request_date_filter_range();
+$filterStartDate = $filterRange[0];
+$filterStopDate = $filterRange[1];
+echo "<h5 class=\"big\"> Период просмотра: " . date("d.m.Y", strtotime($filterStartDate)) . " - " . date("d.m.Y", strtotime($filterStopDate)) . " </h5>";
+render_notification_date_filter($filterStartDate, $filterStopDate);
 
 echo "<div id=\"pause_times_table\">";
-echo "</div>"; 
-echo "</td>"; 
-echo "</tr>";    
-echo "</table>";    
+echo "</div>";
+echo "</td>";
+echo "</tr>";
+echo "</table>";
 echo "</tr>";
 echo "</table>";
 echo "</div>";
 ?>
 
-<script type="text/javascript" src="lib/jquery/jquery.js"></script> 
-<script type="text/javascript" charset="utf-8"> 
+<script type="text/javascript" charset="utf-8">
 
-show_pause_table();                                                                           
+show_pause_table();
 
 function update_clock()
 {
-  $.post('ajax/get_current_day_time.php', RetSWT);                           
-  function RetSWT(dat) 
+  $.post('ajax/get_current_day_time.php', RetSWT);
+  function RetSWT(dat)
   {
     if ( document.getElementById('dateTimeFieldNav') )
     {
@@ -74,9 +78,9 @@ function update_clock()
 }
 
 var timerId=setInterval( "update_clock()", 1000 );
-</script> 
+</script>
 
 <?php
 echo "</body>";
-echo "</html>";  
+echo "</html>";
 ?>

@@ -10,6 +10,12 @@ include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
 $userID = $_SESSION['ss_id']; 
+$filterRange = normalize_date_filter_range(
+  isset($_POST['start_date']) ? $_POST['start_date'] : null,
+  isset($_POST['stop_date']) ? $_POST['stop_date'] : null
+);
+$filterStartDate = $filterRange[0];
+$filterStopDate = $filterRange[1];
 
 echo "<table border=0>";
 echo "<tr bgcolor=\"#ddeedd\" bordercolor=\"#888888\">";
@@ -21,6 +27,7 @@ echo "</tr>";
 echo "<tr>";    
 
 echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 0>";
+echo "<div class=\"notification-table-scroll notification-table-scroll-full\">";
 echo "<table class=\"add_time\">";
 echo "<tr>";
 
@@ -40,7 +47,7 @@ $color1 = "#ddffff";
 $color2 = "#ddeedd";
 $color3 = "#ffffff";
 
-$addTimeInfo = get_all_add_work_info_by_user( $userID, 0 );
+$addTimeInfo = get_all_add_work_info_by_user( $userID, 0, $filterStartDate, $filterStopDate );
 
 for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
 {
@@ -132,4 +139,5 @@ echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 clas
 }
 
 echo "</table>";
+echo "</div>";
 ?>

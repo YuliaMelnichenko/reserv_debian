@@ -47,13 +47,14 @@ echo "<table border=0>";
           echo "<h5 nowrap class=\"dark\"><br>/уведомления по приостановкам учета времени<br><br></h5>";
         echo "</div>";
 
-    $paramArr = get_dbsetup_param( 'pause_journal_deep_day' );
-    $paramInt = (int)$paramArr[1];
+    $filterRange = get_request_date_filter_range();
+    $filterStartDate = $filterRange[0];
+    $filterStopDate = $filterRange[1];
 
-    $today = date("d-m-Y");
-    $dateForm = date("d.m.Y", strtotime("-$paramInt days"));
+    echo "<h5 class=\"big\"> Период просмотра: " . date("d.m.Y", strtotime($filterStartDate)) . " - " . date("d.m.Y", strtotime($filterStopDate)) . " </h5>";
+    render_notification_date_filter($filterStartDate, $filterStopDate);
 
-    echo "<h5 class=\"big\"> Глубина просмотра журнала (180 дней): $dateForm - $today </h5>";
+    echo "<div class=\"notification-table-scroll notification-table-scroll-narrow\">";
     echo "<table id = \"pause_approvement_table_users\" class=\"add_time\" border=1>";
     echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
     echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Сотрудник</h5>"."</td>";
@@ -80,11 +81,12 @@ echo "<table border=0>";
         $userName = get_user_name_by_id($userID);
 
         $mid = getMaskedUID( 32, $userID );
-        $uhref = "location.href='pause_view_user.php?mid=$mid'";
+        $userUrl = append_date_filter_to_url("pause_view_user.php?mid=$mid", $filterStartDate, $filterStopDate);
+        $uhref = "location.href='$userUrl'";
 
         $notificationCount = 0;
         $currentDayNotificationCount = 0;
-        get_pause_notif_counts( $userID, $notificationCount, $currentDayNotificationCount );
+        get_pause_notif_counts( $userID, $notificationCount, $currentDayNotificationCount, $filterStartDate, $filterStopDate );
 
         $cellStype = "middle";
         if ( $newNotificationCount > 0 ){ $cellStype = "middleBlue1"; }
@@ -112,6 +114,7 @@ echo "<table border=0>";
     }
 
     echo "</table>";
+    echo "</div>";
 
           echo "</td>"; 
     echo "</tr>";
