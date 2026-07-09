@@ -1,6 +1,7 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -10,16 +11,21 @@ include_once __DIR__ . "/../php_tori/connect.php";
 
 $_SESSION['pause_page_mode'] = 2;
 
-$userID = $_POST['user'];
+$userID = isset($_POST['user']) ? (int) $_POST['user'] : 0;
 
-if ( $userID != -1 )
+if ( $userID == -1 )
 { 
-  $_SESSION['add_time_page_user_id'] = $userID;
+  $userID = isset($_SESSION['add_time_page_user_id'])
+    ? (int) $_SESSION['add_time_page_user_id']
+    : 0;
 }
-else
-{ 
-  $userID = $_SESSION['add_time_page_user_id'];
+
+if ($userID <= 0) {
+  deny_ajax_access(400, 'INVALID_USER');
 }
+
+require_ajax_self_or_superuser($userID);
+$_SESSION['add_time_page_user_id'] = $userID;
 
 $userName = get_user_name_by_id($userID);
 
@@ -91,11 +97,11 @@ echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
         }
 
         echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-        echo "<td nowrap class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$ta_start_date."</h5></td>";
-        echo "<td nowrap class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$ta_start_time." - ".$ta_stop_time."</h5></td>";
+echo "<td nowrap class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_date) . "</h5></td>";
+echo "<td nowrap class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_time . " - " . $ta_stop_time) . "</h5></td>";
         echo "<td nowrap class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$time_duration."</h5></td>";
-        echo "<td width=160 class=\"nopadding_s\" valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_description."</h5></td>";
-        echo "<td width=140 class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class = \"small\">$superUserName</h5>"."</td>";
+echo "<td width=160 class=\"nopadding_s\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
+echo "<td width=140 class=\"nopadding_s\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
         echo "</tr>";
       }
 

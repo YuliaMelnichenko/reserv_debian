@@ -13,6 +13,7 @@ function log_out(){
 
 <?php
 include_once __DIR__ . "/funcs.php";
+require_once __DIR__ . '/inc/access.php';
 
 $needToShow = 1;
 
@@ -68,11 +69,37 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
   if ( $needToShow == 1 ){ echo "<tr><td><button style=\"cursor: pointer; font-size: 80%; text-align: left; padding: 5px 0px 5px 5px; width:230px; height:40px; background-color:#a8fd88; border:1px solid #888888;\" onclick=\"location.href='delay.php'\"><h5 class=\"bigger\">Опоздания</h5></button></td></tr>"; }
   if ( $needToShow == 1 ){ echo "<tr><td><button style=\"cursor: pointer; font-size: 80%; text-align: left; padding: 5px 0px 5px 5px; width:230px; height:40px; background-color:#a8fd88; border:1px solid #888888;\" onclick=\"location.href='pause.php'\"><h5 class=\"bigger\">Приостановки учета времени</h5></button></td></tr>"; }
   if ( $needToShow == 1 ){ echo "<tr><td><button style=\"cursor: pointer; font-size: 80%; text-align: left; padding: 5px 0px 5px 5px; width:230px; height:40px; background-color:#a8fd88; border:1px solid #888888;\" onclick=\"location.href='sport_pause.php'\"><h5 class=\"bigger\">Тренажерный зал</h5></button></td></tr>"; }
-  if ($_SESSION['ss_id'] == 1 || $_SESSION['ss_id'] == 2 || $_SESSION['ss_id'] == 3 || $_SESSION['ss_id'] == 30 || $_SESSION['ss_id'] == 31 || $_SESSION['ss_id'] == 50 || $_SESSION['ss_id'] == 148 || $_SESSION['ss_id'] == 500) {
+  if (access_current_user_can_manage_staff_leaves()) {
       if ( $needToShow == 1 ){ echo "<tr><td><button style=\"cursor: pointer; font-size: 80%; text-align: left; padding: 5px 0px 5px 5px; width:230px; height:40px; background-color:#a8fd88; border:1px solid #888888;\" onclick=\"location.href='staff_leaves.php'\"><h5 class=\"bigger\">Отсутствие сотрудников</h5></button></td></tr>"; }
   }
-  if ( $_SESSION['ss_id'] == 148 || $_SESSION['ss_id'] == 1 ) {
+  if (access_current_user_can_view_work_overtime()) {
       if ( $needToShow == 1 ){ echo "<tr><td><button style=\"cursor: pointer; font-size: 80%; text-align: left; padding: 5px 0px 5px 5px; width:230px; height:40px; background-color:#a8fd88; border:1px solid #888888;\" onclick=\"location.href='work_overtime.php'\"><h5 class=\"bigger\">Переработки</h5></button></td></tr>"; }
+  }
+
+  $accountingErrorsCount = 0;
+
+  if (isset($link) && $link) {
+    $accountingErrorsSyncDate = isset($_SESSION['accounting_errors_sync_date'])
+      ? (string)$_SESSION['accounting_errors_sync_date']
+      : '';
+
+    if ($accountingErrorsSyncDate !== date('Y-m-d')) {
+      $syncResult = sync_accounting_errors_for_user(
+        $link,
+        (int)$_SESSION['ss_id'],
+        get_accounting_errors_default_depth_days()
+      );
+
+      if ($syncResult !== false) {
+        $_SESSION['accounting_errors_sync_date'] = date('Y-m-d');
+      }
+    }
+
+    $accountingErrorsCount = get_accounting_errors_count($link, (int)$_SESSION['ss_id']);
+  }
+
+  if ($needToShow == 1 && $accountingErrorsCount > 0) {
+    echo "<tr><td><button style=\"cursor: pointer; font-size: 80%; text-align: left; padding: 5px 0px 5px 5px; width:230px; height:40px; background-color:#a8fd88; border:1px solid #888888;\" onclick=\"location.href='accounting_errors.php'\"><h5 class=\"bigger\">Ошибки учета ($accountingErrorsCount)</h5></button></td></tr>";
   }
 
   if ( am_i_superuser( $_SESSION['ss_id'] ) == 1 ){
@@ -80,18 +107,24 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
 
     $notifCount = get_notification_count( $sv_id );
     $delayNotifCount = get_delay_notification_count( $sv_id );
+    $accountingErrorsNotifCount = isset($link) && $link
+      ? get_accounting_errors_notification_count($link, $sv_id)
+      : 0;
     
     $counterStr = "";
     $delayNotifCountStr = "";
     $pauseNotifCountStr = "";
+    $accountingErrorsNotifCountStr = "";
 
     if ( $notifCount > 0 ){ $counterStr = "($notifCount)"; }
     if ( $delayNotifCount > 0 ){ $delayNotifCountStr = "($delayNotifCount)"; }
+    if ( $accountingErrorsNotifCount > 0 ){ $accountingErrorsNotifCountStr = "($accountingErrorsNotifCount)"; }
 
     echo "<tr><td height = 30px valign = \"bottom\"><h5 class=\"bigger\">Уведомления:</h5></td></tr>";
     echo "<tr><td><button id=\"notifBtn\" style=\"cursor: pointer; font-size: 80%; text-align: left; padding: 5px 20px 5px 5px; width:230px; height:60px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"add_time_set_start(); location.href='time_approvement.php'\"><h5 class=\"biggersmall\">По работе вне офиса $counterStr</h5></button></td></tr>";
     echo "<tr><td><button id=\"notifDelayBtn\" style=\"cursor: pointer; font-size: 70%; text-align: left; padding: 5px 5px 5px 5px; width:230px; height:60px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"delay_set_start(); location.href='delay_approvement.php'\"><h5 class=\"biggersmall\">По опозданиям $delayNotifCountStr</h5></button></td></tr>";
     if ( $needToShow == 1 ){ echo "<tr><td><button id=\"notifPauseBtn\" style=\"cursor: pointer; font-size: 70%; text-align: left; padding: 5px 5px 5px 5px; width:230px; height:60px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"pause_set_start(); location.href='pause_view.php'\"><h5 class=\"biggersmall\">По приостановкам учета времени $pauseNotifCountStr</h5></button></td></tr>"; }
+    echo "<tr><td><button id=\"notifAccountingErrorsBtn\" style=\"cursor: pointer; font-size: 70%; text-align: left; padding: 5px; width:230px; height:60px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='accounting_errors_approvement.php'\"><h5 class=\"biggersmall\">По ошибкам учета $accountingErrorsNotifCountStr</h5></button></td></tr>";
   } 
   echo "<tr><td style=\"padding: 2px\" height=8px></td></tr>";
 

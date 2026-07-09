@@ -1,6 +1,7 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -8,7 +9,22 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 if ( isset($_POST['userID']) AND isset($_POST['inTime']) )
 {
   $userID = (int)($_POST['userID']);
-  $newInTime = $_POST['inTime'];
+  $newInTime = trim($_POST['inTime']);
+
+  if ($userID <= 0) {
+    deny_ajax_access(400, 'INVALID_USER');
+  }
+
+  require_ajax_supervisor_for_user($userID, 3);
+
+  if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/', $newInTime)) {
+    echo "-13";
+    exit;
+  }
+
+  if (strlen($newInTime) == 5) {
+    $newInTime .= ':00';
+  }
   $currentDate = date('Y-m-d');
   
   $newStartTime = $newInTime; 
@@ -18,7 +34,7 @@ if ( isset($_POST['userID']) AND isset($_POST['inTime']) )
   include_once __DIR__ . "/../funcs.php";
   include_once __DIR__ . "/../php_tori/connect.php";
 
-  $query = mysqli_query($link, "SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = '$currentDate' and user_id = '$userID'"); 
+  $query = db_query($link, "SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting WHERE date = ? AND user_id = ?", 'si', array($currentDate, $userID));
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
@@ -66,7 +82,7 @@ if ( isset($_POST['userID']) AND isset($_POST['inTime']) )
             $newEatStopTime = $eatStop;
             $newOutTime = $outTime;             
           }
-          $query = mysqli_query($link, "UPDATE visiting set in_time='$newStartTime', out_time='$newOutTime', eat_start='$newEatStartTime', eat_stop='$newEatStopTime', adj='1' where date = '$currentDate' and user_id = '$userID'");
+          $query = db_execute($link, "UPDATE visiting SET in_time = ?, out_time = ?, eat_start = ?, eat_stop = ?, adj = 1 WHERE date = ? AND user_id = ?", 'sssssi', array($newStartTime, $newOutTime, $newEatStartTime, $newEatStopTime, $currentDate, $userID));
           $merr=mysqli_error($link);
           if ( !$query ) 
           {
@@ -102,7 +118,7 @@ if ( isset($_POST['userID']) AND isset($_POST['inTime']) )
             $newOutTime = $outTime;             
           }
           
-          $query = mysqli_query($link, "UPDATE visiting set in_time='$newStartTime', out_time='$newOutTime', eat_start='$newEatStartTime', eat_stop='$newEatStopTime', adj='1' where date = '$currentDate' and user_id = '$userID'");
+          $query = db_execute($link, "UPDATE visiting SET in_time = ?, out_time = ?, eat_start = ?, eat_stop = ?, adj = 1 WHERE date = ? AND user_id = ?", 'sssssi', array($newStartTime, $newOutTime, $newEatStartTime, $newEatStopTime, $currentDate, $userID));
           $merr=mysqli_error($link);
           if ( !$query ) 
           {
@@ -140,7 +156,7 @@ if ( isset($_POST['userID']) AND isset($_POST['inTime']) )
             $newOutTime = $outTime;             
           }
           
-          $query = mysqli_query($link, "UPDATE visiting set in_time='$newStartTime', out_time='$newOutTime', eat_start='$newEatStartTime', eat_stop='$newEatStopTime', adj='1' where date = '$currentDate' and user_id = '$userID'");
+          $query = db_execute($link, "UPDATE visiting SET in_time = ?, out_time = ?, eat_start = ?, eat_stop = ?, adj = 1 WHERE date = ? AND user_id = ?", 'sssssi', array($newStartTime, $newOutTime, $newEatStartTime, $newEatStopTime, $currentDate, $userID));
           $merr=mysqli_error($link);
           if ( !$query ) 
           {
@@ -156,7 +172,7 @@ if ( isset($_POST['userID']) AND isset($_POST['inTime']) )
         $newEatStopTime = $eatStop;
         $newOutTime = $outTime;             
         
-        $query = mysqli_query($link, "UPDATE visiting set in_time='$newStartTime', out_time='$newOutTime', eat_start='$newEatStartTime', eat_stop='$newEatStopTime', adj='1' where date = '$currentDate' and user_id = '$userID'");
+        $query = db_execute($link, "UPDATE visiting SET in_time = ?, out_time = ?, eat_start = ?, eat_stop = ?, adj = 1 WHERE date = ? AND user_id = ?", 'sssssi', array($newStartTime, $newOutTime, $newEatStartTime, $newEatStopTime, $currentDate, $userID));
         $merr=mysqli_error($link);
         if ( !$query ) 
         {

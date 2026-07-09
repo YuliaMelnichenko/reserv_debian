@@ -2781,6 +2781,13 @@ h5.activ_text {
   width: 240px;
 }
 
+.accounting-error-attention {
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  vertical-align: -2px;
+}
+
 h5.activ_time {
   font-family: Arial, sans;
   font-size: 12px;
@@ -2936,7 +2943,6 @@ h5.activ_time {
   border-collapse: collapse;
   margin: 15px 3px 0 0;
   width: 915px;
-  margin: 0;
   border:solid #d17125 1px;
   background-color:#eeeeee;
 }
@@ -3136,14 +3142,19 @@ h5.activ_time {
   margin-bottom: 5px;
 }
 
-#archiveExcelPreviewOverlay {
+#archiveExcelPreviewOverlay,
+#accountingErrorModalOverlay,
+#accountingErrorStatusModalOverlay {
   position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 99999;
+  inset: 0;
+  z-index: 9999;
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.45);
+}
+
+#archiveExcelPreviewOverlay {
+  z-index: 99999;
   align-items: center;
   justify-content: center;
 }
@@ -3160,15 +3171,20 @@ h5.activ_time {
   font-family: Arial, sans-serif;
 }
 
-#archiveExcelPreviewHeader {
+#archiveExcelPreviewHeader,
+#accountingErrorModalHeader,
+#accountingErrorStatusModalHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-weight: bold;
+}
+
+#archiveExcelPreviewHeader {
   padding: 10px 12px;
   background: #d9ead3;
   border-bottom: 1px solid #888888;
   font-size: 15px;
-  font-weight: bold;
 }
 
 #archiveExcelPreviewHeader button {
@@ -3182,6 +3198,9 @@ h5.activ_time {
   line-height: 20px;
 }
 
+#archiveExcelPreviewFilters {
+  padding: 10px 12px 0;
+}
 
 #archiveExcelPreviewNote {
   padding: 8px 12px;
@@ -3209,35 +3228,22 @@ h5.activ_time {
   border: 1px solid #888888;
 }
 
-  #archiveExcelPreviewFilters {
-  padding: 10px 12px 0 12px;
-}
-
-.archive-excel-preview-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-
-.archive-excel-preview-table th,
-.archive-excel-preview-table td {
-  border: 1px solid #cccccc;
-  padding: 5px;
-}
-
-.archive-excel-preview-table th {
-  background: #d9ead3;
-}
-
+.archive-excel-preview-table,
 .archive-excel-filter-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
 }
 
+.archive-excel-preview-table th,
+.archive-excel-preview-table td,
 .archive-excel-filter-table td {
   border: 1px solid #cccccc;
   padding: 5px;
+}
+
+.archive-excel-preview-table th {
+  background: #d9ead3;
 }
 
 .archive-excel-filter-table td:first-child {
@@ -3250,204 +3256,76 @@ h5.activ_time {
   display: none;
   margin: 8px 0;
   padding: 6px;
-  border:1px solid #888888;
-  background:#eef5ff;
+  border: 1px solid #888888;
+  background: #eef5ff;
 }
 
-.search-block { 
-  margin: 10px 0; 
-  display:flex; 
-  gap:8px; 
-  align-items:center; 
-}
-
-.search-block input[type=number]{ 
-  width:100px; 
-  padding:4px; 
-}
-
-#results_table { 
-  width:100%; 
-  border-collapse: collapse; 
-}
-
-#results_table th, 
-#results_table td { 
-  border:1px solid #ccc; 
-  padding:6px; 
-}
-
-#modal_details { 
-  display:none; 
-  position:fixed; 
-  left:50%; 
-  top:50%; 
-  transform:translate(-50%,-50%); 
-  background:#fff; 
-  border:1px solid #888; 
-  padding:12px; 
-  z-index:1000; 
-  width:400px; 
-  max-height:70vh; 
-  overflow:auto; 
-  box-shadow:0 4px 12px rgba(0,0,0,0.2); 
-}
-
-#modal_overlay { 
-  display:none; 
-  position:fixed; 
-  left:0; 
-  top:0; 
-  width:100%; 
-  height:100%; 
-  background:rgba(0,0,0,0.4); 
-  z-index:900; 
-}
-
-.btn { 
-  cursor:pointer; 
-  padding:3px 6px; 
-  border:1px solid #888; 
-  background:#f0f0f0; 
-}
-
-.btn-primary { 
-  background:#f8d888; 
-}
-
-.btn-danger { 
-  background:#ff7979; 
-  color:#fff; 
-}
-
-#accountingErrorModalOverlay {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 9999;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.45);
-}
-
-#accountingErrorModalWindow {
-  width: 520px;
-  margin: 120px auto;
-  background: #ffffff;
-  border: 1px solid #666666;
-  padding: 12px;
-  box-shadow: 0 0 12px #333333;
-}
-
-#accountingErrorModalHeader {
+.search-block {
+  margin: 10px 0;
   display: flex;
-  justify-content: space-between;
+  gap: 8px;
   align-items: center;
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 12px;
 }
 
-#accountingErrorModalHeader button {
-  font-size: 20px;
-  cursor: pointer;
+.search-block input[type=number] {
+  width: 100px;
+  padding: 4px;
 }
 
-#accountingErrorModalDate {
-  margin-bottom: 8px;
-  font-weight: bold;
-}
-
-#accountingErrorCommentText {
-  width: 100%;
-  height: 140px;
-  box-sizing: border-box;
-  resize: vertical;
-}
-
-#accountingErrorModalActions {
-  margin-top: 10px;
-  text-align: right;
-}
-
-#accountingErrorModalActions button {
-  margin-left: 8px;
-}
-
-#accountingErrorsTableScroll {
-  margin-bottom: 15px;
-  width: 820px;
-  max-height: 560px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  border: 1px solid #888888;
-  background: #ffffff;
-}
-
-#accounting_errors_table {
-width: 100%;
-border-collapse: collapse;
-}
-
-#accounting_errors_table tr:first-child td {
-position: sticky;
-top: 0;
-z-index: 2;
-background: #eeeeee;
-}
-
-#accountingErrorsApprovementTableScroll {
-  width: 820px;
-  max-height: 560px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  border: 1px solid #888888;
-  background: #ffffff;
-}
-
-#accounting_errors_approvement_table_users {
+#results_table {
   width: 100%;
   border-collapse: collapse;
 }
 
-#accounting_errors_approvement_table_users tr:first-child td {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: #eeeeee;
+#results_table th,
+#results_table td {
+  border: 1px solid #cccccc;
+  padding: 6px;
 }
 
-  #accountingErrorsUserTableScroll {
-  width: 930px;
-  max-height: 560px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  border: 1px solid #888888;
-  background: #ffffff;
-}
-
-#accounting_errors_user_table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-#accounting_errors_user_table tr:first-child td {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: #eeeeee;
-}
-
-#accountingErrorStatusModalOverlay {
+#modal_details {
+  display: none;
   position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 9999;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  border: 1px solid #888888;
+  padding: 12px;
+  z-index: 1000;
+  width: 400px;
+  max-height: 70vh;
+  overflow: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#modal_overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 900;
 }
 
+.btn {
+  cursor: pointer;
+  padding: 3px 6px;
+  border: 1px solid #888888;
+  background: #f0f0f0;
+}
+
+.btn-primary {
+  background: #f8d888;
+}
+
+.btn-danger {
+  background: #ff7979;
+  color: #ffffff;
+}
+
+#accountingErrorModalWindow,
 #accountingErrorStatusModalWindow {
   width: 520px;
   margin: 120px auto;
@@ -3457,38 +3335,85 @@ background: #eeeeee;
   box-shadow: 0 0 12px #333333;
 }
 
+#accountingErrorModalHeader,
 #accountingErrorStatusModalHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   font-size: 16px;
-  font-weight: bold;
   margin-bottom: 12px;
 }
 
+#accountingErrorModalHeader button,
 #accountingErrorStatusModalHeader button {
   font-size: 20px;
   cursor: pointer;
 }
 
+#accountingErrorModalDate,
 #accountingErrorStatusModalDate {
   margin-bottom: 8px;
   font-weight: bold;
 }
 
+#accountingErrorCommentText,
 #accountingErrorSupervisorCommentText {
   width: 100%;
-  height: 120px;
   box-sizing: border-box;
   resize: vertical;
 }
 
+#accountingErrorCommentText {
+  height: 140px;
+}
+
+#accountingErrorSupervisorCommentText {
+  height: 120px;
+}
+
+#accountingErrorModalActions,
 #accountingErrorStatusModalActions {
   margin-top: 10px;
   text-align: right;
 }
 
+#accountingErrorModalActions button,
 #accountingErrorStatusModalActions button {
   margin-left: 8px;
 }
 
+#accountingErrorsTableScroll,
+#accountingErrorsApprovementTableScroll,
+#accountingErrorsUserTableScroll {
+  max-height: 560px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1px solid #888888;
+  background: #ffffff;
+}
+
+#accountingErrorsTableScroll,
+#accountingErrorsApprovementTableScroll {
+  width: 820px;
+}
+
+#accountingErrorsTableScroll {
+  margin-bottom: 15px;
+}
+
+#accountingErrorsUserTableScroll {
+  width: 930px;
+}
+
+#accounting_errors_table,
+#accounting_errors_approvement_table_users,
+#accounting_errors_user_table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#accounting_errors_table tr:first-child td,
+#accounting_errors_approvement_table_users tr:first-child td,
+#accounting_errors_user_table tr:first-child td {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #eeeeee;
+}

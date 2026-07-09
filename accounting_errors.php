@@ -1,6 +1,11 @@
 <?php
 ob_start();
-session_start();
+require_once __DIR__ . '/inc/session.php';
+require_once __DIR__ . '/inc/access.php';
+require_page_auth();
+include_once __DIR__ . '/funcs.php';
+include __DIR__ . '/php_tori/connect.php';
+save_last_location('accounting_errors.php');
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -19,17 +24,14 @@ echo "<body bgcolor=\"#ffffff\" >";
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
 
 <?php
-include_once __DIR__ . "/funcs.php";
-save_last_location("accounting_errors.php");
-auth();
-
-include_once __DIR__ . "/php_tori/connect.php";
-mysqli_set_charset($link, "utf8");
-
 $userID = $_SESSION['ss_id'];
 $depthDays = get_accounting_errors_default_depth_days();
 
-sync_accounting_errors_for_user($link, $userID, $depthDays);
+$syncResult = sync_accounting_errors_for_user($link, $userID, $depthDays);
+
+if ($syncResult !== false) {
+  $_SESSION['accounting_errors_sync_date'] = date('Y-m-d');
+}
 
 echo "<div align=\"left\">";
 
@@ -63,20 +65,19 @@ echo "<table border=0>";
             echo "<td class=\"add_time\" valign=\"middle\" align=\"center\" width=100><h5 class=\"big\">Действие</h5></td>";
             echo "</tr>";
 
-            $userIDEsc = mysqli_real_escape_string($link, $userID);
-            $startDate = mysqli_real_escape_string($link, date("Y-m-d", strtotime("-$depthDays days")));
-
-            $query = mysqli_query($link, "
-            SELECT ID, ERROR_DATE, STATUS, USER_COMMENT
-            FROM accounting_errors
-            WHERE USERID = '$userIDEsc'
-                AND ERROR_DATE >= '$startDate'
-                AND STATUS IN (0, 1, 2, 3)
-            ORDER BY ERROR_DATE DESC
-            ");
+            $startDate = date("Y-m-d", strtotime("-$depthDays days"));
+            $query = db_query(
+                $link,
+                'SELECT ID, ERROR_DATE, STATUS, USER_COMMENT
+                 FROM accounting_errors
+                 WHERE USERID = ? AND ERROR_DATE >= ? AND STATUS IN (0, 1, 2, 3)
+                 ORDER BY ERROR_DATE DESC',
+                'is',
+                array((int)$userID, $startDate)
+            );
 
             if (!$query) {
-                echo "<tr><td colspan=4><h5 class=\"middle\">mysqli_error = " . mysqli_error($link) . "</h5></td></tr>";
+                echo "<tr><td colspan=4><h5 class=\"middle\">Не удалось загрузить ошибки учета.</h5></td></tr>";
             }
             else {
                 $color = "#ddffff";
@@ -123,7 +124,8 @@ echo "<table border=0>";
                     echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">";
 
                         if ($status == 0 || $status == 1 || $status == 3) {
-                            echo "<button title=\"Внести комментарий\" style=\"padding:0px; background-color:#ffffff; border:0px solid #888888; cursor:pointer;\" onclick=\"openAccountingErrorCommentWindow($errorID, '$dateView', '" . htmlspecialchars($comment, ENT_QUOTES, "UTF-8") . "');\">";
+                            $commentAttr = htmlspecialchars((string)$comment, ENT_QUOTES, 'UTF-8');
+                            echo "<button title=\"Внести комментарий\" data-comment=\"$commentAttr\" style=\"padding:0px; background-color:#ffffff; border:0px solid #888888; cursor:pointer;\" onclick=\"openAccountingErrorCommentWindow($errorID, '$dateView', this.dataset.comment);\">";
                                 echo "<img src=\"img/red.png\" onerror=\"this.src='img/pen.png';\" alt=\"Комментарий\">";
                             echo "</button>";
                         }

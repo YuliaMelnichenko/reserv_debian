@@ -1,11 +1,8 @@
 <?php
 ob_start();
-
-session_start();
-
-$ip = $_SERVER['REMOTE_ADDR'];
-
-echo $ip;
+require_once __DIR__ . '/inc/session.php';
+require_once __DIR__ . '/inc/access.php';
+csrf_ensure_token();
 
 include __DIR__ . "/funcs.php";
 ?>
@@ -26,18 +23,14 @@ echo "</head>";
 <script type="text/javascript" src="js/tory.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
-function check_cookie(){
+function check_cookie()
+{
   $.post('ajax/get_login_from_cookie.php', RetSWT1 );
-  function RetSWT1(dat1) {
-    if ( dat1 != "" ){
-      $.post('ajax/get_passwd_from_cookie.php', RetSWT2 );
-      function RetSWT2(dat2) {
-        if ( dat2 != "" ){
-          document.getElementById('login').value = dat1;
-          document.getElementById('passwd').value = dat2;
-          auth();
-        }
-      }    
+  function RetSWT1(dat1) 
+  {
+    if ( dat1 != "" )
+    {
+      document.getElementById('login').value = dat1;
     }
   }
 }
@@ -47,12 +40,17 @@ function auth() {
   var passwd = document.getElementById('passwd').value;
 
   if ( document.getElementById('autologin').checked ) {
-    $.post('ajax/set_cookie.php', {login: login, passwd: passwd}, RetSWT1 );
-    function RetSWT1(dat1) {
-      if ( dat1 == 0 ){
-        alert( "Ошибка сохранения авторизационных данных. Проверьте настройки или смените браузер" );
+    $.post('ajax/set_cookie.php', {login: login}, RetSWT1 );
+    function RetSWT1(dat1) 
+    {
+      if ( dat1 == 0 )
+      {
+        alert( "Ошибка сохранения логина. Проверьте настройки или смените браузер" );
       }
     }
+  }
+  else {
+    unset_cookie();
   }
 
   $.post('ajax/auth.php', {login: login, passwd: passwd}, function(dat) {
@@ -64,23 +62,23 @@ function auth() {
       unset_cookie();
       document.getElementById('login').value = '';
       document.getElementById('passwd').value = '';
+      // document.getElementById('autologin').checked = false;
     }
   });
 }
 
-function set_focus(){	
+function set_focus()
+{	
   document.getElementById("auth_btn").focus();
 }
 </script>
-
 <?php
 echo "<body bgcolor=\"#ffffff\" onload=\"set_focus();\">";
                                                               
 echo "<div align=\"center\">";
 
-$ip = $_SERVER['REMOTE_ADDR'];
-
-if ( !isset($_SESSION['ss_id']) ){
+if ( !isset($_SESSION['ss_id']) )
+{
   $_SESSION['ss_mode'] = 0;
   $first_num = rand(1,20);
   $second_num = rand(1,20);
@@ -115,7 +113,7 @@ if ( !isset($_SESSION['ss_id']) ){
         echo "<input class=\"no_padding\"  checked style=\"font-size: 100%; width:14px; height:14px; background-color:#ddeeff; border:0px solid #888888;\" type=\"checkbox\" id=\"autologin\" value=\"1\" >";
       echo "</td>";
       echo "<td bgcolor=\"#ddeeff\" valign=\"top\" align=\"left\" width = 400>";
-        echo "<h5 class=\"middle\">запомнить</h5>";
+        echo "<h5 class=\"middle\">запомнить логин</h5>";
       echo "</td>";
     echo "</tr>";
     echo "<tr>";
@@ -138,7 +136,8 @@ if ( !isset($_SESSION['ss_id']) ){
   echo "</table>";
   echo "</div>";
 }
-else{
+else
+{
   move_to_last_location();
 }
 
@@ -156,3 +155,4 @@ check_cookie();
 echo "</body>";
 echo "</html>";  
 ?>
+

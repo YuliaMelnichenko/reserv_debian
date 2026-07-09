@@ -1,94 +1,77 @@
 <?php
-session_start();
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+header('Content-Type: text/plain; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate');
 
-if (!isset($_SESSION['ss_id'])) {
-  echo "Ошибка: сессия истекла. Обновите страницу.";
-  exit;
+$supervisorID = (int)($_SESSION['ss_id'] ?? 0);
+$errorID = (int)($_POST['error_id'] ?? 0);
+$status = (int)($_POST['status'] ?? 0);
+$comment = trim((string)($_POST['comment'] ?? ''));
+
+if (!in_array($status, array(2, 3, 4), true)) {
+    deny_ajax_access(400, 'Некорректный статус решения.');
 }
 
-if (!isset($_POST['error_id']) || !isset($_POST['status'])) {
-  echo "Ошибка: не переданы данные решения.";
-  exit;
+if (strlen($comment) > 4000) {
+    deny_ajax_access(400, 'Комментарий не должен превышать 4000 символов.');
 }
 
-include_once __DIR__ . "/../funcs.php";
-include __DIR__ . "/../php_tori/connect.php";
+require_ajax_accounting_error_supervisor($errorID, 3);
 
-mysqli_set_charset($link, "utf8");
+include __DIR__ . '/../php_tori/connect.php';
 
-$supervisorID = (int)$_SESSION['ss_id'];
-$errorID = (int)$_POST['error_id'];
-$status = (int)$_POST['status'];
-$comment = isset($_POST['comment']) ? trim($_POST['comment']) : "";
-
-if (am_i_superuser($supervisorID) != 1) {
-  echo "Ошибка: недостаточно прав.";
-  exit;
+if (!mysqli_begin_transaction($link)) {
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
 }
 
-if ($errorID <= 0) {
-  echo "Ошибка: некорректная запись ошибки учета.";
-  exit;
+$result = db_query(
+    $link,
+    'SELECT STATUS FROM accounting_errors WHERE ID = ? LIMIT 1 FOR UPDATE',
+    'i',
+    array($errorID)
+);
+
+if (!$result) {
+    mysqli_rollback($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
 }
 
-if ($status != 2 && $status != 3 && $status != 4) {
-  echo "Ошибка: некорректный статус решения.";
-  exit;
+$row = mysqli_fetch_assoc($result);
+
+if (!$row) {
+    mysqli_rollback($link);
+    deny_ajax_access(404, 'Запись ошибки учета не найдена.');
 }
 
-$supervisorIDEsc = mysqli_real_escape_string($link, $supervisorID);
-$errorIDEsc = mysqli_real_escape_string($link, $errorID);
-
-$checkQuery = mysqli_query($link, "
-  SELECT ae.ID, ae.USERID, ae.STATUS
-  FROM accounting_errors ae
-  INNER JOIN GROUPS g ON g.USERID = ae.USERID
-  WHERE ae.ID = '$errorIDEsc'
-    AND g.SUPERVISORID = '$supervisorIDEsc'
-    AND g.TYPE = 3
-  LIMIT 1
-");
-
-if (!$checkQuery) {
-  echo mysqli_error($link);
-  exit;
+if ((int)$row['STATUS'] === 4 && $status !== 4) {
+    mysqli_rollback($link);
+    deny_ajax_access(409, 'Удаленную запись нельзя изменить.');
 }
 
-if (mysqli_num_rows($checkQuery) == 0) {
-  echo "Ошибка: запись ошибки учета не найдена или недоступна.";
-  exit;
+$updated = db_execute(
+    $link,
+    'UPDATE accounting_errors
+     SET STATUS = ?, SUPERVISORID = ?, SUPERVISOR_COMMENT = ?, SUPERVISOR_REPLY_DT = NOW()
+     WHERE ID = ?',
+    'iisi',
+    array($status, $supervisorID, $comment, $errorID)
+);
+
+if (!$updated) {
+    mysqli_rollback($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
 }
 
-$row = mysqli_fetch_array($checkQuery, MYSQLI_ASSOC);
-$currentStatus = (int)$row["STATUS"];
-
-if ($currentStatus == 4 && $status != 4) {
-  echo "Ошибка: удаленную запись нельзя изменить.";
-  exit;
+if (!mysqli_commit($link)) {
+    mysqli_rollback($link);
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
 }
 
-$commentEsc = mysqli_real_escape_string($link, $comment);
-$statusEsc = mysqli_real_escape_string($link, $status);
-
-$query = mysqli_query($link, "
-  UPDATE accounting_errors
-  SET STATUS = '$statusEsc',
-      SUPERVISORID = '$supervisorIDEsc',
-      SUPERVISOR_COMMENT = '$commentEsc',
-      SUPERVISOR_REPLY_DT = NOW()
-  WHERE ID = '$errorIDEsc'
-  LIMIT 1
-");
-
-if (!$query) {
-  echo mysqli_error($link);
-  exit;
-}
-
-echo "1";
-exit;
-?>
+echo '1';

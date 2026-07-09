@@ -1,6 +1,7 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -31,7 +32,7 @@ $res = mysqli_query($link, "DELETE FROM gym_schedule WHERE USERID='$userID' AND 
 $merr = mysqli_error($link);
 
 if ( !$res ) {
-  echo "<br>mysql_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 } 
 
 $query = mysqli_query($link, "SELECT USERID, START_DT FROM ADD_TIME WHERE DESCRIPTION = '$desc' AND STOP_DT = '0000-00-00 00:00:00'");
@@ -57,7 +58,7 @@ else {
         $surname = $row2["surname"];
     
         echo "<tr bgcolor=\"#ddffff\" bordercolor=\"#888888\" height=\"60px\">";
-        echo "<td width=490 class=\"add_time_sport\" valign=\"middle\" align=\"center\"><h2 class=\"full_name, sport\">$surname "." $firstname "." $lastname</h2></td>";
+echo "<td width=490 class=\"add_time_sport\" valign=\"middle\" align=\"center\"><h2 class=\"full_name, sport\">" . html_escape($surname . " " . $firstname . " " . $lastname) . "</h2></td>";
         echo "<td width=200 class=\"add_time_sport\" valign=\"middle\" align=\"center\"><h2 class=\"sport\">$time</h2></td>";
         echo "</tr>";
     }
@@ -231,7 +232,7 @@ else {
             }
         }
         echo "<tr bordercolor=\"#888888\" height=\"40px\">";
-        echo "<td width=450 class=\"add_time_sport\" valign=\"middle\" align=\"left\" style=\"padding-left:5px\"><h5>$surname4 "." $firstname4 "." $lastname4</h5></td>";
+echo "<td width=450 class=\"add_time_sport\" valign=\"middle\" align=\"left\" style=\"padding-left:5px\"><h5>" . html_escape($surname4 . " " . $firstname4 . " " . $lastname4) . "</h5></td>";
         echo "<td width=100 class=\"add_time_sport\" valign=\"middle\" align=\"left\" style=\"padding-left:35px\">$output_date</td>";
         echo "<td width=100 class=\"add_time_sport\" valign=\"middle\" align=\"center\"><h5>$time</h5></td>";
         echo "</tr>";

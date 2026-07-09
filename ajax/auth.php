@@ -1,24 +1,30 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../inc/session.php';
 header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
                 
 include __DIR__ . "/../php_tori/connect.php";
 include_once __DIR__ . "/../funcs.php";
+require_once __DIR__ . "/../inc/access.php";
+require_csrf_for_unsafe_request(true);
 
-$__login = mysqli_real_escape_string($link, $_POST['login']);   	       
-$__passwd = md5(md5(trim(mysqli_real_escape_string($link, $_POST['passwd'])))); 
+$__login = trim((string) ($_POST['login'] ?? ''));
+$__passwd = md5(md5(trim((string) ($_POST['passwd'] ?? ''))));
 
 mysqli_set_charset($link, "utf8");
 
-$query = mysqli_query($link, "SELECT id, rate, defaultStartTime, allowedDelayMinutes, userTimeZoneMins, dayTransitionTime, remoteWork FROM employees WHERE login = '$__login' AND passwd = '$__passwd'"); 
+$query = db_query(
+  $link,
+  'SELECT id, rate, defaultStartTime, allowedDelayMinutes, userTimeZoneMins, dayTransitionTime, remoteWork FROM employees WHERE login = ? AND passwd = ?',
+  'ss',
+  array($__login, $__passwd)
+);
 $merr = mysqli_error($link);
 
 if ( !$query ) 
 {
-  echo "<br>mysqli_error = $merr<br>";
+  echo database_error_message($link, __FILE__ . ':' . __LINE__);
 }
 else
 {
@@ -26,8 +32,8 @@ else
 
   if ( $vn == 1 )
   { 
-    echo "OK";
     $row = mysqli_fetch_assoc($query);
+    session_regenerate_id(true);
     $_SESSION['ss_id'] = $row["id"];
     $_SESSION['ss_rate'] = $row["rate"];
     $ss_defaultStartTime = $row["defaultStartTime"];	
@@ -45,8 +51,8 @@ else
     $_SESSION['ss_mode'] = 1;
     $_SESSION['ss_delay_show_save'] = 0;
     $_SESSION['ss_UserTimeZoneMins'] = $row["userTimeZoneMins"];
-    session_regenerate_id();
     $_SESSION['ss_sessid'] = session_id();
+    csrf_rotate_token();
     $retArr = get_current_datetime_in_timezone();
     $_SESSION['ss_UserTimeZoneStr'] = $retArr[5];
     $ss_dayTransitionTime = $row["dayTransitionTime"];
@@ -66,6 +72,7 @@ else
     $_SESSION['rep_start_stop_date_mode'] = 2;
 
     $_SESSION['ss_dayWasChanged'] = 0;
+    echo "OK";
   }
   else
   {

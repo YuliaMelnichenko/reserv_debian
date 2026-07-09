@@ -1,6 +1,11 @@
 <?php
 ob_start();
-session_start();
+require_once __DIR__ . '/inc/session.php';
+require_once __DIR__ . '/inc/access.php';
+require_page_superuser();
+include_once __DIR__ . '/funcs.php';
+include __DIR__ . '/php_tori/connect.php';
+save_last_location('accounting_errors_approvement.php');
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -19,22 +24,7 @@ echo "<body bgcolor=\"#ffffff\" >";
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
 
 <?php
-include_once __DIR__ . "/funcs.php";
-save_last_location("accounting_errors_approvement.php");
-auth();
-
-if (am_i_superuser($_SESSION['ss_id']) != 1) {
-  echo "<h5 class=\"big\">Доступ запрещен</h5>";
-  echo "</body>";
-  echo "</html>";
-  exit;
-}
-
-$userID_ = $_SESSION['ss_id'];
-
-include __DIR__ . "/php_tori/connect.php";
-mysqli_set_charset($link, "utf8");
-
+$userID_ = (int)$_SESSION['ss_id'];
 echo "<div align=\"left\">";
 
 echo "<table border=0>";
@@ -73,22 +63,13 @@ echo "<table border=0>";
           $img = "go1.png";
           $rowCount = 0;
 
-          $svIDEsc = mysqli_real_escape_string($link, $userID_);
+          $supervisedUserIDs = get_accounting_errors_supervised_user_ids($link, $userID_);
 
-          $query = mysqli_query($link, "
-            SELECT DISTINCT USERID
-            FROM GROUPS
-            WHERE SUPERVISORID = '$svIDEsc'
-              AND TYPE = 3
-            ORDER BY USERID
-          ");
-
-          if (!$query) {
-            echo "<tr><td colspan=7><h5 class=\"middle\">mysqli_error = " . mysqli_error($link) . "</h5></td></tr>";
+          if ($supervisedUserIDs === false) {
+            echo "<tr><td colspan=7><h5 class=\"middle\">Не удалось загрузить список сотрудников.</h5></td></tr>";
           }
           else {
-            while ($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
-              $userID = $row["USERID"];
+            foreach ($supervisedUserIDs as $userID) {
 
               sync_accounting_errors_for_user($link, $userID, $depthDays);
 
@@ -110,7 +91,7 @@ echo "<table border=0>";
 
               $rowCount++;
 
-              $userName = get_user_name_by_id($userID);
+              $userName = html_escape(get_user_name_by_id($userID));
               $muid = getMaskedUID(32, $userID);
               $uhref = "location.href='accounting_errors_approvement_user.php?mid=$muid'";
 

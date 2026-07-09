@@ -1,14 +1,11 @@
 <?php
 ob_start();
-session_start();
-
-////////////////////////////////////////////////////////
+require_once __DIR__ . '/inc/session.php';
 include_once __DIR__ . "/funcs.php";
+require_once __DIR__ . '/inc/access.php';
+save_last_location("time_add.php");
+require_page_staff_leaves_access();
 include __DIR__ . "/php_tori/connect.php";
-mysqli_set_charset($link, "utf8");
-save_last_location( "time_add.php" );
-auth();
-////////////////////////////////////////////////////////
 
 if (isset($_GET['action']) && $_GET['action'] === 'get' && isset($_GET['id'])) {
     header('Content-Type: application/json');
@@ -555,10 +552,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'archive') {
         );
 
         echo json_encode($rows, JSON_UNESCAPED_UNICODE);
-    } catch (Exception $e) {
-        echo json_encode([
-            'error' => $e->getMessage()
-        ], JSON_UNESCAPED_UNICODE);
+    } catch (Throwable $e) {
+        echo application_json_error('Staff leave archive at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
 
     exit;
@@ -599,11 +594,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'archive_excel_preview') {
             'rows' => $rows,
             'preview_limit' => 50
         ]);
-    } catch (Exception $e) {
-        echo json_encode([
-            'status' => 'error',
-            'message' => $e->getMessage()
-        ]);
+    } catch (Throwable $e) {
+        echo application_json_error('Staff leave archive preview at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
 
     exit;
@@ -634,19 +626,19 @@ if (isset($_GET['action']) && $_GET['action'] === 'archive_excel_export') {
         $eventTitle = getArchiveEventTitle($event);
 
         sendStaffLeavesArchiveXlsx($rows, $periodTitle, $employeeTitle, $eventTitle, $exportTime);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         while (ob_get_level()) {
             ob_end_clean();
         }
 
         header("Content-type: text/plain; charset=utf-8");
-        echo "Ошибка выгрузки: " . $e->getMessage();
+        echo application_error_message('Staff leave XLSX export at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
 
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'add') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add') {
     header('Content-Type: application/json');
 
     try {
@@ -696,7 +688,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'add') {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'update') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update') {
     header('Content-Type: application/json');
 
     try {
@@ -729,7 +721,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'update') {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'delete') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
     header('Content-Type: application/json');
 
     try {
@@ -1156,8 +1148,32 @@ echo "</div>";
         modal.style.display = 'flex';
     }
 
-    function loadArchive() {
-        currentType = 'Архив';
+    function confirmDelete (id) {
+        if (!confirm('Вы уверены, что хотите удалить запись?')) return;
+
+        fetch('staff_leaves.php', {
+            method: 'POST',
+            body: new URLSearchParams({
+                action: 'delete',
+                record_id: id
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showToast("✅ запись удалена");
+            } else {
+                alert('' + data.message);
+            }
+        })
+        .catch(err => {
+            console.error('Ошибка запроса: ', err);
+            alert('Сервер недоступен');
+        });
+    }
+
+function loadArchive() {
+    currentType = 'Архив';
 
     document.querySelectorAll('#event_buttons button.event-switch').forEach(btn => {
         btn.classList.remove('active');

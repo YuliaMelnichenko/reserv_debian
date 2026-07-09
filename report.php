@@ -1,6 +1,8 @@
 <?php
 ob_start();
-session_start();
+require_once __DIR__ . '/inc/session.php';
+require_once __DIR__ . '/inc/access.php';
+require_page_auth();
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -19,21 +21,7 @@ session_start();
 $report_start_date = "2013-01-01";
 $report_stop_date = "2013-08-01";
 
-$ip = $_SERVER['REMOTE_ADDR'];
-
-$read_mode = 0;
-
-if ( $ip == "192.168.100.50" OR $ip == "192.168.100.52" OR $ip == "192.168.100.54" OR $ip == "192.168.100.55" OR $ip == "192.100.100.55" )
-  $read_mode = 1;
-else{
-  if ( isset($_SESSION['ss_id']) )
-    $read_mode = 2;
-  else{
-    echo "Доступ запрещен!<br><br>";
-    echo "Для продолжения необходима авторизация на <a href=\"index.php\" class=\"ml\">на главной странице</a>";
-    die();                                                   
-  }
-}
+$read_mode = access_current_user_is_director() ? 1 : 2;
 
 include_once __DIR__ . "/funcs.php";
 
@@ -56,7 +44,7 @@ include_once __DIR__ . "/php_tori/connect.php";
   $query = mysqli_query($link, "SELECT * FROM work_dayoff order by date asc"); 
   $merr=mysqli_error($link);
   if ( !$query ) {
-    echo "<br>mysql_error = $merr<br>";
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else{
     $vn=mysqli_num_rows($query);
@@ -95,7 +83,7 @@ include_once __DIR__ . "/php_tori/connect.php";
     $merr = mysqli_error($link);
 
     if ( !$query2 ) {
-      echo "<br>mysql_error = $merr<br>";
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
     }
     else{
       $vn2=mysqli_num_rows($query2);
@@ -118,7 +106,7 @@ include_once __DIR__ . "/php_tori/connect.php";
     $query2 = mysqli_query($link, "SELECT * FROM employees where ID = '$temp_id'"); 
     $merr=mysqli_error($link);
     if ( !$query2 ) {
-      echo "<br>mysql_error = $merr<br>";
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
     }
     else{
       $vn2=mysqli_num_rows($query2);
@@ -145,7 +133,7 @@ include_once __DIR__ . "/php_tori/connect.php";
   echo "<td><h5 class=\"fio\">Дата</h5></td>";
   
   for ( $i = 0; $i < count($ids); $i++ ){
-    echo "<td><h5 class=\"fio\">".$surn[$i]." ".$fname[$i]." ".$lname[$i]."</h5></td>";
+    echo "<td><h5 class=\"fio\">" . html_escape($surn[$i] . " " . $fname[$i] . " " . $lname[$i]) . "</h5></td>";
   }
   echo "</tr>";
 
@@ -257,7 +245,7 @@ include_once __DIR__ . "/php_tori/connect.php";
         $query3 = mysqli_query($link, "SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = '$date_one' and user_id = '$ids[$i]' "); 
         $merr=mysqli_error($link);
         if ( !$query3 ) {
-          echo "<br>mysql_error = $merr<br>";
+          echo database_error_message($link, __FILE__ . ':' . __LINE__);
         }
         else{
           $vn3=mysqli_num_rows($query3);
