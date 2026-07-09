@@ -751,9 +751,19 @@ function mark_as_undeleted_add_time_for_user( addID ){
   }   	
 }
 
+function get_notification_filter_payload(){
+  var startInput = document.querySelector('input[name="start_date"]');
+  var stopInput = document.querySelector('input[name="stop_date"]');
+
+  return {
+    start_date: startInput ? startInput.value : '',
+    stop_date: stopInput ? stopInput.value : ''
+  };
+}
+
 function show_table(){
   if ( document.getElementById('add_times_table') ){
-    $.post('ajax/get_add_times_table.php', RetSWT1);                           
+    $.post('ajax/get_add_times_table.php', get_notification_filter_payload(), RetSWT1);
     function RetSWT1(dat1) {
       document.getElementById('add_times_table').innerHTML = dat1;              
     }
@@ -762,7 +772,7 @@ function show_table(){
 
 function show_pause_table(){
   if ( document.getElementById('pause_times_table') ){
-    $.post('ajax/get_pause_times_table.php', RetSWT1);  
+    $.post('ajax/get_pause_times_table.php', get_notification_filter_payload(), RetSWT1);
 
                          
     function RetSWT1(dat1) {
@@ -783,7 +793,7 @@ function show_pause_sport_table(){
 
 function show_delay_table(){
   if ( document.getElementById('delay_table') ){
-    $.post('ajax/get_delay_table.php', RetSWT1);                           
+    $.post('ajax/get_delay_table.php', get_notification_filter_payload(), RetSWT1);
     function RetSWT1(dat1) {
       document.getElementById('delay_table').innerHTML = dat1;
     }

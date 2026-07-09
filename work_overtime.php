@@ -388,28 +388,21 @@ echo "</td>";
 $wholeWidth = 780;
 echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width= $wholeWidth>";
 echo "<h5 class=\"dark\"><br>/Выгрузка сотрудников по переработкам<br></h5>";
+$filterRange = get_request_date_filter_range();
+$filterStartDate = $filterRange[0];
+$filterStopDate = $filterRange[1];
 ?>
 
 <div class="search_block">
     <label for="hours_input" style="font-weight: 700;">Минимум часов (с учетом обеда)</label>
     <input type="number" id="hours_input" min="0" step="1" value="9">
 
-    <label for="period_select" style="font-weight: 700; margin-left: 10px;">Период</label>
-    <select id="period_select">
-        <option value="week">За неделю</option>
-        <option value="month">За месяц</option>
-        <option value="quarter" selected>За квартал</option>
-        <option value="custom">Другой интревал</option>
-    </select>
+    <label for="custom_start" style="font-weight: 700; margin-left: 10px;">Период с</label>
+    <input type="date" id="custom_start" value="<?php echo html_escape($filterStartDate); ?>">
+    <label for="custom_end" style="font-weight: 700;">по</label>
+    <input type="date" id="custom_end" value="<?php echo html_escape($filterStopDate); ?>">
 
     <button id="btn_search" class="btn btn_primary">Найти</button><br>
-
-    <div id="custom_range_block" style="display: none; margin-top: 8px;">
-        <label for="custom_start" style="font-weight: 700;">С:</label>
-        <input type="date" id="custom_start" style="margin-right: 10px;">
-        <label for="custom_end" style="font-weight: 700;">По:</label>
-        <input type="date" id="custom_end">
-    </div>
 
 </div>
 
@@ -450,17 +443,13 @@ echo "<h5 class=\"dark\"><br>/Выгрузка сотрудников по пе�
 $(document).ready(function () {
     function loadList(hours) {
         hours = parseFloat(hours) || 9;
-        let period = $('#period_select').val();
-        let start = '', end = '';
+        let period = 'custom';
+        let start = $('#custom_start').val();
+        let end = $('#custom_end').val();
 
-        if (period === 'custom') {
-            start = $('#custom_start').val();
-            end = $('#custom_end').val();
-
-            if (!start || !end) {
-                $('#results_table tbody').html('<tr><td colspan="3">Укажите даты для поиска</td></tr>');
-                return;
-            }
+        if (!start || !end) {
+            $('#results_table tbody').html('<tr><td colspan="3">Укажите даты для поиска</td></tr>');
+            return;
         }
 
         $('#results_table tbody').html('<tr><td colspan="3">Загрузка...</td></tr>');
@@ -503,15 +492,9 @@ $(document).ready(function () {
         loadList(hours);
     });
 
-    $('#period_select').on('change', function() {
-        if ($(this).val() === 'custom') {
-            $('#custom_range_block').show();
-        } else {
-            $('#custom_range_block').hide();
-        }
+    $('#custom_start, #custom_end').on('change', function() {
         const hours = $('#hours_input').val();
         loadList(hours);
-
     });
 
     loadList($('#hours_input').val());
@@ -523,14 +506,10 @@ $(document).ready(function () {
 
 function showDetails(empId, hours, fioEncoded) {
     hours = parseFloat(hours) || 9;
-    const period = $('#period_select').val() || 'quarter';
+    const period = 'custom';
     var fio = decodeURIComponent(fioEncoded || '');
-    let start = '', end = '';
-
-    if (period === 'custom') {
-        start = $('#custom_start').val();
-        end = $('#custom_end').val();
-    }
+    let start = $('#custom_start').val();
+    let end = $('#custom_end').val();
     $('#modal_title').text('Сотрудник: ' + fio);
     $('#details_table tbody').html('<tr><td colspan="3">Загрузка...</td></tr>');
     $('#modal_overlay').show();

@@ -84,20 +84,26 @@ $user_allowedDelay = 30;
 
 get_user_defStartTime_and_allowedDelay( $userID, $user_defaultStartTime, $user_allowedDelay );
 $userName = get_user_name_by_id($userID);
+$filterRange = get_request_date_filter_range();
+$filterStartDate = $filterRange[0];
+$filterStopDate = $filterRange[1];
+$backUrl = append_date_filter_to_url("delay_approvement.php", $filterStartDate, $filterStopDate);
 
 $delayTimes = Array();
 
-$delayTimes = get_all_delay_info_by_user( $userID, $user_defaultStartTime, $user_allowedDelay );
+$delayTimes = get_all_delay_info_by_user( $userID, $user_defaultStartTime, $user_allowedDelay, $filterStartDate, $filterStopDate );
 
       if ( count( $delayTimes ) == 0 ){
         echo "<table id=\"add_time_approvement_table\" border=0>";
           echo "<tr>";
             echo "<td valign=\"middle\" width=1000 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";
             echo "<td width=262 valign=\"middle\" align=\"right\">";
-              echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='delay_approvement.php';\"><h5>Назад</h5></button>";
+              echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='$backUrl';\"><h5>Назад</h5></button>";
             echo "</td>";
           echo "</tr>";
         echo "</table>";
+        echo "<h5 class=\"big\"> Период просмотра: " . date("d.m.Y", strtotime($filterStartDate)) . " - " . date("d.m.Y", strtotime($filterStopDate)) . " </h5>";
+        render_notification_date_filter($filterStartDate, $filterStopDate, array("mid" => $mid));
 
         echo "<h5><br>Нет сведений!</h5>";
         echo "</td>";
@@ -115,15 +121,22 @@ echo "<table id=\"delay_approvement_table\" border=0>";
         echo "<tr>";
           echo "<td valign=\"middle\" width=1000 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";
           echo "<td width=262 valign=\"middle\" align=\"right\">";
-            echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='delay_approvement.php';\"><h5>Назад</h5></button>";
+            echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='$backUrl';\"><h5>Назад</h5></button>";
           echo "</td>";
         echo "</tr>";
       echo "</table>";
     echo "</td>";
   echo "</tr>";
   echo "<tr>";
+    echo "<td class=\"nopadding_s\">";
+      echo "<h5 class=\"big\"> Период просмотра: " . date("d.m.Y", strtotime($filterStartDate)) . " - " . date("d.m.Y", strtotime($filterStopDate)) . " </h5>";
+      render_notification_date_filter($filterStartDate, $filterStopDate, array("mid" => $mid));
+    echo "</td>";
+  echo "</tr>";
+  echo "<tr>";
     echo "<td class=\"nopadding\" width=1300 valign=\"middle\" align=\"left\">";
 
+      echo "<div class=\"notification-table-scroll notification-table-scroll-full\">";
       echo "<table border=1>";
       echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
 
@@ -260,6 +273,7 @@ echo "<table id=\"delay_approvement_table\" border=0>";
           echo "</td>";  
       }
       echo "</table>";
+      echo "</div>";
     echo "</td>";
   echo "</tr>";
 echo "</table>";

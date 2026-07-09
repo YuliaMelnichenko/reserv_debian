@@ -9,17 +9,16 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-$currentDate = get_current_datetime_in_timezone_str( 1, 0 );
-
 $userID_ = $_SESSION['ss_id']; 
+$filterRange = normalize_date_filter_range(
+  isset($_POST['start_date']) ? $_POST['start_date'] : null,
+  isset($_POST['stop_date']) ? $_POST['stop_date'] : null
+);
+$filterStartDate = $filterRange[0];
+$filterStopDate = $filterRange[1];
+list($filterStartDateTime, $filterStopDateTime) = get_date_filter_datetime_bounds($filterStartDate, $filterStopDate);
 
-$paramArr = get_dbsetup_param( 'pause_journal_deep_day' );
-$paramInt = (int)$paramArr[1];
-
-$today = date("d-m-Y");
-$dateForm = date("d.m.Y", strtotime("-$paramInt days"));
-
-echo "<h5 class=\"big\"> Глубина просмотра журнала (180 дней): $dateForm - $today </h5>";
+echo "<div class=\"notification-table-scroll notification-table-scroll-medium\">";
 echo "<table class=\"add_time\" border=1>";
 echo "<tr bgcolor=\"#DDDDDD\" bordercolor=\"#888888\">";
 echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Начало<br>(дата, время)</h5>"."</td>";
@@ -41,9 +40,11 @@ $query = mysqli_query($link, "SELECT * FROM ADD_TIME
                       USERID='$userID_'
                         AND
                       (
-                        STOP_DT > ADDDATE('$currentDate', INTERVAL -$paramInt DAY)
+                        STOP_DT >= '$filterStartDateTime'
                         OR STOP_DT = '0000-00-00 00:00:00'
                       )
+                        AND
+                      START_DT <= '$filterStopDateTime'
                         AND 
                       pause_mode = 1
                       ORDER BY ID DESC"); 
@@ -95,4 +96,5 @@ echo "<td width=190 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 clas
 }
 
 echo "</table>";
+echo "</div>";
 ?>
