@@ -1703,17 +1703,18 @@ function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime
       return $rets;
     }
  
-    $in_time_def = strtotime( $defauiltInTime );
     $in_time = 0;
 
     if ( $row1 = mysqli_fetch_assoc($query1) ){
       $in_time = $row1["in_dt"];
     }
 
-    $delayVal = 0; 
+    $delayArr = get_delay_value($in_time, $defauiltInTime, $allowedDelay);
+    $isThereDelay = $delayArr[0];
+    $delayVal = $delayArr[1];
 
-    if ( strtotime( $in_time ) > $in_time_def ){
-      $delayVal = strtotime( $in_time ) - $in_time_def;
+    if ($isThereDelay != 1) {
+      continue;
     }
 
     $tempRets = Array();

@@ -22,10 +22,9 @@ include_once __DIR__ . "/../funcs.php";
 
 get_user_defStartTime_and_allowedDelay( $userID, $user_defaultStartTime, $user_allowedDelay );
 
-$newInTimeVal = strtotime($inTime);
-$inTimeVal = strtotime($user_defaultStartTime) + $user_allowedDelay * 60;
+$delayArr = get_delay_value($inTime, $user_defaultStartTime, $user_allowedDelay);
 
-if ( $newInTimeVal > $inTimeVal )
+if ( $delayArr[0] == 1 )
 {
   echo "1";
 }
