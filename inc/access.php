@@ -247,7 +247,7 @@ function access_current_user_has_id($allowedUserIDs)
 
 function access_current_user_can_manage_staff_leaves()
 {
-    return access_current_user_has_id(array(1, 2, 3, 30, 31, 50, 148, 500));
+    return access_current_user_has_id(array(1, 2, 3, 30, 31, 50, 148, 175, 500));
 }
 
 function access_current_user_can_view_work_overtime()
@@ -336,6 +336,45 @@ function require_ajax_supervisor_for_user($targetUserID, $groupType)
     require_ajax_auth();
 
     if (!access_current_user_supervises_user($targetUserID, $groupType)) {
+        deny_ajax_access(403, 'FORBIDDEN');
+    }
+}
+
+function require_ajax_accounting_error_supervisor($errorID, $groupType)
+{
+    require_ajax_auth();
+
+    $errorID = (int)$errorID;
+    $groupType = (int)$groupType;
+
+    if ($errorID <= 0) {
+        deny_ajax_access(400, 'INVALID_ERROR');
+    }
+
+    if (access_current_user_is_director()) {
+        return;
+    }
+
+    $link = access_open_database();
+
+    if (!$link) {
+        deny_ajax_access(500, 'DATABASE_UNAVAILABLE');
+    }
+
+    $result = db_query(
+        $link,
+        'SELECT 1
+         FROM accounting_errors ae
+         INNER JOIN GROUPS g ON g.USERID = ae.USERID
+         WHERE ae.ID = ? AND g.SUPERVISORID = ? AND TRIM(g.TYPE) = ?
+         LIMIT 1',
+        'iii',
+        array($errorID, (int)$_SESSION['ss_id'], $groupType)
+    );
+    $allowed = $result && mysqli_fetch_assoc($result);
+    mysqli_close($link);
+
+    if (!$allowed) {
         deny_ajax_access(403, 'FORBIDDEN');
     }
 }
