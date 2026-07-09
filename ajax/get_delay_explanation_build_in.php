@@ -60,7 +60,15 @@ else
       $inTime = $delayRet[9];
 
 
-      $allowedInTimeStr = substr( $user_defaultStartTime, 0, 6 ).(string)($user_allowedDelay);
+      $allowedInTimeStr = $user_defaultStartTime;
+      $inTimeVal = strtotime($inTime);
+
+      if ($inTimeVal !== false && strtotime($user_defaultStartTime) !== false) {
+        $allowedInTimeStr = date(
+          "H:i:s",
+          strtotime(date("Y-m-d", $inTimeVal) . " " . $user_defaultStartTime) + ((int)$user_allowedDelay * 60)
+        );
+      }
 
       $delayValStr = "$inTime > $allowedInTimeStr<br>= ".format_time_d_hhmmss_pure( $delayVal ); 
 

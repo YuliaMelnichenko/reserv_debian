@@ -439,23 +439,27 @@ if ( $vn == 0 ) {
   $user_defaultStartTimeWithDelayVal = $retArr[4];
   $user_remoteWork = $retArr[5];
 
-  if ( $currentTimeHHMMSS <= $user_defaultStartTimeWithDelayVal || $user_remoteWork == 1 ) {
+  $currentDelayArr = get_delay_value($currentDateTime, $user_defaultStartTime, $user_allowedDelay);
+  $currentDelayVal = $currentDelayArr[1];
+
+  if ( $currentDelayArr[0] != 1 || $user_remoteWork == 1 ) {
     $_SESSION['ss_there_is_delay'] = 0;
+    $_SESSION['ss_delay_show_save'] = 0;
     $_SESSION['ss_delay_duration_val'] = 0;
-    $_SESSION['ss_delay_duration'] = "00:00:00";
+    $_SESSION['ss_delay_duration'] = 0;
 
     echo "<td>";
       echo "<button id=\"reg_in_work_button\" style=\"font-size: 110%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"reg_in_work();\">Зарегистрировать время прихода</button>";
     echo "</td>";
   }
   else {
-    $delayDuration = $currentTimeHHMMSS - strtotime($user_defaultStartTime);
+    $delayDuration = $currentDelayVal;
     $delayDurationStr = gmdate( "H:i:s", $delayDuration );
 
     $_SESSION['ss_there_is_delay'] = 2;
     $_SESSION['ss_delay_show_save'] = 1;
     $_SESSION['ss_delay_duration_val'] = $delayDuration;
-    $_SESSION['ss_delay_duration'] = $delayDurationStr;
+    $_SESSION['ss_delay_duration'] = $delayDuration;
 
     echo "<td>";
       echo "<button style=\"font-size: 110%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f79398; border:1px solid #888888;\" onclick=\"reg_in_work_with_delay();\">Зарегистрировать приход с опозданием!</button>";
@@ -474,6 +478,12 @@ else {
   $out_dt = $row1["out_dt"];
   $state_db = (int)$row1["state"];
   $visitID = (int)$row1["ID"];
+  $inDelayArr = get_delay_value($in_dt, $user_defaultStartTime, $user_allowedDelay);
+  $isThereDelayVal = $inDelayArr[0] == 1 ? 2 : 0;
+  $_SESSION['ss_there_is_delay'] = $isThereDelayVal;
+  $_SESSION['ss_delay_show_save'] = $isThereDelayVal == 2 ? 1 : 0;
+  $_SESSION['ss_delay_duration_val'] = $inDelayArr[1];
+  $_SESSION['ss_delay_duration'] = $inDelayArr[1];
 
   if ($state_db == 3 && $eat_start_dt == "0000-00-00 00:00:00") {
     mysqli_query($link, "
