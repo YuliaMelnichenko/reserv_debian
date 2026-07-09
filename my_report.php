@@ -546,7 +546,6 @@ echo "</font>";
 echo "</div>";
 ?>
 
-<script type="text/javascript" src="lib/jquery/jquery.js"></script> 
 <script type="text/javascript" charset="utf-8"> 
 
 function update_clock(){
@@ -561,6 +560,6 @@ function update_clock(){
 var timerId=setInterval( "update_clock()", 10000 );      
 
 </script>
-<script type="text/javascript" src="js/tory.js"></script>
+<script type="text/javascript" src="js/tory.js?v=20260709"></script>
 </body>
 </html> 
