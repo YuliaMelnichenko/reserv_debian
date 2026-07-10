@@ -87,7 +87,7 @@ $useBkColor = 0;
 
     if ( $approved == 0 )
     { 
-      $content1 = "<h5 class=\"big\">на рассмотрении</h5>";
+      $content1 = journal_status_label("на рассмотрении", "big");
       $cellColor = $bkColor; 
     }
     else if ( $approved == -1 )
@@ -98,7 +98,7 @@ $useBkColor = 0;
       $content1 = "<table cellpadding=\"0\" cellspacing=\"0\" border=0>";
         $content1 .= "<tr>";
           $content1 .= "<td width=\"80%\" align=\"left\" >";
-            $content1 .= "<h5 class=\"big\">$approvedStr</h5>";
+            $content1 .= journal_status_label($approvedStr, "big");
           $content1 .= "</td>"; 
           $content1 .= "<td width=\"20%\" align=\"right\" >";
             $content1 .= "<h5 class=\"big\">$ta_approved_str_add1</h5>";
@@ -116,7 +116,7 @@ $useBkColor = 0;
       $content1 = "<table cellpadding=\"0\" cellspacing=\"0\" border=0>";
         $content1 .= "<tr>";
           $content1 .= "<td width=\"80%\" align=\"left\" >";
-            $content1 .= "<h5 class=\"big\">$approvedStr</h5>";
+            $content1 .= journal_status_label($approvedStr, "big");
           $content1 .= "</td>"; 
           $content1 .= "<td width=\"20%\" align=\"right\" >";
             $content1 .= "<h5 class=\"big\">$ta_approved_str_add1</h5>";
