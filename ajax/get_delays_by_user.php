@@ -112,12 +112,12 @@ echo "<table id=\"delay_approvement_table\" border=0>";
 
         if ( $retDelay_approved == 0 )
         { 
-          $content1 = "<h5 class=\"middleBold_r\">на рассмотрении</h5>";
+          $content1 = journal_status_label("на рассмотрении");
           $delRestore = "1";  
         }
         else if ( $retDelay_approved == 1 )
         { 
-          $content1 = "<h5 class=\"middleBold_r\">принято</h5>";
+          $content1 = journal_status_label("принято");
           $bgcolor = "#AAFFAA";
           $accBtnDisabled = "disabled";
           $accBtnImg = "acceptDis_small.bmp";
@@ -125,7 +125,7 @@ echo "<table id=\"delay_approvement_table\" border=0>";
         }   
         else if ( $retDelay_approved == -1 )
         { 
-          $content1 = "<h5 class=\"middleBold_r\">отклонено</h5>";
+          $content1 = journal_status_label("отклонено");
           $bgcolor = "#FFAAAA";
           $refBtnDisabled = "disabled";
           $refBtnImg = "refuseDis_small.bmp";
@@ -133,7 +133,7 @@ echo "<table id=\"delay_approvement_table\" border=0>";
         }
         else if ( $retDelay_approved == 99 OR $retDelay_approved == 100 OR $retDelay_approved == 101 )
         { 
-          $content1 = "<h5 class=\"big\">отклонено</h5>";
+          $content1 = journal_status_label("отклонено", "big");
           $bgcolor = "#DDDDDD";
           $accBtnDisabled = "disabled";
           $refBtnDisabled = "disabled";
