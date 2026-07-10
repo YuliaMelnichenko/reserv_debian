@@ -8,8 +8,27 @@ require_page_work_overtime_access();
 include __DIR__ . "/php_tori/connect.php";
 
 function getPeriodBounds (string $period): array {
-    [$startDate, $stopDate] = get_date_filter_period_range($period);
-    return [$startDate . ' 00:00:00', $stopDate . ' 23:59:59'];
+    $today = date('Y-m-d 23:59:59');
+
+    switch ($period) {
+        case 'week':
+            $start = date('Y-m-d 00:00:00', strtotime('monday this week'));
+            // $end = $today;
+            break;
+        case 'month':
+            $start = date('Y-m-01 00:00:00');
+            // $end = $today;
+            break;
+        case 'quarter':
+        default:
+            $year = intval(date('Y'));
+            $month = intval(date('n'));
+            $quarter = intval(ceil($month / 3));
+            $start_month = ($quarter - 1) * 3 + 1;
+            $start = date("$year-$start_month-01 00:00:00");
+            break;
+    }
+    return [$start, $today];
 }
 
 function formatHours($hours) {
@@ -32,9 +51,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
 
     try {
         $hours = isset($_GET['hours']) ? floatval($_GET['hours']) : 9.0;
-        $period = $_GET['period'] ?? '4';
+        $period = $_GET['period'] ?? 'quarter';
 
-        if ($period === '7') {
+        if ($period === 'custom') {
             $start = $_GET['start'] ?? '';
             $end = $_GET['end'] ?? '';
 
@@ -194,9 +213,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
         $hours = isset($_GET['hours']) ? floatval($_GET['hours']) : 9.0;
         if ($hours <= 0) $hours = 9.0;
 
-        $period = $_GET['period'] ?? '4';
+        $period = $_GET['period'] ?? 'quarter';
 
-        if ($period === '7') {
+        if ($period === 'custom') {
             $start = $_GET['start'] ?? '';
             $end = $_GET['end'] ?? '';
 
@@ -369,35 +388,28 @@ echo "</td>";
 $wholeWidth = 780;
 echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width= $wholeWidth>";
 echo "<h5 class=\"dark\"><br>/Выгрузка сотрудников по переработкам<br></h5>";
-$filterRange = get_request_date_filter_range();
-$filterStartDate = $filterRange[0];
-$filterStopDate = $filterRange[1];
-$selectedPeriod = get_request_date_filter_period();
-$manualPeriodDisplay = ($selectedPeriod == "7") ? "inline-flex" : "none";
 ?>
 
 <div class="search_block">
     <label for="hours_input" style="font-weight: 700;">Минимум часов (с учетом обеда)</label>
     <input type="number" id="hours_input" min="0" step="1" value="9">
 
-    <label for="period_filter" style="font-weight: 700; margin-left: 10px;">Период:</label>
-    <select id="period_filter" class="flat">
-        <option value="1" <?php echo $selectedPeriod == "1" ? "selected" : ""; ?>>С начала недели</option>
-        <option value="2" <?php echo $selectedPeriod == "2" ? "selected" : ""; ?>>С начала месяца</option>
-        <option value="3" <?php echo $selectedPeriod == "3" ? "selected" : ""; ?>>С начала предыдущего месяца</option>
-        <option value="4" <?php echo $selectedPeriod == "4" ? "selected" : ""; ?>>С начала квартала</option>
-        <option value="5" <?php echo $selectedPeriod == "5" ? "selected" : ""; ?>>Предыдущий квартал</option>
-        <option value="7" <?php echo $selectedPeriod == "7" ? "selected" : ""; ?>>Задать вручную</option>
+    <label for="period_select" style="font-weight: 700; margin-left: 10px;">Период</label>
+    <select id="period_select">
+        <option value="week">За неделю</option>
+        <option value="month">За месяц</option>
+        <option value="quarter" selected>За квартал</option>
+        <option value="custom">Другой интревал</option>
     </select>
 
-    <span id="manual_period_fields" style="display: <?php echo $manualPeriodDisplay; ?>; align-items: center; gap: 6px;">
-        <label for="custom_start" style="font-weight: 700;">с</label>
-        <input type="date" id="custom_start" value="<?php echo html_escape($filterStartDate); ?>">
-        <label for="custom_end" style="font-weight: 700;">по</label>
-        <input type="date" id="custom_end" value="<?php echo html_escape($filterStopDate); ?>">
-    </span>
-
     <button id="btn_search" class="btn btn_primary">Найти</button><br>
+
+    <div id="custom_range_block" style="display: none; margin-top: 8px;">
+        <label for="custom_start" style="font-weight: 700;">С:</label>
+        <input type="date" id="custom_start" style="margin-right: 10px;">
+        <label for="custom_end" style="font-weight: 700;">По:</label>
+        <input type="date" id="custom_end">
+    </div>
 
 </div>
 
@@ -436,32 +448,26 @@ $manualPeriodDisplay = ($selectedPeriod == "7") ? "inline-flex" : "none";
 <script type="text/javascript" src="js/tory.js?v=20260709"></script>
 <script>
 $(document).ready(function () {
-    function getSelectedPeriodData() {
-        const period = $('#period_filter').val() || '4';
-        const start = $('#custom_start').val();
-        const end = $('#custom_end').val();
-
-        return {period: period, start: start, end: end};
-    }
-
-    function toggleManualPeriodFields() {
-        $('#manual_period_fields').css('display', $('#period_filter').val() === '7' ? 'inline-flex' : 'none');
-    }
-
     function loadList(hours) {
         hours = parseFloat(hours) || 9;
-        const periodData = getSelectedPeriodData();
+        let period = $('#period_select').val();
+        let start = '', end = '';
 
-        if (periodData.period === '7' && (!periodData.start || !periodData.end)) {
-            $('#results_table tbody').html('<tr><td colspan="3">Укажите даты для поиска</td></tr>');
-            return;
+        if (period === 'custom') {
+            start = $('#custom_start').val();
+            end = $('#custom_end').val();
+
+            if (!start || !end) {
+                $('#results_table tbody').html('<tr><td colspan="3">Укажите даты для поиска</td></tr>');
+                return;
+            }
         }
 
         $('#results_table tbody').html('<tr><td colspan="3">Загрузка...</td></tr>');
 
         $.ajax({
             url: 'work_overtime.php',
-            data: {action: 'load', hours: hours, period: periodData.period, start: periodData.start, end: periodData.end},
+            data: {action: 'load', hours: hours, period: period, start: start, end: end},
             dataType: 'json',
             success: function(resp) {
                 if (resp.status !== 'success') {
@@ -497,18 +503,17 @@ $(document).ready(function () {
         loadList(hours);
     });
 
-    $('#custom_start, #custom_end').on('change', function() {
+    $('#period_select').on('change', function() {
+        if ($(this).val() === 'custom') {
+            $('#custom_range_block').show();
+        } else {
+            $('#custom_range_block').hide();
+        }
         const hours = $('#hours_input').val();
         loadList(hours);
+
     });
 
-    $('#period_filter').on('change', function() {
-        toggleManualPeriodFields();
-        const hours = $('#hours_input').val();
-        loadList(hours);
-    });
-
-    toggleManualPeriodFields();
     loadList($('#hours_input').val());
 
     $('#modal_close, #modal_overlay').on('click', function() {
@@ -518,10 +523,14 @@ $(document).ready(function () {
 
 function showDetails(empId, hours, fioEncoded) {
     hours = parseFloat(hours) || 9;
-    const period = $('#period_filter').val() || '4';
+    const period = $('#period_select').val() || 'quarter';
     var fio = decodeURIComponent(fioEncoded || '');
-    let start = $('#custom_start').val();
-    let end = $('#custom_end').val();
+    let start = '', end = '';
+
+    if (period === 'custom') {
+        start = $('#custom_start').val();
+        end = $('#custom_end').val();
+    }
     $('#modal_title').text('Сотрудник: ' + fio);
     $('#details_table tbody').html('<tr><td colspan="3">Загрузка...</td></tr>');
     $('#modal_overlay').show();

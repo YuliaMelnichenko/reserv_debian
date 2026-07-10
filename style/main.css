@@ -825,53 +825,6 @@ h6.small_help_2 {
   flex-direction: column;
 }
 
-.notification-filter {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 6px 0 8px;
-  padding: 6px;
-  width: fit-content;
-  border: 1px solid #888888;
-  background: #eef5ff;
-  font-family: Arial, sans-serif;
-  font-size: 12px;
-}
-
-.notification-filter input[type="date"] {
-  height: 22px;
-  font-size: 12px;
-}
-
-.notification-filter label,
-.notification-filter-manual {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.notification-filter select {
-  height: 24px;
-  font-size: 12px;
-}
-
-.notification-filter button {
-  height: 24px;
-  padding: 2px 10px;
-  background-color: #f8d888;
-  border: 1px solid #888888;
-  cursor: pointer;
-}
-
-.notification-filter-reset {
-  color: #0142aa;
-  text-decoration: none;
-}
-
-.notification-filter-reset:hover {
-  text-decoration: underline;
-}
-
 .notification-table-scroll {
   display: inline-block;
   width: auto;

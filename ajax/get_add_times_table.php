@@ -10,12 +10,6 @@ include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
 $userID = $_SESSION['ss_id']; 
-$filterRange = normalize_date_filter_range(
-  isset($_POST['start_date']) ? $_POST['start_date'] : null,
-  isset($_POST['stop_date']) ? $_POST['stop_date'] : null
-);
-$filterStartDate = $filterRange[0];
-$filterStopDate = $filterRange[1];
 
 echo "<table border=0>";
 echo "<tr bgcolor=\"#ddeedd\" bordercolor=\"#888888\">";
@@ -47,7 +41,7 @@ $color1 = "#ddffff";
 $color2 = "#ddeedd";
 $color3 = "#ffffff";
 
-$addTimeInfo = get_all_add_work_info_by_user( $userID, 0, $filterStartDate, $filterStopDate );
+$addTimeInfo = get_all_add_work_info_by_user( $userID, 0 );
 
 for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
 {

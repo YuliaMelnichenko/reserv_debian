@@ -84,14 +84,11 @@ $user_allowedDelay = 30;
 
 get_user_defStartTime_and_allowedDelay( $userID, $user_defaultStartTime, $user_allowedDelay );
 $userName = get_user_name_by_id($userID);
-$filterRange = get_request_date_filter_range();
-$filterStartDate = $filterRange[0];
-$filterStopDate = $filterRange[1];
-$backUrl = append_date_filter_to_url("delay_approvement.php", $filterStartDate, $filterStopDate);
+$backUrl = "delay_approvement.php";
 
 $delayTimes = Array();
 
-$delayTimes = get_all_delay_info_by_user( $userID, $user_defaultStartTime, $user_allowedDelay, $filterStartDate, $filterStopDate );
+$delayTimes = get_all_delay_info_by_user( $userID, $user_defaultStartTime, $user_allowedDelay );
 
       if ( count( $delayTimes ) == 0 ){
         echo "<table id=\"add_time_approvement_table\" border=0>";
@@ -102,9 +99,6 @@ $delayTimes = get_all_delay_info_by_user( $userID, $user_defaultStartTime, $user
             echo "</td>";
           echo "</tr>";
         echo "</table>";
-        echo "<h5 class=\"big\"> Период просмотра: " . date("d.m.Y", strtotime($filterStartDate)) . " - " . date("d.m.Y", strtotime($filterStopDate)) . " </h5>";
-        render_notification_date_filter($filterStartDate, $filterStopDate, array("mid" => $mid));
-
         echo "<h5><br>Нет сведений!</h5>";
         echo "</td>";
         echo "<tr>";
@@ -125,12 +119,6 @@ echo "<table id=\"delay_approvement_table\" border=0>";
           echo "</td>";
         echo "</tr>";
       echo "</table>";
-    echo "</td>";
-  echo "</tr>";
-  echo "<tr>";
-    echo "<td class=\"nopadding_s\">";
-      echo "<h5 class=\"big\"> Период просмотра: " . date("d.m.Y", strtotime($filterStartDate)) . " - " . date("d.m.Y", strtotime($filterStopDate)) . " </h5>";
-      render_notification_date_filter($filterStartDate, $filterStopDate, array("mid" => $mid));
     echo "</td>";
   echo "</tr>";
   echo "<tr>";
