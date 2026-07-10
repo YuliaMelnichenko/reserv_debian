@@ -17,10 +17,11 @@ else
 
 require_ajax_self_or_supervisor($userId, 3);
 
-$ss_delay_duration = (int)$_SESSION['ss_delay_duration'];
-
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+
+$ss_delay_duration = (int)$_SESSION['ss_delay_duration'];
+$ss_delay_duration_db = format_time_d_hhmmss_pure($ss_delay_duration);
 
 $currentDateArr = get_current_datetime_in_timezone();
 $currentDate = $currentDateArr[2];
@@ -62,8 +63,8 @@ if (!$delayExists)
     $link,
     "INSERT INTO Delays (ID, date, duration, userID, supervisorID, explaneDesk, acceptorID, penaltyID, penaltyReply, status)
      VALUES (?, ?, ?, ?, -1, 'Без объяснения', -1, -1, '', 0)",
-    'isii',
-    array($newID, $currentDate, $ss_delay_duration, $userId)
+    'issi',
+    array($newID, $currentDate, $ss_delay_duration_db, $userId)
   );
 
   if (!$query)

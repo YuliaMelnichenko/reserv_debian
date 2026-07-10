@@ -160,7 +160,9 @@ function set_explanation( mode, delayID ){
       else if ( dat1 == 0 ){
         alert( "Невозможно изменить уже заквитированных объяснений к опозданиям" );
       }
-      get_time_registration_div_content();
+      if (typeof get_time_registration_div_content === 'function') {
+        get_time_registration_div_content();
+      }
     }
   } 
   if ( document.getElementById('delay_explanation_delay') ){ document.getElementById('delay_explanation_delay').style.display='none'; }
