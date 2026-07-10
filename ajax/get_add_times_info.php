@@ -77,16 +77,16 @@ foreach( $addRets as $addRet )
     
   $bgColor = "";
   
-  if ( $approved == 0 ){ $approvedStr = "на рассмотрении"; $fontSt = "small"; }
+  if ( $approved == 0 ){ $approvedStr = journal_status_label("на рассмотрении", "small"); }
   else if ( $approved == -1 )
   { 
     $addMsg1 = " <img title=\"Решение принял: $superUserName\" src=\"img/superuserBad.png\">";
-    $approvedStr = "отклонено $addMsg1"; $bgColor = "#FFAAAA";  
+    $approvedStr = journal_status_label("отклонено", "small") . $addMsg1; $bgColor = "#FFAAAA";
   }
   else if ( $approved == 1 )
   { 
     $addMsg1 = " <img title=\"Решение принял: $superUserName\" src=\"img/superuserGood.png\">";
-    $approvedStr = "принято $addMsg1"; $bgColor = "#AAFFAA";
+    $approvedStr = journal_status_label("принято", "small") . $addMsg1; $bgColor = "#AAFFAA";
   }
 
 
@@ -101,7 +101,7 @@ echo "<h5 class=\"small1\">" . html_escape($reasonStr) . "</h5>";
 echo "<h5 class=\"small1\">" . html_escape($description) . "</h5>";
     echo "</td>";  
     echo "<td bgcolor=\"$bgColor\" bordercolor=\"#888888\" valign=\"middle\" align=\"center\" width = 100>";
-      echo "<h5 class=\"$fontSt\">$approvedStr"."</h5>";
+      echo $approvedStr;
     echo "</td>";  
   echo "</tr>";
 }
