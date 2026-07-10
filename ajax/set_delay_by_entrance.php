@@ -58,7 +58,13 @@ $delayExists = mysqli_num_rows($query) > 0;
 
 if (!$delayExists)
 {
-  $query = db_execute($link, "INSERT INTO Delays VALUES (?, ?, ?, ?, -1, 'Без объяснения', -1, -1, '', 0)", 'isii', array($newID, $currentDate, $ss_delay_duration, $userId));
+  $query = db_execute(
+    $link,
+    "INSERT INTO Delays (ID, date, duration, userID, supervisorID, explaneDesk, acceptorID, penaltyID, penaltyReply, status)
+     VALUES (?, ?, ?, ?, -1, 'Без объяснения', -1, -1, '', 0)",
+    'isii',
+    array($newID, $currentDate, $ss_delay_duration, $userId)
+  );
 
   if (!$query)
   {

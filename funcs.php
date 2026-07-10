@@ -727,8 +727,33 @@ function DayInc( $day )
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function add_time_datetime_sql($dateTimeColumn, $dateColumn, $timeColumn)
+function add_time_legacy_datetime_columns_exist($link)
 {
+  static $exists = null;
+
+  if ($exists !== null) {
+    return $exists;
+  }
+
+  $exists = false;
+  $result = mysqli_query($link, "SHOW COLUMNS FROM ADD_TIME WHERE Field IN ('STARTDATE', 'STARTTIME', 'STOPTIME')");
+
+  if ($result && mysqli_num_rows($result) == 3) {
+    $exists = true;
+  }
+
+  return $exists;
+}
+
+function add_time_datetime_sql($dateTimeColumn, $dateColumn = null, $timeColumn = null, $link = null)
+{
+  if ($link === null || $dateColumn === null || $timeColumn === null || !add_time_legacy_datetime_columns_exist($link)) {
+    return "CASE
+      WHEN $dateTimeColumn IS NOT NULL AND $dateTimeColumn <> '0000-00-00 00:00:00' THEN $dateTimeColumn
+      ELSE '0000-00-00 00:00:00'
+    END";
+  }
+
   return "CASE
     WHEN $dateTimeColumn IS NOT NULL AND $dateTimeColumn <> '0000-00-00 00:00:00' THEN $dateTimeColumn
     WHEN $dateColumn IS NOT NULL AND $dateColumn <> '0000-00-00'
@@ -827,7 +852,7 @@ function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNoti
   $notificationCount = 0;
   $currentDayNotificationCount = 0;
   $currentDate = date('Y-m-d');
-  $startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME');
+  $startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME', $link);
 
   $query = mysqli_query($link, "SELECT $startExpr AS START_DT_EFFECTIVE
                                 FROM ADD_TIME a
@@ -869,7 +894,7 @@ function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNot
   $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
   $paramArr = get_dbsetup_param( 'add_time_journal_deep_day' );
   $paramInt = (-1)*$paramArr[1];
-  $stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME');
+  $stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME', $link);
 
   $query = mysqli_query($link, "SELECT APPROVED
                                 FROM ADD_TIME a
@@ -2175,16 +2200,17 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
   return $results;
 }
 
-function get_all_add_work_info_by_user( $userID, $pauseMode )
+function get_all_add_work_info_by_user( $userID, $pauseMode = 0 )
 {
   $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
   $paramArr = get_dbsetup_param( 'add_time_journal_deep_day' );
   $paramInt = (-1)*$paramArr[1];
-  $startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME');
-  $stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME');
   
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
+  $startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME', $link);
+  $stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME', $link);
+  $results = Array();
 
   $query = mysqli_query($link, "SELECT DISTINCT a.ID,
                          $startExpr AS START_DT_EFFECTIVE,
@@ -2208,9 +2234,8 @@ function get_all_add_work_info_by_user( $userID, $pauseMode )
   if ( !$query ) 
   {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    return $results;
   }                     
-
-  $results = Array();
 
   while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
   {
