@@ -8,10 +8,11 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 
 $userID_ = (int)$_SESSION['ss_id'];
 
-$ss_delay_duration = (int)$_SESSION['ss_delay_duration'];
-
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+
+$ss_delay_duration = (int)$_SESSION['ss_delay_duration'];
+$ss_delay_duration_db = format_time_d_hhmmss_pure($ss_delay_duration);
 
 $currentDateArr = get_current_datetime_in_timezone();
 $currentDate = $currentDateArr[2];
@@ -98,8 +99,8 @@ if (!$delay)
     $link,
     "INSERT INTO Delays (ID, date, duration, userID, supervisorID, explaneDesk, acceptorID, penaltyID, penaltyReply, status)
      VALUES (?, ?, ?, ?, ?, ?, -1, -1, '', 0)",
-    'isiiis',
-    array($newID, $currentDate, $ss_delay_duration, $userID_, $superuserID, $delayExplanation)
+    'issiis',
+    array($newID, $currentDate, $ss_delay_duration_db, $userID_, $superuserID, $delayExplanation)
   );
 
   if (!$query)

@@ -77,8 +77,9 @@ if ($row = mysqli_fetch_array($supervisor_query, MYSQLI_ASSOC)) {
 
 $daysRange = get_days_range_inclusive($add_time_part_start_date, $add_time_part_stop_date);
 $newDaysRange = array();
+$includeAllDays = ((int)$add_time_part_base == 5);
 
-if ($exclude_weekend_holidays == 1) {
+if ($exclude_weekend_holidays == 1 && !$includeAllDays) {
   $weekendsHolidays = get_workdays_holidays_bay_range($add_time_part_start_date, $add_time_part_stop_date);
 
   foreach ($daysRange as $rangeDay) {

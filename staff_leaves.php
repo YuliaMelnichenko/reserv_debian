@@ -980,7 +980,7 @@ echo "</div>";
         loadLeaves(currentType);
     });
 
-    function renderLeaveRowsWithMergedNames(tbody, data) {
+    function renderLeaveRowsWithMergedNames(tbody, data, showActions = true) {
         tbody.innerHTML = "";
 
         if (!Array.isArray(data) || data.length === 0) {
@@ -1014,17 +1014,24 @@ echo "</div>";
                     `;
                 }
 
+                const actionsCell = showActions
+                    ? `
+                        <button id="btn_red" onclick="editLeave(${row.id})" title="Редактировать">
+                            <img src="img/red2.png" alt="Редактировать" width="20" height="20">
+                        </button>
+                        <button id="btn_delete_leave" onclick="confirmDelete(${row.id})" title="Удалить">
+                            <img src="img/delete_small.bmp" alt="Удалить" width="14" height="14">
+                        </button>
+                    `
+                    : '';
+
                 tr.innerHTML = `
                     ${nameCell}
                     <td class="${borderClass}">${formatDate(row.start_date)}</td>
                     <td class="${borderClass}">${formatDate(row.stop_date)}</td>
                     <td class="${borderClass}">${row.total_days}</td>
                     <td class="${borderClass}">${escapeHtml(row.event)}</td>
-                    <td class="${borderClass}">
-                        <button id="btn_red" onclick="editLeave(${row.id})" title="Редактировать">
-                            <img src="img/red2.png" alt="Редактировать" width="20" height="20">
-                        </button>
-                    </td>
+                    <td class="${borderClass}">${actionsCell}</td>
                 `;
 
                 tbody.appendChild(tr);
@@ -1248,7 +1255,7 @@ function loadArchive() {
                 return;
             }
 
-            renderLeaveRowsWithMergedNames(tbody, data);
+            renderLeaveRowsWithMergedNames(tbody, data, false);
             table.style.display = 'table';
         })
         .catch(err => {

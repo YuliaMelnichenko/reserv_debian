@@ -2372,7 +2372,7 @@ function get_add_time_duration_by_times_ex( $addTimeInfo ){
     for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ ){
       $addInf = $addTimeInfo[$idx];
 
-      if ( $addInf[4] == 1 AND $addInf[7] == 0 ) {
+      if ( $addInf[4] != -1 AND $addInf[4] != 99 AND $addInf[4] != 100 AND $addInf[4] != 101 AND $addInf[7] == 0 ) {
         if ( strtotime( $addInf[1] ) > strtotime( $addInf[0] ) ){
           $result = $result + ( strtotime( $addInf[1] ) - strtotime( $addInf[0] ) );
         }  
