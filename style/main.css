@@ -857,7 +857,7 @@ h6.small_help_2 {
 }
 
 .notification-table-scroll tr:first-child td {
-  position: sticky;
+  /* position: sticky; */
   top: 0;
   z-index: 2;
 }
@@ -1094,7 +1094,7 @@ div.report_head_name {
   min-height: 53px;
   line-height: 1.15;
   font-family: Arial, sans-serif;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .report_head_surname {
@@ -2843,8 +2843,8 @@ h5.activ_text {
 }
 
 .accounting-error-attention {
-  width: 14px;
-  height: 14px;
+  width: 17px;
+  height: 17px;
   margin-left: 4px;
   vertical-align: -2px;
 }

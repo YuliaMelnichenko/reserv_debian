@@ -520,7 +520,6 @@ if (
 
     echo "<script type=\"text/javascript\">";
     echo "window.toriStopDTStr = " . json_encode($stopDTStr) . ";";
-    echo "console.log('toriStopDTStr from PHP:', window.toriStopDTStr);";
     echo "</script>";
     
     $_date = date('Y-m-d');
