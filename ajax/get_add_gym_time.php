@@ -37,10 +37,10 @@ $content .= "</div>";
 
 $content .= "<div id=\"buttonBox\">";
 $content .= "<div class=\"add_train_btn\">";
-$content .= "<button style=\"cursor: pointer; font-size: 100%; width:90px; height:25px; background-color:#ff7979; border:1px solid #888888;\" onclick=\"close_add_sport_time();\">Закрыть</button><br>";
+$content .= "<button class=\"journal-action-button journal-action-button-compact journal-action-button-close\" onclick=\"close_add_sport_time();\">Закрыть</button><br>";
 $content .= "</div>";
 $content .= "<div class=\"add_train_btn\">";
-$content .= "<button style=\"cursor: pointer; font-size: 100%; width:90px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"save_entry('$example', '$allTime');\">Добавить</button><br>";
+$content .= "<button class=\"journal-action-button journal-action-button-compact\" onclick=\"save_entry('$example', '$allTime');\">Добавить</button><br>";
 $content .= "</div>";
 $content .= "</div>";
 

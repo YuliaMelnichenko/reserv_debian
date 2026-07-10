@@ -125,11 +125,11 @@ $content .= "<table cellpadding=\"0\" cellspacing=\"0\" border=0 width=1065>";
 $content .= "<tr>";
 
 $content .= "<td bordercolor=\"#000000\" width=\"50%\" valign=\"middle\" align=\"left\">";
-$content .= "<button style=\"cursor: pointer; font-size: 100%; width:178px; height:25px; background-color:#ff7979; border:1px solid #888888;\" onclick=\"cancel_part_time_add();\">Закрыть</button><br>";
+$content .= "<button class=\"journal-action-button journal-action-button-wide journal-action-button-close\" onclick=\"cancel_part_time_add();\">Закрыть</button><br>";
 $content .= "</td>";
 
 $content .= "<td bordercolor=\"#000000\" width=\"50%\" valign=\"middle\" align=\"right\">";
-$content .= "<button style=\"cursor: pointer; font-size: 100%; width:178px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"part_time_add( $byAlert );\">Добавить</button><br>";
+$content .= "<button class=\"journal-action-button journal-action-button-wide\" onclick=\"part_time_add( $byAlert );\">Добавить</button><br>";
 $content .= "</td>";
 
 $content .= "</tr>";

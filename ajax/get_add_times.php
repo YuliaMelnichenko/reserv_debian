@@ -19,11 +19,11 @@ $content .= "<br><table border=0 width=1080>";
 $content .= "<tr>";
 
 $content .= "<td bordercolor=\"#000000\" width=\"500px\" valign=\"middle\" align=\"left\">";
-$content .= "<button style=\"cursor: pointer; font-size: 100%; width:178px; height:25px; background-color:#ff7979; border:1px solid #888888;\" onclick=\"cancel_time_add(); location.reload();\">Закрыть</button><br>";
+$content .= "<button class=\"journal-action-button journal-action-button-wide journal-action-button-close\" onclick=\"cancel_time_add(); location.reload();\">Закрыть</button><br>";
 $content .= "</td>";
 
 $content .= "<td bordercolor=\"#000000\" width=\"520px\" valign=\"middle\" align=\"right\">";
-$content .= "<button style=\"cursor: pointer; font-size: 100%; width:178px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"add_addition_time();\">Добавить</button><br>";
+$content .= "<button class=\"journal-action-button journal-action-button-wide\" onclick=\"add_addition_time();\">Добавить</button><br>";
 $content .= "</td>";
 
 $content .= "</tr>";
@@ -137,7 +137,7 @@ $useBkColor = 0;
     $content .= $content1;
     $content .= "</td>";
     $content .= "<td class=\"add_time\" valign=\"middle\" align=\"center\" width = \"92px\">";
-    $content .= "<button $titleDel $disabled style=\"font-size: 90%; width:80px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"part_time_del( $id );\">Удалить</button><br>";
+    $content .= "<button $titleDel $disabled class=\"journal-action-button journal-action-button-small-delete\" onclick=\"part_time_del( $id );\">Удалить</button><br>";
     $content .= "</td>";
     $content .= "</tr>";
     if ( $useBkColor == 0 )
