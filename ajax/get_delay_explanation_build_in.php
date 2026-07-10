@@ -74,10 +74,12 @@ else
 
       $superUserName = get_sv_name_by_userid( $userID_ );
       $superUserReply = $delayRet[5];
+      $bgcolor = "";
+      $statusStr = "";
 
       if ( $status == 0 )
       { 
-      $statusStr = "<h5 class=\"middle\">на рассмотрении</h5>"; 
+      $statusStr = journal_status_label("на рассмотрении", "middle");
       }
         else if ( $status == -1 )
       { 
@@ -87,7 +89,7 @@ else
         $content1 = "<table class=\"slim\" border=0>";
           $content1 .= "<tr>";
             $content1 .= "<td class=\"nopadding_s\" width=\"60\" align=\"left\" >";
-              $content1 .= "<h5 class=\"middle\">$approvedStr</h5>";
+              $content1 .= journal_status_label($approvedStr, "middle");
             $content1 .= "</td>"; 
             $content1 .= "<td class=\"nopadding\" width=\"40\" align=\"right\" >";
               $content1 .= "<h5 class=\"middle\">$ta_approved_str_add1$ta_approved_str_add2</h5>";
@@ -104,7 +106,7 @@ else
         $content1 = "<table class=\"slim\" border=0>";
           $content1 .= "<tr>";
             $content1 .= "<td class=\"nopadding_s\" width=\"60\" align=\"left\" >";
-              $content1 .= "<h5 class=\"middle\">$approvedStr</h5>";
+              $content1 .= journal_status_label($approvedStr, "middle");
             $content1 .= "</td>"; 
             $content1 .= "<td class=\"nopadding\" width=\"40\" align=\"right\" >";
               $content1 .= "<h5 class=\"middle\">$ta_approved_str_add1$ta_approved_str_add2</h5>";

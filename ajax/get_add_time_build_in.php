@@ -85,7 +85,7 @@ else
 
     if ( $approved == 0 )
     { 
-      $approvedStr = "<h5 class=\"middle\">на рассмотрении</h5>"; 
+      $approvedStr = journal_status_label("на рассмотрении", "middle");
     }
     else if ( $approved == -1 )
     { 
@@ -95,7 +95,7 @@ else
       $content1 = "<table class=\"slim\" border=0>";
         $content1 .= "<tr>";
           $content1 .= "<td class=\"nopadding_s\" width=\"60\" align=\"left\" >";
-            $content1 .= "<h5 class=\"middle\">$approvedStr</h5>";
+            $content1 .= journal_status_label($approvedStr, "middle");
           $content1 .= "</td>"; 
           $content1 .= "<td class=\"nopadding\" width=\"40\" align=\"right\" >";
             $content1 .= "<h5 class=\"middle\">$ta_approved_str_add1$ta_approved_str_add2</h5>";
@@ -112,7 +112,7 @@ else
       $content1 = "<table class=\"slim\" border=0>";
         $content1 .= "<tr>";
           $content1 .= "<td class=\"nopadding_s\" width=\"60\" align=\"left\" >";
-            $content1 .= "<h5 class=\"middle\">$approvedStr</h5>";
+            $content1 .= journal_status_label($approvedStr, "middle");
           $content1 .= "</td>"; 
           $content1 .= "<td class=\"nopadding\" width=\"40\" align=\"right\" >";
             $content1 .= "<h5 class=\"middle\">$ta_approved_str_add1$ta_approved_str_add2</h5>";
@@ -173,7 +173,7 @@ echo "<h5 class=\"small\">" . html_escape($reasonStr) . "</h5>";
 echo "<h5 class=\"small1\">" . html_escape($description) . "</h5>";
       echo "</td>";  
       echo "<td nowrap width = 120 class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
-        echo "<h5 class=\"middle\">$approvedStr"."</h5>";
+        echo journal_status_label($approvedStr, "middle");
       echo "</td>";  
     echo "</tr>";
   }
