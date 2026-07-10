@@ -34,9 +34,9 @@ echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
     echo "<td class=\"nopadding_s\">";
       echo "<table class=\"slim\" border=0>";
         echo "<tr>";
-          echo "<td class=\"nopadding\" valign=\"middle\" width=473 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";
+          echo "<td class=\"nopadding\" valign=\"middle\" width=473 align=\"left\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5></td>";
           echo "<td class=\"nopadding\" width=10 valign=\"middle\" align=\"right\">";
-            echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"pause_go_back();\"><h5>Назад</h5></button>";
+            echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"pause_go_back();\"><h5>Назад</h5></button>";
           echo "</td>";
         echo "</tr>";
       echo "</table>";
@@ -57,10 +57,9 @@ echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
   
       $colorMode = 1;
       $color1 = "#ddffff";
-      $color2 = "#ddeedd";
       $color3 = "#ffffff";
 
-      $tempAddTimes = get_all_add_work_info_by_user( $userID, 0 );
+      $tempAddTimes = get_all_add_work_info_by_user( $userID, 1 );
 
       $addTimes = Array();
 
@@ -74,8 +73,7 @@ echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
 
       foreach( $addTimes as $addTime )
       {
-        $ta_id = $addTime[8];
-        $ta_start_date = $addTime[9];
+        $ta_start_date = date("Y-m-d", strtotime($addTime[0]));
         $ta_start_time = $addTime[0];
         $ta_stop_time = $addTime[1];
         $ta_duration = $addTime[6];
