@@ -87,7 +87,7 @@ foreach( $delays as $delay )
 
   if ( $delStatus == 0 )
   { 
-    $approvedStr = "на рассмотрении";
+    $approvedStr = journal_status_label("на рассмотрении");
     $cellColor = ""; 
     $buttonAdd1 = "";
     $buttonAdd2 = "onclick=\"delay_set('$delID', '$userID_');\"";
@@ -95,7 +95,7 @@ foreach( $delays as $delay )
   }
   else if ( $delStatus == -1 )
   { 
-    $approvedStr = "отклонено"; 
+    $approvedStr = journal_status_label("отклонено");
     $cellColor = "#FFAAAA"; 
     $buttonAdd1 = "disabled";
     $buttonAdd2 = "";
@@ -103,7 +103,7 @@ foreach( $delays as $delay )
   }
   else if ( $delStatus == 1 )
   { 
-    $approvedStr = "принято"; 
+    $approvedStr = journal_status_label("принято");
     $cellColor = "#AAFFAA"; 
     $buttonAdd1 = "disabled";
     $buttonAdd2 = "";
@@ -119,7 +119,7 @@ foreach( $delays as $delay )
 echo "<td width=200 bgcolor=\"$agreedColor\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
 echo "<td width=200 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($acceptorName) . "</h5></td>";
   echo "<td width=120 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($delAcceptorReply) . "</h5></td>";
-  echo "<td width=130 bgcolor=\"$cellColor\" valign=\"middle\" align=\"center\">"."<h5>$approvedStr</h5>"."</td>";
+  echo "<td width=130 bgcolor=\"$cellColor\" valign=\"middle\" align=\"center\">$approvedStr</td>";
   echo "<td width=160 valign=\"middle\" align=\"center\">";
     echo "<button class=\"journal-action-button journal-action-button-delay\" $buttonAdd1 $buttonAdd2 $buttonAdd3 name=\"nextBtn\">Внести объяснение</button>";
   echo "</td>";
