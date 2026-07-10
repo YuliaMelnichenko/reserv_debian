@@ -25,7 +25,7 @@ echo "<body bgcolor=\"#ffffff\" >";
 </script>
 
 <?php
-$userID_ = $_SESSION['ss_id']; 
+$userID_ = (int)$_SESSION['ss_id'];
 
 echo "<div align=\"left\">";
 
@@ -61,7 +61,12 @@ echo "<table border=0>";
 
     mysqli_set_charset($link, "utf8");
 
-    $query = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = '$userID_' AND TYPE = 4 "); 
+    $query = db_query(
+      $link,
+      'SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = ? AND TYPE = ? ORDER BY USERID',
+      'ii',
+      array($userID_, 4)
+    );
     if (!$query)
     {
       echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -70,7 +75,7 @@ echo "<table border=0>";
     {
       while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
       {  
-        $userID = $row["USERID"];
+        $userID = (int)$row["USERID"];
         $userName = get_user_name_by_id($userID);
 
         $mid = getMaskedUID( 32, $userID );
@@ -82,11 +87,11 @@ echo "<table border=0>";
         get_pause_notif_counts( $userID, $notificationCount, $currentDayNotificationCount );
 
         echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-        echo "<td width = 250 class=\"add_time\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$userName</h5>"."</td>";
+        echo "<td width = 250 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"middle\">" . html_escape($userName) . "</h5></td>";
         echo "<td width = 45 class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$notificationCount</h5>"."</td>";
         echo "<td width = 120 class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$currentDayNotificationCount</h5>"."</td>";
         echo "<td width = 80 class=\"add_time\" valign=\"middle\" align=\"center\">";
-          echo "<button id = \"explBtn\" title = \"Просмотреть\" style=\"padding: 0px 0px 0px 0px; background-color:#ffffff; border:0px solid #888888;\" onclick=\"$uhref\";\"><img src=\"img/$img\"></button>";
+          echo "<button class=\"journal-view-button\" id=\"explBtn\" title=\"Просмотреть\" onclick=\"$uhref\"><img src=\"img/$img\"></button>";
         echo "</td>";
         echo "</tr>";
 

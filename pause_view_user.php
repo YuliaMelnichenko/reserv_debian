@@ -84,9 +84,9 @@ echo "<table border=0>";
 
 echo "<table id=\"pause_approvement_table\" border=0>";
   echo "<tr>";
-     echo "<td valign=\"middle\" width=604 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";                                                                                                    
+     echo "<td valign=\"middle\" width=604 align=\"left\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5></td>";
      echo "<td width=10 valign=\"middle\" align=\"right\">";
-       echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='$backUrl';\"><h5>Назад</h5></button>";
+       echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"location.href='$backUrl';\"><h5>Назад</h5></button>";
      echo "</td>";
   echo "</tr>";
 echo "</table>";
@@ -102,9 +102,9 @@ echo "<table id=\"pause_approvement_table\" border=0>";
     echo "<td class=\"nopadding_s\">";
       echo "<table border=0>";
         echo "<tr>";
-          echo "<td valign=\"middle\" width=604 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";
+          echo "<td valign=\"middle\" width=604 align=\"left\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5></td>";
           echo "<td width=10 valign=\"middle\" align=\"right\">";
-            echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='$backUrl';\"><h5>Назад</h5></button>";
+            echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"location.href='$backUrl';\"><h5>Назад</h5></button>";
           echo "</td>";
         echo "</tr>";
       echo "</table>";
@@ -126,7 +126,6 @@ echo "<table id=\"pause_approvement_table\" border=0>";
   
       $colorMode = 1;
       $color1 = "#ddffff";
-      $color2 = "#ddeedd";
       $color3 = "#ffffff";
 
       $tempAddTimes = get_all_add_work_info_by_user( $userID, 1 );
@@ -144,7 +143,6 @@ echo "<table id=\"pause_approvement_table\" border=0>";
       foreach( $addTimes as $addTime )
       {
 
-        $ta_id = $addTime[8];
         $ta_start_dt = $addTime[0];
         $ta_stop_dt = $addTime[1];
         $ta_duration = $addTime[6];

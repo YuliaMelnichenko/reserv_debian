@@ -3430,6 +3430,12 @@ h5.activ_time {
   background: transparent;
 }
 
+.journal-view-button {
+  padding: 0;
+  background-color: #ffffff;
+  border: 0 solid #888888;
+}
+
 #accountingErrorModalWindow,
 #accountingErrorStatusModalWindow {
   width: 320px;

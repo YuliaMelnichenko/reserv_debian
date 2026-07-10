@@ -38,7 +38,7 @@ function ta_delete( delID )
 </script>
 
 <?php
-$SUID = $_SESSION['ss_id']; 
+$SUID = (int)$_SESSION['ss_id'];
 
 echo "<div align=\"left\">";
 
@@ -76,7 +76,12 @@ $color = "#ddffff";
 $img = "go1.png";
 
 mysqli_set_charset($link, "utf8");
-$query = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = '$SUID' AND TYPE = 0 order by USERID"); 
+$query = db_query(
+  $link,
+  'SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = ? AND TYPE = ? ORDER BY USERID',
+  'ii',
+  array($SUID, 0)
+);
 if (!$query)
 {
   echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -85,7 +90,7 @@ else
 {
   while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
   {  
-    $userID = $row["USERID"];
+    $userID = (int)$row["USERID"];
     $userName = get_user_name_by_id($userID);
 
     $notificationCount = 0;
@@ -103,14 +108,14 @@ else
     if ( $newNotificationCount > 0 ){ $cellStype = "middleBlue1"; }
 
     echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-    echo "<td class=\"add_time\" width = 250 valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$userName</h5>"."</td>";
+    echo "<td class=\"add_time\" width = 250 valign=\"middle\" align=\"left\"><h5 class=\"middle\">" . html_escape($userName) . "</h5></td>";
     echo "<td class=\"add_time\" width = 60 valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$notificationCount</h5>"."</td>";
     echo "<td class=\"add_time\" width = 80 valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$acceptedNotificationCount</h5>"."</td>";
     echo "<td class=\"add_time\" width = 105 valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$refusedNotificationCount</h5>"."</td>";
     echo "<td class=\"add_time\" width = 90 valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$deletedNotificationCount</h5>"."</td>";
     echo "<td class=\"add_time\" width = 60 valign=\"middle\" align=\"center\">"."<h5 class=\"$cellStype\">$newNotificationCount</h5>"."</td>";
     echo "<td class=\"add_time\" width = 105 valign=\"middle\" align=\"center\">";
-      echo "<button id = \"explBtn\" title = \"Просмотреть\" style=\"padding: 0px 0px 0px 0px; background-color:#ffffff; border:0px solid #888888;\" onclick=\"$uhref\";\"><img src=\"img/$img\"></button>";
+      echo "<button class=\"journal-view-button\" id=\"explBtn\" title=\"Просмотреть\" onclick=\"$uhref\"><img src=\"img/$img\"></button>";
     echo "</td>";
     echo "</tr>";
 
