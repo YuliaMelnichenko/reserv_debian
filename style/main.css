@@ -3414,6 +3414,22 @@ h5.activ_time {
   height: 20px;
 }
 
+.journal-back-button {
+  width: 73px;
+  height: 25px;
+  padding: 5px;
+  background-color: #f8d888;
+  border: 1px solid #888888;
+}
+
+.journal-icon-button {
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 0 solid #888888;
+  background: transparent;
+}
+
 #accountingErrorModalWindow,
 #accountingErrorStatusModalWindow {
   width: 320px;

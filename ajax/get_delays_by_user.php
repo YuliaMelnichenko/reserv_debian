@@ -39,9 +39,9 @@ echo "<table id=\"delay_approvement_table\" border=0>";
     echo "<td class=\"nopadding_s\">";
       echo "<table border=0>";
         echo "<tr>";
-          echo "<td valign=\"middle\" width=950 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";
+          echo "<td valign=\"middle\" width=950 align=\"left\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5></td>";
           echo "<td width=10 valign=\"middle\" align=\"right\">";
-            echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"delay_go_back();\"><h5>Назад</h5></button>";
+            echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"delay_go_back();\"><h5>Назад</h5></button>";
           echo "</td>";
         echo "</tr>";
       echo "</table>";
@@ -66,7 +66,6 @@ echo "<table id=\"delay_approvement_table\" border=0>";
   
       $colorMode = 1;
       $color1 = "#ddffff";
-      $color2 = "#ddeedd";
       $color3 = "#ffffff";
 
       $delayTimes = Array();
@@ -75,7 +74,7 @@ echo "<table id=\"delay_approvement_table\" border=0>";
 
       foreach( $delayTimes as $delayTime )
       {
-        $retDelay_id = $delayTime[0];
+        $retDelay_id = (int)$delayTime[0];
         $retDelay_superuserID = $delayTime[1];
         $retDelay_agreed = $delayTime[2];
         $retDelay_description = $delayTime[3];
@@ -91,6 +90,7 @@ echo "<table id=\"delay_approvement_table\" border=0>";
         $acceptorName = get_superuser_name_by_id( $retDelay_acceptorID );  
 
         $bgcolor = "";
+        $bgcolor1 = "";
         $accBtnDisabled = "";
         $refBtnDisabled = "";
 
@@ -113,7 +113,6 @@ echo "<table id=\"delay_approvement_table\" border=0>";
         if ( $retDelay_approved == 0 )
         { 
           $content1 = "<h5 class=\"middleBold_r\">на рассмотрении</h5>";
-          $bgcolor = $bkColor; 
           $delRestore = "1";  
         }
         else if ( $retDelay_approved == 1 )
@@ -171,12 +170,12 @@ echo "<table id=\"delay_approvement_table\" border=0>";
             echo "<table border=0>";
               echo "<tr>";
                 echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
-                  echo "<button onclick=\"accept_delay_for_user(" . (int) $retDelay_id . ", " . html_escape(js_encode($retDelay_acceptor_description)) . ", " . (int) $retDelay_penalty_id . ", " . html_escape(js_encode($retDelay_start_date)) . ", " . (int) $userID . ");\" $accBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                  echo "<button class=\"journal-icon-button\" onclick=\"accept_delay_for_user(" . (int) $retDelay_id . ", " . html_escape(js_encode($retDelay_acceptor_description)) . ", " . (int) $retDelay_penalty_id . ", " . html_escape(js_encode($retDelay_start_date)) . ", " . (int) $userID . ");\" $accBtnDisabled>";
                     echo "<img title=\"Принять\" src=\"img/$accBtnImg\">";                   
                   echo "</button>";
                 echo "</td>";
                 echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
-                  echo "<button onclick=\"refuse_delay_for_user(" . (int) $retDelay_id . ", " . html_escape(js_encode($retDelay_acceptor_description)) . ", " . (int) $retDelay_penalty_id . ", " . html_escape(js_encode($retDelay_start_date)) . ", " . (int) $userID . ");\" $refBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                  echo "<button class=\"journal-icon-button\" onclick=\"refuse_delay_for_user(" . (int) $retDelay_id . ", " . html_escape(js_encode($retDelay_acceptor_description)) . ", " . (int) $retDelay_penalty_id . ", " . html_escape(js_encode($retDelay_start_date)) . ", " . (int) $userID . ");\" $refBtnDisabled>";
                     echo "<img title=\"Отклонить\" src=\"img/$refBtnImg\">";                   
                   echo "</button>";
                 echo "</td>";
@@ -185,13 +184,13 @@ echo "<table id=\"delay_approvement_table\" border=0>";
                 echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
                   if ( $delRestore == 1 )
                   { 
-                    echo "<button onclick=\"mark_as_deleted_delay_for_user(" . (int) $retDelay_id . ");\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                    echo "<button class=\"journal-icon-button\" onclick=\"mark_as_deleted_delay_for_user(" . (int) $retDelay_id . ");\">";
                       echo "<img title=\"Удалить\" src=\"img/delete_small.bmp\">";                   
                     echo "</button>";
                   }
                   else
                   {
-                    echo "<button onclick=\"mark_as_undeleted_delay_for_user(" . (int) $retDelay_id . ");\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                    echo "<button class=\"journal-icon-button\" onclick=\"mark_as_undeleted_delay_for_user(" . (int) $retDelay_id . ");\">";
                       echo "<img title=\"Восстановить\" src=\"img/restore_small.bmp\">";                   
                     echo "</button>";
                   }

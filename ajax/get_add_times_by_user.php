@@ -10,7 +10,6 @@ include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
 $_SESSION['add_time_page_mode'] = 2;
-$add_time_journal_deep = $_SESSION['add_time_journal_deep'];
 
 $userID = isset($_POST['user']) ? (int) $_POST['user'] : 0;
 
@@ -35,9 +34,9 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
     echo "<td class=\"nopadding_s\">";
       echo "<table border=0>";
         echo "<tr>";
-          echo "<td valign=\"middle\" width=1014 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";
+          echo "<td valign=\"middle\" width=1014 align=\"left\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5></td>";
           echo "<td width=10 valign=\"middle\" align=\"right\">";
-            echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"add_time_go_back();\"><h5>Назад</h5></button>";
+            echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"add_time_go_back();\"><h5>Назад</h5></button>";
           echo "</td>";
         echo "</tr>";
       echo "</table>";
@@ -62,7 +61,6 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
   
       $colorMode = 1;
       $color1 = "#ddffff";
-      $color2 = "#ddeedd";
       $color3 = "#ffffff";
 
       $addTimeInfo = get_all_add_work_info_by_user( $userID );
@@ -71,10 +69,10 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
       {
         $addInf = $addTimeInfo[$idx];
 
-        $ta_id = $addInf[8];
+        $ta_id = (int)$addInf[8];
         $ta_start_dt = $addInf[0];
         $ta_stop_dt = $addInf[1];
-        $ta_duration = $addTime[6];
+        $ta_duration = $addInf[6];
 
         $ta_reason_description = $addInf[11];
         $ta_description = $addInf[3];
@@ -82,14 +80,11 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
         $ta_approved = $addInf[4];
         $ta_superuser = $addInf[5];
         
-        $ta_approved_str = "На рассмотрении";
-
         $superUserName = get_superuser_name_by_id( $ta_superuser );
 
         if ( $ta_approved == 0 )
         { 
           $approvedStr = "<h5 class=\"middleBold_r\">на рассмотрении</h5>";
-          $cellColor = $bkColor; 
         }
         else if ( $ta_approved == 1 )
         { 
@@ -116,8 +111,6 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
           $color = $color3;
           $colorMode = 0;
         }
-
-        $buttonAdd1 = "";
 
         $bgcolor = "";
         $accBtnDisabled = "";
@@ -168,12 +161,12 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
           echo "<table border=0>";
             echo "<tr>";
               echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
-                echo "<button onclick=\"accept_add_time_for_user(" . (int) $ta_id . ", " . html_escape(js_encode($ta_SUdescription)) . ");\" $accBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                echo "<button class=\"journal-icon-button\" onclick=\"accept_add_time_for_user(" . (int) $ta_id . ", " . html_escape(js_encode($ta_SUdescription)) . ");\" $accBtnDisabled>";
                   echo "<img title=\"Принять\" src=\"img/$accBtnImg\">";                   
                 echo "</button>";
               echo "</td>";
               echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=0>";
-                echo "<button onclick=\"refuse_add_time_for_user(" . (int) $ta_id . ", " . html_escape(js_encode($ta_SUdescription)) . ");\" $refBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                echo "<button class=\"journal-icon-button\" onclick=\"refuse_add_time_for_user(" . (int) $ta_id . ", " . html_escape(js_encode($ta_SUdescription)) . ");\" $refBtnDisabled>";
                   echo "<img title=\"Отклонить\" src=\"img/$refBtnImg\">";                   
                 echo "</button>";
               echo "</td>";
@@ -182,13 +175,13 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
               echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
                 if ( $delRestore == 1 )
                 { 
-                  echo "<button onclick=\"mark_as_deleted_add_time_for_user(" . (int) $ta_id . ");\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                  echo "<button class=\"journal-icon-button\" onclick=\"mark_as_deleted_add_time_for_user(" . (int) $ta_id . ");\">";
                     echo "<img title=\"Удалить\" src=\"img/delete_small.bmp\">";                   
                   echo "</button>";
                 }
                 else
                 {
-                  echo "<button onclick=\"mark_as_undeleted_add_time_for_user(" . (int) $ta_id . ");\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                  echo "<button class=\"journal-icon-button\" onclick=\"mark_as_undeleted_add_time_for_user(" . (int) $ta_id . ");\">";
                     echo "<img title=\"Восстановить\" src=\"img/restore_small.bmp\">";                   
                   echo "</button>";
                 }
