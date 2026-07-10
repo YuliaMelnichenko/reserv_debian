@@ -3393,6 +3393,27 @@ h5.activ_time {
   color: #ffffff;
 }
 
+.journal-action-button {
+  cursor: pointer;
+  font-size: 80%;
+  height: 25px;
+  background-color: #f8d888;
+  border: 1px solid #888888;
+}
+
+.journal-action-button-add {
+  width: 150px;
+}
+
+.journal-action-button-delete {
+  width: 100px;
+}
+
+.journal-action-button-delay {
+  width: 140px;
+  height: 20px;
+}
+
 #accountingErrorModalWindow,
 #accountingErrorStatusModalWindow {
   width: 320px;

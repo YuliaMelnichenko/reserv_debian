@@ -15,7 +15,7 @@ echo "<table border=0>";
 echo "<tr bgcolor=\"#ddeedd\" bordercolor=\"#888888\">";
 
 echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" height = 30>";
-echo "<button style=\" cursor: pointer; font-size: 80%; width:150px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"as_add_time();\">Добавить время</button><br>";
+echo "<button class=\"journal-action-button journal-action-button-add\" onclick=\"as_add_time();\">Добавить время</button><br>";
 echo "</td>";    
 echo "</tr>";    
 echo "<tr>";    
@@ -121,7 +121,7 @@ echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 clas
 echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_SUdescription) . "</h5></td>";
   echo "<td class=\"add_time\" width=115 bgcolor=\"$bgcolor\" valign=\"middle\" align=\"center\">$approvedStr</td>";
   echo "<td class=\"add_time\" width=105 valign=\"middle\" align=\"center\">";
-    echo "<button style=\"font-size: 80%; width:100px; height:25px; background-color:#f8d888; border:1px solid #888888;\" $buttonAdd1 $buttonAdd2 $buttonAdd3 name=\"nextBtn\">Удалить</button>";
+    echo "<button class=\"journal-action-button journal-action-button-delete\" $buttonAdd1 $buttonAdd2 $buttonAdd3 name=\"nextBtn\">Удалить</button>";
   echo "</td>";
   echo "</tr>";
 }
