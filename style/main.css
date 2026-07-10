@@ -2989,13 +2989,6 @@ h5.activ_time {
   padding: 1px 4px;
 }
 
-#btn_delete_leave {
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 1px 4px;
-}
-
 #btn_del {
   cursor: pointer; 
   background: none;

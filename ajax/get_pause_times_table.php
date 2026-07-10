@@ -15,8 +15,8 @@ $paramArr = get_dbsetup_param( 'pause_journal_deep_day' );
 $paramInt = (int)$paramArr[1];
 $today = date("d-m-Y");
 $dateForm = date("d.m.Y", strtotime("-$paramInt days"));
-$startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME');
-$stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME');
+$startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME', $link);
+$stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME', $link);
 
 echo "<h5 class=\"big\"> Глубина просмотра журнала (180 дней): $dateForm - $today </h5>";
 echo "<div class=\"notification-table-scroll notification-table-scroll-medium\">";

@@ -96,7 +96,8 @@ if (!$delay)
   $newID = $lastDelay ? (int)$lastDelay['ID'] + 1 : 1;
   $query = db_execute(
     $link,
-    "INSERT INTO Delays VALUES (?, ?, ?, ?, ?, ?, -1, -1, '', 0)",
+    "INSERT INTO Delays (ID, date, duration, userID, supervisorID, explaneDesk, acceptorID, penaltyID, penaltyReply, status)
+     VALUES (?, ?, ?, ?, ?, ?, -1, -1, '', 0)",
     'isiiis',
     array($newID, $currentDate, $ss_delay_duration, $userID_, $superuserID, $delayExplanation)
   );

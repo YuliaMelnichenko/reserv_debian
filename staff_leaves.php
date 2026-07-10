@@ -1024,9 +1024,6 @@ echo "</div>";
                         <button id="btn_red" onclick="editLeave(${row.id})" title="Редактировать">
                             <img src="img/red2.png" alt="Редактировать" width="20" height="20">
                         </button>
-                        <button id="btn_delete_leave" onclick="confirmDelete(${row.id})" title="Удалить">
-                            <img src="img/delete_small.bmp" alt="Удалить" width="14" height="14">
-                        </button>
                     </td>
                 `;
 
