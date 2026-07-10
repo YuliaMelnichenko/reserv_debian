@@ -3405,6 +3405,25 @@ h5.activ_time {
   width: 150px;
 }
 
+.journal-action-button-wide {
+  width: 178px;
+  font-size: 100%;
+}
+
+.journal-action-button-compact {
+  width: 90px;
+  font-size: 100%;
+}
+
+.journal-action-button-small-delete {
+  width: 80px;
+  font-size: 90%;
+}
+
+.journal-action-button-close {
+  background-color: #ff7979;
+}
+
 .journal-action-button-delete {
   width: 100px;
 }
