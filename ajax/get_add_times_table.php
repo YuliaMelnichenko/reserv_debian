@@ -65,15 +65,15 @@ for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
 
   if ( $ta_approved == 0 )
   { 
-    $approvedStr = "<h5 class=\"middleBold_r\">на рассмотрении</h5>";
+    $approvedStr = journal_status_label("на рассмотрении");
   }
   else if ( $ta_approved == -1 )
   { 
-    $approvedStr = "<h5 class=\"middleBold_r\">отклонено</h5>";
+    $approvedStr = journal_status_label("отклонено");
   }
   else if ( $ta_approved == 1 )
   { 
-    $approvedStr = "<h5 class=\"middleBold_r\">принято</h5>";
+    $approvedStr = journal_status_label("принято");
   }   
 
   $time_duration = $ta_duration > 0 ? format_time_( $ta_duration ) : "";
