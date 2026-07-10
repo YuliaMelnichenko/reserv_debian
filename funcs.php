@@ -583,6 +583,11 @@ function format_time_( $short_time_ )
   return $result_time;
 }
 
+function journal_status_label($text, $class = "middleBold_r")
+{
+  return "<h5 class=\"" . html_escape($class) . "\">" . html_escape($text) . "</h5>";
+}
+
 function format_time_hour_min( $short_time_ )
 {
   $hours = (int)($short_time_/(3600));

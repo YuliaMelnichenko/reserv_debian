@@ -3436,6 +3436,21 @@ h5.activ_time {
   border: 0 solid #888888;
 }
 
+.journal-modal-action-button {
+  width: 119px;
+  height: 20px;
+  font-size: 100%;
+  border: 1px solid #888888;
+}
+
+.journal-modal-action-cancel {
+  background-color: #ff8888;
+}
+
+.journal-modal-action-save {
+  background-color: #88ff88;
+}
+
 #accountingErrorModalWindow,
 #accountingErrorStatusModalWindow {
   width: 320px;

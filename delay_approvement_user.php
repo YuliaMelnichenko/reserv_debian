@@ -178,26 +178,26 @@ echo "<table id=\"delay_approvement_table\" border=0>";
         $refBtnImg = "refuse_small.bmp";
 
         if ( $retDelay_approved == 0 ){
-          $content1 = "<h5 class=\"middleBold_r\">на рассмотрении</h5>";
+          $content1 = journal_status_label("на рассмотрении");
           $bgcolor = '#ffffff'; 
           $delRestore = "1";  
         }
         else if ( $retDelay_approved == 1 ){
-          $content1 = "<h5 class=\"middleBold_r\">принято</h5>";
+          $content1 = journal_status_label("принято");
           $bgcolor = "#AAFFAA";
           $accBtnDisabled = "disabled";
           $accBtnImg = "acceptDis_small.bmp";
           $delRestore = "1";
         }
         else if ( $retDelay_approved == -1 ){ 
-          $content1 = "<h5 class=\"middleBold_r\">отклонено</h5>";
+          $content1 = journal_status_label("отклонено");
           $bgcolor = "#FFAAAA";
           $refBtnDisabled = "disabled";
           $refBtnImg = "refuseDis_small.bmp";
           $delRestore = "1";
         }
         else if ( $retDelay_approved == 99 OR $retDelay_approved == 100 OR $retDelay_approved == 101 ){
-          $content1 = "<h5 class=\"big\">отклонено</h5>";
+          $content1 = journal_status_label("отклонено", "big");
           $bgcolor = "#DDDDDD";
           $accBtnDisabled = "disabled";
           $refBtnDisabled = "disabled";
@@ -275,10 +275,10 @@ echo "</table>";
         echo "</div>";
         echo "<div class=\"box_btn\">";
           echo "<div>";
-            echo "<button style=\"font-size: 100%; width:119px; height:20px; background-color:#ff8888; border:1px solid #888888;\" onclick=\"document.getElementById('delay_approvement_desc').style.display='none'; location.reload();\">Отмена</button>";
+            echo "<button class=\"journal-modal-action-button journal-modal-action-cancel\" onclick=\"document.getElementById('delay_approvement_desc').style.display='none'; location.reload();\">Отмена</button>";
           echo "</div>";
           echo "<div>";
-            echo "<button style=\"font-size: 100%; width:119px; height:20px; background-color:#88ff88; border:1px solid #888888;\" onclick=\"accept_refuse_delay_for_user_final( document.getElementById('recIDTempVal').value, document.getElementById('delay_part_desc_2').value, document.getElementById('acceptTempVal').value, document.getElementById('penIDTempVal').value, document.getElementById('penDateTempVal').value, document.getElementById('penUserIDTempVal').value ); location.reload();\">Сохранить</button>";
+            echo "<button class=\"journal-modal-action-button journal-modal-action-save\" onclick=\"accept_refuse_delay_for_user_final( document.getElementById('recIDTempVal').value, document.getElementById('delay_part_desc_2').value, document.getElementById('acceptTempVal').value, document.getElementById('penIDTempVal').value, document.getElementById('penDateTempVal').value, document.getElementById('penUserIDTempVal').value ); location.reload();\">Сохранить</button>";
           echo "</div>";
         echo "</div>";
       echo "</div>";

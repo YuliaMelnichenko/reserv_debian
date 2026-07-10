@@ -146,16 +146,16 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
         $superUserName = get_superuser_name_by_id( $ta_superuser );
 
         if ( $ta_approved == 0 ){
-          $approvedStr = "<h5 class=\"middleBold_r\">на рассмотрении</h5>";
+          $approvedStr = journal_status_label("на рассмотрении");
         }
         else if ( $ta_approved == 1 ){
-          $approvedStr = "<h5 class=\"middleBold_r\">принято</h5>";
+          $approvedStr = journal_status_label("принято");
         }
         else if ( $ta_approved == -1 ){ 
-          $approvedStr = "<h5 class=\"middleBold_r\">отклонено</h5>";
+          $approvedStr = journal_status_label("отклонено");
         }
         else if ( $ta_approved == 99 OR $ta_approved == 100 OR $ta_approved == 101 ){
-          $approvedStr = "<h5 class=\"middleBold_r\">удалено</h5>";
+          $approvedStr = journal_status_label("удалено");
         }
 
         $time_duration = $ta_duration > 0 ? format_time_( $ta_duration ) : "";
@@ -263,10 +263,10 @@ echo "<input id=\"acceptTempVal\" type=\"hidden\" value=\"\">";
       echo "</div>";
       echo "<div class=\"box_btn\">";
         echo "<div>";
-        echo "<button style=\"font-size: 100%; width:119px; height:20px; background-color:#ff8888; border:1px solid #888888;\" onclick=\"document.getElementById('add_time_approvement_desc').style.display='none'; location.reload();\">Отмена</button>";
+        echo "<button class=\"journal-modal-action-button journal-modal-action-cancel\" onclick=\"document.getElementById('add_time_approvement_desc').style.display='none'; location.reload();\">Отмена</button>";
         echo "</div>";
         echo "<div>";
-        echo "<button style=\"font-size: 100%; width:119px; height:20px; background-color:#88ff88; border:1px solid #888888;\" onclick=\"accept_refuse_add_time_for_user_final( document.getElementById('recIDTempVal').value, document.getElementById('add_time_part_desc_2').value, document.getElementById('acceptTempVal').value ); location.reload();\">Сохранить</button>";
+        echo "<button class=\"journal-modal-action-button journal-modal-action-save\" onclick=\"accept_refuse_add_time_for_user_final( document.getElementById('recIDTempVal').value, document.getElementById('add_time_part_desc_2').value, document.getElementById('acceptTempVal').value ); location.reload();\">Сохранить</button>";
         echo "</div>";
       echo "</div>";
     echo "</div>";
