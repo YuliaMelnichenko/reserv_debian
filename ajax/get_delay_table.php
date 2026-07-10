@@ -9,9 +9,9 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-$userID_ = $_SESSION['ss_id']; 
+$userID_ = (int)$_SESSION['ss_id'];
 $user_defaultStartTime = $_SESSION['ss_defaultStartTime'];
-$user_allowedDelay = $_SESSION['ss_allowedDelay'];
+$user_allowedDelay = (int)$_SESSION['ss_allowedDelay'];
 
 echo "<div class=\"notification-table-scroll notification-table-scroll-full\">";
 
@@ -32,14 +32,13 @@ echo "</tr>";
   
 $colorMode = 1;
 $color1 = "#ddffff";
-$color2 = "#ddeedd";
 $color3 = "#ffffff";
 
 $delays = get_all_delay_info_by_user( $userID_, $user_defaultStartTime, $user_allowedDelay );
 
 foreach( $delays as $delay )
 {
-  $delID = $delay[0];  
+  $delID = (int)$delay[0];
   $delDate = $delay[11];  
   $delInTime = $delay[8];  
   $delDefInTime = $delay[9];  
@@ -116,10 +115,10 @@ foreach( $delays as $delay )
   echo "<td width=105 valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$delInTime</h5>"."</td>";
   echo "<td width=185 valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$delDefInTime >> $delDefInTimeWithDelay (+ $delAllowedDelay мин.)</h5>"."</td>";
   echo "<td width=95 valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$delDurationStr</h5>"."</td>";
-  echo "<td width=140 valign=\"middle\" align=\"left\">"."<h5 class=\"small\">$delComment</h5>"."</td>";
+  echo "<td width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($delComment) . "</h5></td>";
 echo "<td width=200 bgcolor=\"$agreedColor\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
 echo "<td width=200 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($acceptorName) . "</h5></td>";
-  echo "<td width=120 valign=\"middle\" align=\"left\">"."<h5 class=\"small\">$delAcceptorReply</h5>"."</td>";
+  echo "<td width=120 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($delAcceptorReply) . "</h5></td>";
   echo "<td width=130 bgcolor=\"$cellColor\" valign=\"middle\" align=\"center\">"."<h5>$approvedStr</h5>"."</td>";
   echo "<td width=160 valign=\"middle\" align=\"center\">";
     echo "<button style=\"font-size: 80%; width:140px; height:20px; background-color:#f8d888; border:1px solid #888888;\" $buttonAdd1 $buttonAdd2 $buttonAdd3 name=\"nextBtn\">Внести объяснение</button>";

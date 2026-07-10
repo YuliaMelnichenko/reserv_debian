@@ -9,7 +9,7 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-$userID = $_SESSION['ss_id']; 
+$userID = (int)$_SESSION['ss_id'];
 
 echo "<table border=0>";
 echo "<tr bgcolor=\"#ddeedd\" bordercolor=\"#888888\">";
@@ -38,7 +38,6 @@ echo "</tr>";
   
 $colorMode = 1;
 $color1 = "#ddffff";
-$color2 = "#ddeedd";
 $color3 = "#ffffff";
 
 $addTimeInfo = get_all_add_work_info_by_user( $userID, 0 );
@@ -47,7 +46,7 @@ for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
 {
   $addInf = $addTimeInfo[$idx];
 
-  $ta_id = $addInf[8];
+  $ta_id = (int)$addInf[8];
   $ta_start_dt = $addInf[0];
   $ta_stop_dt = $addInf[1];
   $ta_duration = $addInf[6];
@@ -61,8 +60,6 @@ for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
 
   if ( $pauseMode == 1 ){ continue; }    
   if ( $ta_approved == 99 OR $ta_approved == 100 OR $ta_approved == 101 ){ continue; }    
-
-  $ta_approved_str = "На рассмотрении";
 
   $superUserName = get_superuser_name_by_id( $ta_suir );
 
@@ -104,10 +101,6 @@ for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
     $bgcolor = "#FFAAAA";
     $buttonAdd2 = "onclick=\"alert( 'запись уже заквитирована. Удаление невозможно');\"";
     $buttonAdd3 = "title=\"запись уже заквитирована. Удаление невозможно\"";
-  }
-  if ( $ta_approved == 0 )
-  {
-    $classColor = "big";
   }
   if ( $ta_approved == 1 )
   {
