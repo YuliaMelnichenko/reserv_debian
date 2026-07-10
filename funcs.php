@@ -559,14 +559,25 @@ function get_name_by_userid( $user_id )
 
 function format_time_( $short_time_ )
 {
-  $hours = (int)($short_time_/(3600));
-  if ( $hours > 24 )
+  $short_time_ = (int)$short_time_;
+
+  if ( $short_time_ < 0 ){
+    $short_time_ = 0;
+  }
+
+  $hours = (int)($short_time_ / 3600);
+  $mins = (int)(($short_time_ % 3600) / 60);
+  $secs = (int)($short_time_ % 60);
+  $timePart = sprintf("%02d:%02d:%02d", $hours % 24, $mins, $secs);
+
+  if ( $hours >= 24 )
   {
-    $result_time = gmdate("dд H:i:s", $short_time_ );
+    $days = (int)($hours / 24);
+    $result_time = $days . "д " . $timePart;
   }
   else
   {
-    $result_time = gmdate("H:i:s", $short_time_ );
+    $result_time = $timePart;
   }
 
   return $result_time;
@@ -1743,7 +1754,7 @@ function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime
 
     $supervisorID = $row0["supervisorID"];
     $acceptorID = $row0["acceptorID"];
-    $explaneDesk = $row0["explaneDesk"];
+    $explaneDesk = strip_tags($row0["explaneDesk"]);
     $penaltyID = $row0["penaltyID"];
     $penaltyReply = $row0["penaltyReply"];
     $status = $row0["status"];
@@ -1917,7 +1928,7 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
     $delayDate = $row0["date"];
     $supervisorID = $row0["supervisorID"];
     $agreed = 10;/*$row0["agreed"];*/
-    $explaneDesk = $row0["explaneDesk"];
+    $explaneDesk = strip_tags($row0["explaneDesk"]);
     $acceptorID = $row0["acceptorID"];
     $penaltyID = $row0["penaltyID"];
     $penaltyReply = $row0["penaltyReply"];
@@ -2058,7 +2069,7 @@ function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
     $delayDate = $row["date"];
     $visitingIn_DT = $row["in_dt"];
     $supervisorID = $row["supervisorID"];
-    $explaneDesk = $row["explaneDesk"];
+    $explaneDesk = strip_tags($row["explaneDesk"]);
     $acceptorID = $row["acceptorID"];
     $penaltyID = $row["penaltyID"];
     $penaltyReply = $row["penaltyReply"];
