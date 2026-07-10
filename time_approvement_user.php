@@ -71,15 +71,12 @@ mysqli_set_charset($link, "utf8");
 
         echo "<div id=\"addTimeHeader\">";
           echo "<h5 class=\"dark\"><br>/уведомления по работе вне офиса<br><br></h5>";
-        echo "</div>";
+      echo "</div>";
 
       $userName = get_user_name_by_id($userID);
-      $filterRange = get_request_date_filter_range();
-      $filterStartDate = $filterRange[0];
-      $filterStopDate = $filterRange[1];
-      $backUrl = append_date_filter_to_url("time_approvement.php", $filterStartDate, $filterStopDate);
+      $backUrl = "time_approvement.php";
 
-      $addTimeInfo = get_all_add_work_info_by_user( $userID, 0, $filterStartDate, $filterStopDate );
+      $addTimeInfo = get_all_add_work_info_by_user( $userID, 0 );
 
       if ( count( $addTimeInfo ) == 0 ){
         echo "<table id=\"add_time_approvement_table\" border=0>";
@@ -90,8 +87,6 @@ mysqli_set_charset($link, "utf8");
             echo "</td>";
           echo "</tr>";
         echo "</table>";
-        echo "<h5 class=\"big\"> Период просмотра: " . date("d.m.Y", strtotime($filterStartDate)) . " - " . date("d.m.Y", strtotime($filterStopDate)) . " </h5>";
-        render_notification_date_filter($filterStartDate, $filterStopDate, array("mid" => $mid));
         echo "<h5><br>Нет сведений!</h5>";
         echo "</td>";               
         echo "<tr>";
@@ -110,12 +105,6 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
           echo "</td>";
         echo "</tr>";
       echo "</table>";
-    echo "</td>";
-  echo "</tr>";
-  echo "<tr>";
-    echo "<td class=\"nopadding_s\">";
-      echo "<h5 class=\"big\"> Период просмотра: " . date("d.m.Y", strtotime($filterStartDate)) . " - " . date("d.m.Y", strtotime($filterStopDate)) . " </h5>";
-      render_notification_date_filter($filterStartDate, $filterStopDate, array("mid" => $mid));
     echo "</td>";
   echo "</tr>";
   echo "<tr>";

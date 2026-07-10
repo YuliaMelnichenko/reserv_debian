@@ -26,9 +26,6 @@ echo "<body bgcolor=\"#ffffff\" >";
 <?php
 $userID = $_SESSION['ss_id'];
 $depthDays = get_accounting_errors_default_depth_days();
-$filterRange = get_request_date_filter_range();
-$filterStartDate = $filterRange[0];
-$filterStopDate = $filterRange[1];
 
 $syncResult = sync_accounting_errors_for_user($link, $userID, $depthDays);
 
@@ -55,8 +52,10 @@ echo "<table border=0>";
         echo "<h5 class=\"dark\"><br>/ошибки учета рабочего времени<br><br></h5>";
       echo "</div>";
 
-      echo "<h5 class=\"big\"> Период просмотра: " . date("d.m.Y", strtotime($filterStartDate)) . " - " . date("d.m.Y", strtotime($filterStopDate)) . " </h5>";
-      render_notification_date_filter($filterStartDate, $filterStopDate);
+      $today = date("d-m-Y");
+      $dateForm = date("d.m.Y", strtotime("-$depthDays days"));
+
+      echo "<h5 class=\"big\"> Глубина просмотра журнала ($depthDays дней): $dateForm - $today </h5>";
       echo "<div id=\"accountingErrorsTableScroll\">";
         echo "<table class=\"add_time\" id=\"accounting_errors_table\" border=1>";
             echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
@@ -66,14 +65,15 @@ echo "<table border=0>";
             echo "<td class=\"add_time\" valign=\"middle\" align=\"center\" width=100><h5 class=\"big\">Действие</h5></td>";
             echo "</tr>";
 
+            $startDate = date("Y-m-d", strtotime("-$depthDays days"));
             $query = db_query(
                 $link,
                 'SELECT ID, ERROR_DATE, STATUS, USER_COMMENT
                  FROM accounting_errors
-                 WHERE USERID = ? AND ERROR_DATE >= ? AND ERROR_DATE <= ? AND STATUS IN (0, 1, 2, 3)
+                 WHERE USERID = ? AND ERROR_DATE >= ? AND STATUS IN (0, 1, 2, 3)
                  ORDER BY ERROR_DATE DESC',
-                'iss',
-                array((int)$userID, $filterStartDate, $filterStopDate)
+                'is',
+                array((int)$userID, $startDate)
             );
 
             if (!$query) {

@@ -257,17 +257,19 @@ function get_accounting_errors_count($link, $userID)
     return (int)$row['CNT'];
 }
 
-function get_accounting_errors_notification_count($link, $supervisorID, $startDate = null, $stopDate = null)
+function get_accounting_errors_notification_count($link, $supervisorID)
 {
-    list($startDate, $stopDate) = normalize_date_filter_range($startDate, $stopDate);
+    $depthDays = get_accounting_errors_default_depth_days();
+    list($startDate) = accounting_errors_get_range($depthDays);
+
     $result = db_query(
         $link,
         'SELECT COUNT(DISTINCT ae.ID) AS CNT
          FROM accounting_errors ae
          INNER JOIN GROUPS g ON g.USERID = ae.USERID
-         WHERE g.SUPERVISORID = ? AND TRIM(g.TYPE) = ? AND ae.ERROR_DATE >= ? AND ae.ERROR_DATE <= ? AND ae.STATUS = 1',
-        'iiss',
-        array((int)$supervisorID, 3, $startDate, $stopDate)
+         WHERE g.SUPERVISORID = ? AND TRIM(g.TYPE) = ? AND ae.ERROR_DATE >= ? AND ae.STATUS = 1',
+        'iis',
+        array((int)$supervisorID, 3, $startDate)
     );
 
     if (!$result) {
@@ -279,9 +281,10 @@ function get_accounting_errors_notification_count($link, $supervisorID, $startDa
     return (int)$row['CNT'];
 }
 
-function get_accounting_errors_counts_by_user($link, $userID, &$totalCount, &$acceptedCount, &$refusedCount, &$deletedCount, &$newCount, $startDate = null, $stopDate = null)
+function get_accounting_errors_counts_by_user($link, $userID, &$totalCount, &$acceptedCount, &$refusedCount, &$deletedCount, &$newCount)
 {
-    list($startDate, $stopDate) = normalize_date_filter_range($startDate, $stopDate);
+    $depthDays = get_accounting_errors_default_depth_days();
+    list($startDate) = accounting_errors_get_range($depthDays);
 
     $totalCount = 0;
     $acceptedCount = 0;
@@ -291,9 +294,9 @@ function get_accounting_errors_counts_by_user($link, $userID, &$totalCount, &$ac
 
     $result = db_query(
         $link,
-        'SELECT STATUS, COUNT(*) AS CNT FROM accounting_errors WHERE USERID = ? AND ERROR_DATE >= ? AND ERROR_DATE <= ? GROUP BY STATUS',
-        'iss',
-        array((int)$userID, $startDate, $stopDate)
+        'SELECT STATUS, COUNT(*) AS CNT FROM accounting_errors WHERE USERID = ? AND ERROR_DATE >= ? GROUP BY STATUS',
+        'is',
+        array((int)$userID, $startDate)
     );
 
     if (!$result) {

@@ -12,12 +12,6 @@ include_once __DIR__ . "/../php_tori/connect.php";
 $userID_ = $_SESSION['ss_id']; 
 $user_defaultStartTime = $_SESSION['ss_defaultStartTime'];
 $user_allowedDelay = $_SESSION['ss_allowedDelay'];
-$filterRange = normalize_date_filter_range(
-  isset($_POST['start_date']) ? $_POST['start_date'] : null,
-  isset($_POST['stop_date']) ? $_POST['stop_date'] : null
-);
-$filterStartDate = $filterRange[0];
-$filterStopDate = $filterRange[1];
 
 echo "<div class=\"notification-table-scroll notification-table-scroll-full\">";
 
@@ -41,7 +35,7 @@ $color1 = "#ddffff";
 $color2 = "#ddeedd";
 $color3 = "#ffffff";
 
-$delays = get_all_delay_info_by_user( $userID_, $user_defaultStartTime, $user_allowedDelay, $filterStartDate, $filterStopDate );
+$delays = get_all_delay_info_by_user( $userID_, $user_defaultStartTime, $user_allowedDelay );
 
 foreach( $delays as $delay )
 {
