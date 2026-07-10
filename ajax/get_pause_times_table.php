@@ -9,7 +9,7 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-$userID_ = $_SESSION['ss_id']; 
+$userID_ = (int)$_SESSION['ss_id'];
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 $paramArr = get_dbsetup_param( 'pause_journal_deep_day' );
 $paramInt = (int)$paramArr[1];
@@ -31,22 +31,26 @@ echo "</tr>";
   
 $colorMode = 1;
 $color1 = "#ddffff";
-$color2 = "#ddeedd";
 $color3 = "#ffffff";
 
 mysqli_set_charset($link, "utf8");
 
-$query = mysqli_query($link, "SELECT a.*,
-                      $startExpr AS START_DT_EFFECTIVE,
-                      $stopExpr AS STOP_DT_EFFECTIVE
-                      FROM ADD_TIME a
-                      WHERE a.USERID='$userID_'
-                        AND a.PAUSE_MODE = 1
-                        AND (
-                          $stopExpr > ADDDATE('$currentDate', INTERVAL -$paramInt DAY)
-                          OR $stopExpr = '0000-00-00 00:00:00'
-                        )
-                      ORDER BY START_DT_EFFECTIVE DESC, a.ID DESC");
+$query = db_query(
+  $link,
+  "SELECT a.*,
+          $startExpr AS START_DT_EFFECTIVE,
+          $stopExpr AS STOP_DT_EFFECTIVE
+   FROM ADD_TIME a
+   WHERE a.USERID = ?
+     AND a.PAUSE_MODE = 1
+     AND (
+       $stopExpr > ADDDATE(?, INTERVAL -? DAY)
+       OR $stopExpr = '0000-00-00 00:00:00'
+     )
+   ORDER BY START_DT_EFFECTIVE DESC, a.ID DESC",
+  'isi',
+  array($userID_, $currentDate, $paramInt)
+);
 
 if (!$query) {
   echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -54,19 +58,12 @@ if (!$query) {
 }
 
 while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
-  $ta_id = $row["ID"];
   $ta_suir = $row["SUIR"];
   $ta_start_date = $row["START_DT_EFFECTIVE"];
   $ta_stop_date = $row["STOP_DT_EFFECTIVE"];
-  $ta_reason = $row["REASON"];
   $ta_description = $row["DESCRIPTION"];
-  $ta_approved = $row["APPROVED"];
-
-  $ta_approved_str = "На рассмотрении";
 
   $superUserName = get_superuser_name_by_id( $ta_suir );
-
-  $ta_reason_description = "Приостановка учета времени";
 
   if ( $colorMode == 0 ) {
     $color = $color1;
