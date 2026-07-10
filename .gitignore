@@ -1,9 +1,37 @@
 .env
-*.swp
+.env.*
+!.env.example
 
-# Local tooling and sensitive utility scripts
+# Local tooling
 .idea/
 .vscode/
+*.swp
+*.swo
+*~
+
+# OS metadata
 Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Runtime and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+cache/
+tmp/
+temp/
+logs/
+
+# Local database dumps and exports
+*.sql.gz
+*.sql.zip
+*.dump
+*.bak.sql
+
+# Sensitive utility scripts
 tpwd.php
 test.php
