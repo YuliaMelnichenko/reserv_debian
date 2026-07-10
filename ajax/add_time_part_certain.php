@@ -49,7 +49,7 @@ else{
 
     $addTimeDescID = $_SESSION['ss_ch_delay_ID'];
 
-    $descDel = "<font color=\"#FF0000\">Из доп. времени:</font> ".$desk;
+    $descDel = "Из доп. времени: ".$desk;
 
   $query1 = db_execute($link, 'UPDATE Delays SET explaneDesk = ? WHERE id = ?', 'si', array($descDel, $addTimeDescID));
 

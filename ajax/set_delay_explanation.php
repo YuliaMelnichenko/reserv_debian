@@ -18,7 +18,7 @@ $currentDateArr = get_current_datetime_in_timezone();
 $currentDate = $currentDateArr[2];
 
 $superuserID = (int) ($_POST['delayExplanationSU'] ?? -1);
-$delayExplanation = (string) ($_POST['delayExplanation'] ?? '');
+$delayExplanation = trim(strip_tags((string) ($_POST['delayExplanation'] ?? '')));
 
 if ($superuserID !== -1) {
   if ($superuserID <= 0) {

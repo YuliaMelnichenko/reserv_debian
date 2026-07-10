@@ -45,6 +45,46 @@ function formatHours($hours) {
     return "$m мин";
 }
 
+function overtimeNumbersSql(): string {
+    $digits = "SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9";
+
+    return "
+        SELECT ones.n + tens.n * 10 + hundreds.n * 100 AS n
+        FROM ($digits) ones
+        CROSS JOIN ($digits) tens
+        CROSS JOIN ($digits) hundreds
+        WHERE ones.n + tens.n * 10 + hundreds.n * 100 <= 730
+    ";
+}
+
+function overtimeAddTimeSqlParts(): array {
+    $numbersSql = overtimeNumbersSql();
+    $workDateSql = "DATE_ADD(DATE(a.START_DT), INTERVAL n.n DAY)";
+    $rangeSql = "
+        a.START_DT < ? AND a.STOP_DT > ?
+        AND $workDateSql >= DATE(?)
+        AND $workDateSql <= DATE(?)
+        AND a.START_DT IS NOT NULL
+        AND a.START_DT != '0000-00-00 00:00:00'
+        AND a.STOP_DT IS NOT NULL
+        AND a.STOP_DT != '0000-00-00 00:00:00'
+        AND a.STOP_DT > a.START_DT
+    ";
+    $durationSql = "
+        GREATEST(
+            0,
+            TIME_TO_SEC(
+                TIMEDIFF(
+                    LEAST(a.STOP_DT, DATE_ADD($workDateSql, INTERVAL 1 DAY)),
+                    GREATEST(a.START_DT, $workDateSql)
+                )
+            )
+        )
+    ";
+
+    return [$numbersSql, $workDateSql, $rangeSql, $durationSql];
+}
+
 // === AJAX: список сотрудников с количеством переработок >= hours (текущий квартал) ===
 if (isset($_GET['action']) && $_GET['action'] === 'load') {
     header('Content-Type: application/json; charset=utf-8');
@@ -66,6 +106,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
         } else {
             list($qstart, $qend) = getPeriodBounds($period);
         }
+
+        list($numbersSql, $addWorkDateSql, $addRangeSql, $addDurationSql) = overtimeAddTimeSqlParts();
 
         $sql = "
             SELECT 
@@ -93,16 +135,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
                     
                     UNION
                     
-                    SELECT USERID AS user_id, DATE(START_DT) AS work_date
-                    FROM ADD_TIME
-                    WHERE START_DT >= ? AND START_DT < ? 
-                    AND REASON IN (1, 2, 3, 4, 5)
-                    AND START_DT IS NOT NULL
-                    AND START_DT != '0000-00-00 00:00:00'
-                    AND STOP_DT IS NOT NULL
-                    AND STOP_DT != '0000-00-00 00:00:00'
-                    AND STOP_DT > START_DT
-                    GROUP BY USERID, DATE(START_DT)
+                    SELECT a.USERID AS user_id, $addWorkDateSql AS work_date
+                    FROM ADD_TIME a
+                    JOIN ($numbersSql) n ON n.n <= DATEDIFF(DATE(a.STOP_DT), DATE(a.START_DT))
+                    WHERE $addRangeSql
+                    AND a.REASON IN (1, 2, 3, 4, 5)
+                    GROUP BY a.USERID, $addWorkDateSql
                 ) d 
                 LEFT JOIN (
                     SELECT user_id, DATE(in_dt) AS work_date,
@@ -128,30 +166,22 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
                     GROUP BY user_id, DATE(in_dt)
                 ) v ON d.user_id = v.user_id AND d.work_date = v.work_date
                 LEFT JOIN (
-                    SELECT USERID AS user_id, DATE(START_DT) AS work_date,
-                        ROUND(SUM(TIME_TO_SEC(TIMEDIFF(STOP_DT, START_DT))) / 3600, 2) AS outside_hours
-                    FROM ADD_TIME
-                    WHERE START_DT >= ? AND START_DT < ?
-                    AND REASON IN (1, 2, 3, 4, 5)
-                    AND STOP_DT IS NOT NULL
-                    AND STOP_DT != '0000-00-00 00:00:00'
-                    AND START_DT IS NOT NULL
-                    AND START_DT != '0000-00-00 00:00:00'
-                    AND STOP_DT > START_DT
-                    GROUP BY USERID, DATE(START_DT)
+                    SELECT a.USERID AS user_id, $addWorkDateSql AS work_date,
+                        ROUND(SUM($addDurationSql) / 3600, 2) AS outside_hours
+                    FROM ADD_TIME a
+                    JOIN ($numbersSql) n ON n.n <= DATEDIFF(DATE(a.STOP_DT), DATE(a.START_DT))
+                    WHERE $addRangeSql
+                    AND a.REASON IN (1, 2, 3, 4, 5)
+                    GROUP BY a.USERID, $addWorkDateSql
                 ) a ON d.user_id = a.user_id AND d.work_date = a.work_date
                 LEFT JOIN (
-                    SELECT USERID AS user_id, DATE(START_DT) AS work_date,
-                        ROUND(SUM(TIME_TO_SEC(TIMEDIFF(STOP_DT, START_DT))) / 3600, 2) AS pause_hours
-                    FROM ADD_TIME
-                    WHERE START_DT >= ? AND START_DT < ?
-                    AND REASON = -1
-                    AND STOP_DT IS NOT NULL
-                    AND STOP_DT != '0000-00-00 00:00:00'
-                    AND START_DT IS NOT NULL
-                    AND START_DT != '0000-00-00 00:00:00'
-                    AND STOP_DT > START_DT
-                    GROUP BY USERID, DATE(START_DT)
+                    SELECT a.USERID AS user_id, $addWorkDateSql AS work_date,
+                        ROUND(SUM($addDurationSql) / 3600, 2) AS pause_hours
+                    FROM ADD_TIME a
+                    JOIN ($numbersSql) n ON n.n <= DATEDIFF(DATE(a.STOP_DT), DATE(a.START_DT))
+                    WHERE $addRangeSql
+                    AND a.REASON = -1
+                    GROUP BY a.USERID, $addWorkDateSql
                 ) p ON d.user_id = p.user_id AND d.work_date = p.work_date
                 WHERE GREATEST(
                     0,
@@ -169,15 +199,19 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
             throw new Exception('Ошибка подготовки запроса: ' . mysqli_error($link));
         }
 
+        if (mysqli_stmt_param_count($stmt) !== 18) {
+            throw new Exception('Количество плейсхолдеров не совпадает: ' . mysqli_stmt_param_count($stmt));
+        }
+
         mysqli_stmt_bind_param($stmt, 
-                                'dssssssssssd',
+                                'dssssssssssssssssd',
                                     $hours, // 1
                                     $qstart, $qend, // 2-3 visiting (union)
-                                        $qstart, $qend, // 4-5 add_time (union)
-                                        $qstart, $qend, // 6-7 visiting (join)
-                                        $qstart, $qend, // 8-9 add_time positive (join)
-                                        $qstart, $qend, // 10-11 add_time pause REASON=-1 (join)
-                                        $hours          // 12 threshold
+                                        $qend, $qstart, $qstart, $qend, // 4-7 add_time (union)
+                                        $qstart, $qend, // 8-9 visiting (join)
+                                        $qend, $qstart, $qstart, $qend, // 10-13 add_time positive (join)
+                                        $qend, $qstart, $qstart, $qend, // 14-17 add_time pause REASON=-1 (join)
+                                        $hours          // 18 threshold
         );
         
         mysqli_stmt_execute($stmt);
@@ -228,6 +262,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
             list($qstart, $qend) = getPeriodBounds($period);
         }
 
+        list($numbersSql, $addWorkDateSql, $addRangeSql, $addDurationSql) = overtimeAddTimeSqlParts();
+
         $sql = "
             SELECT 
                 d.work_date,
@@ -252,17 +288,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
 
                 UNION
                 
-                SELECT DATE(START_DT) AS work_date
-                FROM ADD_TIME
-                WHERE USERID = ?
-                AND START_DT >= ? AND START_DT < ?
-                AND REASON IN (1, 2, 3, 4, 5)
-                AND START_DT IS NOT NULL
-                AND START_DT != '0000-00-00 00:00:00'
-                AND STOP_DT IS NOT NULL
-                AND STOP_DT != '0000-00-00 00:00:00'
-                AND STOP_DT > START_DT
-                GROUP BY DATE(START_DT)
+                SELECT $addWorkDateSql AS work_date
+                FROM ADD_TIME a
+                JOIN ($numbersSql) n ON n.n <= DATEDIFF(DATE(a.STOP_DT), DATE(a.START_DT))
+                WHERE a.USERID = ?
+                AND $addRangeSql
+                AND a.REASON IN (1, 2, 3, 4, 5)
+                GROUP BY $addWorkDateSql
             ) d 
             LEFT JOIN (
                 SELECT DATE(in_dt) AS work_date,
@@ -289,32 +321,24 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
                 GROUP BY DATE(in_dt) 
             ) v ON d.work_date = v.work_date
             LEFT JOIN (
-                SELECT DATE(START_DT) AS work_date,
-                    ROUND(SUM(TIME_TO_SEC(TIMEDIFF(STOP_DT, START_DT))) / 3600, 2) AS outside_hours
-                FROM ADD_TIME
-                WHERE USERID = ? 
-                AND START_DT >= ? AND START_DT < ?
-                AND REASON IN (1, 2, 3, 4, 5)
-                AND START_DT IS NOT NULL
-                AND START_DT != '0000-00-00 00:00:00'
-                AND STOP_DT IS NOT NULL
-                AND STOP_DT != '0000-00-00 00:00:00'
-                AND STOP_DT > START_DT
-                GROUP BY DATE(START_DT)
+                SELECT $addWorkDateSql AS work_date,
+                    ROUND(SUM($addDurationSql) / 3600, 2) AS outside_hours
+                FROM ADD_TIME a
+                JOIN ($numbersSql) n ON n.n <= DATEDIFF(DATE(a.STOP_DT), DATE(a.START_DT))
+                WHERE a.USERID = ?
+                AND $addRangeSql
+                AND a.REASON IN (1, 2, 3, 4, 5)
+                GROUP BY $addWorkDateSql
             ) a ON d.work_date = a.work_date
             LEFT JOIN (
-                SELECT DATE(START_DT) AS work_date,
-                    ROUND(SUM(TIME_TO_SEC(TIMEDIFF(STOP_DT, START_DT))) / 3600, 2) AS pause_hours
-                FROM ADD_TIME
-                WHERE USERID = ?
-                AND START_DT >= ? AND START_DT < ?
-                AND REASON = -1
-                AND START_DT IS NOT NULL
-                AND START_DT != '0000-00-00 00:00:00'
-                AND STOP_DT IS NOT NULL
-                AND STOP_DT != '0000-00-00 00:00:00'
-                AND STOP_DT > START_DT
-                GROUP BY DATE(START_DT)
+                SELECT $addWorkDateSql AS work_date,
+                    ROUND(SUM($addDurationSql) / 3600, 2) AS pause_hours
+                FROM ADD_TIME a
+                JOIN ($numbersSql) n ON n.n <= DATEDIFF(DATE(a.STOP_DT), DATE(a.START_DT))
+                WHERE a.USERID = ?
+                AND $addRangeSql
+                AND a.REASON = -1
+                GROUP BY $addWorkDateSql
             ) p ON d.work_date = p.work_date
             WHERE GREATEST(
                 0,
@@ -325,17 +349,17 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
         $stmt = mysqli_prepare($link, $sql);
         if (!$stmt) throw new Exception('Ошибка подготовки запроса ' . mysqli_error($link));
 
-        if (mysqli_stmt_param_count($stmt) !== 16) {
+        if (mysqli_stmt_param_count($stmt) !== 22) {
             throw new Exception('Количество плейсхолдеров не совпадает: ' . mysqli_stmt_param_count($stmt));
         }
 
         mysqli_stmt_bind_param($stmt, 
-                                'issississississd',
+                                'ississssississssissssd',
                                     $empId, $qstart, $qend, // visiting (union)
-                                        $empId, $qstart, $qend, // add_time positive (union)
+                                        $empId, $qend, $qstart, $qstart, $qend, // add_time positive (union)
                                         $empId, $qstart, $qend, // visiting (join)
-                                        $empId, $qstart, $qend, // add_time positive (join)
-                                        $empId, $qstart, $qend, // add_time pause REASON=-1 (join)
+                                        $empId, $qend, $qstart, $qstart, $qend, // add_time positive (join)
+                                        $empId, $qend, $qstart, $qstart, $qend, // add_time pause REASON=-1 (join)
                                         $hours                  // threshold
         );
 

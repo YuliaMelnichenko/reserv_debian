@@ -50,7 +50,7 @@ $disableStr = "";
 while ( $row0 = mysqli_fetch_assoc($query0) ){
   $status = $row0["status"];
   $supervisorID = $row0["supervisorID"];
-  $explaneDesk = $row0["explaneDesk"];
+  $explaneDesk = strip_tags($row0["explaneDesk"]);
   $found = 1;
 }
 
