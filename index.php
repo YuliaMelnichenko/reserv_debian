@@ -13,16 +13,36 @@ auth();
 <script type="text/javascript" src="js/tory.js?v=20260709"></script>
 <script type="text/javascript" charset="utf-8"> 
 
-var timerIdSessValid=setInterval( "check_sess()", 500000 );
+var timerIdSessValid = setInterval(check_sess, 500000);
 
 function check_sess(){
-  $.post('ajax/check_session_valid.php', RetSWT);
-  function RetSWT(dat) {
-    if ( dat == 0 ){
-      console.log(dat);
-      window.location=self.location;
+  $.ajax({
+    url: 'ajax/sync_current_period.php',
+    method: 'POST',
+    dataType: 'json',
+    success: function(dat) {
+      if (!dat || dat.valid != 1) {
+        window.location = self.location;
+        return;
+      }
+
+      if (dat.refreshTimeRegistration == 1) {
+        if (dat.stopDTStr) {
+          window.toriStopDTStr = dat.stopDTStr;
+        }
+
+        get_time_registration_div_content();
+        build_in_delay_expl();
+
+        if (typeof update_clock === 'function') {
+          update_clock();
+        }
+      }
+    },
+    error: function() {
+      window.location = self.location;
     }
-  }
+  });
 }
 
 function hide_day_change_layers(){
@@ -50,7 +70,7 @@ function check_day_change(){
   }
 }
 
-var timerIdDayChange=setInterval( "check_day_change()", 3000 );
+var timerIdDayChange = setInterval(check_day_change, 3000);
 
 function day_continue_confirm()
 {
@@ -1192,7 +1212,7 @@ function update_clock(){
   }
 }
 
-var timerId=setInterval( "update_clock()", 10000 );
+var timerId = setInterval(update_clock, 10000);
 
 </script> 
 
