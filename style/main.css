@@ -1038,6 +1038,102 @@ h6.small_help_2 {
   z-index: 2;
 }
 
+.notification-page-layout {
+  text-align: left;
+}
+
+.notification-page-table {
+  border: 0;
+  border-collapse: collapse;
+}
+
+.notification-nav-cell,
+.notification-content-cell {
+  vertical-align: top;
+  text-align: left;
+  background: #ddeeff;
+  border-color: #888888;
+}
+
+.notification-nav-cell {
+  width: 250px;
+}
+
+.notification-content-cell-wide {
+  width: 835px;
+}
+
+.notification-content-cell-narrow {
+  width: 562px;
+}
+
+.notification-summary-table {
+  border-collapse: collapse;
+}
+
+.notification-table-head {
+  background: #eeeeee;
+}
+
+.notification-row {
+  background: #ffffff;
+}
+
+.notification-row-alt {
+  background: #ddffff;
+}
+
+.notification-user-name-cell {
+  width: 250px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.notification-table-head .notification-user-name-cell {
+  text-align: center;
+}
+
+.notification-count-cell,
+.notification-accepted-cell,
+.notification-refused-cell,
+.notification-deleted-cell,
+.notification-view-cell,
+.notification-pause-count-cell,
+.notification-current-day-cell,
+.notification-pause-view-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.notification-count-cell {
+  width: 60px;
+}
+
+.notification-accepted-cell {
+  width: 80px;
+}
+
+.notification-refused-cell,
+.notification-view-cell {
+  width: 105px;
+}
+
+.notification-deleted-cell {
+  width: 90px;
+}
+
+.notification-pause-count-cell {
+  width: 45px;
+}
+
+.notification-current-day-cell {
+  width: 120px;
+}
+
+.notification-pause-view-cell {
+  width: 80px;
+}
+
 .box_btn {
   display: flex;
   justify-content: space-around;
