@@ -574,80 +574,80 @@ if (
       echo "<table>";
         echo "<tr>";
           echo "<td class=\"brd\" valign=\"top\" align=\"left\" width = $width11>";
-            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Сотрудник</span>";
+            echo "<span class=\"current-employee-info\">Сотрудник</span>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"top\" align=\"center\" width = $width22>";
-            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">" . html_escape($row0["surname"] . " " . $row0["firstname"] . " " . $row0["lastname"]) . $employeeAccountingErrorIcon . "</span>";
+            echo "<span class=\"current-employee-info\">" . html_escape($row0["surname"] . " " . $row0["firstname"] . " " . $row0["lastname"]) . $employeeAccountingErrorIcon . "</span>";
           echo "</td>";  
         echo "</tr>";     
 
         echo "<tr>";
           echo "<td class=\"brd\" valign=\"top\" align=\"left\">";
-            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Подразделение</span>"; 
+            echo "<span class=\"current-employee-info\">Подразделение</span>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"middle\" align=\"center\">";
-            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$depName." (".$room." к.)"."</span>";
+            echo "<span class=\"current-employee-info\">".$depName." (".$room." к.)"."</span>";
           echo "</td>";
         echo "</tr>";
 
         echo "<tr>";
           echo "<td class=\"brd\" valign=\"top\" align=\"left\">";
-          echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Ответственный</span>";  
+          echo "<span class=\"current-employee-info\">Ответственный</span>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"middle\" align=\"center\">";
-            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$sv_name."</span>";
+            echo "<span class=\"current-employee-info\">".$sv_name."</span>";
           echo "</td>";  
         echo "</tr>";     
 
         echo "<tr>";
           echo "<td class=\"brd\" valign=\"top\" align=\"left\">";
-            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Длительность рабочей недели</span>";
+            echo "<span class=\"current-employee-info\">Длительность рабочей недели</span>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"middle\" align=\"center\">";
-            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$user_rate." ч.</span>";
+            echo "<span class=\"current-employee-info\">".$user_rate." ч.</span>";
           echo "</td>";  
         echo "</tr>";
 
         echo "<tr>";
           echo "<td class=\"brd\" valign=\"top\" align=\"left\">";
-            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Начало рабочего дня c допустимым опозданием</span>";
+            echo "<span class=\"current-employee-info\">Начало рабочего дня c допустимым опозданием</span>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"middle\" align=\"center\">";
             if ( $user_RemoteWork == 1 )
             {
-              echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">---</span>";
+              echo "<span class=\"current-employee-info\">---</span>";
             }
             else
             {
-              echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$user_defaultStartTime." >> ".$user_defaultStartTimeWithDelay." (+".$user_allowedDelay." мин.)</span>";
+              echo "<span class=\"current-employee-info\">".$user_defaultStartTime." >> ".$user_defaultStartTimeWithDelay." (+".$user_allowedDelay." мин.)</span>";
             }
           echo "</td>";  
         echo "</tr>";
 
         echo "<tr>";
           echo "<td class=\"brd\" valign=\"top\" align=\"left\">";
-            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Часовой пояс</span>";
+            echo "<span class=\"current-employee-info\">Часовой пояс</span>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"middle\" align=\"center\">";
-            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$user_timeZone."</span>";
+            echo "<span class=\"current-employee-info\">".$user_timeZone."</span>";
           echo "</td>";  
         echo "</tr>";
 
         echo "<tr>";
           echo "<td class=\"brd\" valign=\"top\" align=\"left\">";
-            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Текущий отчетный период</span>";
+            echo "<span class=\"current-employee-info\">Текущий отчетный период</span>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"middle\" align=\"center\">";
-            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$startDTStr." - ".$stopDTStr."</span>";
+            echo "<span class=\"current-employee-info\">".$startDTStr." - ".$stopDTStr."</span>";
           echo "</td>";  
         echo "</tr>";
 
         echo "<tr>";
           echo "<td class=\"brd\" valign=\"top\" align=\"left\">";
-            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">Режим работы</span>";
+            echo "<span class=\"current-employee-info\">Режим работы</span>";
           echo "</td>";  
           echo "<td class=\"brd\" valign=\"middle\" align=\"center\">";
-            echo "<span style=\"color:#000000; font-family: Arial; font-size: 13px; font-weight: 500\">".$user_RemoteWorkStr."</span>";
+            echo "<span class=\"current-employee-info\">".$user_RemoteWorkStr."</span>";
           echo "</td>";  
         echo "</tr>";
       echo "</table>";
