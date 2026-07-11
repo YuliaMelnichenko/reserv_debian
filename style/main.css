@@ -4046,6 +4046,10 @@ h5.activ_time {
   width: 835px;
 }
 
+.accounting-errors-content-cell-wide {
+  width: 950px;
+}
+
 .accounting-errors-table-head,
 .accounting-errors-row {
   background: #ffffff;
@@ -4090,4 +4094,82 @@ h5.activ_time {
 
 .accounting-errors-action-cell {
   width: 100px;
+}
+
+.accounting-errors-user-name-cell {
+  width: 250px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.accounting-errors-table-head .accounting-errors-user-name-cell {
+  text-align: center;
+}
+
+.accounting-errors-count-cell,
+.accounting-errors-accepted-cell,
+.accounting-errors-refused-cell,
+.accounting-errors-deleted-cell,
+.accounting-errors-view-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.accounting-errors-count-cell {
+  width: 60px;
+}
+
+.accounting-errors-accepted-cell {
+  width: 80px;
+}
+
+.accounting-errors-refused-cell,
+.accounting-errors-view-cell {
+  width: 105px;
+}
+
+.accounting-errors-deleted-cell {
+  width: 90px;
+}
+
+.accounting-errors-user-date-cell,
+.accounting-errors-user-status-cell,
+.accounting-errors-user-actions-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.accounting-errors-user-comment-cell,
+.accounting-errors-supervisor-comment-cell {
+  text-align: left;
+  vertical-align: middle;
+}
+
+.accounting-errors-table-head .accounting-errors-user-comment-cell,
+.accounting-errors-table-head .accounting-errors-supervisor-comment-cell {
+  text-align: center;
+}
+
+.accounting-errors-user-date-cell {
+  width: 95px;
+}
+
+.accounting-errors-user-status-cell {
+  width: 125px;
+}
+
+.accounting-errors-user-comment-cell {
+  width: 330px;
+}
+
+.accounting-errors-supervisor-comment-cell {
+  width: 230px;
+}
+
+.accounting-errors-user-actions-cell {
+  width: 150px;
+}
+
+.accounting-errors-action-icon {
+  height: 14px;
 }
