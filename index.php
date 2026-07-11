@@ -399,8 +399,7 @@ echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 echo "<body onload=\"check_day_change();\" bgcolor=\"#ffffff\" >";
 
-include_once __DIR__ . "/funcs.php";
-include __DIR__ . "/php_tori/connect.php";
+include_once __DIR__ . "/php_tori/connect.php";
 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 $user_dayTransitionTime = isset($_SESSION['ss_dayTransitionTime'])
@@ -480,9 +479,6 @@ echo "</div>";
 echo "<div align=\"left\">";
 
 ////////////////////////////////////////////////////////
-include_once __DIR__ . "/funcs.php";
-include __DIR__ . "/php_tori/connect.php";
-
 if (
   isset($_SESSION['ss_id']) &&
   ($_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501)
@@ -493,7 +489,6 @@ if (
 
 ////////////////////////////////////////////////////////
 
- include __DIR__ . "/php_tori/connect.php";
   if ( isset( $_SESSION['ss_id'] ) )
   { 
     $user_id = $_SESSION['ss_id'];
@@ -554,8 +549,6 @@ if (
       $empl_state = $row0["state"];
             
       $sv_name = get_sv_name_by_userid( $user_id );
-
-     include __DIR__ . "/php_tori/connect.php";
 
       mysqli_set_charset($link, "utf8");
     
@@ -691,8 +684,6 @@ if (
     echo "</td>";
 
     mysqli_set_charset($link, "utf8");
-    include __DIR__ . "/php_tori/connect.php";
-
     $bosses_arr = [];
 
     $bosses_sql = "SELECT id, firstname, surname, lastname, DATE_FORMAT(birthday, '%m-%d') AS bday FROM employees WHERE id IN (400, 500, 501)";

@@ -105,7 +105,7 @@ echo "<table border=0>";
                 echo "<td class=\"add_time\" width=90 valign=\"middle\" align=\"center\"><h5 class=\"middle\">$deletedNotificationCount</h5></td>";
                 echo "<td class=\"add_time\" width=60 valign=\"middle\" align=\"center\"><h5 class=\"$cellStype\">$newNotificationCount</h5></td>";
                 echo "<td class=\"add_time\" width=105 valign=\"middle\" align=\"center\">";
-                  echo "<button id=\"accountingErrorsViewBtn_$userID\" title=\"Просмотреть\" style=\"padding: 0px 0px 0px 0px; background-color:#ffffff; border:0px solid #888888; cursor:pointer;\" onclick=\"$uhref;\"><img src=\"img/$img\"></button>";
+                  echo "<button id=\"accountingErrorsViewBtn_$userID\" class=\"journal-cell-icon-button\" title=\"Просмотреть\" onclick=\"$uhref;\"><img src=\"img/$img\"></button>";
                 echo "</td>";
               echo "</tr>";
 
