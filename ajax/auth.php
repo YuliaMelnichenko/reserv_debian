@@ -55,7 +55,7 @@ else
     csrf_rotate_token();
     $retArr = get_current_datetime_in_timezone();
     $_SESSION['ss_UserTimeZoneStr'] = $retArr[5];
-    $ss_dayTransitionTime = $row["dayTransitionTime"];
+    $ss_dayTransitionTime = get_standard_day_transition_time();
     $_SESSION['ss_dayTransitionTime'] = $ss_dayTransitionTime;
     
 

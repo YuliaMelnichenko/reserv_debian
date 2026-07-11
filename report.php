@@ -12,7 +12,7 @@ require_page_auth();
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META NAME="Author" CONTENT="InTec">
-<link rel="stylesheet" type="text/css" href="style/style.css" />
+<link rel="stylesheet" type="text/css" href="style/main.css" />
 </head>
 <body bgcolor="#ffffff">
 <div align="left">

@@ -15,7 +15,12 @@ function get_accounting_error_status_name($status)
 
 function get_accounting_errors_default_depth_days()
 {
-    return 180;
+    return 0;
+}
+
+function is_accounting_errors_exempt_user($userID)
+{
+    return in_array((int)$userID, array(156, 161), true);
 }
 
 function accounting_errors_log_database_failure($link, $context)
@@ -24,19 +29,15 @@ function accounting_errors_log_database_failure($link, $context)
     return false;
 }
 
-function accounting_errors_get_range($depthDays)
+function accounting_errors_get_range($depthDays = 0)
 {
-    $depthDays = (int)$depthDays;
+    return get_current_quarter_date_range(true);
+}
 
-    if ($depthDays <= 0) {
-        $depthDays = get_accounting_errors_default_depth_days();
-    }
-
-    $startDate = date('Y-m-d', strtotime('-' . $depthDays . ' days'));
-    $stopDate = date('Y-m-d', strtotime('-1 day'));
-    $stopExclusive = date('Y-m-d', strtotime($stopDate . ' +1 day'));
-
-    return array($startDate, $stopDate, $stopExclusive);
+function get_accounting_errors_period_label()
+{
+    list($startDate, $stopDate) = accounting_errors_get_range();
+    return format_date_range_label($startDate, $stopDate);
 }
 
 function accounting_errors_remove_dates_from_result($result, $column, &$dates)
@@ -54,6 +55,10 @@ function sync_accounting_errors_for_user($link, $userID, $depthDays = 0)
 
     if ($userID <= 0) {
         return false;
+    }
+
+    if (is_accounting_errors_exempt_user($userID)) {
+        return 0;
     }
 
     list($startDate, $stopDate, $stopExclusive) = accounting_errors_get_range($depthDays);
@@ -238,14 +243,17 @@ function sync_accounting_errors_for_user($link, $userID, $depthDays = 0)
 
 function get_accounting_errors_count($link, $userID)
 {
-    $depthDays = get_accounting_errors_default_depth_days();
-    list($startDate) = accounting_errors_get_range($depthDays);
+    if (is_accounting_errors_exempt_user($userID)) {
+        return 0;
+    }
+
+    list($startDate, $stopDate) = accounting_errors_get_range();
 
     $result = db_query(
         $link,
-        'SELECT COUNT(*) AS CNT FROM accounting_errors WHERE USERID = ? AND ERROR_DATE >= ? AND STATUS IN (0, 1, 3)',
-        'is',
-        array((int)$userID, $startDate)
+        'SELECT COUNT(*) AS CNT FROM accounting_errors WHERE USERID = ? AND ERROR_DATE >= ? AND ERROR_DATE <= ? AND STATUS IN (0, 1, 3)',
+        'iss',
+        array((int)$userID, $startDate, $stopDate)
     );
 
     if (!$result) {
@@ -259,17 +267,16 @@ function get_accounting_errors_count($link, $userID)
 
 function get_accounting_errors_notification_count($link, $supervisorID)
 {
-    $depthDays = get_accounting_errors_default_depth_days();
-    list($startDate) = accounting_errors_get_range($depthDays);
+    list($startDate, $stopDate) = accounting_errors_get_range();
 
     $result = db_query(
         $link,
         'SELECT COUNT(DISTINCT ae.ID) AS CNT
          FROM accounting_errors ae
          INNER JOIN GROUPS g ON g.USERID = ae.USERID
-         WHERE g.SUPERVISORID = ? AND TRIM(g.TYPE) = ? AND ae.ERROR_DATE >= ? AND ae.STATUS = 1',
-        'iis',
-        array((int)$supervisorID, 3, $startDate)
+         WHERE g.SUPERVISORID = ? AND TRIM(g.TYPE) = ? AND ae.ERROR_DATE >= ? AND ae.ERROR_DATE <= ? AND ae.STATUS = 1 AND ae.USERID NOT IN (156, 161)',
+        'iiss',
+        array((int)$supervisorID, 3, $startDate, $stopDate)
     );
 
     if (!$result) {
@@ -283,8 +290,7 @@ function get_accounting_errors_notification_count($link, $supervisorID)
 
 function get_accounting_errors_counts_by_user($link, $userID, &$totalCount, &$acceptedCount, &$refusedCount, &$deletedCount, &$newCount)
 {
-    $depthDays = get_accounting_errors_default_depth_days();
-    list($startDate) = accounting_errors_get_range($depthDays);
+    list($startDate, $stopDate) = accounting_errors_get_range();
 
     $totalCount = 0;
     $acceptedCount = 0;
@@ -292,11 +298,15 @@ function get_accounting_errors_counts_by_user($link, $userID, &$totalCount, &$ac
     $deletedCount = 0;
     $newCount = 0;
 
+    if (is_accounting_errors_exempt_user($userID)) {
+        return true;
+    }
+
     $result = db_query(
         $link,
-        'SELECT STATUS, COUNT(*) AS CNT FROM accounting_errors WHERE USERID = ? AND ERROR_DATE >= ? GROUP BY STATUS',
-        'is',
-        array((int)$userID, $startDate)
+        'SELECT STATUS, COUNT(*) AS CNT FROM accounting_errors WHERE USERID = ? AND ERROR_DATE >= ? AND ERROR_DATE <= ? GROUP BY STATUS',
+        'iss',
+        array((int)$userID, $startDate, $stopDate)
     );
 
     if (!$result) {
@@ -327,7 +337,7 @@ function get_accounting_errors_supervised_user_ids($link, $supervisorID)
 {
     $result = db_query(
         $link,
-        'SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = ? AND TRIM(TYPE) = ? ORDER BY USERID',
+        'SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = ? AND TRIM(TYPE) = ? AND USERID NOT IN (156, 161) ORDER BY USERID',
         'ii',
         array((int)$supervisorID, 3)
     );
