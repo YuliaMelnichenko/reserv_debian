@@ -181,7 +181,7 @@ include_once __DIR__ . "/php_tori/connect.php";
 
     if ( $week_day == 1 ){
       echo "<tr>";
-      echo "<td style=\"background-color:#dddddd\"><h5 class=\"total_week_month\">Итого часов<br>за неделю</h5></td>";
+      echo "<td class=\"report-summary-cell report-summary-week-label\"><h5 class=\"total_week_month\">Итого часов<br>за неделю</h5></td>";
 
       $norm = $week_day_cnt * $day_norm;
 
@@ -193,9 +193,9 @@ include_once __DIR__ . "/php_tori/connect.php";
 	      $dur_differ = format_time_differs_from_norm_hour_min( $week_dur[$i], $norm ); 
 
         if ( (int)$hour >= $norm )
-          echo "<td align = \"center\" style=\"background-color:#88ff88\" ><h5 class=\"total_week_month\">".$hour_min."<br>норма = ".$norm." ч. <br>Переработка = $dur_differ</h5>";
+          echo "<td class=\"report-summary-cell report-summary-week-over\"><h5 class=\"total_week_month\">".$hour_min."<br>норма = ".$norm." ч. <br>Переработка = $dur_differ</h5>";
         else if ( (int)$hour < $norm )
-          echo "<td align = \"center\" style=\"background-color:#ff8888\" ><h5 class=\"total_week_month\">".$hour_min."<br>норма = ".$norm." ч. <br>Недоработка = $dur_differ</h5>";
+          echo "<td class=\"report-summary-cell report-summary-week-under\"><h5 class=\"total_week_month\">".$hour_min."<br>норма = ".$norm." ч. <br>Недоработка = $dur_differ</h5>";
 
          
         echo "</td>";
@@ -209,7 +209,7 @@ include_once __DIR__ . "/php_tori/connect.php";
  
     if ( $month_day == 1 ){
       echo "<tr>";
-      echo "<td height = \"100\" style=\"background-color:#9999ff\"><h5 class=\"total_week_month\">Итого часов<br>за месяц</h5></td>";
+      echo "<td class=\"report-summary-cell report-summary-month-label\"><h5 class=\"total_week_month\">Итого часов<br>за месяц</h5></td>";
 
       $m_norm = $month_day_cnt * $day_norm;
       
@@ -221,9 +221,9 @@ include_once __DIR__ . "/php_tori/connect.php";
 	      $m_dur_differ = format_time_differs_from_norm_hour_min( $month_dur[$i], $m_norm ); 
 
         if ( (int)$m_hour >= $m_norm )
-          echo "<td align = \"center\" style=\"background-color:#99ff99\" ><h5 class=\"total_week_month\">".$m_hour_min."<br>норма месяца = ".$m_norm." ч. <br>Переработка = $m_dur_differ</h5>";
+          echo "<td class=\"report-summary-cell report-summary-month-over\"><h5 class=\"total_week_month\">".$m_hour_min."<br>норма месяца = ".$m_norm." ч. <br>Переработка = $m_dur_differ</h5>";
         else if ( (int)$m_hour < $m_norm )
-          echo "<td align = \"center\" style=\"background-color:#ff7777\" ><h5 class=\"total_week_month\">".$m_hour_min."<br>норма месяца = ".$m_norm." ч. <br>Недоработка = $m_dur_differ</h5>";
+          echo "<td class=\"report-summary-cell report-summary-month-under\"><h5 class=\"total_week_month\">".$m_hour_min."<br>норма месяца = ".$m_norm." ч. <br>Недоработка = $m_dur_differ</h5>";
 
         $month_dur[$i] = 0;
       }  	
@@ -323,7 +323,7 @@ include_once __DIR__ . "/php_tori/connect.php";
                          
 	  if ( $now_date_time != strtotime( $date_one ) ){
       if ( $color_code == 0 ){
-        echo "<td style=\"background-color:#00ff00\" >";
+        echo "<td class=\"report-day-worked\" >";
 
 	      echo "<h5 class=\"info\">";
 
@@ -333,8 +333,6 @@ include_once __DIR__ . "/php_tori/connect.php";
         echo "<br><br>Раб. вр. - обед: ".$work_day_duration;
 	    }
 	    else{  
-        echo "<td style=\"background-color:#";
-
           if ( $week_day == 6 OR $week_day == 0 )
 	          $is_day_off = 1;
           else
@@ -355,13 +353,13 @@ include_once __DIR__ . "/php_tori/connect.php";
       }
 
       if ( $is_day_off == 1 ){
-  	    echo "ffffff\" align = \"center\" valign = \"middle\">"; 
+        echo "<td class=\"report-day-off\" align = \"center\" valign = \"middle\">";
 
         echo "<h5 class=\"lite\">";
         echo "выходной";
       }
       else{
-        echo "ff0000\" align = \"center\" valign = \"middle\">"; 
+        echo "<td class=\"report-day-missing\" align = \"center\" valign = \"middle\">";
         echo "<h5 class=\"alarm\">";
         echo "Недостаточно<br>сведений!";                
       }
@@ -369,9 +367,9 @@ include_once __DIR__ . "/php_tori/connect.php";
   }
   else{
     if ( isset( $state ) AND $state == 0 )
-	    echo "<td valign = \"middle\" style=\"background-color:#00ff00\" >";
+	    echo "<td class=\"report-day-worked\" valign = \"middle\" >";
 	  else
-      echo "<td valign = \"middle\" style=\"background-color:#ffffff\" >";
+      echo "<td class=\"report-day-off\" valign = \"middle\" >";
 
 	    echo "<h5 class=\"info\">";
 
@@ -482,7 +480,7 @@ else{
   }
 
   if ( $is_day_off == 1 ){ 
-    echo "<td style=\"background-color:#eeeeee\" align = \"center\" valign = \"middle\">"; 
+    echo "<td class=\"report-day-muted-off\" align = \"center\" valign = \"middle\">";
     echo "<h5 class=\"lite\">";
     echo "выходной</td>";
   }
