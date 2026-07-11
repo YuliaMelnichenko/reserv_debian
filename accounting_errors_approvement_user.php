@@ -165,44 +165,44 @@ echo "<table border=0>";
                 $deleteDisabledImg = "close.png";
 
                 if ($status == 2) {
-                    echo "<button title=\"Уже принято\" disabled style=\"padding:0px; background-color:#ffffff; border:0px solid #888888; cursor:default; margin-right:4px; opacity:0.8;\">";
+                    echo "<button class=\"journal-icon-button journal-icon-button-spaced journal-icon-button-disabled\" title=\"Уже принято\" disabled>";
                     echo "<img src=\"img/$acceptDisabledImg\" onerror=\"this.src='img/$acceptImg';\" alt=\"Уже принято\" height=\"14\">";
                     echo "</button>";
                 }
                 else if ($status == 4) {
-                    echo "<button title=\"Принять нельзя: запись удалена\" disabled style=\"padding:0px; background-color:#ffffff; border:0px solid #888888; cursor:default; margin-right:4px; opacity:0.8;\">";
+                    echo "<button class=\"journal-icon-button journal-icon-button-spaced journal-icon-button-disabled\" title=\"Принять нельзя: запись удалена\" disabled>";
                     echo "<img src=\"img/$acceptDisabledImg\" onerror=\"this.src='img/$acceptImg';\" alt=\"Принять нельзя\" height=\"14\">";
                     echo "</button>";
                 }
                 else {
-                    echo "<button title=\"Принять\" style=\"padding:0px; background-color:#ffffff; border:0px solid #888888; cursor:pointer; margin-right:4px;\" onclick=\"openAccountingErrorStatusWindow($errorID, 2, '$dateView');\">";
+                    echo "<button class=\"journal-icon-button journal-icon-button-spaced\" title=\"Принять\" onclick=\"openAccountingErrorStatusWindow($errorID, 2, '$dateView');\">";
                     echo "<img src=\"img/$acceptImg\" onerror=\"this.src='img/workTimeGood.png';\" alt=\"Принять\" height=\"14\">";
                     echo "</button>";
                 }
 
                 if ($status == 3) {
-                    echo "<button title=\"Уже отклонено\" disabled style=\"padding:0px; background-color:#ffffff; border:0px solid #888888; cursor:default; margin-right:4px; opacity:0.8;\">";
+                    echo "<button class=\"journal-icon-button journal-icon-button-spaced journal-icon-button-disabled\" title=\"Уже отклонено\" disabled>";
                     echo "<img src=\"img/$refuseDisabledImg\" onerror=\"this.src='img/$refuseImg';\" alt=\"Уже отклонено\" height=\"14\">";
                     echo "</button>";
                 }
                 else if ($status == 4) {
-                    echo "<button title=\"Отклонить нельзя: запись удалена\" disabled style=\"padding:0px; background-color:#ffffff; border:0px solid #888888; cursor:default; margin-right:4px; opacity:0.8;\">";
+                    echo "<button class=\"journal-icon-button journal-icon-button-spaced journal-icon-button-disabled\" title=\"Отклонить нельзя: запись удалена\" disabled>";
                     echo "<img src=\"img/$refuseDisabledImg\" onerror=\"this.src='img/$refuseImg';\" alt=\"Отклонить нельзя\" height=\"14\">";
                     echo "</button>";
                 }
                 else {
-                    echo "<button title=\"Отклонить\" style=\"padding:0px; background-color:#ffffff; border:0px solid #888888; cursor:pointer; margin-right:4px;\" onclick=\"openAccountingErrorStatusWindow($errorID, 3, '$dateView');\">";
+                    echo "<button class=\"journal-icon-button journal-icon-button-spaced\" title=\"Отклонить\" onclick=\"openAccountingErrorStatusWindow($errorID, 3, '$dateView');\">";
                     echo "<img src=\"img/$refuseImg\" onerror=\"this.src='img/workTimeBad.png';\" alt=\"Отклонить\" height=\"14\">";
                     echo "</button>";
                 }
 
                 if ($status == 4) {
-                    echo "<button title=\"Уже удалено\" disabled style=\"padding:0px; background-color:#ffffff; border:0px solid #888888; cursor:default; opacity:0.8;\">";
+                    echo "<button class=\"journal-icon-button journal-icon-button-disabled\" title=\"Уже удалено\" disabled>";
                     echo "<img src=\"img/$deleteDisabledImg\" onerror=\"this.src='img/$deleteImg';\" alt=\"Уже удалено\" height=\"14\">";
                     echo "</button>";
                 }
                 else {
-                    echo "<button title=\"Удалить\" style=\"padding:0px; background-color:#ffffff; border:0px solid #888888; cursor:pointer;\" onclick=\"openAccountingErrorStatusWindow($errorID, 4, '$dateView');\">";
+                    echo "<button class=\"journal-icon-button\" title=\"Удалить\" onclick=\"openAccountingErrorStatusWindow($errorID, 4, '$dateView');\">";
                     echo "<img src=\"img/$deleteImg\" onerror=\"this.src='img/del.png';\" alt=\"Удалить\" height=\"14\">";
                     echo "</button>";
                 }
