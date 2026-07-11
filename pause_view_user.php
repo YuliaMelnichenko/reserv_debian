@@ -50,7 +50,7 @@ function update_clock()
   }
 }
 
-var timerId=setInterval( "update_clock()", 1000 );
+var timerId = setInterval(update_clock, 1000);
 </script> 
 
 <?php

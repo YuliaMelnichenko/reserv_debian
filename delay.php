@@ -74,7 +74,7 @@ function update_clock()
   }
 }
 
-var timerId=setInterval( "update_clock()", 10000 );
+var timerId = setInterval(update_clock, 10000);
 </script>
 
 <?php

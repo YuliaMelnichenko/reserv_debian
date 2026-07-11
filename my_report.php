@@ -571,7 +571,7 @@ function update_clock(){
   }
 }
 
-var timerId=setInterval( "update_clock()", 10000 );      
+var timerId = setInterval(update_clock, 10000);
 
 </script>
 <script type="text/javascript" src="js/tory.js?v=20260709"></script>

@@ -475,7 +475,7 @@ build_in_delay_expl();
 build_in_add_work();
 get_time_registration_div_content();   
 
-var timerId=setInterval( "update_clock()", 5000 );
+var timerId = setInterval(update_clock, 5000);
 
 </script> 
 
