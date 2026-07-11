@@ -203,6 +203,19 @@ div.layer_question_div_2 {
   height: 140px;
 }
 
+.is-hidden {
+  display: none;
+}
+
+.day-change-button {
+  width: 180px;
+  height: 30px;
+  border: 1px solid #888888;
+  background-color: #f8d888;
+  cursor: pointer;
+  font-size: 80%;
+}
+
 div.report_head_dt{
   width: 1080px;
   height: 360px;
@@ -1997,6 +2010,36 @@ input.no_padding {
   padding-bottom:0px;
 }
 
+.auth-label {
+  color: #222222;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+}
+
+.auth-login-input {
+  width: 120px;
+}
+
+.auth-password-input {
+  width: 170px;
+}
+
+.auth-checkbox {
+  width: 14px;
+  height: 14px;
+  border: 0 solid #888888;
+  background-color: #ddeeff;
+  font-size: 100%;
+}
+
+.auth-submit-button {
+  width: 420px;
+  height: 50px;
+  border: 1px solid #888888;
+  background-color: #f8d888;
+  font-size: 150%;
+}
+
 input.button_simple {
   border:1px solid #777777;
   background-color:#D4D0C8;
@@ -3619,6 +3662,11 @@ h5.activ_time {
 
 .journal-modal-action-save {
   background-color: #88ff88;
+}
+
+.journal-comment-textarea {
+  width: 250px;
+  resize: none;
 }
 
 #accountingErrorModalWindow,

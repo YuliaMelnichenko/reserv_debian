@@ -99,8 +99,8 @@ if ( !isset($_SESSION['ss_id']) )
 
   echo "<h4>Для продолжения необходима авторизация</h4><br><br>";
 
-  echo "<font size=\"3\" color=\"#222222\" face=\"Arial\">Логин: </font><input type=\"text\" id=\"login\" style=\"width:120px;\" />";
-  echo "<font size=\"3\" color=\"#222222\" face=\"Arial\"> Пароль: </font><input type=\"password\" id=\"passwd\" style=\"width:170px;\" /><br />";
+  echo "<span class=\"auth-label\">Логин: </span><input class=\"auth-login-input\" type=\"text\" id=\"login\" />";
+  echo "<span class=\"auth-label\"> Пароль: </span><input class=\"auth-password-input\" type=\"password\" id=\"passwd\" /><br />";
 
   echo "<table border=0>";
     echo "<tr>";
@@ -111,7 +111,7 @@ if ( !isset($_SESSION['ss_id']) )
     echo "</tr>";
     echo "<tr>";
       echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 20>";
-        echo "<input class=\"no_padding\"  checked style=\"font-size: 100%; width:14px; height:14px; background-color:#ddeeff; border:0px solid #888888;\" type=\"checkbox\" id=\"autologin\" value=\"1\" >";
+        echo "<input class=\"no_padding auth-checkbox\" checked type=\"checkbox\" id=\"autologin\" value=\"1\" >";
       echo "</td>";
       echo "<td bgcolor=\"#ddeeff\" valign=\"top\" align=\"left\" width = 400>";
         echo "<h5 class=\"middle\">запомнить логин</h5>";
@@ -125,8 +125,8 @@ if ( !isset($_SESSION['ss_id']) )
     echo "</tr>";
   echo "</table>";
 
-  echo "<input type=\"hidden\" value=\"$summ_\" name=\"check\" style=\"width:30px;\" />";
-  echo "<button id=\"auth_btn\" style=\"font-size: 150%; width:420px; height:50px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"auth();\" name=\"nextBtn\">Авторизоваться</button>";
+  echo "<input type=\"hidden\" value=\"$summ_\" name=\"check\" />";
+  echo "<button id=\"auth_btn\" class=\"auth-submit-button\" onclick=\"auth();\" name=\"nextBtn\">Авторизоваться</button>";
   echo "</td>";
   echo "</tr>";
   echo "</table>";
