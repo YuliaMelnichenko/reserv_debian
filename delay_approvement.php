@@ -16,7 +16,7 @@ echo "<title>Система учета времени присутствия с�
 echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
-echo "<body bgcolor=\"#ffffff\" >";
+echo "<body class=\"app-page\">";
 ?>
 
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
@@ -26,7 +26,7 @@ echo "<body bgcolor=\"#ffffff\" >";
 <?php
 $userID_ = (int)$_SESSION['ss_id'];
 
-echo "<div align=\"left\">";
+echo "<div class=\"notification-page-layout\">";
 
 include_once __DIR__ . "/php_tori/connect.php";
 
@@ -38,30 +38,28 @@ echo "<input id=\"penIDTempVal\" type=\"hidden\" value=\"\">";
 echo "<input id=\"penDateTempVal\" type=\"hidden\" value=\"\">";
 echo "<input id=\"penUserIDTempVal\" type=\"hidden\" value=\"\">";
 
-echo "<table border=0>";
+echo "<table class=\"notification-page-table\">";
   echo "<tr>";
-    echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
+    echo "<td class=\"notification-nav-cell\">";
       include_once __DIR__ . "/navigate.php";
     echo "</td>";
 
-    $wholeWidth = 835;
-
-    echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
+    echo "<td class=\"notification-content-cell notification-content-cell-wide\">";
 
     echo "<div id=\"delayHeader\">";
       echo "<h5 class=\"dark\"><br>/уведомления по опозданиям<br><br></h5>";
     echo "</div>";
 
 echo "<div class=\"notification-table-scroll notification-table-scroll-wide\">";
-echo "<table class=\"add_time\" id = \"delay_approvement_table_users\" border=1>";
-echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Сотрудник</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Всего</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Принятые</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Отклоненные</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Удаленные</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Новые</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Просмотреть</h5>"."</td>";
+echo "<table class=\"add_time notification-summary-table\" id = \"delay_approvement_table_users\">";
+echo "<tr class=\"notification-table-head\">";
+echo "<td class=\"add_time notification-user-name-cell\">"."<h5 class=\"big\">Сотрудник</h5>"."</td>";
+echo "<td class=\"add_time notification-count-cell\">"."<h5 class=\"big\">Всего</h5>"."</td>";
+echo "<td class=\"add_time notification-accepted-cell\">"."<h5 class=\"big\">Принятые</h5>"."</td>";
+echo "<td class=\"add_time notification-refused-cell\">"."<h5 class=\"big\">Отклоненные</h5>"."</td>";
+echo "<td class=\"add_time notification-deleted-cell\">"."<h5 class=\"big\">Удаленные</h5>"."</td>";
+echo "<td class=\"add_time notification-count-cell\">"."<h5 class=\"big\">Новые</h5>"."</td>";
+echo "<td class=\"add_time notification-view-cell\">"."<h5 class=\"big\">Просмотреть</h5>"."</td>";
 echo "</tr>";
 
 $color = "#ddffff";
@@ -99,14 +97,16 @@ else
     $cellStype = "middle";
     if ( $newNotificationCount > 0 ){ $cellStype = "middleBlue1"; }
 
-    echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-    echo "<td class=\"add_time\" width = 250 valign=\"middle\" align=\"left\"><h5 class=\"middle\">" . html_escape($userName) . "</h5></td>";
-    echo "<td class=\"add_time\" width = 60 valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$notificationCount</h5>"."</td>";
-    echo "<td class=\"add_time\" width = 80 valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$acceptedNotificationCount</h5>"."</td>";
-    echo "<td class=\"add_time\" width = 105 valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$refusedNotificationCount</h5>"."</td>";
-    echo "<td class=\"add_time\" width = 90 valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$deletedNotificationCount</h5>"."</td>";
-    echo "<td class=\"add_time\" width = 60 valign=\"middle\" align=\"center\">"."<h5 class=\"$cellStype\">$newNotificationCount</h5>"."</td>";
-    echo "<td class=\"add_time\" width = 105 valign=\"middle\" align=\"center\">";
+    $rowClass = $color == "#ddffff" ? "notification-row-alt" : "notification-row";
+
+    echo "<tr class=\"$rowClass\">";
+    echo "<td class=\"add_time notification-user-name-cell\"><h5 class=\"middle\">" . html_escape($userName) . "</h5></td>";
+    echo "<td class=\"add_time notification-count-cell\">"."<h5 class=\"middle\">$notificationCount</h5>"."</td>";
+    echo "<td class=\"add_time notification-accepted-cell\">"."<h5 class=\"middle\">$acceptedNotificationCount</h5>"."</td>";
+    echo "<td class=\"add_time notification-refused-cell\">"."<h5 class=\"middle\">$refusedNotificationCount</h5>"."</td>";
+    echo "<td class=\"add_time notification-deleted-cell\">"."<h5 class=\"middle\">$deletedNotificationCount</h5>"."</td>";
+    echo "<td class=\"add_time notification-count-cell\">"."<h5 class=\"$cellStype\">$newNotificationCount</h5>"."</td>";
+    echo "<td class=\"add_time notification-view-cell\">";
       echo "<button class=\"journal-view-button\" id=\"explBtn\" title=\"Просмотреть\" onclick=\"$uhref\"><img src=\"img/$img\"></button>";
     echo "</td>";
     echo "</tr>";
@@ -148,7 +148,7 @@ function update_clock()
   }
 }
 
-var timerId=setInterval( "update_clock()", 10000 );
+var timerId = setInterval(update_clock, 10000);
 </script>
 
 <?php

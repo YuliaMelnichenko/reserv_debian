@@ -16,7 +16,7 @@ echo "<title>Система учета времени присутствия с�
 echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
-echo "<body bgcolor=\"#ffffff\" >";
+echo "<body class=\"app-page\">";
 ?>
 
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
@@ -26,33 +26,31 @@ echo "<body bgcolor=\"#ffffff\" >";
 <?php
 $userID_ = (int)$_SESSION['ss_id'];
 
-echo "<div align=\"left\">";
+echo "<div class=\"notification-page-layout\">";
 
 include_once __DIR__ . "/php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
 
-echo "<table border=0>";
+echo "<table class=\"notification-page-table\">";
   echo "<tr>";
-    echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
+    echo "<td class=\"notification-nav-cell\">";
       include_once __DIR__ . "/navigate.php";
     echo "</td>"; 
 
-      $wholeWidth = 562;
-
-      echo "<td id=\"add_time_content_width\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
+      echo "<td id=\"add_time_content_width\" class=\"notification-content-cell notification-content-cell-narrow\">";
 
         echo "<div id=\"addTimeHeader\">";
           echo "<h5 nowrap class=\"dark\"><br>/уведомления по приостановкам учета времени<br><br></h5>";
         echo "</div>";
 
     echo "<div class=\"notification-table-scroll notification-table-scroll-narrow\">";
-    echo "<table id = \"pause_approvement_table_users\" class=\"add_time\" border=1>";
-    echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
-    echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Сотрудник</h5>"."</td>";
-    echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Всего</h5>"."</td>";
-    echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">За текущий день</h5>"."</td>";
-    echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Просмотреть</h5>"."</td>";
+    echo "<table id = \"pause_approvement_table_users\" class=\"add_time notification-summary-table\">";
+    echo "<tr class=\"notification-table-head\">";
+    echo "<td class=\"add_time notification-user-name-cell\">"."<h5 class=\"big\">Сотрудник</h5>"."</td>";
+    echo "<td class=\"add_time notification-pause-count-cell\">"."<h5 class=\"big\">Всего</h5>"."</td>";
+    echo "<td class=\"add_time notification-current-day-cell\">"."<h5 class=\"big\">За текущий день</h5>"."</td>";
+    echo "<td class=\"add_time notification-pause-view-cell\">"."<h5 class=\"big\">Просмотреть</h5>"."</td>";
     echo "</tr>";
 
     $color = "#ddffff";
@@ -85,11 +83,13 @@ echo "<table border=0>";
         $currentDayNotificationCount = 0;
         get_pause_notif_counts( $userID, $notificationCount, $currentDayNotificationCount );
 
-        echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-        echo "<td width = 250 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"middle\">" . html_escape($userName) . "</h5></td>";
-        echo "<td width = 45 class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$notificationCount</h5>"."</td>";
-        echo "<td width = 120 class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$currentDayNotificationCount</h5>"."</td>";
-        echo "<td width = 80 class=\"add_time\" valign=\"middle\" align=\"center\">";
+        $rowClass = $color == "#ddffff" ? "notification-row-alt" : "notification-row";
+
+        echo "<tr class=\"$rowClass\">";
+        echo "<td class=\"add_time notification-user-name-cell\"><h5 class=\"middle\">" . html_escape($userName) . "</h5></td>";
+        echo "<td class=\"add_time notification-pause-count-cell\">"."<h5 class=\"middle\">$notificationCount</h5>"."</td>";
+        echo "<td class=\"add_time notification-current-day-cell\">"."<h5 class=\"middle\">$currentDayNotificationCount</h5>"."</td>";
+        echo "<td class=\"add_time notification-pause-view-cell\">";
           echo "<button class=\"journal-view-button\" id=\"explBtn\" title=\"Просмотреть\" onclick=\"$uhref\"><img src=\"img/$img\"></button>";
         echo "</td>";
         echo "</tr>";
@@ -131,7 +131,7 @@ function update_clock()
   }
 }
 
-var timerId=setInterval( "update_clock()", 1000 );
+var timerId = setInterval(update_clock, 1000);
 </script> 
 
 <?php
