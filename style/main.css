@@ -1173,6 +1173,50 @@ div.report_head_stub_left {
   justify-content: space-between;
 }
 
+.delay-explanation-textarea {
+  width: 240px;
+  resize: none;
+}
+
+.delay-explanation-button {
+  width: 178px;
+  height: 20px;
+  border: 1px solid #888888;
+  font-size: 100%;
+}
+
+.delay-explanation-button-save {
+  background-color: #f8d888;
+}
+
+.delay-explanation-button-close,
+.gym-close-button {
+  background-color: #ff7979;
+}
+
+.delay-question-button {
+  width: 130px;
+  height: 25px;
+  border: 1px solid #888888;
+  font-size: 100%;
+}
+
+.delay-question-button-yes {
+  background-color: #91f591;
+}
+
+.delay-question-button-no {
+  background-color: #f79398;
+}
+
+.gym-close-button {
+  width: 90px;
+  height: 25px;
+  border: 1px solid #888888;
+  cursor: pointer;
+  font-size: 100%;
+}
+
 #add_stop_time {
   resize: none;
   width: 150px;

@@ -82,7 +82,7 @@ echo "<table cellpadding=\"0\" cellspacing=\"0\" border=1 bordercolor=\"#888888\
       echo "</select>";      
     echo "</td>";
     echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
-     echo "<textarea $disableStr id=\"delayExplanation\" style=\"width:240px; resize: none;\" cols=\"33\" rows=\"2\">" . html_escape($explaneDesk) . "</textarea>";
+     echo "<textarea $disableStr id=\"delayExplanation\" class=\"delay-explanation-textarea\" cols=\"33\" rows=\"2\">" . html_escape($explaneDesk) . "</textarea>";
     echo "</td>";
   echo "</tr>";
 echo "</table>"; 
@@ -106,16 +106,16 @@ if ( $status != 0 ){
 }
 
 echo "<td bordercolor=\"#000000\" width=\"210px\" valign=\"middle\" align=\"left\">";
-echo "<button style=\"font-size: 100%; width:178px; height:20px; background-color:#ff7979; border:1px solid #888888;\" onclick=\"close_explanation( '$mode' );\">Закрыть</button><br>";
+echo "<button class=\"delay-explanation-button delay-explanation-button-close\" onclick=\"close_explanation( '$mode' );\">Закрыть</button><br>";
 echo "</td>";
 
 echo "<td bordercolor=\"#000000\" width=\"300px\" valign=\"middle\" align=\"right\">";
 
 if ( $mode == 0 ){
-  echo "<button $disableStr style=\"font-size: 100%; width:178px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"set_explanation( '0', '-1' );\">Сохранить</button><br>";
+  echo "<button $disableStr class=\"delay-explanation-button delay-explanation-button-save\" onclick=\"set_explanation( '0', '-1' );\">Сохранить</button><br>";
 }
 else{
-  echo "<button $disableStr style=\"font-size: 100%; width:178px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"set_explanation( '$mode', '$delayID' );\">Сохранить</button><br>";
+  echo "<button $disableStr class=\"delay-explanation-button delay-explanation-button-save\" onclick=\"set_explanation( '$mode', '$delayID' );\">Сохранить</button><br>";
 }
 echo "</td>";
 
