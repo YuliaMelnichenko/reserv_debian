@@ -17,7 +17,7 @@ echo "<title>Система учета времени присутствия с�
 echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
-echo "<body bgcolor=\"#ffffff\" >";
+echo "<body class=\"app-page accounting-errors-page\">";
 ?>
 
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
@@ -34,20 +34,18 @@ if ($syncResult !== false) {
   $_SESSION['accounting_errors_sync_date'] = date('Y-m-d');
 }
 
-echo "<div align=\"left\">";
+echo "<div class=\"accounting-errors-layout\">";
 
 echo "<input id=\"accountingErrorIDTemp\" type=\"hidden\" value=\"\">";
 echo "<input id=\"accountingErrorDateTemp\" type=\"hidden\" value=\"\">";
 
-echo "<table border=0>";
+echo "<table class=\"accounting-errors-page-table\">";
   echo "<tr>";
-    echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width=250>";
+    echo "<td class=\"accounting-errors-nav-cell\">";
       include_once __DIR__ . "/navigate.php";
     echo "</td>";
 
-    $wholeWidth = 835;
-
-    echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width=$wholeWidth>";
+    echo "<td class=\"accounting-errors-content-cell\">";
 
       echo "<div id=\"accountingErrorsHeader\">";
         echo "<h5 class=\"dark\"><br>/ошибки учета рабочего времени<br><br></h5>";
@@ -55,12 +53,12 @@ echo "<table border=0>";
 
       echo "<h5 class=\"big\">Текущий квартал: $accountingErrorsPeriodLabel</h5>";
       echo "<div id=\"accountingErrorsTableScroll\">";
-        echo "<table class=\"add_time\" id=\"accounting_errors_table\" border=1>";
-            echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
-            echo "<td class=\"add_time\" valign=\"middle\" align=\"center\" width=120><h5 class=\"big\">Дата</h5></td>";
-            echo "<td class=\"add_time\" valign=\"middle\" align=\"center\" width=150><h5 class=\"big\">Статус</h5></td>";
-            echo "<td class=\"add_time\" valign=\"middle\" align=\"center\" width=430><h5 class=\"big\">Комментарий</h5></td>";
-            echo "<td class=\"add_time\" valign=\"middle\" align=\"center\" width=100><h5 class=\"big\">Действие</h5></td>";
+        echo "<table class=\"add_time\" id=\"accounting_errors_table\">";
+            echo "<tr class=\"accounting-errors-table-head\">";
+            echo "<td class=\"add_time accounting-errors-date-cell\"><h5 class=\"big\">Дата</h5></td>";
+            echo "<td class=\"add_time accounting-errors-status-cell\"><h5 class=\"big\">Статус</h5></td>";
+            echo "<td class=\"add_time accounting-errors-comment-cell\"><h5 class=\"big\">Комментарий</h5></td>";
+            echo "<td class=\"add_time accounting-errors-action-cell\"><h5 class=\"big\">Действие</h5></td>";
             echo "</tr>";
 
             $query = db_query(
@@ -114,11 +112,13 @@ echo "<table border=0>";
                         $statusClass = "middleRed";
                     }
 
-                    echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-                    echo "<td class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"middle\">$dateView</h5></td>";
-                    echo "<td class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"$statusClass\">$statusName</h5></td>";
-                    echo "<td class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"middle\">$commentView</h5></td>";
-                    echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">";
+                    $rowClass = $color == "#ddffff" ? "accounting-errors-row-alt" : "accounting-errors-row";
+
+                    echo "<tr class=\"$rowClass\">";
+                    echo "<td class=\"add_time accounting-errors-date-cell\"><h5 class=\"middle\">$dateView</h5></td>";
+                    echo "<td class=\"add_time accounting-errors-status-cell\"><h5 class=\"$statusClass\">$statusName</h5></td>";
+                    echo "<td class=\"add_time accounting-errors-comment-cell\"><h5 class=\"middle\">$commentView</h5></td>";
+                    echo "<td class=\"add_time accounting-errors-action-cell\">";
 
                         if ($status == 0 || $status == 1 || $status == 3) {
                             $commentAttr = htmlspecialchars((string)$comment, ENT_QUOTES, 'UTF-8');
@@ -142,7 +142,7 @@ echo "<table border=0>";
                 }
 
                 if ($rowCount == 0) {
-                    echo "<tr bgcolor=\"#ffffff\"><td class=\"add_time\" colspan=4 valign=\"middle\" align=\"center\"><h5 class=\"middle\">Ошибок учета нет</h5></td></tr>";
+                    echo "<tr class=\"accounting-errors-row\"><td class=\"add_time accounting-errors-empty-cell\" colspan=4><h5 class=\"middle\">Ошибок учета нет</h5></td></tr>";
                 }
             }
 

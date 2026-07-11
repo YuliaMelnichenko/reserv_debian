@@ -4016,3 +4016,78 @@ h5.activ_time {
   z-index: 2;
   background: #eeeeee;
 }
+
+.app-page {
+  background: #ffffff;
+}
+
+.accounting-errors-layout {
+  text-align: left;
+}
+
+.accounting-errors-page-table {
+  border: 0;
+  border-collapse: collapse;
+}
+
+.accounting-errors-nav-cell,
+.accounting-errors-content-cell {
+  vertical-align: top;
+  text-align: left;
+  background: #ddeeff;
+  border-color: #888888;
+}
+
+.accounting-errors-nav-cell {
+  width: 250px;
+}
+
+.accounting-errors-content-cell {
+  width: 835px;
+}
+
+.accounting-errors-table-head,
+.accounting-errors-row {
+  background: #ffffff;
+}
+
+.accounting-errors-table-head {
+  background: #eeeeee;
+}
+
+.accounting-errors-row-alt {
+  background: #ddffff;
+}
+
+.accounting-errors-date-cell,
+.accounting-errors-status-cell,
+.accounting-errors-action-cell,
+.accounting-errors-empty-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.accounting-errors-comment-cell {
+  text-align: left;
+  vertical-align: middle;
+}
+
+.accounting-errors-table-head .accounting-errors-comment-cell {
+  text-align: center;
+}
+
+.accounting-errors-date-cell {
+  width: 120px;
+}
+
+.accounting-errors-status-cell {
+  width: 150px;
+}
+
+.accounting-errors-comment-cell {
+  width: 430px;
+}
+
+.accounting-errors-action-cell {
+  width: 100px;
+}
