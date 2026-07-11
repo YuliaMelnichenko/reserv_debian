@@ -3379,6 +3379,19 @@ h5.activ_time {
   width: 23px;
 }
 
+.presence-inline-icon {
+  margin: 1px 0;
+}
+
+.employee-event-icon {
+  width: 23px;
+  margin: 1px 0;
+}
+
+.plain-cell {
+  padding: 0;
+}
+
 #add_time_part_start_time {
   margin: 0 5px;
 }

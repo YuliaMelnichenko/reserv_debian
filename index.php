@@ -694,7 +694,7 @@ if (
       while ($b = mysqli_fetch_assoc($bosses_q)) {
         if (isset($b['bday']) && $b['bday'] === date('m-d')) {
           $full_name = trim($b['surname'] . " " . $b['firstname'] . " " . $b['lastname']);
-          $img = "<img style=\"margin: 1px 0\" title=\"C днем рождения!\" src=\"img/birthday.png\">";
+          $img = "<img class=\"presence-inline-icon\" title=\"C днем рождения!\" src=\"img/birthday.png\">";
           $bosses_arr[] = [
             $full_name,
             "",
@@ -797,16 +797,16 @@ if (
         $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Обед/приостановка времени\" src=\"img/pause_time.png\">";
         $presenceSortOrder = 1;
       } elseif ($isRemoteNow) {
-        $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Работает удаленно\" src=\"img/remoteWorkIcon2.png\" style=\"margin: 1px 0\">";
+        $img = "<img class=\"work-status presence-inline-icon\" data-emp=\"$id_empl\" title=\"Работает удаленно\" src=\"img/remoteWorkIcon2.png\">";
         $presenceSortOrder = 1;
       } elseif (!$hasVisit) {
-        $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"На работу не приходил\" src=\"img/home.png\" style=\"margin: 1px 0\">";
+        $img = "<img class=\"work-status presence-inline-icon\" data-emp=\"$id_empl\" title=\"На работу не приходил\" src=\"img/home.png\">";
         $presenceSortOrder = 0;
       } elseif ($hasGoneHome) {
         $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Ушел домой\" src=\"img/go_home.png\">";
         $presenceSortOrder = 2;
       } else {
-        $img = "<img class=\"work-status\" data-emp=\"$id_empl\" style=\"margin: 1px 0\" title=\"На рабочем месте\" src=\"img/in_work2.png\">";
+        $img = "<img class=\"work-status presence-inline-icon\" data-emp=\"$id_empl\" title=\"На рабочем месте\" src=\"img/in_work2.png\">";
         $presenceSortOrder = 1;
       }
 
@@ -1028,7 +1028,7 @@ if (
 
       if (!in_array($personal_id, [400, 500, 501])) {
         if (!empty($birth) && $birth == date('m-d')) {
-          echo "<img style=\"margin: 1px 0\" title=\"C днем рождения!\" src=\"img/birthday.png\">";          
+          echo "<img class=\"presence-inline-icon\" title=\"C днем рождения!\" src=\"img/birthday.png\">";
         }
       } 
 
@@ -1046,14 +1046,14 @@ if (
             if ($today >= $start && $today <= $stop) {
               $daysToEnd = getDaysLeft($stop, $today);
               $tooltip = "До конца отпуска осталось: $daysToEnd " . getDayWord($daysToEnd) . "\nОтпуск: " . date("d.m.Y", strtotime($start)) . " - " . date("d.m.Y", strtotime($stop));
-              echo "<img src=\"img/vacation.png\" title=\"$tooltip\" style=\"width: 23px; margin: 1px 0\">";
+              echo "<img class=\"employee-event-icon\" src=\"img/vacation.png\" title=\"$tooltip\">";
             } elseif ($today < $start) {
                 $daysLeft = getWorkingDaysUntil($today, $start, $holidayDates);
                 
                 if (array_key_exists($daysLeft, $vacationIcons)) {
                   $tooltip = "Осталось $daysLeft " . "рабочих " . getDayWord($daysLeft) . " до отпуска. \n$tooltipDate";
                   $icon = $vacationIcons[$daysLeft];
-                  echo "<img src=\"img/$icon\" title=\"$tooltip\" style=\"width: 23px; margin: 1px 0\">";
+                  echo "<img class=\"employee-event-icon\" src=\"img/$icon\" title=\"$tooltip\">";
                 }
               } else {
                 "<!-- ni icon for $daysLeft days -->";
@@ -1066,14 +1066,14 @@ if (
             if ($today >= $start && $today <= $stop) {
               $daysToEnd = getDaysLeft($stop, $today);
               $tooltip = "До конца командировки осталось: $daysToEnd" . getDayWord($daysToEnd) . "\nКомандировка: " . date("d.m.Y", strtotime($start)) . " - " . date("d.m.Y", strtotime($stop));
-              echo "<img src=\"img/business_trip.png\" title=\"$tooltip\" style=\"width: 23px; margin: 1px 0\">";
+              echo "<img class=\"employee-event-icon\" src=\"img/business_trip.png\" title=\"$tooltip\">";
             } elseif ($today < $start) {
               $daysLeft = getWorkingDaysUntil($today, $start, $holidayDates);
 
               if (array_key_exists($daysLeft, $businessTripIcons)) {
                 $tooltip = "Осталось $daysLeft " . "рабочих " . getDayWord($daysLeft) . " до командировки. \n$tooltipDate";
                 $icon = $businessTripIcons[$daysLeft];
-                echo "<img src=\"img/$icon\" title=\"$tooltip\" style=\"width: 23px; margin: 1px 0\">";
+                echo "<img class=\"employee-event-icon\" src=\"img/$icon\" title=\"$tooltip\">";
               }
             }
           }
@@ -1082,7 +1082,7 @@ if (
             if ($today >= $start && $today <= $stop) {
               $daysToEnd = getDaysLeft($stop, $today);
               $tooltip = "До конца больничного осталось: $daysToEnd " . getDayWord($daysToEnd) . ". \nБольничный: " . date("d.m.Y", strtotime($start)) . " - " . date("d.m.Y", strtotime($stop));
-              echo "<img src=\"img/sick.png\" title=\"$tooltip\" style=\"width: 23px; margin: 1px 0\">";
+              echo "<img class=\"employee-event-icon\" src=\"img/sick.png\" title=\"$tooltip\">";
             }
           }
         }
@@ -1101,7 +1101,7 @@ if (
     echo "<td bgcolor=\"#ffffff\" valign=\"top\" align=\"left\" width = 10>";
     echo "</td>";
  
-    echo "<td valign=\"top\" align=\"left\" style=\"padding: 0;\">";
+    echo "<td class=\"plain-cell\" valign=\"top\" align=\"left\">";
     echo "<div id=\"inform\">";
     echo "<h5 class=\"dark0\"><br>/обновления кнопки 16.08.2024г.:<br><br></h5>";
     echo "<h5 class=\"dark1\">1. Настроено отображение присутствия сотрудников на рабочем месте информационной плиткой \"/присутствие сотрудников \" на главной вкладке.<br></h5>";
@@ -1115,8 +1115,8 @@ if (
     echo "<td bgcolor=\"#ffffff\" valign=\"top\" align=\"left\" width = 10>";
     echo "</td>";
 
-    echo "<td valign=\"top\" align=\"left\" style=\"padding: 0;\">";
-    echo "<div id=\"birthday_block\" style=\"display: none\">";
+    echo "<td class=\"plain-cell\" valign=\"top\" align=\"left\">";
+    echo "<div id=\"birthday_block\">";
     echo "</div>";
     echo "</td>";
 
