@@ -371,7 +371,7 @@ echo "<div id=\"report_container\">";
     echo "</div>";
     echo "<div id=\"select_reporting_period\">";
       echo "<h4 class=\"small\">Выбранный отчетный период: ".$_SESSION['rep_start_date']." - ".$_SESSION['rep_stop_date'] ."</h4>";
-        echo "<div id=\"manual_rep\" style=\"display:none;\">";
+        echo "<div id=\"manual_rep\" class=\"is-hidden\">";
 
           if ( isset( $_SESSION['rep_start_date'] ) ){ 
             $manRepStart = $_SESSION['rep_start_date']; 
@@ -386,9 +386,9 @@ echo "<div id=\"report_container\">";
             $manRepStop = $currDate; 
           }
 
-          echo "<input id=\"report_start_date\" align=\"center\" style=\"width:110px;\" type=\"date\" value=\"$manRepStart\" max=\"2060-12-31\">";
-          echo " - <input id=\"report_stop_date\" align=\"center\" style=\"width:110px;\" type=\"date\" value=\"$manRepStop\" max=\"2060-12-31\">";
-          echo "  <button class=\"button_style\" style=\"font-size: 90%; width:100px; height:21px; background-color:#f8d888; border:1px solid #888888; margin-left:3px\" onclick=\"manual_report_set();\" name=\"nextBtn\">Показать</button>";
+          echo "<input id=\"report_start_date\" class=\"report-date-input\" align=\"center\" type=\"date\" value=\"$manRepStart\" max=\"2060-12-31\">";
+          echo " - <input id=\"report_stop_date\" class=\"report-date-input\" align=\"center\" type=\"date\" value=\"$manRepStop\" max=\"2060-12-31\">";
+          echo "  <button class=\"button_style report-show-button\" onclick=\"manual_report_set();\" name=\"nextBtn\">Показать</button>";
         echo "</div>";
     echo "</div>";
 echo "</div>";

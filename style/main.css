@@ -2040,6 +2040,10 @@ input.no_padding {
   font-size: 150%;
 }
 
+.registration-input {
+  width: 255px;
+}
+
 input.button_simple {
   border:1px solid #777777;
   background-color:#D4D0C8;
@@ -3010,6 +3014,13 @@ h5.activ_text {
   vertical-align: -2px;
 }
 
+.current-employee-info {
+  color: #000000;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+}
+
 h5.activ_time {
   font-family: Arial, sans;
   font-size: 12px;
@@ -3041,6 +3052,19 @@ h5.activ_time {
 #select_reporting_period {
   display: flex;
   flex-direction: column;
+}
+
+.report-date-input {
+  width: 110px;
+}
+
+.report-show-button {
+  width: 100px;
+  height: 21px;
+  margin-left: 3px;
+  border: 1px solid #888888;
+  background-color: #f8d888;
+  font-size: 90%;
 }
 
 #add_time_part_start_dateTime,
