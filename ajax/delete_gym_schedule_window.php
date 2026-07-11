@@ -39,7 +39,7 @@ $content .= "</div>";
 $content .= "<table cellpadding=\"0\" cellspacing=\"0\" border=0 width=350>";  
 $content .= "<tr>";
 $content .= "<td bordercolor=\"#000000\" width=\"100\" valign=\"middle\" align=\"right\">";
-$content .= "<button style=\"cursor: pointer; font-size: 100%; width:90px; height:25px; background-color:#ff7979; border:1px solid #888888;\" onclick=\"close_add_sport_time();\">Закрыть</button><br>";
+$content .= "<button class=\"gym-close-button\" onclick=\"close_add_sport_time();\">Закрыть</button><br>";
 $content .= "</td>";
 
 $content .= "</tr>";
