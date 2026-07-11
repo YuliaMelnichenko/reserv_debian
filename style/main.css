@@ -3339,6 +3339,14 @@ h5.activ_time {
   background: rgba(0, 0, 0, 0.45);
 }
 
+.accounting-error-modal-hidden {
+  display: none;
+}
+
+.accounting-error-modal-label {
+  margin-bottom: 6px;
+}
+
 #archiveExcelPreviewOverlay {
   z-index: 99999;
   align-items: center;
@@ -3574,6 +3582,22 @@ h5.activ_time {
 .journal-icon-button-disabled {
   cursor: default;
   opacity: 0.8;
+}
+
+.journal-cell-icon-button {
+  padding: 0;
+  border: 0 solid #888888;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.journal-back-button {
+  width: 90px;
+  height: 24px;
+  margin-bottom: 8px;
+  border: 1px solid #888888;
+  background-color: #f8d888;
+  font-size: 90%;
 }
 
 .journal-view-button {

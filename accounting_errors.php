@@ -122,7 +122,7 @@ echo "<table border=0>";
 
                         if ($status == 0 || $status == 1 || $status == 3) {
                             $commentAttr = htmlspecialchars((string)$comment, ENT_QUOTES, 'UTF-8');
-                            echo "<button title=\"Внести комментарий\" data-comment=\"$commentAttr\" style=\"padding:0px; background-color:#ffffff; border:0px solid #888888; cursor:pointer;\" onclick=\"openAccountingErrorCommentWindow($errorID, '$dateView', this.dataset.comment);\">";
+                            echo "<button class=\"journal-cell-icon-button\" title=\"Внести комментарий\" data-comment=\"$commentAttr\" onclick=\"openAccountingErrorCommentWindow($errorID, '$dateView', this.dataset.comment);\">";
                                 echo "<img src=\"img/red.png\" onerror=\"this.src='img/pen.png';\" alt=\"Комментарий\">";
                             echo "</button>";
                         }
@@ -156,7 +156,7 @@ echo "</table>";
 echo "</div>";
 ?>
 
-<div id="accountingErrorModalOverlay" style="display:none;">
+<div id="accountingErrorModalOverlay" class="accounting-error-modal-hidden">
   <div id="accountingErrorModalWindow">
     <div id="accountingErrorModalHeader">
       <span>Комментарий к ошибке учета</span>

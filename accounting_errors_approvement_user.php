@@ -76,7 +76,7 @@ echo "<table border=0>";
 
       echo "<h5 class=\"big\">Текущий квартал: $accountingErrorsPeriodLabel</h5>";
 
-      echo "<button class=\"button_style\" style=\"font-size: 90%; width:90px; height:24px; background-color:#f8d888; border:1px solid #888888; margin-bottom:8px;\" onclick=\"location.href='$backUrl'\">Назад</button>";
+      echo "<button class=\"button_style journal-back-button\" onclick=\"location.href='$backUrl'\">Назад</button>";
 
       echo "<div id=\"accountingErrorsUserTableScroll\">";
         echo "<table class=\"add_time\" id=\"accounting_errors_user_table\" border=1>";
@@ -235,7 +235,7 @@ echo "</table>";
 echo "</div>";
 ?>
 
-<div id="accountingErrorStatusModalOverlay" style="display:none;">
+<div id="accountingErrorStatusModalOverlay" class="accounting-error-modal-hidden">
   <div id="accountingErrorStatusModalWindow">
     <div id="accountingErrorStatusModalHeader">
       <span id="accountingErrorStatusModalTitle">Решение по ошибке учета</span>
@@ -244,7 +244,7 @@ echo "</div>";
 
     <div id="accountingErrorStatusModalDate"></div>
 
-    <div style="margin-bottom: 6px;">Комментарий руководителя:</div>
+    <div class="accounting-error-modal-label">Комментарий руководителя:</div>
     <textarea id="accountingErrorSupervisorCommentText"></textarea>
 
     <div id="accountingErrorStatusModalActions">
