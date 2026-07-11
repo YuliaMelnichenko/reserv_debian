@@ -95,7 +95,7 @@ for( $idx = 0; $idx < count( $stats[0] ); $idx ++ ){
   echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$date</h5>"."</td>";
   echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$prefix: $postfix</h5>"."</td>";
   echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
-    echo "<button id = \"explBtn\" title = \"Просмотреть\" style=\"padding: 0px 0px 0px 0px; background-color:#ffffff; border:0px solid #888888;\" onclick=\"fill_alerts_by_user( '$userID_', '$date', '$Sttime', '$messStr' );\"><img src=\"img/$img\"></button>";
+    echo "<button id = \"explBtn\" class=\"journal-cell-icon-button\" title = \"Просмотреть\" onclick=\"fill_alerts_by_user( '$userID_', '$date', '$Sttime', '$messStr' );\"><img src=\"img/$img\"></button>";
   echo "</td>";
   echo "</tr>";
 }
@@ -121,7 +121,7 @@ else{
     echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$date</h5>"."</td>";
     echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$comments</h5>"."</td>";
     echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
-      echo "<button id = \"explBtn\" title = \"Отметить как просмотренное\" style=\"padding: 0px 0px 0px 0px; background-color:#ffffff; border:0px solid #888888;\" onclick=\"set_alert_viewed( '$id' );\"><img src=\"img/closeSmall.png\"></button>";
+      echo "<button id = \"explBtn\" class=\"journal-cell-icon-button\" title = \"Отметить как просмотренное\" onclick=\"set_alert_viewed( '$id' );\"><img src=\"img/closeSmall.png\"></button>";
     echo "</td>";
     echo "</tr>";
   }

@@ -258,7 +258,7 @@ echo "<input id=\"acceptTempVal\" type=\"hidden\" value=\"\">";
         echo "<h5 class=\"bigbig\">Комментарий</h5>";
       echo "</div>";
       echo "<div class=\"text_box\">";
-        echo "<textarea id=\"add_time_part_desc_2\" style=\"width:250px; resize: none;\" cols=\"43\" rows=\"3\"></textarea>";
+        echo "<textarea id=\"add_time_part_desc_2\" class=\"journal-comment-textarea\" cols=\"43\" rows=\"3\"></textarea>";
       echo "</div>";
       echo "<div class=\"box_btn\">";
         echo "<div>";

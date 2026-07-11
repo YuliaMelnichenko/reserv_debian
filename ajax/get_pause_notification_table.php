@@ -48,7 +48,7 @@ else
     echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$notificationCount</h5>"."</td>";
     echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$currentDayNotificationCount</h5>"."</td>";
     echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
-      echo "<button id = \"explBtn\" title = \"Просмотреть\" style=\"padding: 0px 0px 0px 0px; background-color:#ffffff; border:0px solid #888888;\" onclick=\"show_pause_by_user( '$userID' );\"><img src=\"img/$img\"></button>";
+      echo "<button id = \"explBtn\" class=\"journal-cell-icon-button\" title = \"Просмотреть\" onclick=\"show_pause_by_user( '$userID' );\"><img src=\"img/$img\"></button>";
     echo "</td>";
     echo "</tr>";
 
