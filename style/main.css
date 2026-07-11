@@ -52,6 +52,51 @@ h5.total_week_month
 	color: #000000
 }
 
+.report-summary-cell {
+  text-align: center;
+}
+
+.report-summary-week-label {
+  background-color: #dddddd;
+}
+
+.report-summary-week-over {
+  background-color: #88ff88;
+}
+
+.report-summary-week-under {
+  background-color: #ff8888;
+}
+
+.report-summary-month-label {
+  height: 100px;
+  background-color: #9999ff;
+}
+
+.report-summary-month-over {
+  background-color: #99ff99;
+}
+
+.report-summary-month-under {
+  background-color: #ff7777;
+}
+
+.report-day-worked {
+  background-color: #00ff00;
+}
+
+.report-day-off {
+  background-color: #ffffff;
+}
+
+.report-day-missing {
+  background-color: #ff0000;
+}
+
+.report-day-muted-off {
+  background-color: #eeeeee;
+}
+
 h5.alarm
 {
 	margin: 0;
