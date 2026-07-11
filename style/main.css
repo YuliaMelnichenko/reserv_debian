@@ -2298,6 +2298,98 @@ a.nounder {
 	text-decoration: none
 }
 
+.nav-zero-cell {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.nav-clock-cell {
+  border-color: #fdf2b5;
+}
+
+.nav-panel-cell,
+.nav-brand-cell,
+.nav-icon-cell {
+  margin: 0;
+  padding: 0;
+}
+
+.nav-brand-title {
+  margin: 0;
+  padding: 0;
+}
+
+.nav-brand-prefix,
+.nav-brand-name {
+  font-family: "Arial Black", Arial, sans-serif;
+  font-size: 24px;
+}
+
+.nav-brand-prefix {
+  color: #ffffff;
+}
+
+.nav-brand-name {
+  color: #4a6e97;
+}
+
+.nav-icon {
+  width: 22px;
+  height: 22px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav-menu-button {
+  width: 230px;
+  border: 1px solid #888888;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav-menu-button-main,
+.nav-menu-button-section,
+.nav-redmine-button {
+  height: 40px;
+  font-size: 80%;
+}
+
+.nav-menu-button-main {
+  padding: 5px;
+  background-color: #f8d888;
+}
+
+.nav-menu-button-current {
+  padding-right: 27px;
+}
+
+.nav-menu-button-section {
+  padding: 5px 0 5px 5px;
+  background-color: #a8fd88;
+}
+
+.nav-notification-button {
+  height: 60px;
+  padding: 5px;
+  background-color: #f8d888;
+  font-size: 70%;
+}
+
+.nav-notification-button-wide {
+  padding-right: 20px;
+  font-size: 80%;
+}
+
+.nav-spacer-cell {
+  padding: 2px;
+}
+
+.nav-redmine-button {
+  padding: 5px 25px 5px 10px;
+  background-color: #f79398;
+}
+
 a.ml {
 	font-family: Arial, sans;
   font-weight: 900;
