@@ -58,6 +58,7 @@ echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
       $colorMode = 1;
       $color1 = "#ddffff";
       $color3 = "#ffffff";
+      list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(false);
 
       $tempAddTimes = get_all_add_work_info_by_user( $userID, 1 );
 
@@ -67,6 +68,18 @@ echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
       {
         if ( $tempAddTime[7] == 1 ) 
         {
+          if (!is_time_defined($tempAddTime[0]) || !is_time_defined($tempAddTime[1])) {
+            continue;
+          }
+
+          if (strtotime($tempAddTime[1]) <= strtotime($tempAddTime[0])) {
+            continue;
+          }
+
+          if ($tempAddTime[0] < $quarterStartDate || $tempAddTime[0] >= $quarterStopExclusive) {
+            continue;
+          }
+
           $addTimes[] = $tempAddTime;
         }
       }

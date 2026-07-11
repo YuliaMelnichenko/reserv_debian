@@ -396,7 +396,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
 <head>
     <meta charset="utf-8">
     <title>Выгрузка переработок — текущий квартал</title>
-    <link rel="stylesheet" href="style/style.css">
     <link rel="stylesheet" href="style/main.css">
 </head>
 <body>

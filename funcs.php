@@ -214,8 +214,20 @@ function datetime_to_time_str( $indatetime )
     return $retStr;
 }
 
+function get_standard_day_transition_time()
+{
+  return "00:00:00";
+}
+
+function normalize_day_transition_time($dayTransitionTime)
+{
+  return get_standard_day_transition_time();
+}
+
 function datetimestr_to_day_start_stop_DT_ex_str($dateTimeStr, $dayTransitionTime)
 {
+  $dayTransitionTime = normalize_day_transition_time($dayTransitionTime);
+
   if ($dayTransitionTime == "" || $dayTransitionTime == "NDF") {
     $dayTransitionTime = "00:00:00";
   }
@@ -253,6 +265,8 @@ function datetimestr_to_day_start_stop_DT_ex_str($dateTimeStr, $dayTransitionTim
 }
 
 function datetimestr_to_day_start_stop_DT_ex_str_idx($dateTimeStr, $dayTransitionTime){
+  $dayTransitionTime = normalize_day_transition_time($dayTransitionTime);
+
   if ($dayTransitionTime == "" || $dayTransitionTime == "NDF") {
     $dayTransitionTime = "00:00:00";
   }
@@ -741,6 +755,23 @@ function DayInc( $day )
   return strtotime( "+1 day", $day );
 }
 
+function get_current_quarter_date_range($stopAtYesterday = false)
+{
+  $month = (int)date('n');
+  $year = (int)date('Y');
+  $quarterStartMonth = ((int)(($month - 1) / 3)) * 3 + 1;
+  $startDate = date('Y-m-d', mktime(0, 0, 0, $quarterStartMonth, 1, $year));
+  $stopDate = $stopAtYesterday ? date('Y-m-d', strtotime('-1 day')) : date('Y-m-d');
+  $stopExclusive = date('Y-m-d', strtotime($stopDate . ' +1 day'));
+
+  return array($startDate, $stopDate, $stopExclusive);
+}
+
+function format_date_range_label($startDate, $stopDate)
+{
+  return date('d.m.Y', strtotime($startDate)) . ' - ' . date('d.m.Y', strtotime($stopDate));
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function add_time_legacy_datetime_columns_exist($link)
@@ -868,12 +899,19 @@ function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNoti
   $notificationCount = 0;
   $currentDayNotificationCount = 0;
   $currentDate = date('Y-m-d');
+  list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(false);
   $startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME', $link);
+  $stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME', $link);
 
   $query = mysqli_query($link, "SELECT $startExpr AS START_DT_EFFECTIVE
                                 FROM ADD_TIME a
                                 WHERE a.USERID='$user_id'
-                                  AND a.PAUSE_MODE = 1");
+                                  AND a.PAUSE_MODE = 1
+                                  AND $startExpr >= '$quarterStartDate'
+                                  AND $startExpr < '$quarterStopExclusive'
+                                  AND $startExpr <> '0000-00-00 00:00:00'
+                                  AND $stopExpr <> '0000-00-00 00:00:00'
+                                  AND $stopExpr > $startExpr");
 
   $merr=mysqli_error($link);
 
@@ -910,16 +948,17 @@ function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNot
   $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
   $paramArr = get_dbsetup_param( 'add_time_journal_deep_day' );
   $paramInt = (-1)*$paramArr[1];
+  $startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME', $link);
   $stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME', $link);
 
   $query = mysqli_query($link, "SELECT APPROVED
                                 FROM ADD_TIME a
                                 WHERE a.PAUSE_MODE = 0
                                   AND a.USERID = '$user_id'
-                                  AND (
-                                    $stopExpr > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )
-                                    OR $stopExpr = '0000-00-00 00:00:00'
-                                  )");
+                                  AND $stopExpr > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )
+                                  AND $stopExpr <> '0000-00-00 00:00:00'
+                                  AND $startExpr <> '0000-00-00 00:00:00'
+                                  AND $stopExpr > $startExpr");
 
   $merr = mysqli_error($link);
 
@@ -2240,9 +2279,11 @@ function get_all_add_work_info_by_user( $userID, $pauseMode = 0 )
                          ON a.REASON = b.ID
                          where a.USERID = '$userID'
                            AND a.PAUSE_MODE = '$pauseMode'
+                           AND $startExpr <> '0000-00-00 00:00:00'
+                           AND $stopExpr <> '0000-00-00 00:00:00'
+                           AND $stopExpr > $startExpr
                            AND (
                              $stopExpr > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )
-                             OR $stopExpr = '0000-00-00 00:00:00'
                            )
                          order by START_DT_EFFECTIVE DESC");
 

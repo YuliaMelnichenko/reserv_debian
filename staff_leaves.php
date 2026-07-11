@@ -756,7 +756,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
     <head>
         <title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" href="style/style.css">
         <link rel="stylesheet" href="style/main.css">
     </head>
     <body bgcolor="#ffffff">

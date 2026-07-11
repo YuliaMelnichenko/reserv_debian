@@ -41,7 +41,7 @@ else
     get_pause_notif_counts( $userID, $notificationCount, $currentDayNotificationCount );
 
     $cellStype = "middle";
-    if ( $newNotificationCount > 0 ){ $cellStype = "middleBlue1"; }
+    if ( $notificationCount > 0 ){ $cellStype = "middleBlue1"; }
 
     echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
     echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$userName</h5>"."</td>";

@@ -1,3 +1,121 @@
+/* Merged from style/style.css */
+h1
+{
+	font-family:"Arial", Times, serif;
+	color:#595959;
+	font-style:normal;
+	font-size:19px
+}
+
+h2
+{
+	font-family:"Arial", Times, serif;
+	color:#595959;
+	font-style:normal;
+	font-size:15px
+}
+
+
+h5.fio
+{
+	margin: 0;
+	padding: 0;
+  font-family: Arial, sans;
+  font-size: 12px;
+	color: #000000
+}
+
+h5.info
+{
+	margin: 0;
+	padding: 0;
+  font-family: Arial, sans;
+  font-size: 11px;
+	color: #000000;
+}
+
+h5.info_miss
+{
+	margin: 0;
+	padding: 0;
+  font-family: Arial, sans;
+  font-size: 11px;
+	color: #ff0000
+}
+
+h5.total_week_month
+{
+	margin: 0;
+	padding: 0;
+  font-family: Arial, sans;
+  font-size: 14px;
+	color: #000000
+}
+
+h5.alarm
+{
+	margin: 0;
+	padding: 0;
+  font-family: Arial, sans;
+  font-size: 16px;
+	color: #000000
+}
+
+h5.alarm_low
+{
+	margin: 0;
+	padding: 0;
+  font-family: Arial, sans;
+  font-size: 11px;
+	color: #000000
+}
+
+h2.lite
+{
+	margin: 0;
+	padding: 0;
+  font-family: Arial, sans;
+  font-size: 18px;
+	color: #999999
+}
+
+h6
+{
+	margin: 0;
+	padding: 0;
+  font-family: Arial, sans;
+  font-size: 17px;
+	color: #333333
+}
+
+a.ml
+{
+	font-family: Arial, sans;
+  font-weight: 900;
+  font-size: 12px;
+	color: #0142aa;
+	text-decoration: none
+}
+
+a.ml:active
+{
+	color: #d17125;
+}
+
+a.ml:hover
+{
+	color: #ff0000;
+}
+
+td.rg
+{
+padding-top:5px;
+padding-left:10px;
+padding-right:10px;
+padding-bottom:5px
+}
+
+/* Main application styles */
 body {
     font-family: Arial !important;
 }
@@ -15,7 +133,7 @@ div.layer_div {
   opacity: 1;
   background: rgba(221,238,255,0.8);
   pointer-events: auto;
-  position: fixed; 
+  position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
@@ -30,10 +148,10 @@ div.layer_div {
 }
 
 table.pauseFullScreen {
-  opacity: 1; 
+  opacity: 1;
   background: rgba(221,238,255,0.8);
   pointer-events: auto;
-  position: fixed; 
+  position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
@@ -47,10 +165,10 @@ table.pauseFullScreen {
 }
 
 table.lunchPauseFullScreen {
-  opacity: 1; 
+  opacity: 1;
   background: rgba(221,238,255,0.8);
   pointer-events: auto;
-  position: fixed; 
+  position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
@@ -551,7 +669,7 @@ h5.small1 {
   font-size: 9px;
   color: #222222;
   display:inline
-} 
+}
 
 h5.small11 {
   margin: 0;
@@ -560,12 +678,12 @@ h5.small11 {
   font-size: 11px;
   color: #222222;
   display:inline
-} 
+}
 
 h5.smallblack {
   font-family: Arial, sans;
   font-size: 18px;
-  color: #111166; 
+  color: #111166;
   text-indent:2em;
   display:inline
 }
@@ -770,7 +888,7 @@ h6.small_help_2 {
   width: 990px;
   height: 170px;
   left: 50%;
-  top: 35%; 
+  top: 35%;
   margin-left: -495px;
   margin-top: -85px;
   background: #ddeeff;
@@ -900,7 +1018,7 @@ h6.small_help_2 {
   display: block;
   padding:10px;
 }
-  
+
 #pause_approvement_desc {
   position: absolute;
   width: 265px;
@@ -925,7 +1043,7 @@ h6.small_help_2 {
   overflow: auto;
   display: block;
 }
-  
+
 #delay_time_approvement {
   position: static;
   width: 1255px;
@@ -952,16 +1070,16 @@ span.report_head_date {
   height: 53px;
   display: inline-block;
   vertical-align: middle;
-  line-height: 26px;                                                                                                                                                                                     
+  line-height: 26px;
 }
 
 div.report_head_stub {
   position: static;
-  width: 16px; 
-  height: 53px; 
-  background: #eeeeee; 
+  width: 16px;
+  height: 53px;
+  background: #eeeeee;
   padding:0px;
-  line-height: 52px; 
+  line-height: 52px;
 }
 
 div.report_head_stub_left {
@@ -970,7 +1088,7 @@ div.report_head_stub_left {
   height: 20px;
   border: solid 0px #888888;
   padding:0px;
-  line-height: 52px; 
+  line-height: 52px;
 }
 
 #delay_out_time {
@@ -996,28 +1114,28 @@ div.report_head_stub_left {
   justify-content: space-evenly;
   height: 150px;
 }
-  
+
 .reg_out_time_head {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
 }
-  
+
 .reg_out_time_text {
   margin-left: 15px;
 }
-  
+
 .reg_out_time_close {
   margin-right: 15px;
-  
+
 }
-  
+
 .reg_out_time_body {
   display: flex;
   margin-left: 15px;
   justify-content: space-between;
 }
-  
+
 .reg_out_time_button_save {
   font-size: 120%;
   width: 110px;
@@ -1027,21 +1145,21 @@ div.report_head_stub_left {
   margin-left: 15px;
   cursor: pointer;
 }
-  
+
 .reg_out_time_button_close {
   font-size: 120%;
   width: 110px;
   height: 30px;
   background-color: #f79398;
-  border: 1px solid #888888; 
+  border: 1px solid #888888;
   cursor: pointer;
 }
-  
+
 .reg_out_time_footer {
   display: flex;
   justify-content: space-between;
 }
-  
+
 #add_stop_time {
   resize: none;
   width: 150px;
@@ -1064,7 +1182,7 @@ div.report_head_date {
   height: 34px;
   background: #eeeeee;
   padding:0px;
-  line-height: 34px; 
+  line-height: 34px;
 }
 
 .report_window_head_single {
@@ -1078,10 +1196,10 @@ div.report_head_name {
   text-align: center;
   vertical-align: baseline;
   position: static;
-  width: 165px; 
-  height:53px; 
-  background: #FEFEFE; 
-  overflow: hidden; 
+  width: 165px;
+  height:53px;
+  background: #FEFEFE;
+  overflow: hidden;
   padding:0px;
 }
 
@@ -1116,7 +1234,7 @@ div.report_head_left_date_cert {
   height: 110px;
   background: #bbddff;
   padding:0px;
-  line-height: 30px; 
+  line-height: 30px;
 }
 
 div.report_head_left_date_cert1 {
@@ -1128,18 +1246,18 @@ div.report_head_left_date_cert1 {
   height: 95px;
   background: #bbddff;
   padding:0px;
-  line-height: 20px; 
+  line-height: 20px;
 }
 
 /*-----------------------------------------------------------------------------------------------------------------*/
-  
+
 div.report_head_left_date_rep_period {
   position: static;
   width: 100px;
   height: 160px;
   background: #dddddd;
   padding:0px;
-  line-height: 20px; 
+  line-height: 20px;
 }
 
 div.report_head_left_date_rep_week {
@@ -1148,7 +1266,7 @@ div.report_head_left_date_rep_week {
   height: 160px;
   background: #eeee77;
   padding:0px;
-  line-height: 35px; 
+  line-height: 35px;
 }
 
 div.report_head_left_date_rep_month {
@@ -1157,9 +1275,9 @@ div.report_head_left_date_rep_month {
   height: 160px;
   background: #77eeee;
   padding:0px;
-  line-height: 35px; 
+  line-height: 35px;
 }
-  
+
 div.report_head_left_date_rep_quarter {
   position: static;
   width: 100px;
@@ -1168,14 +1286,14 @@ div.report_head_left_date_rep_quarter {
   padding:0px;
   line-height: 35px;
 }
-  
+
 div.report_head_left_date_rep_year {
   position: static;
   width: 100px;
   height: 160px;
   background: #7777ee;
   padding:0px;
-  line-height: 35px; 
+  line-height: 35px;
 }
 
 /*-----------------------------------------------------------------------------------------------------------------*/
@@ -1229,8 +1347,8 @@ div.report_body_head_day {
   justify-content: space-between;
   flex-direction: column;
   position: static;
-  width: 165px; 
-  height: 110px; 
+  width: 165px;
+  height: 110px;
   padding:0px;
 }
 
@@ -1244,42 +1362,42 @@ div.report_body_head_day_first{
   flex-direction: column;
   justify-content: space-between;
   position: static;
-  width: 155px; 
-  height: 95px; 
+  width: 155px;
+  height: 95px;
   padding:0px;
 }
-  
+
 /*-----------------------------------------------------------------------------------------------------------------*/
 
 #report_head {
   position: static;
-  width: 0px; 
-  height: 52px; 
-  background: #ddeeff; 
-  border: solid 0px #888888; 
-  overflow: hidden; 
+  width: 0px;
+  height: 52px;
+  background: #ddeeff;
+  border: solid 0px #888888;
+  overflow: hidden;
   display: block;
   padding:0px;
 }
 
 #report_window_head_left {
   position: static;
-  width: 100px; 
-  height: 53px; 
-  background: #ffee00; 
-  border: solid 1px #999999; 
-  overflow: hidden; 
+  width: 100px;
+  height: 53px;
+  background: #ffee00;
+  border: solid 1px #999999;
+  overflow: hidden;
   display: block;
   padding:0px;
 }
 
 #report_body {
   position: static;
-  width: 1800px; 
+  width: 1800px;
   height: 800px;
   background: #ddeeff;
-  border: solid 0px #ff8888; 
-  overflow: auto; 
+  border: solid 0px #ff8888;
+  overflow: auto;
   display: block;
   padding:0px;
   z-index: 10;
@@ -1290,7 +1408,7 @@ div.report_body_head_day_first{
   width: 102px;
   height: 900px;
   background: #ddeeff;
-  overflow: hidden; 
+  overflow: hidden;
   display: block;
   padding:0px;
 }
@@ -1331,7 +1449,7 @@ report_window_head_single {
 
 #report_window_single {
   position: static;
-  width: 184px; 
+  width: 184px;
   height: 900px;
   background: #ddeeff;
   overflow:hidden;
@@ -1501,7 +1619,7 @@ report_window_head_single {
   width: 530px;
   height: 240px;
   left: 50%;
-  top: 35%; 
+  top: 35%;
   margin: 0;
   margin-left: -255px;
   margin-top: -120 px;
@@ -1768,8 +1886,8 @@ report_window_head_single {
 table {
   margin: 0px;
   padding: 0px;
-  border:1px; 
-  border-collapse:collapse; 
+  border:1px;
+  border-collapse:collapse;
 }
 
 table.no_padding {
@@ -1796,7 +1914,7 @@ table.slim {
   margin: 5px;
   padding: 5px;
   border:solid #d17113 1px;
-  border-collapse:collapse; 
+  border-collapse:collapse;
 }
 
 table.slimN {
@@ -1811,8 +1929,8 @@ table.hor_bor {
   padding-left:70px;
   padding-right:70px;
   padding-bottom:70px;
-  border:0px; 
-  border-collapse:collapse; 
+  border:0px;
+  border-collapse:collapse;
 }
 
 table.add_time {
@@ -1825,16 +1943,16 @@ table.add_time {
 table.rep {
   margin: 0px;
   padding: 0px;
-  border:1px; 
+  border:1px;
   border-collapse:collapse;
-  table-layout:fixed; 
+  table-layout:fixed;
 }
 
 iframe {
   margin: 0;
   padding: 0;
-  border:0px; 
-  border-collapse:collapse; 
+  border:0px;
+  border-collapse:collapse;
 }
 
 select {
@@ -2049,61 +2167,61 @@ td.add_time {
   margin: 0;
   padding: 2px 5px 2px 5px;
   border:solid #d17125 1px;
-} 
+}
 
 td.report_cell_date {
   margin: 0;
   padding: 1px 2px 1px 2px;
   border:solid #d17125 1px;
   width:100px;
-} 
+}
 
 td.report_no_padding {
   margin: 0;
   padding: 0px 0px 0px 0px;
   border:solid #999999 1px;
-} 
+}
 
 td.report_small_padding {
   margin: 0;
   padding: 10px 10px 10px 10px;
   border:solid #999999 1px;
-} 
+}
 
 td.report_no_padding_no_border {
   margin: 0;
   padding: 0px 0px 0px 0px;
   background-color:#effeee;
-} 
+}
 
 td.report_no_padding_no_border_no_bg {
   margin: 0;
   padding: 0px 0px 0px 0px;
-} 
+}
 
 td.report_no_padding_rep {
   margin: 0;
   padding: 0px 0px 0px 0px;
-} 
+}
 
 td.report_no_padding_no_border_1 {
   margin: 0;
   padding: 0px 0px 0px 0px;
   background-color:#000ee0;
-} 
+}
 
 td.report_no_padding_no_border_2 {
   margin: 0;
   padding: 0px 0px 0px 0px;
   background-color:#e00e00;
-} 
+}
 
 td.report_cell_name {
   margin: 0;
   padding: 1px 5px 1px 5px;
   border:solid #d17125 1px;
   width:205px;
-} 
+}
 
 td.leftpadding {
   padding-top:5px;
@@ -2121,8 +2239,8 @@ td.reqpad {
 
 
 img {
-  border:0px 0px 0px 0px; 
-  border-collapse:collapse; 
+  border:0px 0px 0px 0px;
+  border-collapse:collapse;
   padding-top:0px;
   padding-left:0px;
   padding-right:0px;
@@ -2137,7 +2255,7 @@ a.ml {
 	font-family: Arial, sans;
   font-weight: 900;
   font-size: 10px;
-	color: #014221; 
+	color: #014221;
 	text-decoration: none
 }
 
@@ -2145,16 +2263,16 @@ a.mlbig {
 	font-family: Arial, sans;
   font-weight: 900;
   font-size: 14px;
-	color: #3333FF; 
+	color: #3333FF;
 	text-decoration: none
 }
 
 a.ml:active {
-	color: #d17125; 
+	color: #d17125;
 }
 
 a.ml:hover {
-	color: #ff0000; 
+	color: #ff0000;
 }
 
 a.mloffs {
@@ -2162,45 +2280,45 @@ a.mloffs {
   font-weight: 300;
   font-size: 9px;
 	text-indent:1em;
-	color: #dd3333; 
+	color: #dd3333;
 	text-decoration: none
 }
 
 a.mloffs:active {
-	color: #d17125; 
+	color: #d17125;
 }
 
 a.mloffs:hover {
-	color: #ff0000; 
+	color: #ff0000;
 }
 
 a.middle {
 	font-family: Arial, sans;
   font-weight: 900;
   font-size: 11px;
-	color: #014221; 
+	color: #014221;
 	text-decoration: none
 }
 
 a.middle:active {
-	color: #d17125; 
+	color: #d17125;
 }
 
 a.middle:hover {
-	color: #ff0000; 
+	color: #ff0000;
 }
 
 a.middle_offset {
 	font-family: Arial, sans;
   font-weight: 900;
   font-size: 11px;
-	color: #111166; 
+	color: #111166;
 	text-indent:2em;
 	text-decoration: none
 }
 
 a.middle_offset:active {
-	color: #222266; 
+	color: #222266;
 }
 
 a.middle_offset:hover {
@@ -2212,13 +2330,13 @@ a.middle_offset_small {
 	font-family: Arial, sans;
   font-weight: 900;
   font-size: 10px;
-	color: #111166; 
+	color: #111166;
 	text-indent:2em;
 	text-decoration: none
 }
 
 a.middle_offset_small:active {
-	color: #222266; 
+	color: #222266;
 }
 
 a.middle_offset_small:hover {
@@ -2230,39 +2348,39 @@ a.middlered {
 	font-family: Arial, sans;
   font-weight: 900;
   font-size: 11px;
-	color: #ed1212; 
+	color: #ed1212;
 	text-decoration: none
 }
 
 a.ml:active {
-	color: #d17125; 
+	color: #d17125;
 }
 
 a.ml:hover {
-	color: #ff0000; 
+	color: #ff0000;
 }
 
 a.mlsmall {
 	font-family: Arial, sans;
   font-weight: 900;
   font-size: 9px;
-	color: #014221; 
+	color: #014221;
 	text-decoration: none
 }
 
 a.ml:active {
-	color: #d17125; 
+	color: #d17125;
 }
 
 a.ml:hover {
-	color: #ff0000; 
+	color: #ff0000;
 }
 
 a.bigred {
 	font-family: Arial, sans;
   font-weight: 900;
   font-size: 12px;
-	color: #ed1212; 
+	color: #ed1212;
 	text-decoration: none
 }
 
@@ -2270,7 +2388,7 @@ a.mlred {
 	font-family: Arial, sans;
   font-weight: 900;
   font-size: 10px;
-	color: #ed1212; 
+	color: #ed1212;
 	text-decoration: none
 }
 
@@ -2278,36 +2396,36 @@ a.hidden {
 	font-family: Arial, sans;
   font-weight: 900;
   font-size: 12px;
-	color: #eeeeee; 
+	color: #eeeeee;
 	text-decoration: none
 }
 
 a.hidden:hover {
-	color: #bbbbbb; 
+	color: #bbbbbb;
 }
 
 a.mlred:active {
-	color: #d17125; 
+	color: #d17125;
 }
 
 a.mlred:hover {
-	color: #ff0000; 
+	color: #ff0000;
 }
 
 a.temp {
 	font-family: Arial, sans;
   font-weight: 900;
   font-size: 12px;
-	color: #ff1221; 
+	color: #ff1221;
 	text-decoration: none
 }
 
 a.temp:active {
-	color: #d17125; 
+	color: #d17125;
 }
 
 a.temp:hover {
-	color: #ff0000; 
+	color: #ff0000;
 }
 
 a.offset {
@@ -2320,11 +2438,11 @@ a.offset {
 }
 
 a.offset:active {
-	color: #d17125; 
+	color: #d17125;
 }
 
 a.offset:hover {
-	color: #ff0000; 
+	color: #ff0000;
 }
 
 a.offsetred {
@@ -2337,11 +2455,11 @@ a.offsetred {
 }
 
 a.offsetred:active {
-	color: #ed1212; 
+	color: #ed1212;
 }
 
 a.offsetred:hover {
-	color: #ff0000; 
+	color: #ff0000;
 }
 
 a.payment {
@@ -2353,74 +2471,74 @@ a.payment {
 }
 
 a.offsetred:active {
-	color: #ed1212; 
+	color: #ed1212;
 }
 
 a.offsetred:hover {
-	color: #ff0000; 
+	color: #ff0000;
 }
 
 a.rg {
 	font-family: Arial, sans;
   font-weight: 900;
   font-size: 17px;
-	color: #0000ff; 
+	color: #0000ff;
 }
 
 a.rg:active {
-	color: #d17100; 
+	color: #d17100;
 }
 
 a.rg:hover {
-	color: #ff0000; 
+	color: #ff0000;
 }
 
 a.rgsmall {
 	font-family: Arial, sans;
   font-weight: 900;
   font-size: 12px;
-	color: #0000ff; 
+	color: #0000ff;
 }
 
 a.rgsmall:active {
-	color: #d17100; 
+	color: #d17100;
 }
 
 a.rgsmall:hover {
-	color: #ff0000; 
+	color: #ff0000;
 }
 
 a.hide {
 	font-family: Arial, sans;
   font-weight: 900;
   font-size: 10px;
-	color: #cccccc; 
+	color: #cccccc;
 	text-decoration: none
 }
 
 a.hide:active {
-	color: #d17125; 
+	color: #d17125;
 }
 
 a.hide:hover {
-	color: #ff0000; 
+	color: #ff0000;
 }
 
 a.intext {
 	font-family: Arial, sans;
   font-weight: 900;
   font-size: 12px;
-	color: #d17125; 
+	color: #d17125;
 	text-decoration: underline
 }
 
 a.intext:active {
-	color: #d17125; 
+	color: #d17125;
 	text-decoration: none
 }
 
 a.intext:hover {
-	color: #ff0000; 
+	color: #ff0000;
 	text-decoration: none
 }
 
@@ -2428,12 +2546,12 @@ a.intext_middle_new_color {
 	font-family: Arial, sans;
   font-weight: 900;
   font-size: 14px;
-	color: #0e4b70; 
+	color: #0e4b70;
 	text-decoration: none
 }
 
 a.intext_middle_new_color:hover {
-	color: #ff0000; 
+	color: #ff0000;
 	text-decoration: none
 }
 
@@ -2441,17 +2559,17 @@ ul {
 	margin: 0;
 	padding: 0;
 	list-style: none;
-	width: 150px; 
+	width: 150px;
 	border-bottom: 1px solid #ccc;
 }
-	
+
 ul li {
 	position: relative;
 }
-	
+
 li ul {
 	position: absolute;
-	left: 149px; 
+	left: 149px;
 	top: 5px;
 	display: none;
 }
@@ -2463,12 +2581,12 @@ ul li a {
 	padding: 5px;
 	border: 1px solid #bbb;
 	border-bottom: 0;
-}  
-	
+}
+
 * html ul li { float: left; height: 1%; }
 * html ul li a { height: 1%; }
 
-li:hover ul, li.over ul { display: block; }   
+li:hover ul, li.over ul { display: block; }
 
 .time {
   vertical-align: text-top;
@@ -2627,11 +2745,11 @@ li:hover ul, li.over ul { display: block; }
 }
 
 #signUp {
-  cursor: pointer; 
-  font-size: 80%; 
-  width: 150px; 
-  height: 25px; 
-  background-color:#f8d888; 
+  cursor: pointer;
+  font-size: 80%;
+  width: 150px;
+  height: 25px;
+  background-color:#f8d888;
   border: 1px solid #888888
 }
 
@@ -2753,19 +2871,19 @@ li:hover ul, li.over ul { display: block; }
 #del_btn {
   color: #ed1212;
   background-color: #FFDDDD;
-  cursor: pointer; 
-  font-size: 80%; 
+  cursor: pointer;
+  font-size: 80%;
   width: 150px;
-  height: 25px; 
+  height: 25px;
   border: 1px solid #888888;
 }
 
 #disabled_btn {
   color: black;
   background-color: #bdbbbb;
-  font-size: 80%; 
+  font-size: 80%;
   width: 150px;
-  height: 25px; 
+  height: 25px;
   border: 1px solid #888888;
 }
 
@@ -2780,11 +2898,11 @@ li:hover ul, li.over ul { display: block; }
 }
 
 #sport_pause_btn {
-  margin: 0; 
-  padding: 0; 
-  font-size: 100%; 
-  width: 260px; 
-  height: 30px; 
+  margin: 0;
+  padding: 0;
+  font-size: 100%;
+  width: 260px;
+  height: 30px;
   background-color: #f8d888;
   border: 1px solid #888888;
   cursor: pointer;
@@ -2873,7 +2991,7 @@ h5.activ_time {
   width: 110px;
   height: 30px;
   background-color: #f79398;
-  border: 1px solid #888888; 
+  border: 1px solid #888888;
   cursor: pointer;
 }
 
@@ -2928,11 +3046,11 @@ h5.activ_time {
 
 #btn_vacations,
 #btn_sick {
-  cursor: pointer; 
-  font-size: 80%; 
-  width: 100px; 
-  height: 25px; 
-  background-color:#f8d888; 
+  cursor: pointer;
+  font-size: 80%;
+  width: 100px;
+  height: 25px;
+  background-color:#f8d888;
   border: 1px solid #888888;
 }
 
@@ -2943,11 +3061,11 @@ h5.activ_time {
 }
 
 #event_buttons button.event-switch {
-  cursor: pointer; 
-  font-size: 80%; 
-  width: 100px; 
-  height: 25px; 
-  background-color:#f8d888; 
+  cursor: pointer;
+  font-size: 80%;
+  width: 100px;
+  height: 25px;
+  background-color:#f8d888;
   border: 1px solid #888888;
 }
 
@@ -2976,7 +3094,7 @@ h5.activ_time {
 }
 
 #btn_add {
-  cursor: pointer; 
+  cursor: pointer;
   margin-right: 15px;
   background: none;
   border: none;
@@ -2997,7 +3115,7 @@ h5.activ_time {
 }
 
 #btn_del {
-  cursor: pointer; 
+  cursor: pointer;
   background: none;
   border: none;
 }

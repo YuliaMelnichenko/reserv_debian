@@ -11,14 +11,12 @@ include_once __DIR__ . "/../php_tori/connect.php";
 
 $userID_ = (int)$_SESSION['ss_id'];
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
-$paramArr = get_dbsetup_param( 'pause_journal_deep_day' );
-$paramInt = (int)$paramArr[1];
-$today = date("d-m-Y");
-$dateForm = date("d.m.Y", strtotime("-$paramInt days"));
+list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(false);
+$quarterLabel = format_date_range_label($quarterStartDate, $quarterStopDate);
 $startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME', $link);
 $stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME', $link);
 
-echo "<h5 class=\"big\"> Глубина просмотра журнала (180 дней): $dateForm - $today </h5>";
+echo "<h5 class=\"big\">Текущий квартал: $quarterLabel</h5>";
 echo "<div class=\"notification-table-scroll notification-table-scroll-medium\">";
 echo "<table class=\"add_time\" border=1>";
 echo "<tr bgcolor=\"#DDDDDD\" bordercolor=\"#888888\">";
@@ -43,13 +41,14 @@ $query = db_query(
    FROM ADD_TIME a
    WHERE a.USERID = ?
      AND a.PAUSE_MODE = 1
-     AND (
-       $stopExpr > ADDDATE(?, INTERVAL -? DAY)
-       OR $stopExpr = '0000-00-00 00:00:00'
-     )
+     AND $startExpr >= ?
+     AND $startExpr < ?
+     AND $startExpr <> '0000-00-00 00:00:00'
+     AND $stopExpr <> '0000-00-00 00:00:00'
+     AND $stopExpr > $startExpr
    ORDER BY START_DT_EFFECTIVE DESC, a.ID DESC",
-  'isi',
-  array($userID_, $currentDate, $paramInt)
+  'iss',
+  array($userID_, $quarterStartDate, $quarterStopExclusive)
 );
 
 if (!$query) {
@@ -74,13 +73,7 @@ while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
     $colorMode = 0;
   }
                           
-  if (is_time_defined($ta_stop_date) == 1) {
-    $time_duration = format_time_(strtotime($ta_stop_date) - strtotime($ta_start_date));
-  } else {
-    $timeRes = get_current_datetime_in_timezone();
-    $time_duration = format_time_(strtotime($timeRes[1]) - strtotime($ta_start_date));
-    $ta_stop_date = "Активна";
-  }
+  $time_duration = format_time_(strtotime($ta_stop_date) - strtotime($ta_start_date));
   	
   echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
 echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_date) . "</h5></td>";

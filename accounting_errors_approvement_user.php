@@ -12,7 +12,6 @@ echo "<html>";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";
 echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">";
-echo "<link rel=\"stylesheet\" href=\"style/style.css\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 echo "<body bgcolor=\"#ffffff\" >";
@@ -46,6 +45,8 @@ $userID = (int)$resArr[1];
 require_page_supervisor_for_user($userID, 3);
 
 $depthDays = get_accounting_errors_default_depth_days();
+list($accountingErrorsStartDate, $accountingErrorsStopDate) = accounting_errors_get_range($depthDays);
+$accountingErrorsPeriodLabel = get_accounting_errors_period_label();
 $backUrl = "accounting_errors_approvement.php";
 
 sync_accounting_errors_for_user($link, $userID, $depthDays);
@@ -73,10 +74,7 @@ echo "<table border=0>";
 
       echo "<h5 class=\"big\">Сотрудник: $userName</h5>";
 
-      $today = date("d-m-Y");
-      $dateForm = date("d.m.Y", strtotime("-$depthDays days"));
-
-      echo "<h5 class=\"big\"> Глубина просмотра журнала ($depthDays дней): $dateForm - $today </h5>";
+      echo "<h5 class=\"big\">Текущий квартал: $accountingErrorsPeriodLabel</h5>";
 
       echo "<button class=\"button_style\" style=\"font-size: 90%; width:90px; height:24px; background-color:#f8d888; border:1px solid #888888; margin-bottom:8px;\" onclick=\"location.href='$backUrl'\">Назад</button>";
 
@@ -90,15 +88,14 @@ echo "<table border=0>";
             echo "<td class=\"add_time\" valign=\"middle\" align=\"center\" width=150><h5 class=\"big\">Действия</h5></td>";
           echo "</tr>";
 
-          $startDate = date("Y-m-d", strtotime("-$depthDays days"));
           $query = db_query(
             $link,
             'SELECT ID, ERROR_DATE, STATUS, USER_COMMENT, SUPERVISOR_COMMENT, SUPERVISORID, USER_REPLY_DT, SUPERVISOR_REPLY_DT
              FROM accounting_errors
-             WHERE USERID = ? AND ERROR_DATE >= ?
+             WHERE USERID = ? AND USERID NOT IN (156, 161) AND ERROR_DATE >= ? AND ERROR_DATE <= ?
              ORDER BY ERROR_DATE DESC',
-            'is',
-            array($userID, $startDate)
+            'iss',
+            array($userID, $accountingErrorsStartDate, $accountingErrorsStopDate)
           );
 
           if (!$query) {
