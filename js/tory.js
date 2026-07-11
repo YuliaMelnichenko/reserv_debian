@@ -114,6 +114,15 @@ function fit_notification_table(containerId, tableId, fixedWidth, extraHeight, e
   return { height: panelHeight, width: panelWidth };
 }
 
+function reload_if_missing_container(containerId) {
+  if (!document.getElementById(containerId)) {
+    window.location.reload();
+    return true;
+  }
+
+  return false;
+}
+
 function unset_cookie(csrfToken){
   var token = csrfToken || window.TORI_CSRF_TOKEN || '';
 
@@ -614,8 +623,10 @@ function delay_set_start(){
 function accept_refuse_delay_for_user_final( addID, suDesc, accept, penaltyID, penDate, userID ){
   $.post('ajax/set_delay_penalty_info.php', { addID: addID, suDesc: suDesc, accept: accept, penaltyID: penaltyID, penDate: penDate, userID: userID }, RetSWT2);
   function RetSWT2(dat2) {
-    show_delays_by_user( -1 );
     document.getElementById('delay_approvement_desc').style.display='none';
+    if (!reload_if_missing_container('delay_approvement')) {
+      show_delays_by_user( -1 );
+    }
   }
 }
 
@@ -654,7 +665,9 @@ function mark_as_deleted_delay_for_user( addID ){
   if ( perform == true ){
     var mode = 100;
     $.post('ajax/set_delay_state.php', { addID: addID, mode: mode }, function() {
-      show_delays_by_user( -1 );
+      if (!reload_if_missing_container('delay_approvement')) {
+        show_delays_by_user( -1 );
+      }
     });
   }
 }
@@ -664,7 +677,9 @@ function mark_as_undeleted_delay_for_user( addID ){
   if ( perform == true ){
     var mode = 200;
     $.post('ajax/set_delay_state.php', { addID: addID, mode: mode }, function() {
-      show_delays_by_user( -1 );
+      if (!reload_if_missing_container('delay_approvement')) {
+        show_delays_by_user( -1 );
+      }
     });
   }
 }
@@ -707,8 +722,10 @@ function add_time_set_start(){
 function accept_refuse_add_time_for_user_final( addID, suDesc, accept ) {
   $.post('ajax/set_add_times_info.php', { addID: addID, suDesc: suDesc, accept: accept }, RetSWT1);
   function RetSWT1(dat1) {
-    show_add_times_by_user( -1 );
     document.getElementById('add_time_approvement_desc').style.display='none';
+    if (!reload_if_missing_container('add_time_content')) {
+      show_add_times_by_user( -1 );
+    }
   }
 }
 
@@ -735,7 +752,9 @@ function mark_as_deleted_add_time_for_user( addID ){
   if ( perform == true ){
     var mode = 100;
     $.post('ajax/set_add_times_state.php', { addID: addID, mode: mode }, function() {
-      show_add_times_by_user( -1 );
+      if (!reload_if_missing_container('add_time_content')) {
+        show_add_times_by_user( -1 );
+      }
     });
   }
 }
@@ -745,7 +764,9 @@ function mark_as_undeleted_add_time_for_user( addID ){
   if ( perform == true ){
     var mode = 200;
     $.post('ajax/set_add_times_state.php', { addID: addID, mode: mode }, function() {
-      show_add_times_by_user( -1 );
+      if (!reload_if_missing_container('add_time_content')) {
+        show_add_times_by_user( -1 );
+      }
     });
   }
 }

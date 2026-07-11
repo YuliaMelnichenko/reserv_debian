@@ -244,12 +244,12 @@ echo "<table id=\"delay_approvement_table\" border=0>";
                 //   echo "</td>";
                 echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
                   if ( $delRestore == 1 ){ 
-                    echo "<button class=\"journal-icon-button\" onclick=\"mark_as_deleted_delay_for_user(" . (int) $retDelay_id . "); location.reload();\">";
+                    echo "<button class=\"journal-icon-button\" onclick=\"mark_as_deleted_delay_for_user(" . (int) $retDelay_id . ");\">";
                       echo "<img title=\"Удалить\" src=\"img/delete_small.bmp\">";
                     echo "</button>";
                   }
                   else{
-                    echo "<button class=\"journal-icon-button\" onclick=\"mark_as_undeleted_delay_for_user(" . (int) $retDelay_id . "); location.reload();\">";
+                    echo "<button class=\"journal-icon-button\" onclick=\"mark_as_undeleted_delay_for_user(" . (int) $retDelay_id . ");\">";
                       echo "<img title=\"Восстановить\" src=\"img/restore_small.bmp\">";
                     echo "</button>";
                   }
@@ -274,10 +274,10 @@ echo "</table>";
         echo "</div>";
         echo "<div class=\"box_btn\">";
           echo "<div>";
-            echo "<button class=\"journal-modal-action-button journal-modal-action-cancel\" onclick=\"document.getElementById('delay_approvement_desc').style.display='none'; location.reload();\">Отмена</button>";
+            echo "<button class=\"journal-modal-action-button journal-modal-action-cancel\" onclick=\"document.getElementById('delay_approvement_desc').style.display='none';\">Отмена</button>";
           echo "</div>";
           echo "<div>";
-            echo "<button class=\"journal-modal-action-button journal-modal-action-save\" onclick=\"accept_refuse_delay_for_user_final( document.getElementById('recIDTempVal').value, document.getElementById('delay_part_desc_2').value, document.getElementById('acceptTempVal').value, document.getElementById('penIDTempVal').value, document.getElementById('penDateTempVal').value, document.getElementById('penUserIDTempVal').value ); location.reload();\">Сохранить</button>";
+            echo "<button class=\"journal-modal-action-button journal-modal-action-save\" onclick=\"accept_refuse_delay_for_user_final( document.getElementById('recIDTempVal').value, document.getElementById('delay_part_desc_2').value, document.getElementById('acceptTempVal').value, document.getElementById('penIDTempVal').value, document.getElementById('penDateTempVal').value, document.getElementById('penUserIDTempVal').value );\">Сохранить</button>";
           echo "</div>";
         echo "</div>";
       echo "</div>";
