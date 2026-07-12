@@ -11,29 +11,29 @@ include_once __DIR__ . "/../php_tori/connect.php";
 
 $userID = (int)$_SESSION['ss_id'];
 
-echo "<table border=0>";
-echo "<tr bgcolor=\"#ddeedd\" bordercolor=\"#888888\">";
+echo "<table class=\"journal-entry-layout\">";
+echo "<tr>";
 
-echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" height = 30>";
+echo "<td class=\"journal-entry-toolbar-cell\">";
 echo "<button class=\"journal-action-button journal-action-button-add\" onclick=\"as_add_time();\">Добавить время</button><br>";
 echo "</td>";    
 echo "</tr>";    
 echo "<tr>";    
 
-echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 0>";
+echo "<td class=\"journal-entry-content-cell\">";
 echo "<div class=\"notification-table-scroll notification-table-scroll-full\">";
-echo "<table class=\"add_time\">";
-echo "<tr>";
+echo "<table class=\"add_time journal-entry-table\">";
+echo "<tr class=\"journal-entry-head\">";
 
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Начало<br>(дата, время)</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Окончание<br>(дата, время)</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Длительность</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Основание</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Комментарий работника</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Лицо, принявшее<br>решение</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Комментарий лица,<br>принявшего решение</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Статус</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Управление</h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Начало<br>(дата, время)</h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Окончание<br>(дата, время)</h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Длительность</h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Основание</h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Комментарий работника</h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Лицо, принявшее<br>решение</h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Комментарий лица,<br>принявшего решение</h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Статус</h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Управление</h5>"."</td>";
 echo "</tr>";
   
 $colorMode = 1;
@@ -93,34 +93,36 @@ for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
   $buttonAdd2 = "onclick=\"ta_delete('$ta_id');\"";
   $buttonAdd3 = "title=\"удалить запись\"";
 
-  $bgcolor = "";
+  $statusClass = "";
 
   if ( $ta_approved == -1 )
   {
     $buttonAdd1 = "disabled";
-    $bgcolor = "#FFAAAA";
+    $statusClass = "journal-entry-status-refused";
     $buttonAdd2 = "onclick=\"alert( 'запись уже заквитирована. Удаление невозможно');\"";
     $buttonAdd3 = "title=\"запись уже заквитирована. Удаление невозможно\"";
   }
   if ( $ta_approved == 1 )
   {
     $buttonAdd1 = "disabled";
-    $bgcolor = "#AAFFAA";
+    $statusClass = "journal-entry-status-accepted";
     $buttonAdd2 = "onclick=\"alert( 'запись уже заквитирована. Удаление невозможно');\"";
     $buttonAdd3 = "title=\"запись уже заквитирована. Удаление невозможно\"";
   }
 
-  echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_dt) . "</h5></td>";
-echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_stop_dt) . "</h5></td>";
-  echo "<td class=\"add_time\" width=85  valign=\"middle\" align=\"center\"><h5 class=\"small\">".$time_duration."</h5></td>";
-echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_reason_description) . "</h5></td>";
-echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
+  $rowClass = $color == $color1 ? "journal-entry-row-alt" : "journal-entry-row";
 
-echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
-echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_SUdescription) . "</h5></td>";
-  echo "<td class=\"add_time\" width=115 bgcolor=\"$bgcolor\" valign=\"middle\" align=\"center\">$approvedStr</td>";
-  echo "<td class=\"add_time\" width=105 valign=\"middle\" align=\"center\">";
+  echo "<tr class=\"$rowClass\">";
+echo "<td class=\"add_time journal-entry-date-cell\"><h5 class=\"small\">" . html_escape($ta_start_dt) . "</h5></td>";
+echo "<td class=\"add_time journal-entry-date-cell\"><h5 class=\"small\">" . html_escape($ta_stop_dt) . "</h5></td>";
+  echo "<td class=\"add_time journal-entry-duration-cell\"><h5 class=\"small\">".$time_duration."</h5></td>";
+echo "<td class=\"add_time journal-entry-reason-cell\"><h5 class=\"small\">" . html_escape($ta_reason_description) . "</h5></td>";
+echo "<td class=\"add_time journal-entry-comment-cell\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
+
+echo "<td class=\"add_time journal-entry-supervisor-cell\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
+echo "<td class=\"add_time journal-entry-comment-cell\"><h5 class=\"small\">" . html_escape($ta_SUdescription) . "</h5></td>";
+  echo "<td class=\"add_time journal-entry-status-cell $statusClass\">$approvedStr</td>";
+  echo "<td class=\"add_time journal-entry-actions-cell\">";
     echo "<button class=\"journal-action-button journal-action-button-delete\" $buttonAdd1 $buttonAdd2 $buttonAdd3 name=\"nextBtn\">Удалить</button>";
   echo "</td>";
   echo "</tr>";
@@ -128,4 +130,7 @@ echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 clas
 
 echo "</table>";
 echo "</div>";
+echo "</td>";
+echo "</tr>";
+echo "</table>";
 ?>

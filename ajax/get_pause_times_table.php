@@ -18,13 +18,13 @@ $stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME', $lin
 
 echo "<h5 class=\"big\">Текущий квартал: $quarterLabel</h5>";
 echo "<div class=\"notification-table-scroll notification-table-scroll-medium\">";
-echo "<table class=\"add_time\" border=1>";
-echo "<tr bgcolor=\"#DDDDDD\" bordercolor=\"#888888\">";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Начало<br>(дата, время)</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Окончание<br>(дата, время)</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Длительность</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Комментарий<br></h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>С кем предварительно<br>согласовано</h5>"."</td>";
+echo "<table class=\"add_time journal-entry-table\">";
+echo "<tr class=\"journal-entry-head\">";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Начало<br>(дата, время)</h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Окончание<br>(дата, время)</h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Длительность</h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Комментарий<br></h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>С кем предварительно<br>согласовано</h5>"."</td>";
 echo "</tr>";
   
 $colorMode = 1;
@@ -75,12 +75,14 @@ while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
                           
   $time_duration = format_time_(strtotime($ta_stop_date) - strtotime($ta_start_date));
   	
-  echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_date) . "</h5></td>";
-echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_stop_date) . "</h5></td>";
-  echo "<td width=80  class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$time_duration."</h5></td>";
-echo "<td width=160 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
-echo "<td width=190 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
+  $rowClass = $color == $color1 ? "journal-entry-row-alt" : "journal-entry-row";
+
+  echo "<tr class=\"$rowClass\">";
+echo "<td class=\"add_time journal-entry-date-cell\"><h5 class=\"small\">" . html_escape($ta_start_date) . "</h5></td>";
+echo "<td class=\"add_time journal-entry-date-cell\"><h5 class=\"small\">" . html_escape($ta_stop_date) . "</h5></td>";
+  echo "<td class=\"add_time journal-entry-duration-cell\"><h5 class=\"small\">".$time_duration."</h5></td>";
+echo "<td class=\"add_time journal-entry-pause-comment-cell\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
+echo "<td class=\"add_time journal-entry-pause-supervisor-cell\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
   echo "</tr>";
 }
 

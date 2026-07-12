@@ -3998,6 +3998,111 @@ h5.activ_time {
   background: #dddddd;
 }
 
+.journal-entry-layout {
+  border: 0;
+  border-collapse: collapse;
+}
+
+.journal-entry-toolbar-cell,
+.journal-entry-content-cell {
+  vertical-align: top;
+  text-align: left;
+  background: #ddeeff;
+  border-color: #888888;
+}
+
+.journal-entry-toolbar-cell {
+  height: 30px;
+}
+
+.journal-entry-content-cell {
+  width: 0;
+}
+
+.journal-entry-table {
+  border: 1px solid #888888;
+  border-collapse: collapse;
+}
+
+.journal-entry-head {
+  background: #dddddd;
+}
+
+.journal-entry-head-cell {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.journal-entry-row {
+  background: #ffffff;
+}
+
+.journal-entry-row-alt {
+  background: #ddffff;
+}
+
+.journal-entry-date-cell {
+  width: 100px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.journal-entry-duration-cell {
+  width: 85px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.journal-entry-reason-cell {
+  width: 100px;
+  vertical-align: middle;
+  text-align: left;
+}
+
+.journal-entry-comment-cell {
+  width: 140px;
+  vertical-align: middle;
+  text-align: left;
+}
+
+.journal-entry-supervisor-cell {
+  width: 140px;
+  vertical-align: middle;
+  text-align: left;
+}
+
+.journal-entry-pause-comment-cell {
+  width: 160px;
+  vertical-align: middle;
+  text-align: left;
+}
+
+.journal-entry-pause-supervisor-cell {
+  width: 190px;
+  vertical-align: middle;
+  text-align: left;
+}
+
+.journal-entry-status-cell {
+  width: 115px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.journal-entry-actions-cell {
+  width: 105px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.journal-entry-status-accepted {
+  background: #aaffaa;
+}
+
+.journal-entry-status-refused {
+  background: #ffaaaa;
+}
+
 .add_time_radio {
   margin-bottom: 5px;
 }
