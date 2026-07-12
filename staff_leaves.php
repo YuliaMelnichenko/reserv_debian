@@ -952,7 +952,6 @@ echo "</div>";
             .then(res => res.text())
             .then(text => {
                 try {
-                    console.log('Сырой ответ от сервера: ', text);
                     const data =JSON.parse(text);
 
                     if (data.status === 'success') {

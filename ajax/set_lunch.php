@@ -103,7 +103,7 @@ $durationStr = format_time_d_hhmmss_pure($duration);
           <td align="center" width="446">
             <div id="lunch_head_block">
               <div class="left_button" style="display: flex; align-items: center; margin-left: 2px">
-                <button id ="lunch_time_back" title="возврат состояния регистрации времени до предыдущего" style="font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;" onclick="rollback_state(); location.reload();"><img src="img/rollbackState.png"></button>
+                <button id ="lunch_time_back" title="возврат состояния регистрации времени до предыдущего" style="font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;" onclick="rollback_state();"><img src="img/rollbackState.png"></button>
               </div>
               <h5 class="bigbig1" style="margin-right: 135px"><br>Сотрудник на обеде<br><br></h5>
             </div>
