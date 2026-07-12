@@ -29,28 +29,28 @@ else
 }
 
 
-$content = "<table cellpadding=\"0\" cellspacing=\"0\" border=0 bordercolor=\"#888888\">";
+$content = "<table class=\"add-time-part-form\">";
 $content .= "<tr>";
  $content .= "<td>";
  $content .= "<div class=\"add_time_radio\">";
-    $content .= "<input checked type=\"radio\" style=\"background-color:#faefdd; border:0px;\" id=\"add_time_certain\" name=\"group2\"><h5 class=\"middle\">Задать единичную запись</h5><br>";
+    $content .= "<input checked type=\"radio\" class=\"add-time-mode-radio\" id=\"add_time_certain\" name=\"group2\"><h5 class=\"middle\">Задать единичную запись</h5><br>";
  $content .= "</div>";
-  $content .= "<table class=\"time_add_table\" cellpadding=\"0\" cellspacing=\"0\" border=1 bordercolor=\"#888888\">";
+  $content .= "<table class=\"time_add_table add-time-part-single-table\">";
   $content .= "<tr>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 320>"."<h5 class=\"bigDark\">Начало<br>(дата, время)"."</h5></td>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 320>"."<h5 class=\"bigDark\">Окончание<br>(дата, время)"."</h5></td>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 320>"."<h5 class=\"bigDark\">Основание"."</h5></td>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 320>"."<h5 class=\"bigDark\">Комментарий"."</h5></td>";
+  $content .= "<td class=\"add-time-part-cell add-time-part-wide-cell\">"."<h5 class=\"bigDark\">Начало<br>(дата, время)"."</h5></td>";
+  $content .= "<td class=\"add-time-part-cell add-time-part-wide-cell\">"."<h5 class=\"bigDark\">Окончание<br>(дата, время)"."</h5></td>";
+  $content .= "<td class=\"add-time-part-cell add-time-part-wide-cell\">"."<h5 class=\"bigDark\">Основание"."</h5></td>";
+  $content .= "<td class=\"add-time-part-cell add-time-part-wide-cell\">"."<h5 class=\"bigDark\">Комментарий"."</h5></td>";
   $content .= "</tr>";
   $content .= "<tr>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 320>";
-  $content .= "<h5 class=\"middle\"></h5><input id=\"add_time_part_start_dateTime\" type=\"datetime-local\" align=\"center\">";
+  $content .= "<td class=\"add-time-part-cell add-time-part-wide-cell\">";
+  $content .= "<h5 class=\"middle\"></h5><input id=\"add_time_part_start_dateTime\" type=\"datetime-local\">";
   $content .= "</td>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 320>";
-  $content .= "<h5 class=\"middle\"></h5><input id=\"add_time_part_stop_dateTime\" type=\"datetime-local\" align=\"center\">";
+  $content .= "<td class=\"add-time-part-cell add-time-part-wide-cell\">";
+  $content .= "<h5 class=\"middle\"></h5><input id=\"add_time_part_stop_dateTime\" type=\"datetime-local\">";
   $content .= "</td>";
-  $content .= "<td valign=\"middle\" align=\"center\">";
-  $content .= "<select id=\"add_time_part_base\" bgcolor=\"#888888\">";
+  $content .= "<td class=\"add-time-part-cell\">";
+  $content .= "<select id=\"add_time_part_base\">";
    
   for ( $idx = 0; $idx < count( $reasonsArr ); $idx ++ )
   {
@@ -62,7 +62,7 @@ $content .= "<tr>";
   
   $content .= "</select>";      
   $content .= "</td>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 300 height = 70>";
+  $content .= "<td class=\"add-time-part-cell add-time-part-comment-cell\">";
   $content .= "<textarea id=\"add_time_part_desc\" cols=\"43\" rows=\"3\">".""."</textarea>";
   $content .= "</td>";
   $content .= "</tr>"; 
@@ -72,33 +72,33 @@ $content .= "</tr>";
 $content .= "<tr>";
  $content .= "<td>";
  $content .= "<div class=\"add_time_radio\">";
-    $content .= "<br><input type=\"radio\" style=\"background-color:#faefdd; border:0px;\" id=\"add_time_range\" name=\"group2\"><h5 class=\"middle\">Задать записи для диапазона дат</h5>";
+    $content .= "<br><input type=\"radio\" class=\"add-time-mode-radio\" id=\"add_time_range\" name=\"group2\"><h5 class=\"middle\">Задать записи для диапазона дат</h5>";
  $content .= "</div>";
-  $content .= "<table class=\"time_add_table\" cellpadding=\"0\" cellspacing=\"0\" border=1 bordercolor=\"#888888\">";
+  $content .= "<table class=\"time_add_table add-time-part-range-table\">";
   $content .= "<tr>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 140>"."<h5 class=\"bigDark\">Начало<br>(дата)"."</h5></td>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 140>"."<h5 class=\"bigDark\">Окончание<br>(дата)"."</h5></td>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 130>"."<h5 class=\"bigDark\">Начало<br>(время)"."</h5></td>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 130>"."<h5 class=\"bigDark\">Окончание<br>(время)"."</h5></td>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 320>"."<h5 class=\"bigDark\">Основание"."</h5></td>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 310>"."<h5 class=\"bigDark\">Комментарий"."</h5></td>";
+  $content .= "<td class=\"add-time-part-cell add-time-part-date-cell\">"."<h5 class=\"bigDark\">Начало<br>(дата)"."</h5></td>";
+  $content .= "<td class=\"add-time-part-cell add-time-part-date-cell\">"."<h5 class=\"bigDark\">Окончание<br>(дата)"."</h5></td>";
+  $content .= "<td class=\"add-time-part-cell add-time-part-time-cell\">"."<h5 class=\"bigDark\">Начало<br>(время)"."</h5></td>";
+  $content .= "<td class=\"add-time-part-cell add-time-part-time-cell\">"."<h5 class=\"bigDark\">Окончание<br>(время)"."</h5></td>";
+  $content .= "<td class=\"add-time-part-cell add-time-part-wide-cell\">"."<h5 class=\"bigDark\">Основание"."</h5></td>";
+  $content .= "<td class=\"add-time-part-cell add-time-part-range-comment-cell\">"."<h5 class=\"bigDark\">Комментарий"."</h5></td>";
   $content .= "</tr>";
   $content .= "<tr>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 140>";
-  $content .= "<h5 class=\"middle\"></h5><input id=\"add_time_part_start_date\" align=\"center\" type=\"date\">";
+  $content .= "<td class=\"add-time-part-cell add-time-part-date-cell\">";
+  $content .= "<h5 class=\"middle\"></h5><input id=\"add_time_part_start_date\" type=\"date\">";
   $content .= "</td>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 140>";
-  $content .= "<h5 class=\"middle\"></h5><input id=\"add_time_part_stop_date\" align=\"center\" type=\"date\">";
+  $content .= "<td class=\"add-time-part-cell add-time-part-date-cell\">";
+  $content .= "<h5 class=\"middle\"></h5><input id=\"add_time_part_stop_date\" type=\"date\">";
   $content .= "</td>";
-  $content .= "<td valign=\"middle\" align=\"center\" width =130>";
-  $content .= "<h5 class=\"middle\"></h5><input id=\"add_time_part_start_time\" align=\"center\" type=\"time\">";
+  $content .= "<td class=\"add-time-part-cell add-time-part-time-cell\">";
+  $content .= "<h5 class=\"middle\"></h5><input id=\"add_time_part_start_time\" type=\"time\">";
   $content .= "</td>";
 
-  $content .= "<td valign=\"middle\" align=\"center\" width =130>";
-  $content .= "<h5 class=\"middle\"></h5><input id=\"add_time_part_stop_time\" align=\"center\" type=\"time\">";
+  $content .= "<td class=\"add-time-part-cell add-time-part-time-cell\">";
+  $content .= "<h5 class=\"middle\"></h5><input id=\"add_time_part_stop_time\" type=\"time\">";
   $content .= "</td>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 310>";
-  $content .= "<select id=\"add_time_part_base_1\" bgcolor=\"#888888\" >";
+  $content .= "<td class=\"add-time-part-cell add-time-part-range-base-cell\">";
+  $content .= "<select id=\"add_time_part_base_1\">";
 
   for ( $idx = 0; $idx < count( $reasonsArr ); $idx ++ )
   {
@@ -110,7 +110,7 @@ $content .= "<tr>";
 
   $content .= "</select>";      
   $content .= "</td>";
-  $content .= "<td valign=\"middle\" align=\"center\" width = 280 height = 70>";
+  $content .= "<td class=\"add-time-part-cell add-time-part-range-text-cell\">";
   $content .= "<textarea id=\"add_time_part_desc_1\" cols=\"43\" rows=\"3\">".""."</textarea>";
   $content .= "</td>";
   $content .= "</tr>"; 
@@ -121,14 +121,14 @@ $content .= "</tr>";
 $content .= "</table><br>";  
 
 
-$content .= "<table cellpadding=\"0\" cellspacing=\"0\" border=0 width=1065>";  
+$content .= "<table class=\"add-time-part-actions\">";
 $content .= "<tr>";
 
-$content .= "<td bordercolor=\"#000000\" width=\"50%\" valign=\"middle\" align=\"left\">";
+$content .= "<td class=\"add-time-part-action-left\">";
 $content .= "<button class=\"journal-action-button journal-action-button-wide journal-action-button-close\" onclick=\"cancel_part_time_add();\">Закрыть</button><br>";
 $content .= "</td>";
 
-$content .= "<td bordercolor=\"#000000\" width=\"50%\" valign=\"middle\" align=\"right\">";
+$content .= "<td class=\"add-time-part-action-right\">";
 $content .= "<button class=\"journal-action-button journal-action-button-wide\" onclick=\"part_time_add( $byAlert );\">Добавить</button><br>";
 $content .= "</td>";
 

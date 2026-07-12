@@ -80,10 +80,10 @@ echo "<table class=\"notification-page-table\">";
       if ( count( $addTimeInfo ) == 0 )
       {
 
-echo "<table id=\"pause_approvement_table\" border=0>";
+echo "<table id=\"pause_approvement_table\" class=\"notification-detail-header-table\">";
   echo "<tr>";
-     echo "<td valign=\"middle\" width=604 align=\"left\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5></td>";
-     echo "<td width=10 valign=\"middle\" align=\"right\">";
+     echo "<td class=\"notification-detail-title-cell notification-detail-title-medium\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5></td>";
+     echo "<td class=\"notification-detail-back-cell\">";
        echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"location.href='$backUrl';\"><h5>Назад</h5></button>";
      echo "</td>";
   echo "</tr>";
@@ -95,13 +95,13 @@ echo "</table>";
         exit;
       }
 
-echo "<table id=\"pause_approvement_table\" border=0>";
+echo "<table id=\"pause_approvement_table\" class=\"notification-detail-header-table\">";
   echo "<tr>";
     echo "<td class=\"nopadding_s\">";
-      echo "<table border=0>";
+      echo "<table class=\"notification-detail-header-table\">";
         echo "<tr>";
-          echo "<td valign=\"middle\" width=604 align=\"left\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5></td>";
-          echo "<td width=10 valign=\"middle\" align=\"right\">";
+          echo "<td class=\"notification-detail-title-cell notification-detail-title-medium\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5></td>";
+          echo "<td class=\"notification-detail-back-cell\">";
             echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"location.href='$backUrl';\"><h5>Назад</h5></button>";
           echo "</td>";
         echo "</tr>";
@@ -109,17 +109,17 @@ echo "<table id=\"pause_approvement_table\" border=0>";
     echo "</td>";     
   echo "</tr>";
   echo "<tr>";
-    echo "<td class=\"nopadding\" valign=\"middle\" align=\"left\">";
+    echo "<td class=\"nopadding notification-detail-body-cell\">";
 
       echo "<div class=\"notification-table-scroll notification-table-scroll-medium\">";
-      echo "<table border=1>";
-      echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
+      echo "<table class=\"add_time notification-detail-table pause-detail-table\">";
+      echo "<tr class=\"notification-detail-head\">";
 
-      echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Начало<br>(дата, время)</h5>"."</td>";
-      echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Окончание<br>(дата, время)</h5>"."</td>";
-      echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Длительность</h5>"."</td>";
-      echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Комментарий<br>работника</h5>"."</td>";
-      echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>С кем предварительно<br>согласовано</h5>"."</td>";
+      echo "<td class=\"add_time notification-detail-head-cell\">"."<h5>Начало<br>(дата, время)</h5>"."</td>";
+      echo "<td class=\"add_time notification-detail-head-cell\">"."<h5>Окончание<br>(дата, время)</h5>"."</td>";
+      echo "<td class=\"add_time notification-detail-head-cell\">"."<h5>Длительность</h5>"."</td>";
+      echo "<td class=\"add_time notification-detail-head-cell\">"."<h5>Комментарий<br>работника</h5>"."</td>";
+      echo "<td class=\"add_time notification-detail-head-cell\">"."<h5>С кем предварительно<br>согласовано</h5>"."</td>";
       echo "</tr>";
   
       $colorMode = 1;
@@ -161,12 +161,14 @@ echo "<table id=\"pause_approvement_table\" border=0>";
           $colorMode = 0;
         }
 
-        echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-        echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_dt) . "</h5></td>";
-        echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_stop_dt) . "</h5></td>";
-        echo "<td width=85 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$time_duration."</h5></td>";
-        echo "<td width=140 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
-        echo "<td width=200 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
+        $rowClass = $color == $color1 ? "notification-detail-row-alt" : "notification-detail-row";
+
+        echo "<tr class=\"$rowClass\">";
+        echo "<td class=\"add_time notification-detail-date-cell\"><h5 class=\"small\">" . html_escape($ta_start_dt) . "</h5></td>";
+        echo "<td class=\"add_time notification-detail-date-cell\"><h5 class=\"small\">" . html_escape($ta_stop_dt) . "</h5></td>";
+        echo "<td class=\"add_time notification-detail-duration-cell\"><h5 class=\"small\">".$time_duration."</h5></td>";
+        echo "<td class=\"add_time notification-detail-comment-cell\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
+        echo "<td class=\"add_time notification-detail-supervisor-cell\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
         echo "</tr>";
       }
 

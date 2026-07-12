@@ -3712,6 +3712,292 @@ h5.activ_time {
   margin: 0 10px;
 }
 
+.add-time-part-form,
+.add-time-part-actions {
+  border: 0;
+  border-collapse: collapse;
+}
+
+.add-time-part-actions {
+  width: 1065px;
+}
+
+.add-time-mode-radio {
+  background-color: #faefdd;
+  border: 0;
+}
+
+.add-time-part-single-table,
+.add-time-part-range-table {
+  border: 1px solid #888888;
+  border-collapse: collapse;
+}
+
+.add-time-part-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.add-time-part-wide-cell {
+  width: 320px;
+}
+
+.add-time-part-comment-cell {
+  width: 300px;
+  height: 70px;
+}
+
+.add-time-part-date-cell {
+  width: 140px;
+}
+
+.add-time-part-time-cell {
+  width: 130px;
+}
+
+.add-time-part-range-base-cell {
+  width: 310px;
+}
+
+.add-time-part-range-comment-cell {
+  width: 310px;
+}
+
+.add-time-part-range-text-cell {
+  width: 280px;
+  height: 70px;
+}
+
+.add-time-part-action-left,
+.add-time-part-action-right {
+  width: 50%;
+  vertical-align: middle;
+}
+
+.add-time-part-action-left {
+  text-align: left;
+}
+
+.add-time-part-action-right {
+  text-align: right;
+}
+
+.add-time-build-table {
+  border: 1px solid #888888;
+  border-collapse: collapse;
+}
+
+.add-time-build-head {
+  background: #dddddd;
+}
+
+.add-time-build-pause-row {
+  background: #eeeeee;
+}
+
+.add-time-build-cell {
+  vertical-align: middle;
+  border-color: #888888;
+}
+
+.add-time-build-head-cell {
+  text-align: center;
+  background: #ddeeff;
+}
+
+.add-time-build-duration-cell {
+  text-align: left;
+  background: #ddeeff;
+  white-space: nowrap;
+}
+
+.add-time-build-reason-cell {
+  width: 120px;
+  text-align: left;
+  background: #ddeeff;
+}
+
+.add-time-build-description-cell {
+  width: 148px;
+  text-align: left;
+  background: #ddeeff;
+}
+
+.add-time-build-status-cell {
+  width: 120px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.add-time-status-accepted {
+  background: #aaffaa;
+}
+
+.add-time-status-refused {
+  background: #ffaaaa;
+}
+
+.add-time-status-table {
+  border: 0;
+  border-collapse: collapse;
+}
+
+.add-time-status-label-cell {
+  width: 60px;
+  text-align: left;
+}
+
+.add-time-status-icon-cell {
+  width: 40px;
+  text-align: right;
+}
+
+.notification-detail-header-table {
+  border: 0;
+  border-collapse: collapse;
+}
+
+.notification-detail-title-cell {
+  vertical-align: middle;
+  text-align: left;
+}
+
+.notification-detail-title-medium {
+  width: 604px;
+}
+
+.notification-detail-title-wide {
+  width: 1074px;
+}
+
+.notification-detail-title-delay {
+  width: 1000px;
+}
+
+.notification-detail-back-cell {
+  width: 10px;
+  vertical-align: middle;
+  text-align: right;
+}
+
+.notification-detail-back-wide {
+  width: 262px;
+}
+
+.notification-detail-body-cell {
+  vertical-align: middle;
+  text-align: left;
+}
+
+.notification-detail-body-wide {
+  width: 1300px;
+}
+
+.notification-detail-table {
+  border: 1px solid #888888;
+  border-collapse: collapse;
+}
+
+.notification-detail-head {
+  background: #eeeeee;
+}
+
+.notification-detail-head-cell {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.notification-detail-row {
+  background: #ffffff;
+}
+
+.notification-detail-row-alt {
+  background: #ddffff;
+}
+
+.notification-detail-date-cell {
+  width: 100px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.notification-detail-short-date-cell {
+  width: 60px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.notification-detail-duration-cell {
+  width: 85px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.notification-detail-reason-cell {
+  width: 100px;
+  vertical-align: middle;
+  text-align: left;
+}
+
+.notification-detail-comment-cell {
+  width: 140px;
+  vertical-align: middle;
+  text-align: left;
+}
+
+.notification-detail-delay-comment-cell {
+  width: 160px;
+  vertical-align: middle;
+  text-align: left;
+}
+
+.notification-detail-supervisor-cell,
+.notification-detail-supervisor-wide-cell {
+  width: 200px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.notification-detail-status-cell {
+  width: 115px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.notification-detail-delay-status-cell {
+  width: 130px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.notification-detail-actions-cell {
+  width: 70px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.notification-detail-actions-table {
+  border: 0;
+  border-collapse: collapse;
+}
+
+.notification-detail-action-cell {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.notification-status-accepted {
+  background: #aaffaa;
+}
+
+.notification-status-refused {
+  background: #ffaaaa;
+}
+
+.notification-status-deleted {
+  background: #dddddd;
+}
+
 .add_time_radio {
   margin-bottom: 5px;
 }
