@@ -13,7 +13,7 @@ echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">";
 echo "<meta http-equiv=\"Cache-Control\" content=\"no-cache\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
-echo "<body bgcolor=\"#ffffff\" >";
+echo "<body class=\"app-page\">";
 ?>
 
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
@@ -35,20 +35,18 @@ echo "</div>";
 echo "<div id=\"delay_explanation_add_time_part\">";
 echo "</div>";
 
-echo "<div align=\"left\">";
+echo "<div class=\"notification-page-layout\">";
 
-echo "<table>";
+echo "<table class=\"notification-page-table\">";
 echo "<tr>";
 
-echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
+echo "<td class=\"notification-nav-cell\">";
 
 include_once __DIR__ . "/navigate.php";
 
 echo "</td>";
 
-$wholeWidth = 1133;
-
-echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
+echo "<td class=\"notification-content-cell notification-content-cell-extra-wide\">";
 
 echo "<h5 class=\"dark\"><br>/рабочее время вне офиса<br><br></h5>";
 
@@ -56,8 +54,6 @@ echo "<div id=\"add_times_table\">";
 echo "</div>";
 
 echo "</td>";
-echo "</tr>";
-echo "</table>";
 echo "</tr>";
 echo "</table>";
 echo "</div>";

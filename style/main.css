@@ -1063,8 +1063,31 @@ h6.small_help_2 {
   width: 835px;
 }
 
+.notification-content-cell-extra-wide {
+  width: 1133px;
+}
+
+.notification-content-cell-medium {
+  width: 700px;
+}
+
 .notification-content-cell-narrow {
   width: 562px;
+}
+
+.sport-pause-spacer-cell {
+  width: 10px;
+  vertical-align: top;
+  text-align: left;
+  background: #ffffff;
+}
+
+.sport-pause-help-cell {
+  width: 500px;
+  vertical-align: top;
+  text-align: left;
+  background: #f0f7fb;
+  border-color: #888888;
 }
 
 .notification-summary-table {
