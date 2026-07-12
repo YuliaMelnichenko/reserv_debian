@@ -1067,6 +1067,14 @@ h6.small_help_2 {
   width: 1133px;
 }
 
+.notification-content-cell-approvement-wide {
+  width: 1158px;
+}
+
+.notification-content-cell-delay-wide {
+  width: 1272px;
+}
+
 .notification-content-cell-medium {
   width: 700px;
 }
