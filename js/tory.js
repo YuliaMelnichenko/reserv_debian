@@ -123,6 +123,15 @@ function reload_if_missing_container(containerId) {
   return false;
 }
 
+function refresh_time_registration_or_reload() {
+  if (typeof get_time_registration_div_content === 'function') {
+    get_time_registration_div_content();
+    return;
+  }
+
+  window.location.reload();
+}
+
 function unset_cookie(csrfToken){
   var token = csrfToken || window.TORI_CSRF_TOKEN || '';
 
@@ -140,10 +149,7 @@ function unset_cookie(csrfToken){
     }
   }
 
-  $.post('ajax/delete_cookie.php', {_csrf: token}, RetSWT1 );
-  function RetSWT1(dat1) {
-    console.log(dat1);
-  }
+  $.post('ajax/delete_cookie.php', {_csrf: token});
 }
 
 function set_delay(/* userID */){
@@ -275,7 +281,7 @@ function save_changes_time(userID) {
       function(dat1) {
         if (dat1 == 2) {
           alert("Время ухода изменено.");
-          location.reload();
+          refresh_time_registration_or_reload();
         }
         else {
           alert(dat1);
@@ -309,7 +315,7 @@ function save_changes_time(userID) {
       function(dat2) {
         if (dat2 == 2) {
           alert("Время изменено.");
-          location.reload();
+          refresh_time_registration_or_reload();
         }
         else {
           alert(dat2);
@@ -857,7 +863,6 @@ function add_training_time(){
 }
 
 function close_add_sport_time(){
-  location.reload();
   if ( document.getElementById('delay_explanation_sport_time') ){ document.getElementById('delay_explanation_sport_time').style.display='none'; }
 }
 
@@ -1011,7 +1016,8 @@ function save_entry (currentDay, startTime) {
             function RetSWT2(dat2) {
             if ( dat2 == 2 ) {
               alert( "Тренировка запланирована!" );
-              location.reload();
+              close_add_sport_time();
+              show_pause_sport_table();
             }
             else if ( dat2 == 1 ) {
               alert( "На данное время превышен лимит записи! Выберите другую дату/время." );
@@ -1041,7 +1047,10 @@ function delete_gym_schedule(date_train, start_time, stop_time) {
   function RetSWT1(dat1) {
     if ( dat1 == 2 ) {
       alert( "Тренировка удалена." );
-      location.reload();
+      show_pause_sport_table();
+      if ( document.getElementById('delete_gym_schedule_window') ){
+        document.getElementById('delete_gym_schedule_window').style.display='none';
+      }
    }
    else {
      alert( "Ошибка" );

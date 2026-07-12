@@ -55,7 +55,6 @@ function auth() {
   }
 
   $.post('ajax/auth.php', {login: login, passwd: passwd, _csrf: toriCsrfToken}, function(dat) {
-    console.log("Server answer: ", dat);
     if (dat.trim() === "OK") {
       window.location = self.location;
     } else {

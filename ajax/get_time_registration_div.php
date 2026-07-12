@@ -584,7 +584,7 @@ else {
 
   echo "<div id=\"state_buttons\">";
     echo "<div class=\"left_button\">";
-      echo "<button id =\"time_back\" title=\"возврат состояния регистрации времени до предыдущего\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"rollback_state(); location.reload(true);\"><img src=\"img/rollbackState.png\"></button>";
+      echo "<button id =\"time_back\" title=\"возврат состояния регистрации времени до предыдущего\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"rollback_state();\"><img src=\"img/rollbackState.png\"></button>";
     echo "</div>";
     echo "<div class=\"nopadding_s\" align=\"right\" width=50% style=\"font-size: 100%; margin:0; padding:0; margin-left:0;\">";
       if ($state == 3 || $state == 0) {
