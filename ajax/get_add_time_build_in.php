@@ -37,18 +37,18 @@ if ( $found == 0 )
 else
 {
   echo "<br><h5 class=\"big\">Работа вне офиса и приостановки учета времени за текущий день</h5>";
-  echo "<br><table class=\"slim\" border=1>";
-    echo "<tr bgcolor=\"#DDDDDD\">";
-      echo "<td class=\"nopadding_s\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"center\">";
+  echo "<br><table class=\"slim add-time-build-table\">";
+    echo "<tr class=\"add-time-build-head\">";
+      echo "<td class=\"nopadding_s add-time-build-cell add-time-build-head-cell\">";
         echo "<h5 class=\"middle1\">Длительность"."</h5>";
       echo "</td>";  
-      echo "<td class=\"nopadding_s\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"center\">";
+      echo "<td class=\"nopadding_s add-time-build-cell add-time-build-head-cell\">";
         echo "<h5 class=\"middle1\">Основание"."</h5>";
       echo "</td>";  
-      echo "<td class=\"nopadding_s\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"center\">";
+      echo "<td class=\"nopadding_s add-time-build-cell add-time-build-head-cell\">";
         echo "<h5 class=\"middle1\">Комментарий работника"."</h5>";
       echo "</td>";  
-      echo "<td class=\"nopadding_s\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"center\">";
+      echo "<td class=\"nopadding_s add-time-build-cell add-time-build-head-cell\">";
         echo "<h5 class=\"middle1\">Статус"."</h5>";
       echo "</td>";  
     echo "</tr>";
@@ -81,7 +81,7 @@ else
     $superUserName = get_sv_name_by_userid( $userID_ );
     $addMsg1 = " <img title=\"Решение принял: $superUserName\" src=\"img/superuser.png\">";
 
-    $bgcolor = "";    
+    $statusClass = "";
 
     if ( $approved == 0 )
     { 
@@ -89,15 +89,16 @@ else
     }
     else if ( $approved == -1 )
     { 
-      $approvedStr = "отклонено"; $bgcolor = "#FFAAAA"; 
+      $approvedStr = "отклонено";
+      $statusClass = "add-time-status-refused";
       $ta_approved_str_add1 = " <img title=\"решение принял: $superUserName\" src=\"img/superuserBad.png\">";
       $ta_approved_str_add2 = " <img title=\"комментарий: $suDesc\" src=\"img/delaySUExpl2Bad.png\">";
-      $content1 = "<table class=\"slim\" border=0>";
+      $content1 = "<table class=\"slim add-time-status-table\">";
         $content1 .= "<tr>";
-          $content1 .= "<td class=\"nopadding_s\" width=\"60\" align=\"left\" >";
+          $content1 .= "<td class=\"nopadding_s add-time-status-label-cell\">";
             $content1 .= journal_status_label($approvedStr, "middle");
           $content1 .= "</td>"; 
-          $content1 .= "<td class=\"nopadding\" width=\"40\" align=\"right\" >";
+          $content1 .= "<td class=\"nopadding add-time-status-icon-cell\">";
             $content1 .= "<h5 class=\"middle\">$ta_approved_str_add1$ta_approved_str_add2</h5>";
           $content1 .= "</td>";
         $content1 .= "</tr>";
@@ -106,15 +107,16 @@ else
     }
     else if ( $approved == 1 )
     {
-      $approvedStr = "принято"; $bgcolor = "#AAFFAA"; 
+      $approvedStr = "принято";
+      $statusClass = "add-time-status-accepted";
       $ta_approved_str_add1 = " <img title=\"решение принял: $superUserName\" src=\"img/superuserGood.png\">";
       $ta_approved_str_add2 = " <img title=\"комментарий: $suDesc\" src=\"img/delaySUExpl2Good.png\">";
-      $content1 = "<table class=\"slim\" border=0>";
+      $content1 = "<table class=\"slim add-time-status-table\">";
         $content1 .= "<tr>";
-          $content1 .= "<td class=\"nopadding_s\" width=\"60\" align=\"left\" >";
+          $content1 .= "<td class=\"nopadding_s add-time-status-label-cell\">";
             $content1 .= journal_status_label($approvedStr, "middle");
           $content1 .= "</td>"; 
-          $content1 .= "<td class=\"nopadding\" width=\"40\" align=\"right\" >";
+          $content1 .= "<td class=\"nopadding add-time-status-icon-cell\">";
             $content1 .= "<h5 class=\"middle\">$ta_approved_str_add1$ta_approved_str_add2</h5>";
           $content1 .= "</td>";
         $content1 .= "</tr>";
@@ -123,16 +125,16 @@ else
     }   
 
     echo "<tr>";
-      echo "<td nowrap class=\"nopadding_s\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\">";
+      echo "<td class=\"nopadding_s add-time-build-cell add-time-build-duration-cell\">";
         echo "<h5 class=\"small1\">$startTime - $stopTime<br>= $timeDurationStr"."</h5>";
       echo "</td>";  
-      echo "<td width = 120 class=\"nopadding_s\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\">";
+      echo "<td class=\"nopadding_s add-time-build-cell add-time-build-reason-cell\">";
 echo "<h5 class=\"small1\">" . html_escape($reasonStr) . "</h5>";
       echo "</td>";  
-      echo "<td width = 148 class=\"nopadding_s\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\">";
+      echo "<td class=\"nopadding_s add-time-build-cell add-time-build-description-cell\">";
 echo "<h5 class=\"small1\">" . html_escape($description) . "</h5>";
       echo "</td>";  
-      echo "<td nowrap width = 120 class=\"nopadding_s\" bgcolor=\"$bgcolor\" bordercolor=\"#888888\" valign=\"middle\" align=\"center\">";
+      echo "<td class=\"nopadding_s add-time-build-cell add-time-build-status-cell $statusClass\">";
         echo $approvedStr;
       echo "</td>";  
     echo "</tr>";
@@ -158,21 +160,19 @@ echo "<h5 class=\"small1\">" . html_escape($description) . "</h5>";
     $superUserName = get_sv_name_by_userid( $userID_ );
     $addMsg1 = " <img title=\"Решение принял: $superUserName\" src=\"img/superuser.png\">";
 
-    $bgcolor = "";
-
     $approvedStr = "Утверждению не подлежит";     
 
-    echo "<tr bgcolor=\"#EEEEEE\">";
-      echo "<td nowrap class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\">";
+    echo "<tr class=\"add-time-build-pause-row\">";
+      echo "<td class=\"nopadding_s add-time-build-cell add-time-build-duration-cell\">";
         echo "<h5 class=\"small1\">($timeDurationStr)<br>[$startTime-$stopTime]"."</h5>";
       echo "</td>";  
-      echo "<td width = 120 class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\">";
+      echo "<td class=\"nopadding_s add-time-build-cell add-time-build-reason-cell\">";
 echo "<h5 class=\"small\">" . html_escape($reasonStr) . "</h5>";
       echo "</td>";  
-      echo "<td width = 120 class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\">";
+      echo "<td class=\"nopadding_s add-time-build-cell add-time-build-description-cell\">";
 echo "<h5 class=\"small1\">" . html_escape($description) . "</h5>";
       echo "</td>";  
-      echo "<td nowrap width = 120 class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
+      echo "<td class=\"nopadding_s add-time-build-cell add-time-build-status-cell\">";
         echo journal_status_label($approvedStr, "middle");
       echo "</td>";  
     echo "</tr>";
