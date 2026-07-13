@@ -3524,7 +3524,7 @@ h5.activ_time {
 }
 
 .employee-group-border {
-    border-top: 1,5px solid #666666 !important;
+    border-top: 1.5px solid #666666 !important;
 }
 
 #leave_table th,
@@ -4645,6 +4645,72 @@ h5.activ_time {
   padding: 6px;
   border: 1px solid #888888;
   background: #eef5ff;
+}
+
+.staff-leaves-layout { text-align: left; }
+.staff-leaves-page-table {
+  border: 0;
+  border-collapse: collapse;
+}
+.staff-leaves-nav-cell,
+.staff-leaves-content-cell {
+  vertical-align: top;
+  text-align: left;
+  background: #ddeeff;
+  border-color: #888888;
+}
+.staff-leaves-nav-cell { width: 250px; }
+.staff-leaves-content-cell { width: 950px; }
+
+.archive-filter-label {
+  margin-right: 5px;
+  font: 700 13px Arial, sans-serif;
+}
+.archive-employee-filter { width: 160px; margin-right: 15px; }
+.archive-period-filter { width: 170px; margin-right: 15px; }
+.archive-event-filter { width: 130px; margin-right: 15px; }
+.archive-manual-period { display: none; margin-right: 8px; }
+.archive-date-filter { width: 110px; }
+
+.archive-refresh-button,
+.archive-excel-button {
+  height: 23px;
+  border: 1px solid #888888;
+  font-size: 90%;
+  cursor: pointer;
+}
+.archive-refresh-button { width: 90px; background: #f8d888; }
+.archive-excel-button {
+  width: 80px;
+  margin-left: 40px;
+  background: #d9ead3;
+}
+.archive-excel-icon {
+  height: 16px;
+  margin-right: 3px;
+  vertical-align: middle;
+}
+
+.staff-leave-modal-label {
+  margin-bottom: 5px;
+  color: #333333;
+  font: 700 13px Arial, sans-serif;
+}
+.staff-leave-event-select { width: 120px; }
+.staff-leave-modal-button {
+  width: 100px;
+  height: 25px;
+  border: 1px solid #888888;
+  font-size: 100%;
+  cursor: pointer;
+}
+.staff-leave-modal-save { background: #f8d888; }
+.staff-leave-modal-cancel { background: #ff7979; }
+
+.staff-leave-empty-cell { text-align: center; }
+.staff-leave-action-icon {
+  width: 20px;
+  height: 20px;
 }
 
 .search-block {

@@ -33,7 +33,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'get' && isset($_GET['id'])) {
 
 function getEmployees($link) {
     $employees = [];
-    $res = mysqli_query($link, "SELECT id, firstname, surname FROM employees WHERE relevance = 1 ORDER BY surname");
+    $res = db_query($link, "SELECT id, firstname, surname FROM employees WHERE relevance = 1 ORDER BY surname");
+
+    if (!$res) {
+        return $employees;
+    }
 
     while ($row = mysqli_fetch_assoc($res)) {
         $employees[$row['id']] = $row['surname'] . ' ' . $row['firstname'];
@@ -758,23 +762,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" href="style/main.css">
     </head>
-    <body bgcolor="#ffffff">
+    <body class="app-page">
         <script type="text/javascript" src="lib/jquery/jquery.js"></script>
         <script type="text/javascript" src="js/tory.js"></script>
 
 <?php
-echo "<div align=\"left\">";
-echo "<table border=0>";
+echo "<div class=\"staff-leaves-layout\">";
+echo "<table class=\"staff-leaves-page-table\">";
 echo "<tr>";
-echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
+echo "<td class=\"staff-leaves-nav-cell\">";
 
 include_once __DIR__ . "/navigate.php";
 
 echo "</td>";
    
-$wholeWidth = 800;
-
-echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
+echo "<td class=\"staff-leaves-content-cell\">";
 
 echo "<h5 class=\"dark\"><br>/Больничные и отпуска сотрудников <br></h5>";
 
@@ -793,16 +795,16 @@ echo "<div id=\"event_buttons\">";
 echo "</div>";
 echo "<div id=\"archive_filters\">";
 
-    echo "<span style=\"font-family: Arial,sans; font-size: 13px; font-weight: 700; margin-right:5px;\">Сотрудник:</span>";
-    echo "<select id=\"archive_employee_filter\" class=\"flat\" style=\"width:160px; margin-right:15px;\">";
+    echo "<span class=\"archive-filter-label\">Сотрудник:</span>";
+    echo "<select id=\"archive_employee_filter\" class=\"flat archive-employee-filter\">";
         echo "<option value=\"0\">Все сотрудники</option>";
         foreach (getEmployees($link) as $id => $fio) {
-            echo "<option value=\"" . intval($id) . "\">" . htmlspecialchars($fio) . "</option>";
+            echo "<option value=\"" . intval($id) . "\">" . html_escape($fio) . "</option>";
         }
     echo "</select>";
 
-    echo "<span style=\"font-family: Arial,sans; font-size: 13px; font-weight: 700; margin-right:5px;\">Дата:</span>";
-    echo "<select id=\"archive_period_filter\" class=\"flat\" style=\"width:170px; margin-right:15px;\" onchange=\"toggleArchiveManualPeriod();\">";
+    echo "<span class=\"archive-filter-label\">Дата:</span>";
+    echo "<select id=\"archive_period_filter\" class=\"flat archive-period-filter\" onchange=\"toggleArchiveManualPeriod();\">";
         echo "<option value=\"0\">Все даты</option>";
         echo "<option value=\"1\">С начала недели</option>";
         echo "<option value=\"2\">С начала месяца</option>";
@@ -812,23 +814,23 @@ echo "<div id=\"archive_filters\">";
         echo "<option value=\"7\">Задать вручную</option>";
     echo "</select>";
 
-    echo "<span id=\"archive_manual_period\" style=\"display:none; margin-right:8px;\">";
-        echo "<input id=\"archive_start_date_filter\" type=\"date\" style=\"width:110px;\">";
+    echo "<span id=\"archive_manual_period\" class=\"archive-manual-period\">";
+        echo "<input id=\"archive_start_date_filter\" class=\"archive-date-filter\" type=\"date\">";
         echo " - ";
-        echo "<input id=\"archive_stop_date_filter\" type=\"date\" style=\"width:110px;\">";
+        echo "<input id=\"archive_stop_date_filter\" class=\"archive-date-filter\" type=\"date\">";
     echo "</span>";
 
-    echo "<span style=\"font-family: Arial,sans; font-size: 13px; font-weight: 700; margin-right:5px;\">Событие:</span>";
-    echo "<select id=\"archive_event_filter\" class=\"flat\" style=\"width:130px; margin-right:15px;\">";
+    echo "<span class=\"archive-filter-label\">Событие:</span>";
+    echo "<select id=\"archive_event_filter\" class=\"flat archive-event-filter\">";
         echo "<option value=\"\">Все события</option>";
         echo "<option value=\"Отпуск\">Отпуска</option>";
         echo "<option value=\"Больничный\">Больничные</option>";
         echo "<option value=\"Командировка\">Командировки</option>";
     echo "</select>";
 
-    echo "<button class=\"button_style\" style=\"font-size: 90%; width:90px; height:23px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"loadArchive();\">Обновить</button>";
-    echo "<button class=\"button_style\" title=\"Выгрузить архив в Excel\" style=\"font-size: 90%; width:80px; height:23px; margin-left:40px; background-color:#d9ead3; border:1px solid #888888;\" onclick=\"openArchiveExcelPreview();\">";
-        echo "<img src=\"img/excel.svg\" alt=\"Excel\" height=\"16\" style=\"vertical-align:middle; margin-right:3px;\" onerror=\"this.style.display='none';\">";
+    echo "<button class=\"button_style archive-refresh-button\" onclick=\"loadArchive();\">Обновить</button>";
+    echo "<button class=\"button_style archive-excel-button\" title=\"Выгрузить архив в Excel\" onclick=\"openArchiveExcelPreview();\">";
+        echo "<img class=\"archive-excel-icon\" src=\"img/excel.svg\" alt=\"Excel\" onerror=\"this.style.display='none';\">";
     echo "Excel";
     echo "</button>";
 
@@ -860,7 +862,7 @@ echo "</div>";
         <div id="modal_form_block">
             <input type="hidden" name="record_id" id="record_id">
             <div class="modal_labels" id="selectEmployeeBlock">
-                <label style="font-family: Arial,sans; font-size: 13px; color: #333333; font-weight: 700; margin-bottom: 5px;">Сотрудник:</label>
+                <label class="staff-leave-modal-label">Сотрудник:</label>
                 <select name="employee_id">
                     <option value="">Выберите...</option>
                     <?php foreach (getEmployees($link) as $id => $fio): ?>
@@ -869,16 +871,16 @@ echo "</div>";
                 </select>
             </div>
             <div class="modal_labels">
-                <label style="font-family: Arial,sans; font-size: 13px; color: #333333; font-weight: 700; margin-bottom: 5px;">Дата начала: </label>
+                <label class="staff-leave-modal-label">Дата начала: </label>
                 <input type="date" name="start_date" required>
             </div>
             <div class="modal_labels">
-                <label style="font-family: Arial,sans; font-size: 13px; color: #333333; font-weight: 700; margin-bottom: 5px;">Дата окончания:</label>
+                <label class="staff-leave-modal-label">Дата окончания:</label>
                 <input type="date" name="stop_date" required>
             </div>
             <div class="modal_labels" id="selectEventBlock">
-                <label style="font-family: Arial,sans; font-size: 13px; color: #333333; font-weight: 700; margin-bottom: 5px;">Событие:</label>
-                <select style="width: 120px;" name="event" required>
+                <label class="staff-leave-modal-label">Событие:</label>
+                <select class="staff-leave-event-select" name="event" required>
                     <option value="">Выберите...</option>
                     <option value="Отпуск">Отпуск</option>
                     <option value="Больничный">Больничный</option>
@@ -887,13 +889,13 @@ echo "</div>";
             </div>
         </div>
         <div id="modal_form_btn">
-            <button type="submit" style="cursor: pointer; font-size: 100%; width:100px; height:25px; background-color:#f8d888; border:1px solid #888888;">Сохранить</button>
-            <button type="button" style="cursor: pointer; font-size: 100%; width:100px; height:25px; background-color:#ff7979; border:1px solid #888888;" onclick="closeModal()">Отмена</button>
+            <button type="submit" class="staff-leave-modal-button staff-leave-modal-save">Сохранить</button>
+            <button type="button" class="staff-leave-modal-button staff-leave-modal-cancel" onclick="closeModal()">Отмена</button>
         </div>
     </form>
 </div>
 
-<div id="archiveExcelPreviewOverlay" style="display:none;">
+<div id="archiveExcelPreviewOverlay" class="accounting-error-modal-hidden">
     <div id="archiveExcelPreviewWindow">
         <div id="archiveExcelPreviewHeader">
             <span>Предпросмотр выгрузки в Excel</span>
@@ -985,7 +987,7 @@ echo "</div>";
             const tr = document.createElement('tr');
 
             tr.innerHTML = `
-                <td colspan="6" align="center">
+                <td colspan="6" class="staff-leave-empty-cell">
                     Нет записей
                 </td>
             `;
@@ -1006,7 +1008,7 @@ echo "</div>";
 
                 if (rowIndex === 0) {
                     nameCell = `
-                        <td rowspan="${group.rows.length}" valign="middle" class="merged-fio-cell ${borderClass}">
+                        <td rowspan="${group.rows.length}" class="merged-fio-cell ${borderClass}">
                             ${escapeHtml(group.name)}
                         </td>
                     `;
@@ -1015,10 +1017,10 @@ echo "</div>";
                 const actionsCell = showActions
                     ? `
                         <button id="btn_red" onclick="editLeave(${row.id})" title="Редактировать">
-                            <img src="img/red2.png" alt="Редактировать" width="20" height="20">
+                            <img class="staff-leave-action-icon" src="img/red2.png" alt="Редактировать">
                         </button>
                         <button id="btn_delete_leave" onclick="confirmDelete(${row.id})" title="Удалить">
-                            <img src="img/delete.png" alt="Удалить" width="20" height="20">
+                            <img class="staff-leave-action-icon" src="img/delete.png" alt="Удалить">
                         </button>
                     `
                     : '';
