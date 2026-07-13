@@ -4218,6 +4218,149 @@ h5.activ_time {
   gap: 4px;
 }
 
+.pause-dialog-table {
+  width: 255px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-collapse: collapse;
+}
+
+.pause-dialog-close-cell {
+  width: 250px;
+  text-align: right;
+}
+
+.pause-dialog-close {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.pause-dialog-cell {
+  padding: 0;
+  vertical-align: middle;
+  text-align: left;
+}
+
+.pause-dialog-select {
+  width: 255px;
+  border: 1px solid #888888;
+}
+
+.pause-dialog-textarea,
+.pause-sport-textarea {
+  resize: none;
+}
+
+.pause-dialog-textarea { width: 250px; }
+.pause-sport-textarea { width: 254px; }
+.pause-sport-select {
+  width: 260px;
+  border: 1px solid #888888;
+}
+
+.pause-dialog-action,
+.pause-state-action {
+  height: 30px;
+  padding: 0;
+  border: 1px solid #888888;
+  background: #f8d888;
+  font-size: 100%;
+  cursor: pointer;
+}
+
+.pause-dialog-action { width: 245px; }
+.pause-state-action { width: 390px; }
+
+.pause-overlay-table {
+  background: #ffffff;
+  border-collapse: collapse;
+}
+
+.pause-overlay-cell,
+.pause-state-action-cell {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.pause-state-card {
+  border: 0;
+  background: #ddeeff;
+}
+
+.pause-state-title {
+  width: 250px;
+  text-align: left;
+}
+
+.pause-state-details {
+  width: 450px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-collapse: collapse;
+}
+
+.pause-state-label,
+.pause-state-value {
+  vertical-align: middle;
+  text-align: left;
+}
+
+.pause-state-row-alt {
+  background: #ffffff;
+}
+
+.pause-result-table {
+  width: 450px;
+  border: 1px solid #888888;
+  border-collapse: collapse;
+}
+
+.pause-result-title {
+  width: 450px;
+  text-align: left;
+}
+
+.sport-table {
+  border: 1px solid #888888;
+  border-collapse: collapse;
+}
+
+.sport-table-current { margin-top: 10px; }
+.sport-table-head { background: #dddddd; }
+.sport-table-head-short { height: 20px; }
+.sport-current-row { height: 60px; background: #ddffff; }
+.sport-empty-row,
+.sport-schedule-row { height: 40px; }
+
+.sport-name-cell,
+.sport-time-cell,
+.sport-schedule-cell,
+.sport-empty-cell,
+.sport-schedule-time-cell {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.sport-name-cell { width: 490px; }
+.sport-time-cell { width: 200px; }
+.sport-schedule-name-cell {
+  width: 450px;
+  padding-left: 5px;
+  vertical-align: middle;
+  text-align: left;
+}
+.sport-schedule-date-cell {
+  width: 100px;
+  padding-left: 35px;
+  vertical-align: middle;
+  text-align: left;
+}
+.sport-schedule-time-cell { width: 100px; }
+
 #archiveExcelPreviewOverlay,
 #accountingErrorModalOverlay,
 #accountingErrorStatusModalOverlay {

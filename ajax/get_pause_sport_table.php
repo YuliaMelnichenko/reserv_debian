@@ -6,19 +6,19 @@ header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
-$userID = $_SESSION['ss_id'];
+$userID = (int)$_SESSION['ss_id'];
 
 include __DIR__ . "/../php_tori/connect.php";
 include_once __DIR__ . "/../funcs.php";
 
 echo "<h5 class=\"big\"> Текущая загруженность тренажерного зала </h5>";
 
-echo "<table id=\"add_time_sport_table\" border=1 style=\"margin-top: 10px\">";
-echo "<tr bgcolor=\"#DDDDDD\" bordercolor=\"#888888\" height=\"20px\">";
-echo "<td class=\"add_time_sport\" valign=\"middle\" align=\"center\" width=490>";
+echo "<table id=\"add_time_sport_table\" class=\"sport-table sport-table-current\">";
+echo "<tr class=\"sport-table-head sport-table-head-short\">";
+echo "<td class=\"add_time_sport sport-name-cell\">";
 echo "<div class=\"person\">"."<h5 class=\"data_train\">Сотрудник</h5>"."</div>";
 echo "</td>";
-echo "<td class=\"add_time_sport\" valign=\"middle\" align=\"center\" width=200>";
+echo "<td class=\"add_time_sport sport-time-cell\">";
 echo "<div class=\"training\">"."<h5 class=\"data_train\">Время прихода</h5>"."</div>";
 echo "</td>";
 echo "</tr>";
@@ -39,8 +39,8 @@ $query = mysqli_query($link, "SELECT USERID, START_DT FROM ADD_TIME WHERE DESCRI
 $res = mysqli_num_rows($query);
 
 if ($res == 0) {
-    echo "<tr bordercolor=\"#888888\" height=\"40px\">";
-    echo "<td colspan=3 align=\"center\"><h5>Тренажерный зал пуст</h5></td>";
+    echo "<tr class=\"sport-empty-row\">";
+    echo "<td colspan=\"2\" class=\"sport-empty-cell\"><h5>Тренажерный зал пуст</h5></td>";
     echo "</tr>";
 }
 else {
@@ -57,9 +57,9 @@ else {
         $lastname = $row2["lastname"];
         $surname = $row2["surname"];
     
-        echo "<tr bgcolor=\"#ddffff\" bordercolor=\"#888888\" height=\"60px\">";
-echo "<td width=490 class=\"add_time_sport\" valign=\"middle\" align=\"center\"><h2 class=\"full_name, sport\">" . html_escape($surname . " " . $firstname . " " . $lastname) . "</h2></td>";
-        echo "<td width=200 class=\"add_time_sport\" valign=\"middle\" align=\"center\"><h2 class=\"sport\">$time</h2></td>";
+        echo "<tr class=\"sport-current-row\">";
+        echo "<td class=\"add_time_sport sport-name-cell\"><h2 class=\"full_name sport\">" . html_escape($surname . " " . $firstname . " " . $lastname) . "</h2></td>";
+        echo "<td class=\"add_time_sport sport-time-cell\"><h2 class=\"sport\">" . html_escape($time) . "</h2></td>";
         echo "</tr>";
     }
 }
@@ -74,36 +74,36 @@ $merr=mysqli_error($link);
 echo "<h5 class=\"big\"> Планируемые тренировки </h5>";
 
 echo "<div id=\"training_button\">";
-echo "<div id\"planning\">";
+echo "<div id=\"planning\">";
 echo "<button id=\"signUp\" onclick=\"add_training_time();\">Запланировать</button><br>";
 echo "</div>";
 
 if ($res === 0) {
-    echo "<div id\"delete_training\">";
+    echo "<div id=\"delete_training\">";
     echo "<button id=\"disabled_btn\">Удалить запись</button><br>";
     echo "</div>";
 }
 else {
-    echo "<div id\"delete_training\">";
+    echo "<div id=\"delete_training\">";
     echo "<button id=\"del_btn\" onclick=\"delete_training_schedule();\">Удалить запись</button><br>";
     echo "</div>";  
 }
 echo "</div>";
 
-echo "<table id=\"schedule_training\" border=1>";
-echo "<tr bgcolor=\"#DDDDDD\" bordercolor=\"#888888\" height=\"20px\">";
-echo "<td class=\"add_time_sport\" valign=\"middle\" align=\"center\" rowspan=2>";
+echo "<table id=\"schedule_training\" class=\"sport-table\">";
+echo "<tr class=\"sport-table-head sport-table-head-short\">";
+echo "<td class=\"add_time_sport sport-schedule-name-cell\" rowspan=\"2\">";
 echo "<div class=\"person\">"."<h5 class=\"data_train\">Сотрудник</h5>"."</div>";
 echo "</td>";
-echo "<td class=\"add_time_sport\" valign=\"middle\" align=\"center\" colspan=2>";
+echo "<td class=\"add_time_sport sport-schedule-cell\" colspan=\"2\">";
 echo "<div class=\"training\">"."<h5 class=\"data_train\">График</h5>"."</div>";
 echo "</td>";
 echo "</tr>";
-echo "<tr bgcolor=\"#DDDDDD\" bordercolor=\"#888888\" height=\"20px\">";
-echo "<td align=\"center\">";
+echo "<tr class=\"sport-table-head sport-table-head-short\">";
+echo "<td class=\"sport-schedule-cell\">";
 echo "<div>"."<h5 class=\"data_train\">Дата</h5>"."</div>";
 echo "</td>";
-echo "<td align=\"center\">";
+echo "<td class=\"sport-schedule-cell\">";
 echo "<div>"."<h5 class=\"data_train\">Время</h5>"."</div>";
 echo "</td>";
 echo "</tr>";
@@ -115,8 +115,8 @@ $query3 = mysqli_query($link, "SELECT *, GROUP_CONCAT(DATE_FORMAT(DATE_TRAIN, '%
 $res1 = mysqli_num_rows($query3);
 
 if ($res1 === 0) {
-    echo "<tr bordercolor=\"#888888\" height=\"40px\">";
-    echo "<td colspan=3 align=\"center\"><h5>Записи отсутствуют</h5></td>";
+    echo "<tr class=\"sport-empty-row\">";
+    echo "<td colspan=\"3\" class=\"sport-empty-cell\"><h5>Записи отсутствуют</h5></td>";
     echo "</tr>";
 }
 else {
@@ -231,10 +231,10 @@ else {
                 $output_date = '<h5>' . implode('<br>', $parts) . '</h5>';
             }
         }
-        echo "<tr bordercolor=\"#888888\" height=\"40px\">";
-echo "<td width=450 class=\"add_time_sport\" valign=\"middle\" align=\"left\" style=\"padding-left:5px\"><h5>" . html_escape($surname4 . " " . $firstname4 . " " . $lastname4) . "</h5></td>";
-        echo "<td width=100 class=\"add_time_sport\" valign=\"middle\" align=\"left\" style=\"padding-left:35px\">$output_date</td>";
-        echo "<td width=100 class=\"add_time_sport\" valign=\"middle\" align=\"center\"><h5>$time</h5></td>";
+        echo "<tr class=\"sport-schedule-row\">";
+        echo "<td class=\"add_time_sport sport-schedule-name-cell\"><h5>" . html_escape($surname4 . " " . $firstname4 . " " . $lastname4) . "</h5></td>";
+        echo "<td class=\"add_time_sport sport-schedule-date-cell\">$output_date</td>";
+        echo "<td class=\"add_time_sport sport-schedule-time-cell\"><h5>$time</h5></td>";
         echo "</tr>";
     }
 }
