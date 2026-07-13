@@ -104,7 +104,6 @@ function show_month_stat( $monthDate, $user_id, $user_rate, $user_defaultStartTi
 
   $workDuration = $stat[2];  
   $normkDuration = $StatMonthNorm * 60 * 60;
-  $currentMonthNormDuration = 
 
   $workResult = "Недоработка";
   $diff = 0;
@@ -129,96 +128,41 @@ function show_month_stat( $monthDate, $user_id, $user_rate, $user_defaultStartTi
   if ( $currMonth == $monthNum )
     $isCurrentMonth = 1; 
 
-  $ColumnSizeBase = 550;		
-  $firstColumnSize = 450;		
-  $secondColumnSize = $ColumnSizeBase - $firstColumnSize;		
-  
-  //////
-  echo "<table class=\"slim\" border=1>";
-    echo "<tr>";
-      echo "<td class=\"nopadding_s\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 600>";
-        echo "<b><font size=\"3\" color=\"#000000\" face=\"Arial\">$StatMonthName </font></b>";
-        echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">(норма <b>$StatMonthNorm</b> ч.):</font><br>";
-        ////// 
-	echo "<table cellpadding=\"0\" cellspacing=\"0\" border=1>";
-    	  if ( $isCurrentMonth == 0 )
-            echo "<tr bgcolor=\"#$overLoadColor\" >";
-          else
-    	    echo "<tr bgcolor=\"#eeeeee\" >";
+  $classByColor = function ($color) use ($goodColor, $badColor) {
+    if ($color === $goodColor) return "short-stat-good";
+    if ($color === $badColor) return "short-stat-bad";
+    return "short-stat-neutral";
+  };
 
-       	    echo "<td class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $firstColumnSize>";
-              echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">Наработка (ч.):</font><br>";
-	    echo "</td>";
-       	    echo "<td class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"top\" align=\"right\" width = $secondColumnSize>";
-              echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">$currenMonthWorkDurationStr</font><br>";
-	    echo "</td>";
-	  echo "</tr>";
-    	  echo "<tr>";
-       	    echo "<td class=\"nopadding_s\" bgcolor=\"#eeeeee\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $firstColumnSize>";
-              echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">Наработка вне офиса (ч.):</font><br>";
-	    echo "</td>";
-       	    echo "<td class=\"nopadding_s\" bgcolor=\"#eeeeee\" bordercolor=\"#888888\" valign=\"top\" align=\"right\" width = $secondColumnSize>";
-              echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">$addTimeWorkDayDurationStr</font><br>";
-	    echo "</td>";
-	  echo "</tr>";
-          if ( $isCurrentMonth == 0 )
-    	  {
-            echo "<tr bgcolor=\"#$overLoadColor\" >";
-       	      echo "<td class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $firstColumnSize>";
-                echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">$workResult (ч.):</font><br>";
-	      echo "</td>";
-       	      echo "<td class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"top\" align=\"right\" width = $secondColumnSize>";
-                echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">$overTime</font><br>";
-	      echo "</td>";
-	    echo "</tr>";
-          }
-          else
-    	  {
-            echo "<tr bgcolor=\"#$currentOverloadColor\" >";
-       	      echo "<td class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $firstColumnSize>";
-                echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">$currentOverPhrase (ч.):</font><br>";
-	      echo "</td>";
-       	      echo "<td class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"top\" align=\"right\" width = $secondColumnSize>";
-                echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">$currentOverloadDiffStr</font><br>";
-	      echo "</td>";
-	    echo "</tr>";
-          }
-    	  echo "<tr>";
-       	    echo "<td class=\"nopadding_s\" bgcolor=\"#eeeeee\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $firstColumnSize>";
-              echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">Продолжительность обеденного времени (ч.):</font><br>";
-	    echo "</td>";
-       	    echo "<td class=\"nopadding_s\" bgcolor=\"#eeeeee\" bordercolor=\"#888888\" valign=\"top\" align=\"right\" width = $secondColumnSize>";
-              echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">$eatWorkDayDurationStr</font><br>";
-	    echo "</td>";
-	  echo "</tr>";
-          echo "<tr bgcolor=\"#$penaltyColor\" >";
-            echo "<td class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $firstColumnSize>";
-              echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">Кол-во опозданий по неуважит. причине (шт.):</font><br>";
-	    echo "</td>";
-            echo "<td class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"top\" align=\"right\" width = $secondColumnSize>";
-              echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">$delayCount</font><br>";
-	    echo "</td>";
-	  echo "</tr>";
-          echo "<tr bgcolor=\"#$penaltyColor\" >";
-            echo "<td class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $firstColumnSize>";
-              echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">Общее время опозданий (ч.):</font><br>";
-	    echo "</td>";
-            echo "<td class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"top\" align=\"right\" width = $secondColumnSize>";
-              echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">$delayDurationStr</font><br>";
-	    echo "</td>";
-	  echo "</tr>";
-          echo "<tr bgcolor=\"#$penaltyColor\" >";
-            echo "<td class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $firstColumnSize>";
-              echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">Размер штрафных санкций (руб.):</font><br>";
-	    echo "</td>";
-            echo "<td class=\"nopadding_s\" bordercolor=\"#888888\" valign=\"top\" align=\"right\" width = $secondColumnSize>";
-              echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">$penalty</font><br>";
-	    echo "</td>";
-	  echo "</tr>";
-        echo "</table>";
-	////// 
-      echo "</td>";
+  $renderRow = function ($label, $value, $rowClass) {
+    echo "<tr class=\"$rowClass\">";
+    echo "<td class=\"nopadding_s short-stat-label\">" . html_escape($label) . "</td>";
+    echo "<td class=\"nopadding_s short-stat-value\">" . html_escape($value) . "</td>";
     echo "</tr>";
-  echo "</table>";
+  };
+
+  echo "<table class=\"short-stat-card\">";
+  echo "<tr><td class=\"nopadding_s short-stat-card-cell\">";
+  echo "<strong>" . html_escape($StatMonthName) . "</strong> ";
+  echo "(норма <strong>" . html_escape($StatMonthNorm) . "</strong> ч.):<br>";
+  echo "<table class=\"short-stat-table\">";
+
+  $workRowClass = $isCurrentMonth == 0 ? $classByColor($overLoadColor) : "short-stat-neutral";
+  $renderRow("Наработка (ч.):", $currenMonthWorkDurationStr, $workRowClass);
+  $renderRow("Наработка вне офиса (ч.):", $addTimeWorkDayDurationStr, "short-stat-neutral");
+
+  if ($isCurrentMonth == 0) {
+    $renderRow($workResult . " (ч.):", $overTime, $classByColor($overLoadColor));
+  } else {
+    $renderRow($currentOverPhrase . " (ч.):", $currentOverloadDiffStr, $classByColor($currentOverloadColor));
+  }
+
+  $renderRow("Продолжительность обеденного времени (ч.):", $eatWorkDayDurationStr, "short-stat-neutral");
+  $penaltyRowClass = $classByColor($penaltyColor);
+  $renderRow("Кол-во опозданий по неуважит. причине (шт.):", $delayCount, $penaltyRowClass);
+  $renderRow("Общее время опозданий (ч.):", $delayDurationStr, $penaltyRowClass);
+  $renderRow("Размер штрафных санкций (руб.):", $penalty, $penaltyRowClass);
+
+  echo "</table></td></tr></table>";
 }
 ?>

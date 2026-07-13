@@ -4713,6 +4713,105 @@ h5.activ_time {
   height: 20px;
 }
 
+.report-page-layout { text-align: left; }
+.report-page-table,
+.report-header-table {
+  border: 0;
+  border-collapse: collapse;
+}
+.report-page-nav-cell,
+.report-page-content-cell {
+  vertical-align: top;
+  text-align: left;
+  background: #ddeeff;
+  border-color: #888888;
+}
+.report-page-nav-cell { width: 250px; }
+.report-page-nav-hidden { width: 0; }
+.report-page-content-cell { width: 1100px; }
+.report-period-select { width: 170px; }
+.report-header-spacer { height: 10px; }
+.report-user-head-cell {
+  vertical-align: middle;
+  text-align: center;
+  background: #ffffff;
+}
+
+.overtime-page-layout { text-align: left; }
+.overtime-page-table {
+  border: 0;
+  border-collapse: collapse;
+}
+.overtime-nav-cell,
+.overtime-content-cell {
+  vertical-align: top;
+  text-align: left;
+  background: #ddeeff;
+  border-color: #888888;
+}
+.overtime-nav-cell { width: 250px; }
+.overtime-content-cell { width: 780px; }
+.overtime-filter-label { font-weight: 700; }
+.overtime-period-label { margin-left: 10px; }
+.overtime-custom-range { display: none; margin-top: 8px; }
+.overtime-custom-start { margin-right: 10px; }
+.overtime-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.overtime-modal-title { font-weight: 700; }
+.overtime-details-table {
+  width: 90%;
+  border-collapse: collapse;
+}
+.overtime-details-table th,
+.overtime-details-table td {
+  padding: 6px;
+  border: 1px solid #cccccc;
+}
+
+.short-stat-card {
+  width: 600px;
+  border: 1px solid #888888;
+  border-collapse: collapse;
+}
+.short-stat-card-cell {
+  vertical-align: top;
+  text-align: left;
+  background: #ddeeff;
+  color: #000000;
+  font: 16px Arial, sans-serif;
+}
+.short-stat-table {
+  width: 550px;
+  border: 1px solid #888888;
+  border-collapse: collapse;
+}
+.short-stat-label,
+.short-stat-value {
+  vertical-align: top;
+  color: #000000;
+  font: 16px Arial, sans-serif;
+}
+.short-stat-label { width: 450px; text-align: left; }
+.short-stat-value { width: 100px; text-align: right; }
+.short-stat-neutral { background: #eeeeee; }
+.short-stat-good { background: #b5fe10; }
+.short-stat-bad { background: #ff9696; }
+
+.legacy-report-layout { text-align: left; }
+.legacy-report-table {
+  border: 1px solid #888888;
+  border-collapse: collapse;
+}
+.legacy-report-head { text-align: center; }
+.legacy-report-day-cell {
+  vertical-align: middle;
+  text-align: center;
+}
+
 .search-block {
   margin: 10px 0;
   display: flex;
@@ -5171,3 +5270,39 @@ h5.activ_time {
 .accounting-errors-action-icon {
   height: 14px;
 }
+
+.app-footer { color: #444444; font: 13px Arial, sans-serif; }
+.current-day-layout { text-align: left; }
+.current-day-nav-cell,
+.current-day-content-cell,
+.current-day-profile-cell {
+  vertical-align: top;
+  text-align: left;
+  background: #ddeeff;
+  border-color: #888888;
+}
+.current-day-nav-cell { width: 250px; }
+.current-day-content-cell { width: 520px; }
+.current-day-profile-label { width: 200px; vertical-align: top; text-align: left; }
+.current-day-profile-value { width: 280px; vertical-align: middle; text-align: center; }
+.current-day-main-content { color: #000000; font: 16px Arial, sans-serif; }
+
+.nav-access-mode { color: #000000; font: 13px Arial, sans-serif; }
+.nav-clock-table { border: 1px solid #888888; border-collapse: collapse; }
+.nav-clock-cell { width: 225px; vertical-align: top; text-align: center; background: #ddeeff; }
+.nav-panel-table { width: 190px; border: 0; border-collapse: collapse; }
+.nav-panel-cell { width: 160px; vertical-align: top; text-align: left; background: #ddeeff; border-color: #888888; }
+.nav-brand-table { border: 0; border-collapse: collapse; }
+.nav-brand-cell { width: 205px; }
+.nav-icon-cell { width: 30px; text-align: right; }
+.nav-menu-cell { width: 370px; vertical-align: top; text-align: left; background: #ddeeff; }
+.nav-menu-list { width: 100%; border: 0; border-collapse: collapse; }
+
+.auth-page-layout { text-align: center; }
+.auth-page-table,
+.auth-options-table { border: 0; border-collapse: collapse; }
+.auth-page-cell { width: 460px; vertical-align: top; text-align: left; background: #ffffff; }
+.auth-form-table { width: 460px; border: 1px solid #888888; border-collapse: collapse; }
+.auth-form-cell { width: 460px; vertical-align: top; text-align: left; background: #ddeeff; border-color: #888888; }
+.auth-checkbox-cell { width: 20px; vertical-align: top; text-align: left; background: #ddeeff; }
+.auth-remember-cell { width: 400px; vertical-align: top; text-align: left; background: #ddeeff; }

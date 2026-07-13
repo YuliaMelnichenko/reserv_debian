@@ -417,7 +417,7 @@ echo "<title>Система учета времени присутствия с�
 echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
-echo "<body onload=\"check_day_change();\" bgcolor=\"#ffffff\" >";
+echo "<body class=\"app-page\" onload=\"check_day_change();\">";
 
 include_once __DIR__ . "/php_tori/connect.php";
 
@@ -496,7 +496,7 @@ echo "</div>";
 echo "<div id=\"delay_explanation_delay\">";
 echo "</div>";
 
-echo "<div align=\"left\">";
+echo "<div class=\"current-day-layout\">";
 
 ////////////////////////////////////////////////////////
 if (
@@ -511,7 +511,7 @@ if (
 
   if ( isset( $_SESSION['ss_id'] ) )
   { 
-    $user_id = $_SESSION['ss_id'];
+    $user_id = (int)$_SESSION['ss_id'];
     $user_rate = $_SESSION['ss_rate'];
     $user_defaultStartTime = $_SESSION['ss_defaultStartTime'];
     $user_defaultStartHour = $_SESSION['ss_defaultStartHour'];
@@ -541,18 +541,18 @@ if (
     $bg_style = "";
 
     mysqli_set_charset($link, "utf8");
-    $query0 = mysqli_query($link, "SELECT * FROM employees WHERE id = '$user_id'");
+    $query0 = db_query($link, "SELECT * FROM employees WHERE id = ?", 'i', array($user_id));
     $row0 = mysqli_fetch_assoc($query0); 
     $vn0=mysqli_num_rows($query0);
 
-    $query = mysqli_query($link, "SELECT eat_start_dt, eat_stop_dt FROM visiting WHERE user_id = '$user_id' AND DATE(in_dt) = CURDATE()");
+    $query = db_query($link, "SELECT eat_start_dt, eat_stop_dt FROM visiting WHERE user_id = ? AND DATE(in_dt) = CURDATE()", 'i', array($user_id));
     $row = mysqli_fetch_assoc($query);
 
     $bg_style = "#ddeeff";
 
     echo "<table>";
     echo "<tr>";
-    echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
+    echo "<td class=\"current-day-nav-cell\">";
 
     include_once __DIR__ . "/navigate.php";
 
@@ -560,7 +560,7 @@ if (
 
     $wholeWidth = 625;
 
-    echo "<td bgcolor=\"$bg_style\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
+    echo "<td class=\"current-day-content-cell\">";
 
     echo "<h5 class=\"dark\"><br>/текущий день<br><br></h5>";
         
@@ -572,7 +572,7 @@ if (
 
       mysqli_set_charset($link, "utf8");
     
-      $query01 = mysqli_query($link, "SELECT * FROM departments WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = '$user_id')"); 
+      $query01 = db_query($link, "SELECT * FROM departments WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = ?) LIMIT 1", 'i', array($user_id));
 
       $row01 = mysqli_fetch_assoc($query01);
 
@@ -582,7 +582,7 @@ if (
 
       echo "<table>";
       echo "<tr>";
-      echo "<td bgcolor=\"$bg_style\" bordercolor=\"#888888\" valign=\"top\" align=\"left\">";
+      echo "<td class=\"current-day-profile-cell\">";
 
       $width00 = 600;  
       $width11 = 320; 
@@ -593,10 +593,10 @@ if (
 
       echo "<table>";
         echo "<tr>";
-          echo "<td class=\"brd\" valign=\"top\" align=\"left\" width = $width11>";
+          echo "<td class=\"brd current-day-profile-label\">";
             echo "<span class=\"current-employee-info\">Сотрудник</span>";
           echo "</td>";  
-          echo "<td class=\"brd\" valign=\"top\" align=\"center\" width = $width22>";
+          echo "<td class=\"brd current-day-profile-value\">";
             echo "<span class=\"current-employee-info\">" . html_escape($row0["surname"] . " " . $row0["firstname"] . " " . $row0["lastname"]) . $employeeAccountingErrorIcon . "</span>";
           echo "</td>";  
         echo "</tr>";     
@@ -682,7 +682,7 @@ if (
       echo "</tr>";
       echo "</table>";    
 
-      echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">";
+      echo "<div class=\"current-day-main-content\">";
 
       if ( isset( $_SESSION['ss_state'] ) )
       {
@@ -708,7 +708,7 @@ if (
 
     $bosses_sql = "SELECT id, firstname, surname, lastname, DATE_FORMAT(birthday, '%m-%d') AS bday FROM employees WHERE id IN (400, 500, 501)";
 
-    $bosses_q = mysqli_query($link, $bosses_sql);
+    $bosses_q = db_query($link, $bosses_sql);
 
     if ($bosses_q) {
       while ($b = mysqli_fetch_assoc($bosses_q)) {
@@ -733,7 +733,7 @@ if (
       }
     }
 
-    $query6 = mysqli_query($link, "SELECT id, firstname, surname, lastname, phone, personal_phone, corporate_phone, DATE_FORMAT(birthday, '%m-%d'), email FROM employees WHERE relevance = 1 AND id NOT IN (400, 500, 501) ORDER BY surname");
+    $query6 = db_query($link, "SELECT id, firstname, surname, lastname, phone, personal_phone, corporate_phone, DATE_FORMAT(birthday, '%m-%d'), email FROM employees WHERE relevance = 1 AND id NOT IN (400, 500, 501) ORDER BY surname");
 
     echo "<td bgcolor=\"$bg_style\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
     echo "<h5 class=\"dark0\"><br>/присутствие сотрудников<br><br></h5>";
@@ -972,13 +972,13 @@ if (
     SELECT user_id, event, start_date, stop_date 
     FROM staff_leaves 
     WHERE (
-          (event = 'Больничный' AND '$today' BETWEEN start_date AND stop_date) 
+          (event = 'Больничный' AND ? BETWEEN start_date AND stop_date)
           OR 
-          (event = 'Отпуск' AND ('$today' BETWEEN start_date AND stop_date OR start_date >= '$today'))
+          (event = 'Отпуск' AND (? BETWEEN start_date AND stop_date OR start_date >= ?))
           OR
-          (event = 'Командировка' AND ('$today' BETWEEN start_date AND stop_date OR start_date >= '$today'))
+          (event = 'Командировка' AND (? BETWEEN start_date AND stop_date OR start_date >= ?))
           )";
-    $result9 = mysqli_query($link, $query9);
+    $result9 = db_query($link, $query9, 'sssss', array($today, $today, $today, $today, $today));
     while ($row9 = mysqli_fetch_assoc($result9)) {
       $uid = $row9['user_id'];
       $event = $row9['event'];
@@ -1158,11 +1158,11 @@ if (
         echo "<table cellpadding=\"0\" cellspacing=\"0\" border=0>";
           echo "<tr>";
             echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"center\" align=\"left\" width = 510 height = 16>";
-                echo "<font size=\"3\" color=\"#000000\" face=\"Arial\">Краткая статистика за текущий и предыдущие месяцы ($monthCnt) ";
+                echo "<span class=\"current-day-stat-title\">Краткая статистика за текущий и предыдущие месяцы (" . (int)$monthCnt . ") ";
 		echo "<img src=\"img/plus.bmp\" onclick=\"st_month_inc();\" />";
 		echo "<img src=\"img/minus.bmp\" onclick=\"st_month_dec();\" />";
 		echo "<img src=\"img/dva.bmp\" onclick=\"st_month_def();\" />";
-                echo "</font>";
+                echo "</span>";
 	    echo "</td>";
 	  echo "</tr>";
 
@@ -1188,9 +1188,9 @@ if (
     echo "</table>";
 
   }
-  echo "<font size=\"2\" color=\"#444444\" face=\"Arial\">";
+  echo "<div class=\"app-footer\">";
     include_once __DIR__ . "/end.php";
-  echo "</font>";
+  echo "</div>";
 echo "</div>";
 
 ?>

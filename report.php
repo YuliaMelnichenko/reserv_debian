@@ -14,8 +14,8 @@ require_page_auth();
 <META NAME="Author" CONTENT="InTec">
 <link rel="stylesheet" type="text/css" href="style/main.css" />
 </head>
-<body bgcolor="#ffffff">
-<div align="left">
+<body class="app-page">
+<div class="legacy-report-layout">
 
 <?php
 $report_start_date = "2013-01-01";
@@ -41,7 +41,7 @@ $cont_key = 0;
 include_once __DIR__ . "/php_tori/connect.php";
 
   
-  $query = mysqli_query($link, "SELECT * FROM work_dayoff order by date asc"); 
+  $query = db_query($link, "SELECT * FROM work_dayoff order by date asc");
   $merr=mysqli_error($link);
   if ( !$query ) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -79,7 +79,7 @@ include_once __DIR__ . "/php_tori/connect.php";
   {
     mysqli_set_charset($link, "utf8");
 
-    $query2 = mysqli_query($link, "SELECT * FROM employees"); 
+    $query2 = db_query($link, "SELECT * FROM employees");
     $merr = mysqli_error($link);
 
     if ( !$query2 ) {
@@ -99,11 +99,11 @@ include_once __DIR__ . "/php_tori/connect.php";
     }
   }
   if ( $read_mode == 2 ){
-    $temp_id = $_SESSION['ss_id'];
+    $temp_id = (int)$_SESSION['ss_id'];
 
     mysqli_set_charset($link, "utf8");
 
-    $query2 = mysqli_query($link, "SELECT * FROM employees where ID = '$temp_id'"); 
+    $query2 = db_query($link, "SELECT * FROM employees where ID = ?", 'i', array($temp_id));
     $merr=mysqli_error($link);
     if ( !$query2 ) {
       echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -127,9 +127,9 @@ include_once __DIR__ . "/php_tori/connect.php";
 
   $color_code = 0;
  
-  echo "<table border=\"1\">";
+  echo "<table class=\"legacy-report-table\">";
 
-  echo "<tr align = \"center\">";
+  echo "<tr class=\"legacy-report-head\">";
   echo "<td><h5 class=\"fio\">Дата</h5></td>";
   
   for ( $i = 0; $i < count($ids); $i++ ){
@@ -242,7 +242,12 @@ include_once __DIR__ . "/php_tori/connect.php";
 
     for ( $i = 0; $i < count($ids); $i++ ){
       if ( strtotime( $date_one ) <= $now_date_time ){
-        $query3 = mysqli_query($link, "SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = '$date_one' and user_id = '$ids[$i]' "); 
+        $query3 = db_query(
+          $link,
+          "SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting where date = ? and user_id = ?",
+          'si',
+          array($date_one, (int)$ids[$i])
+        );
         $merr=mysqli_error($link);
         if ( !$query3 ) {
           echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -254,6 +259,15 @@ include_once __DIR__ . "/php_tori/connect.php";
             $color_code = -1;
 
           $row3 = mysqli_fetch_array($query3, MYSQLI_ASSOC);
+          if (!$row3) {
+            $row3 = array(
+              "in_time" => "00:00:00",
+              "out_time" => "00:00:00",
+              "eat_start" => "00:00:00",
+              "eat_stop" => "00:00:00",
+              "state" => 0,
+            );
+          }
 
           $in_time = $row3["in_time"];
           $out_time = $row3["out_time"];
@@ -353,13 +367,13 @@ include_once __DIR__ . "/php_tori/connect.php";
       }
 
       if ( $is_day_off == 1 ){
-        echo "<td class=\"report-day-off\" align = \"center\" valign = \"middle\">";
+        echo "<td class=\"report-day-off legacy-report-day-cell\">";
 
         echo "<h5 class=\"lite\">";
         echo "выходной";
       }
       else{
-        echo "<td class=\"report-day-missing\" align = \"center\" valign = \"middle\">";
+        echo "<td class=\"report-day-missing legacy-report-day-cell\">";
         echo "<h5 class=\"alarm\">";
         echo "Недостаточно<br>сведений!";                
       }
@@ -367,9 +381,9 @@ include_once __DIR__ . "/php_tori/connect.php";
   }
   else{
     if ( isset( $state ) AND $state == 0 )
-	    echo "<td class=\"report-day-worked\" valign = \"middle\" >";
+	    echo "<td class=\"report-day-worked legacy-report-day-cell\">";
 	  else
-      echo "<td class=\"report-day-off\" valign = \"middle\" >";
+      echo "<td class=\"report-day-off legacy-report-day-cell\">";
 
 	    echo "<h5 class=\"info\">";
 
@@ -399,9 +413,7 @@ include_once __DIR__ . "/php_tori/connect.php";
   if ( $in_time != "??:??:??" )
     echo $in_time;
 	else{
-    echo "<font color=\"#ff0000\">";
-    echo "??:??:??";
-    echo "<font color=\"#000000\">";
+    echo "<span class=\"report-missing-value\">??:??:??</span>";
   }
 
   echo " до ";
@@ -409,35 +421,27 @@ include_once __DIR__ . "/php_tori/connect.php";
 	if ( $out_time != "??:??:??" )
     echo $out_time."<br>";
   else{
-    echo "<font color=\"#ff0000\">";
-    echo "??:??:??<br>";
-    echo "<font color=\"#000000\">";
+    echo "<span class=\"report-missing-value\">??:??:??</span><br>";
   }
 
   echo "Обед с ";
 	if ( $eat_start != "??:??:??" )
     echo $eat_start;
 	else{
-    echo "<font color=\"#ff0000\">";
-    echo "??:??:??";
-    echo "<font color=\"#000000\">";
+    echo "<span class=\"report-missing-value\">??:??:??</span>";
   }
               
   echo " до ";
 	if ( $eat_stop != "??:??:??" )
     echo $eat_stop;
 	else{
-    echo "<font color=\"#ff0000\">";
-    echo "??:??:??";
-    echo "<font color=\"#000000\">";
+    echo "<span class=\"report-missing-value\">??:??:??</span>";
   }
 
   if ( strtotime( $work_eat_duration ) > 0 AND $work_eat_duration != "00:00:00" )
     echo " (".$work_eat_duration.")";
 	else{
-    echo "<font color=\"#ff0000\">";
-    echo " (??:??:??)";
-    echo "<font color=\"#000000\">";
+    echo "<span class=\"report-missing-value\"> (??:??:??)</span>";
   }
     
   if ( $state == 0 )
@@ -448,9 +452,7 @@ include_once __DIR__ . "/php_tori/connect.php";
 		  echo "<br><br>Раб. вр. - обед: ".$work_day_duration; 
 		  if ( $work_day_duration_time == 0 ) {
         echo "<br><br>Раб. вр. - обед: ";
-        echo "<font color=\"#ff0000\">";
-        echo " (??:??:??)";
-        echo "<font color=\"#000000\">";
+        echo "<span class=\"report-missing-value\"> (??:??:??)</span>";
       }
     }
   }
@@ -480,7 +482,7 @@ else{
   }
 
   if ( $is_day_off == 1 ){ 
-    echo "<td class=\"report-day-muted-off\" align = \"center\" valign = \"middle\">";
+    echo "<td class=\"report-day-muted-off legacy-report-day-cell\">";
     echo "<h5 class=\"lite\">";
     echo "выходной</td>";
   }
