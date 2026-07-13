@@ -18,6 +18,7 @@ if (!isset($_POST['next'])) {
 
 include_once __DIR__ . "/../php_tori/connect.php";
 include_once __DIR__ . "/../funcs.php";
+require_once __DIR__ . "/../inc/workday_state.php";
 
 mysqli_set_charset($link, "utf8");
 
@@ -191,13 +192,22 @@ $syncedState = sync_time_registration_state_from_db(
 
 $ss_state = (int)$syncedState["state"];
 $ss_visiting_ID = (int)$syncedState["visiting_ID"];
+$transition = get_workday_transition($ss_state, $nextState);
+
+if ($transition === null) {
+  echo "Ошибка: неизвестное состояние регистрации времени.";
+  exit;
+}
+
+$transitionAction = $transition["action"];
+$transitionState = (int)$transition["to"];
 
 error_log(
   "TORI_SWITCH_SYNC user=$id next=$nextState state=$ss_state visit=$ss_visiting_ID start=$startDTStr stop=$stopDTStr now=$dateTimeStr"
 );
 
 if ($nextState == 1) {
-  if ($ss_state == 1) {
+  if ($transitionAction === WORKDAY_ACTION_ARRIVE) {
     $_SESSION['ss_visiting_ID'] = 0;
     $ss_visiting_ID = 0;
 
@@ -311,7 +321,7 @@ if ($nextState == 1) {
       exit;
     }
 
-    $_SESSION['ss_state'] = 2;
+    $_SESSION['ss_state'] = $transitionState;
     $_SESSION['ss_visiting_ID'] = $newID;
 
     echo "1";
@@ -322,7 +332,7 @@ if ($nextState == 1) {
   "TORI_SWITCH_LUNCH_START user=$id next=$nextState state=$ss_state visit=$ss_visiting_ID now=$dateTimeStr"
 );
 
-  if ($ss_state == 2) {
+  if ($transitionAction === WORKDAY_ACTION_START_LUNCH) {
     $visitRow = require_current_visit_row($link, $id, $ss_visiting_ID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds, 2);
 
     if (strtotime($dateTimeStr) <= strtotime($visitRow["in_dt"])) {
@@ -348,13 +358,13 @@ if ($nextState == 1) {
       exit;
     }
 
-    $_SESSION['ss_state'] = 3;
+    $_SESSION['ss_state'] = $transitionState;
 
     echo "1";
     exit;
   }
 
-  if ($ss_state == 3) {
+  if ($transitionAction === WORKDAY_ACTION_FINISH_LUNCH) {
     $visitRow = require_current_visit_row($link, $id, $ss_visiting_ID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds, 3);
 
     if ($visitRow["eat_start_dt"] == "0000-00-00 00:00:00") {
@@ -385,13 +395,13 @@ if ($nextState == 1) {
       exit;
     }
 
-    $_SESSION['ss_state'] = 4;
+    $_SESSION['ss_state'] = $transitionState;
 
     echo "1";
     exit;
   }
 
-  if ($ss_state == 4) {
+  if ($transitionAction === WORKDAY_ACTION_LEAVE) {
     $visitRow = require_current_visit_row($link, $id, $ss_visiting_ID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds, 4);
 
     if ($visitRow === null) {
@@ -466,7 +476,7 @@ if ($nextState == 1) {
       exit;
     }
 
-    $_SESSION['ss_state'] = 0;
+    $_SESSION['ss_state'] = $transitionState;
     $_SESSION['ss_visiting_ID'] = $visitID;
 
     echo "1";
@@ -478,7 +488,7 @@ if ($nextState == 1) {
 }
 
 if ($nextState != 1) {
-  if ($ss_state == 4) {
+  if ($transitionAction === WORKDAY_ACTION_UNDO_FINISH_LUNCH) {
     $visitRow = require_current_visit_row($link, $id, $ss_visiting_ID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds, 4);
 
     $affectedRows = db_execute_affected_rows($link, "
@@ -500,13 +510,13 @@ if ($nextState != 1) {
       exit;
     }
 
-    $_SESSION['ss_state'] = 3;
+    $_SESSION['ss_state'] = $transitionState;
 
     echo "1";
     exit;
   }
 
-  if ($ss_state == 3) {
+  if ($transitionAction === WORKDAY_ACTION_UNDO_START_LUNCH) {
     $visitRow = require_current_visit_row($link, $id, $ss_visiting_ID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds, 3);
 
     $affectedRows = db_execute_affected_rows($link, "
@@ -528,13 +538,13 @@ if ($nextState != 1) {
       exit;
     }
 
-    $_SESSION['ss_state'] = 2;
+    $_SESSION['ss_state'] = $transitionState;
 
     echo "1";
     exit;
   }
 
-  if ($ss_state == 2) {
+  if ($transitionAction === WORKDAY_ACTION_UNDO_ARRIVE) {
     $visitRow = require_current_visit_row($link, $id, $ss_visiting_ID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds, 2);
 
     $affectedRows = db_execute_affected_rows($link, "
@@ -553,20 +563,20 @@ if ($nextState != 1) {
       exit;
     }
 
-    $_SESSION['ss_state'] = 1;
+    $_SESSION['ss_state'] = $transitionState;
     $_SESSION['ss_visiting_ID'] = 0;
 
     echo "1";
     exit;
   }
 
-  if ($ss_state == 1) {
+  if ($transitionAction === WORKDAY_ACTION_NOOP) {
     $_SESSION['ss_visiting_ID'] = 0;
     echo "1";
     exit;
   }
 
-  if ($ss_state == 0) {
+  if ($transitionAction === WORKDAY_ACTION_UNDO_LEAVE) {
     $visitRow = require_current_visit_row($link, $id, $ss_visiting_ID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds, 0);
 
     $affectedRows = db_execute_affected_rows($link, "
@@ -587,7 +597,7 @@ if ($nextState != 1) {
       exit;
     }
 
-    $_SESSION['ss_state'] = 4;
+    $_SESSION['ss_state'] = $transitionState;
 
     echo "1";
     exit;
