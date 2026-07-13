@@ -19,22 +19,27 @@ $today = date("d-m-Y");
 $dateForm = date("d.m.Y", strtotime("-$paramInt days"));
 
 echo "<h5 class=\"big\"> Глубина просмотра журнала (180 дней): $dateForm - $today </h5>";
-echo "<table class=\"add_time\" id = \"delay_approvement_table_users\" border=1>";
-echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Сотрудник</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Всего</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Принятые</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Отклоненные</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Удаленные</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Новые</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Просмотреть</h5>"."</td>";
+echo "<table class=\"add_time notification-summary-table\" id=\"delay_approvement_table_users\">";
+echo "<tr class=\"notification-table-head\">";
+echo "<td class=\"add_time notification-user-name-cell\"><h5 class=\"big\">Сотрудник</h5></td>";
+echo "<td class=\"add_time notification-count-cell\"><h5 class=\"big\">Всего</h5></td>";
+echo "<td class=\"add_time notification-accepted-cell\"><h5 class=\"big\">Принятые</h5></td>";
+echo "<td class=\"add_time notification-refused-cell\"><h5 class=\"big\">Отклоненные</h5></td>";
+echo "<td class=\"add_time notification-deleted-cell\"><h5 class=\"big\">Удаленные</h5></td>";
+echo "<td class=\"add_time notification-count-cell\"><h5 class=\"big\">Новые</h5></td>";
+echo "<td class=\"add_time notification-view-cell\"><h5 class=\"big\">Просмотреть</h5></td>";
 echo "</tr>";
 
 $color = "#ddffff";
 $img = "go1.png";
 
 mysqli_set_charset($link, "utf8");
-$query = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = '$userID_' AND TYPE = 3 "); 
+$query = db_query(
+  $link,
+  'SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = ? AND TYPE = ? ORDER BY USERID',
+  'ii',
+  array((int)$userID_, 3)
+);
 if (!$query)
 {
   echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -43,7 +48,7 @@ else
 {
   while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
   {  
-    $userID = $row["USERID"];
+    $userID = (int)$row["USERID"];
     $userName = get_user_name_by_id($userID);
 
     $notificationCount = 0;
@@ -56,15 +61,17 @@ else
     $cellStype = "middle";
     if ( $newNotificationCount > 0 ){ $cellStype = "middleBlue1"; }
 
-    echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-    echo "<td class=\"add_time\" nowrap valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$userName</h5>"."</td>";
-    echo "<td class=\"add_time\" width = 60 valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$notificationCount</h5>"."</td>";
-    echo "<td class=\"add_time\" width = 80 valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$acceptedNotificationCount</h5>"."</td>";
-    echo "<td class=\"add_time\" width = 105 valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$refusedNotificationCount</h5>"."</td>";
-    echo "<td class=\"add_time\" width = 90 valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$deletedNotificationCount</h5>"."</td>";
-    echo "<td class=\"add_time\" width = 60 valign=\"middle\" align=\"center\">"."<h5 class=\"$cellStype\">$newNotificationCount</h5>"."</td>";
-    echo "<td class=\"add_time\" width = 105 valign=\"middle\" align=\"center\">";
-      echo "<button id = \"explBtn\" class=\"journal-cell-icon-button\" title = \"Просмотреть\" onclick=\"show_delays_by_user( '$userID' );\"><img src=\"img/$img\"></button>";
+    $rowClass = $color == "#ddffff" ? "notification-row-alt" : "notification-row";
+
+    echo "<tr class=\"$rowClass\">";
+    echo "<td class=\"add_time notification-user-name-cell\"><h5 class=\"middle\">" . html_escape($userName) . "</h5></td>";
+    echo "<td class=\"add_time notification-count-cell\"><h5 class=\"middle\">$notificationCount</h5></td>";
+    echo "<td class=\"add_time notification-accepted-cell\"><h5 class=\"middle\">$acceptedNotificationCount</h5></td>";
+    echo "<td class=\"add_time notification-refused-cell\"><h5 class=\"middle\">$refusedNotificationCount</h5></td>";
+    echo "<td class=\"add_time notification-deleted-cell\"><h5 class=\"middle\">$deletedNotificationCount</h5></td>";
+    echo "<td class=\"add_time notification-count-cell\"><h5 class=\"$cellStype\">$newNotificationCount</h5></td>";
+    echo "<td class=\"add_time notification-view-cell\">";
+      echo "<button id=\"explBtn\" class=\"journal-cell-icon-button\" title=\"Просмотреть\" onclick=\"show_delays_by_user('$userID');\"><img src=\"img/$img\" alt=\"\"></button>";
     echo "</td>";
     echo "</tr>";
 

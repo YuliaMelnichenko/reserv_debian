@@ -1534,7 +1534,7 @@ function get_current_day_duration_sec( $userID, $defaultStartTime ){
   return $result;
 }
 
-function get_norm_time_by_current_day_sec( $userID, $user_defaultStartHour, $user_defaultStartMinute ){
+function get_norm_time_by_current_day_sec( $user_defaultStartHour, $user_defaultStartMinute ){
   $hours = date("H");
   $minutes = date("i");
   $seconds = date("s");
@@ -3104,11 +3104,6 @@ $timeInSrc = $timeIn;
   $minutes = round( $timeIn / 3600, 3 );
 
   $hoursStr = (string)$hours;
-
-  if ($hours < 10)
-  {
-    $hoursStr = $hoursStr;
-  }
 
   $minutesStr = (string)$minutes;
 
