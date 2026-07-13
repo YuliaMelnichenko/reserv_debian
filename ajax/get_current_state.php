@@ -17,7 +17,7 @@ include_once __DIR__ . "/../php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
 
-$userID = $_SESSION['ss_id'];
+$userID = (int)$_SESSION['ss_id'];
 
 $userDayTransitionTime = isset($_SESSION['ss_dayTransitionTime'])
   ? $_SESSION['ss_dayTransitionTime']
@@ -34,30 +34,25 @@ $stopDTStr = $dateArr[1];
 $maxOpenShiftHours = 3;
 $maxOpenShiftSeconds = $maxOpenShiftHours * 60 * 60;
 
-$userID = mysqli_real_escape_string($link, $userID);
-$startDTStr = mysqli_real_escape_string($link, $startDTStr);
-$stopDTStr = mysqli_real_escape_string($link, $stopDTStr);
-$currentDateTime = mysqli_real_escape_string($link, $currentDateTime);
-
-$query = mysqli_query($link, "
+$query = db_query($link, "
   SELECT ID, state, eat_start_dt
   FROM visiting
-  WHERE user_id = '$userID'
+  WHERE user_id = ?
     AND (
       (
-        in_dt >= '$startDTStr'
-        AND in_dt < '$stopDTStr'
+        in_dt >= ?
+        AND in_dt < ?
       )
       OR
       (
         state != 0
-        AND in_dt < '$startDTStr'
-        AND TIMESTAMPDIFF(SECOND, '$startDTStr', '$currentDateTime') <= $maxOpenShiftSeconds
+        AND in_dt < ?
+        AND TIMESTAMPDIFF(SECOND, ?, ?) <= ?
       )
     )
   ORDER BY in_dt DESC, ID DESC
   LIMIT 1
-");
+ ", 'isssssi', array($userID, $startDTStr, $stopDTStr, $startDTStr, $startDTStr, $currentDateTime, $maxOpenShiftSeconds));
 
 if (!$query) {
   echo 0;

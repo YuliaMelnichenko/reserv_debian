@@ -28,14 +28,23 @@ $stop = "0000-00-00 00:00:00";
 
 mysqli_set_charset($link, "utf8");
 
-$res = mysqli_query($link, "DELETE FROM gym_schedule WHERE USERID='$userID' AND DATE_TRAIN < CURDATE()");
+$res = db_execute($link, "DELETE FROM gym_schedule WHERE USERID = ? AND DATE_TRAIN < CURDATE()", 'i', array($userID));
 $merr = mysqli_error($link);
 
 if ( !$res ) {
   echo database_error_message($link, __FILE__ . ':' . __LINE__);
 } 
 
-$query = mysqli_query($link, "SELECT USERID, START_DT FROM ADD_TIME WHERE DESCRIPTION = '$desc' AND STOP_DT = '0000-00-00 00:00:00'");
+$query = db_query(
+    $link,
+    "SELECT USERID, START_DT FROM ADD_TIME WHERE DESCRIPTION = ? AND STOP_DT = ?",
+    'ss',
+    array($desc, $stop)
+);
+if (!$query) {
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
+}
 $res = mysqli_num_rows($query);
 
 if ($res == 0) {
@@ -50,8 +59,20 @@ else {
         $start_training = strtotime($ta_start_date);
         $time = date('H:i', $start_training);
 
-        $query2 = mysqli_query($link, "SELECT firstname, lastname, surname FROM employees WHERE id='$ta_id'");
+        $query2 = db_query(
+            $link,
+            "SELECT firstname, lastname, surname FROM employees WHERE id = ?",
+            'i',
+            array((int)$ta_id)
+        );
+        if (!$query2) {
+            echo database_error_message($link, __FILE__ . ':' . __LINE__);
+            exit;
+        }
         $row2 = mysqli_fetch_assoc($query2);
+        if (!$row2) {
+            continue;
+        }
     
         $firstname = $row2["firstname"];
         $lastname = $row2["lastname"];
@@ -67,7 +88,11 @@ echo "</table><br><br>";
 
 mysqli_set_charset($link, "utf8");
 
-$search = mysqli_query($link, "SELECT * FROM gym_schedule WHERE USERID=$userID");
+$search = db_query($link, "SELECT * FROM gym_schedule WHERE USERID = ?", 'i', array($userID));
+if (!$search) {
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
+}
 $res = mysqli_num_rows($search);
 $merr=mysqli_error($link);
 
@@ -110,7 +135,11 @@ echo "</tr>";
 
 mysqli_set_charset($link, "utf8");
 
-$query3 = mysqli_query($link, "SELECT *, GROUP_CONCAT(DATE_FORMAT(DATE_TRAIN, '%d %m') ORDER BY DATE_TRAIN ASC SEPARATOR ' ') AS DATE_TIME, GROUP_CONCAT(CONCAT(TIME_FORMAT(START_TIME, '%H:%i'), '-', TIME_FORMAT(STOP_TIME, '%H:%i')) ORDER BY DATE_TRAIN ASC SEPARATOR ' ') AS SCHEDULE FROM gym_schedule WHERE DATE_TRAIN >= DATE_FORMAT(NOW(), '%Y-%m-%d') GROUP BY USERID ORDER BY DATE_TRAIN ASC");
+$query3 = db_query($link, "SELECT *, GROUP_CONCAT(DATE_FORMAT(DATE_TRAIN, '%d %m') ORDER BY DATE_TRAIN ASC SEPARATOR ' ') AS DATE_TIME, GROUP_CONCAT(CONCAT(TIME_FORMAT(START_TIME, '%H:%i'), '-', TIME_FORMAT(STOP_TIME, '%H:%i')) ORDER BY DATE_TRAIN ASC SEPARATOR ' ') AS SCHEDULE FROM gym_schedule WHERE DATE_TRAIN >= DATE_FORMAT(NOW(), '%Y-%m-%d') GROUP BY USERID ORDER BY DATE_TRAIN ASC");
+if (!$query3) {
+    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    exit;
+}
 
 $res1 = mysqli_num_rows($query3);
 
@@ -128,8 +157,20 @@ else {
         $time = wordwrap($timeTrain, 10, "<br />");
         $date = wordwrap($dateTrain, 5, "<br />");
 
-        $query4 = mysqli_query($link, "SELECT firstname, lastname, surname FROM employees WHERE id='$user_id'");
+        $query4 = db_query(
+            $link,
+            "SELECT firstname, lastname, surname FROM employees WHERE id = ?",
+            'i',
+            array((int)$user_id)
+        );
+        if (!$query4) {
+            echo database_error_message($link, __FILE__ . ':' . __LINE__);
+            exit;
+        }
         $row4 = mysqli_fetch_assoc($query4);
+        if (!$row4) {
+            continue;
+        }
             
         $firstname4 = $row4["firstname"];
         $lastname4 = $row4["lastname"];

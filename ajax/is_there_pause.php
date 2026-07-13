@@ -6,12 +6,13 @@ header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
-$userID = $_SESSION['ss_id']; 
-$ss_visiting_ID = $_SESSION['ss_visiting_ID'];
+$userID = (int)$_SESSION['ss_id'];
+$ss_visiting_ID = (int)$_SESSION['ss_visiting_ID'];
 
 include_once __DIR__ . "/../php_tori/connect.php";
+include_once __DIR__ . "/../funcs.php";
 
-$query = mysqli_query($link, "SELECT take_pause FROM visiting WHERE id = '$ss_visiting_ID' AND user_id = '$userID'");
+$query = db_query($link, "SELECT take_pause FROM visiting WHERE id = ? AND user_id = ?", 'ii', array($ss_visiting_ID, $userID));
 $merr=mysqli_error($link);
 if (!$query)
 {

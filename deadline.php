@@ -274,7 +274,7 @@ auth();
 
   include __DIR__ . "/php_tori/connect.php";
   if ( isset( $_SESSION['ss_id'] ) ){ 
-    $user_id = $_SESSION['ss_id'];
+    $user_id = (int)$_SESSION['ss_id'];
     $user_rate = $_SESSION['ss_rate'];
     $user_defaultStartTime = $_SESSION['ss_defaultStartTime'];
     $user_defaultStartHour = $_SESSION['ss_defaultStartHour'];
@@ -283,7 +283,7 @@ auth();
     $_date = date('Y-m-d');
 
     mysqli_set_charset($link, "utf8");
-    $query0 = mysqli_query($link, "SELECT * FROM employees WHERE id = '$user_id'"); 
+    $query0 = db_query($link, "SELECT * FROM employees WHERE id = ?", 'i', array($user_id));
     $vn0 = mysqli_num_rows($query0);
 
     echo "<table cellpadding=\"10\" cellspacing=\"0\" border=1>";
@@ -309,7 +309,7 @@ auth();
 
       mysqli_set_charset($link, "utf8");
     
-      $query01 = mysqli_query($link, "SELECT * FROM departments WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = '$user_id')"); 
+      $query01 = db_query($link, "SELECT * FROM departments WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = ?)", 'i', array($user_id));
 
       $row01 = mysqli_fetch_assoc($query01);
 

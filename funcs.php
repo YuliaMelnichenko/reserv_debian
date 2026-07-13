@@ -54,9 +54,7 @@ function get_current_datetime_in_timezone(){
 function sync_time_registration_session_by_period($link, $userID, $startDTStr, $stopDTStr){
   include __DIR__ . "/php_tori/connect.php";
 
-  $userID = mysqli_real_escape_string($link, $userID);
-  $startDTStr = mysqli_real_escape_string($link, $startDTStr);
-  $stopDTStr = mysqli_real_escape_string($link, $stopDTStr);
+  $userID = (int)$userID;
 
   $oldStart = isset($_SESSION['ss_startDTStr']) ? $_SESSION['ss_startDTStr'] : "";
   $oldStop = isset($_SESSION['ss_stopDTStr']) ? $_SESSION['ss_stopDTStr'] : "";
@@ -75,25 +73,33 @@ $maxOpenShiftSeconds = $maxOpenShiftHours * 60 * 60;
 $currentDateTimeResult = get_current_datetime_in_timezone();
 $currentDateTime = $currentDateTimeResult[1];
 
-$query = mysqli_query($link, "
+$query = db_query($link, "
   SELECT ID, state
   FROM visiting
-  WHERE user_id = '$userID'
+  WHERE user_id = ?
     AND (
       (
-        in_dt >= '$startDTStr'
-        AND in_dt < '$stopDTStr'
+        in_dt >= ?
+        AND in_dt < ?
       )
       OR
       (
         state != 0
-        AND in_dt < '$startDTStr'
-        AND TIMESTAMPDIFF(SECOND, '$startDTStr', '$currentDateTime') <= $maxOpenShiftSeconds
+        AND in_dt < ?
+        AND TIMESTAMPDIFF(SECOND, ?, ?) <= ?
       )
     )
   ORDER BY in_dt DESC, ID DESC
   LIMIT 1
-");
+", 'isssssi', array(
+  $userID,
+  $startDTStr,
+  $stopDTStr,
+  $startDTStr,
+  $startDTStr,
+  $currentDateTime,
+  $maxOpenShiftSeconds
+));
 
   if (!$query) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -356,7 +362,16 @@ function get_dbsetup_param( $paramName ) {
 
   mysqli_set_charset($link, "utf8");     
 
-  $query = mysqli_query($link, "SELECT valueInt, valueFloat, valueStr FROM DBSETUP WHERE paramName = '$paramName'"); 
+  $success = 0;
+  $valInt = 0;
+  $valFloat = 0;
+  $valStr = '';
+  $query = db_query(
+    $link,
+    "SELECT valueInt, valueFloat, valueStr FROM DBSETUP WHERE paramName = ?",
+    's',
+    array($paramName)
+  );
 
   if ( !$query ) 
   {
@@ -382,7 +397,7 @@ function get_sv_name_by_userid( $user_id )
 {
   include __DIR__ . "/php_tori/connect.php";
 
-  $query0 = mysqli_query($link, "SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 and USERID='$user_id'"); 
+  $query0 = db_query($link, "SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 and USERID = ?", 'i', array((int)$user_id));
 
   $merr=mysqli_error($link);
   if ( !$query0 ) 
@@ -403,7 +418,7 @@ function get_sv_name_by_userid( $user_id )
     }
   } 	
 
-  $query = mysqli_query($link, "SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID='$svID'"); 
+  $query = db_query($link, "SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID = ?", 'i', array((int)$svID));
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
@@ -437,10 +452,10 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
     $dirID = $_SESSION["ss_id"];
     if ($dirID != 1) {
       if ( $svID !=-1 ){
-        $query0 = mysqli_query($link, "SELECT USERID FROM GROUPS WHERE SUPERVISORID='$svID' and ( TYPE=0 or TYPE=-1 ) GROUP BY USERID");
+        $query0 = db_query($link, "SELECT USERID FROM GROUPS WHERE SUPERVISORID = ? and (TYPE = 0 or TYPE = -1) GROUP BY USERID", 'i', array((int)$svID));
       }
       else{
-        $query0 = mysqli_query($link, "SELECT USERID FROM GROUPS WHERE TYPE=0 or TYPE=-1 GROUP BY USERID"); 
+        $query0 = db_query($link, "SELECT USERID FROM GROUPS WHERE TYPE = 0 or TYPE = -1 GROUP BY USERID");
       }
       $merr=mysqli_error($link);
       if ( !$query0 ) {
@@ -460,10 +475,10 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
     }
     else{
       if ( $svID !=-1 ){
-        $query0 = mysqli_query($link, "SELECT e.id FROM GROUPS g INNER JOIN employees e ON g.USERID = e.id WHERE g.SUPERVISORID = '$svID' AND (g.TYPE = 0 OR g.TYPE=-1) ORDER BY e.surname");
+        $query0 = db_query($link, "SELECT e.id FROM GROUPS g INNER JOIN employees e ON g.USERID = e.id WHERE g.SUPERVISORID = ? AND (g.TYPE = 0 OR g.TYPE = -1) ORDER BY e.surname", 'i', array((int)$svID));
       }
       else{
-        $query0 = mysqli_query($link, "SELECT e.id FROM GROUPS g INNER JOIN employees e ON g.USERID = e.id WHERE g.TYPE = 0 OR g.TYPE=-1 ORDER BY e.surname");
+        $query0 = db_query($link, "SELECT e.id FROM GROUPS g INNER JOIN employees e ON g.USERID = e.id WHERE g.TYPE = 0 OR g.TYPE = -1 ORDER BY e.surname");
       }
       $merr=mysqli_error($link);
       if ( !$query0 ) {
@@ -510,7 +525,7 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
   
   foreach ( $newUserIDs as $ID )
   {
-    $query = mysqli_query($link, "SELECT rate, firstname, lastname, surname FROM employees WHERE ID='$ID'"); 
+    $query = db_query($link, "SELECT rate, firstname, lastname, surname FROM employees WHERE ID = ?", 'i', array((int)$ID));
     $merr=mysqli_error($link);
     if ( !$query ) 
     {
@@ -550,7 +565,7 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
 function get_name_by_userid( $user_id )
 {
   include __DIR__ . "/php_tori/connect.php";
-  $query = mysqli_query($link, "SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID='$user_id'"); 
+  $query = db_query($link, "SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID = ?", 'i', array((int)$user_id));
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
@@ -724,7 +739,7 @@ function GetHourNormByMonth( $date, $rate ){
 
   $duration = 0;
 
-  $query0 = mysqli_query($link, "SELECT dur40, dur36, dur24 FROM factory_calendar WHERE date='$date'"); 
+  $query0 = db_query($link, "SELECT dur40, dur36, dur24 FROM factory_calendar WHERE date = ?", 's', array($date));
 
   $merr=mysqli_error($link);
   if ( !$query0 ) 
@@ -783,7 +798,7 @@ function add_time_legacy_datetime_columns_exist($link)
   }
 
   $exists = false;
-  $result = mysqli_query($link, "SHOW COLUMNS FROM ADD_TIME WHERE Field IN ('STARTDATE', 'STARTTIME', 'STOPTIME')");
+  $result = db_query($link, "SHOW COLUMNS FROM ADD_TIME WHERE Field IN ('STARTDATE', 'STARTTIME', 'STOPTIME')");
 
   if ($result && mysqli_num_rows($result) == 3) {
     $exists = true;
@@ -813,7 +828,7 @@ function add_time_datetime_sql($dateTimeColumn, $dateColumn = null, $timeColumn 
 function am_i_superuser( $userID ) {
   include __DIR__ . "/php_tori/connect.php";
 
-  $query = mysqli_query($link, "SELECT * FROM GROUPS WHERE SUPERVISORID='$userID' and TYPE <> -1"); 
+  $query = db_query($link, "SELECT 1 FROM GROUPS WHERE SUPERVISORID = ? and TYPE <> -1 LIMIT 1", 'i', array((int)$userID));
   $merr = mysqli_error($link);
   if ( !$query ) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -845,7 +860,7 @@ function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotifi
   
   mysqli_set_charset($link, "utf8");
 
-  $query = mysqli_query($link, "SELECT a.status 
+  $query = db_query($link, "SELECT a.status
                         from Delays a 
                         join visiting b
                         on 
@@ -853,11 +868,11 @@ function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotifi
                         and
                           a.userID = b.user_id
                         where 
-                          a.userID = '$user_id'
+                          a.userID = ?
                         and
                           b.remoteWorkState = 0
                         and
-                          a.date > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )");
+                          a.date > ADDDATE(?, INTERVAL ? DAY)", 'isi', array((int)$user_id, $currentDate, (int)$paramInt));
 
   $merr=mysqli_error($link);
   if ( !$query ) 
@@ -903,15 +918,20 @@ function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNoti
   $startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME', $link);
   $stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME', $link);
 
-  $query = mysqli_query($link, "SELECT $startExpr AS START_DT_EFFECTIVE
-                                FROM ADD_TIME a
-                                WHERE a.USERID='$user_id'
-                                  AND a.PAUSE_MODE = 1
-                                  AND $startExpr >= '$quarterStartDate'
-                                  AND $startExpr < '$quarterStopExclusive'
-                                  AND $startExpr <> '0000-00-00 00:00:00'
-                                  AND $stopExpr <> '0000-00-00 00:00:00'
-                                  AND $stopExpr > $startExpr");
+  $query = db_query(
+    $link,
+    "SELECT $startExpr AS START_DT_EFFECTIVE
+     FROM ADD_TIME a
+     WHERE a.USERID = ?
+       AND a.PAUSE_MODE = 1
+       AND $startExpr >= ?
+       AND $startExpr < ?
+       AND $startExpr <> '0000-00-00 00:00:00'
+       AND $stopExpr <> '0000-00-00 00:00:00'
+       AND $stopExpr > $startExpr",
+    'iss',
+    array((int)$user_id, $quarterStartDate, $quarterStopExclusive)
+  );
 
   $merr=mysqli_error($link);
 
@@ -951,14 +971,19 @@ function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNot
   $startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME', $link);
   $stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME', $link);
 
-  $query = mysqli_query($link, "SELECT APPROVED
-                                FROM ADD_TIME a
-                                WHERE a.PAUSE_MODE = 0
-                                  AND a.USERID = '$user_id'
-                                  AND $stopExpr > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )
-                                  AND $stopExpr <> '0000-00-00 00:00:00'
-                                  AND $startExpr <> '0000-00-00 00:00:00'
-                                  AND $stopExpr > $startExpr");
+  $query = db_query(
+    $link,
+    "SELECT APPROVED
+     FROM ADD_TIME a
+     WHERE a.PAUSE_MODE = 0
+       AND a.USERID = ?
+       AND $stopExpr > ADDDATE(?, INTERVAL ? DAY)
+       AND $stopExpr <> '0000-00-00 00:00:00'
+       AND $startExpr <> '0000-00-00 00:00:00'
+       AND $stopExpr > $startExpr",
+    'isi',
+    array((int)$user_id, $currentDate, (int)$paramInt)
+  );
 
   $merr = mysqli_error($link);
 
@@ -997,8 +1022,13 @@ function get_notification_count( $user_id ){
   
   $paramInt = (-1)*$paramArr[1];
   
-  $query = mysqli_query($link, "SELECT * FROM ADD_TIME WHERE approved=0 AND pause_mode=0 AND STOP_DT > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )
-                        and userid in (SELECT USERID FROM GROUPS WHERE SUPERVISORID='$user_id' and type=0)"); 
+  $query = db_query(
+    $link,
+    "SELECT * FROM ADD_TIME WHERE approved = 0 AND pause_mode = 0 AND STOP_DT > ADDDATE(?, INTERVAL ? DAY)
+     and userid in (SELECT USERID FROM GROUPS WHERE SUPERVISORID = ? and type = 0)",
+    'sii',
+    array($currentDate, (int)$paramInt, (int)$user_id)
+  );
 
   $merr=mysqli_error($link);
   if ( !$query ) {
@@ -1018,17 +1048,17 @@ function get_delay_notification_count( $user_id ){
   
   $paramInt = (-1)*$paramArr[1];
   
-  $query = mysqli_query($link, "SELECT * from 
+  $query = db_query($link, "SELECT * from
                         Delays a join 
                         visiting b on a.date = cast( b.in_dt as date) and a.userID = b.user_id   
                         where 
-                          a.date > ADDDATE( '$currentDate', INTERVAL -180 DAY ) 
+                          a.date > ADDDATE(?, INTERVAL -180 DAY)
                         and 
                           a.status=0 
                         and
                           b.remoteWorkState = 0
                         and 
-                           a.userid in (SELECT c.userid FROM GROUPS c WHERE c.supervisorid=$user_id and type=3)"); 
+                           a.userid in (SELECT c.userid FROM GROUPS c WHERE c.supervisorid = ? and type = 3)", 'si', array($currentDate, (int)$user_id));
 
   $merr=mysqli_error($link);
   if ( !$query ) {
@@ -1189,7 +1219,7 @@ function get_workdays_holidays_bay_range( $startDate, $stopDate )
   $types = array();
   include __DIR__ . "/php_tori/connect.php";
 
-  $query = mysqli_query($link, "SELECT distinct DATE, TYPE FROM work_dayoff where date >= '$startDate' and date <= '$stopDate'"); 
+  $query = db_query($link, "SELECT distinct DATE, TYPE FROM work_dayoff where date >= ? and date <= ?", 'ss', array($startDate, $stopDate));
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
@@ -1216,7 +1246,7 @@ function get_holidays()
   $index = 1;
   include __DIR__ . "/php_tori/connect.php";
 
-  $query = mysqli_query($link, "SELECT DATE FROM work_dayoff where type = 0"); 
+  $query = db_query($link, "SELECT DATE FROM work_dayoff where type = 0");
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
@@ -1239,7 +1269,7 @@ function get_work_day()
   $index = 1;
   include __DIR__ . "/php_tori/connect.php";
 
-  $query = mysqli_query($link, "SELECT DATE FROM work_dayoff where type = 1"); 
+  $query = db_query($link, "SELECT DATE FROM work_dayoff where type = 1");
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
@@ -1391,7 +1421,7 @@ function get_users_current_day_in_time_by_superuser( $SUID )
 
   include __DIR__ . "/php_tori/connect.php";
 
-  $query = mysqli_query($link, "SELECT v.user_id, v.in_time, v.adj FROM visiting v inner join employees e on v.user_id = e.id where date = '$currentDate' order by e.SURNAME"); 
+  $query = db_query($link, "SELECT v.user_id, v.in_time, v.adj FROM visiting v inner join employees e on v.user_id = e.id where date = ? order by e.SURNAME", 's', array($currentDate));
 
   $merr=mysqli_error($link);
   if ( !$query ) 
@@ -1433,7 +1463,7 @@ function get_penalties( $userDays, $userID )
   $idx = 1;
   include __DIR__ . "/php_tori/connect.php";
 
-  $query = mysqli_query($link, "SELECT date from Penalty where date >= '$minDate' and date <= '$maxDate' and userID = '$userID'"); 
+  $query = db_query($link, "SELECT date from Penalty where date >= ? and date <= ? and userID = ?", 'ssi', array($minDate, $maxDate, (int)$userID));
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
@@ -1465,7 +1495,7 @@ function get_user_rate( $userID ){
 
   $rate = 40;
 
-  $query = mysqli_query($link, "SELECT RATE FROM employees where ID = '$userID' "); 
+  $query = db_query($link, "SELECT RATE FROM employees where ID = ?", 'i', array((int)$userID));
 
   $merr=mysqli_error($link);
   if ( !$query ) {
@@ -1486,7 +1516,7 @@ function get_norm_by_range_sec( $startDate, $stopDate, $userID ){
 
   $rate = 40;
 
-  $query = mysqli_query($link, "SELECT RATE FROM employees where ID = '$userID' ");
+  $query = db_query($link, "SELECT RATE FROM employees where ID = ?", 'i', array((int)$userID));
 
   $merr=mysqli_error($link);
   if ( !$query ) {
@@ -1515,7 +1545,7 @@ function get_current_day_duration_sec( $userID, $defaultStartTime ){
 
   $inTime = 0;
 
-  $query = mysqli_query($link, "SELECT in_time FROM visiting where USER_ID = '$userID' "); 
+  $query = db_query($link, "SELECT in_time FROM visiting where USER_ID = ?", 'i', array((int)$userID));
 
   $merr=mysqli_error($link);
   if ( !$query ) {
@@ -1548,7 +1578,7 @@ function get_norm_time_by_current_day_sec( $user_defaultStartHour, $user_default
 function is_there_add_time_by_alert( $Date, $userID ){
   include __DIR__ . "/php_tori/connect.php";
 
-  $query = mysqli_query($link, "SELECT * from ADD_TIME where STARTDATE = '$Date' and USERID = '$userID' and BYALERT = 1"); 
+  $query = db_query($link, "SELECT 1 from ADD_TIME where STARTDATE = ? and USERID = ? and BYALERT = 1 LIMIT 1", 'si', array($Date, (int)$userID));
   $merr=mysqli_error($link);
   if ( !$query ) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -1584,7 +1614,7 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
 
   $def_in_time = strtotime( $user_defaultStartTime ) + $user_allowedDelay * 60;
 
-  $query1 = mysqli_query($link, "SELECT STARTTIME, STOPTIME FROM ADD_TIME where STARTDATE >= '$startDate' and STARTDATE <= '$stopDate' and USERID = '$userID' and APPROVED = 1"); 
+  $query1 = db_query($link, "SELECT STARTTIME, STOPTIME FROM ADD_TIME where STARTDATE >= ? and STARTDATE <= ? and USERID = ? and APPROVED = 1", 'ssi', array($startDate, $stopDate, (int)$userID));
 
   $merr=mysqli_error($link);
   if ( !$query1 ) {
@@ -1597,7 +1627,7 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
     }
   }
 
-  $query2 = mysqli_query($link, "SELECT date, in_time, out_time, eat_start, eat_stop, state FROM visiting where date >= '$startDate' and date <= '$stopDate' and user_id = '$userID' and state = 0"); 
+  $query2 = db_query($link, "SELECT date, in_time, out_time, eat_start, eat_stop, state FROM visiting where date >= ? and date <= ? and user_id = ? and state = 0", 'ssi', array($startDate, $stopDate, (int)$userID));
   $merr=mysqli_error($link);
   if ( !$query2 ) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -1668,7 +1698,7 @@ function is_there_additional_alerts( $userID ){
 
   include __DIR__ . "/php_tori/connect.php";
 
-  $query = mysqli_query($link, "SELECT * FROM ALERTS where DATE = '$currentDate' and USERID = '$userID' and VIEWED = '0'");
+  $query = db_query($link, "SELECT 1 FROM ALERTS where DATE = ? and USERID = ? and VIEWED = '0' LIMIT 1", 'si', array($currentDate, (int)$userID));
 
   $merr=mysqli_error($link);
   if ( !$query ) {
@@ -1854,7 +1884,7 @@ function get_superuser_names_by_user_id( $ID )
 
   $ret = Array();
 
-  $query = mysqli_query($link, "SELECT DISTINCT ID, FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID in ( select SUPERVISORID from GROUPS where userid = '$ID' )"); 
+  $query = db_query($link, "SELECT DISTINCT ID, FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID in (select SUPERVISORID from GROUPS where userid = ?)", 'i', array((int)$ID));
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
@@ -1884,7 +1914,7 @@ function get_user_name_by_id( $suID )
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
 
-  $query = mysqli_query($link, "SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID='$suID'"); 
+  $query = db_query($link, "SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID = ?", 'i', array((int)$suID));
   $merr=mysqli_error($link);
   if ( !$query ) 
   {
@@ -1911,7 +1941,7 @@ function get_pause_agree_able_superusers_by_userID( $userID )
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
 
-  $query0 = mysqli_query($link, "SELECT SUPERVISORID FROM GROUPS where USERID = '$userID' and type = '3'"); 
+  $query0 = db_query($link, "SELECT SUPERVISORID FROM GROUPS where USERID = ? and type = 3", 'i', array((int)$userID));
 
   $rets = Array();
 
@@ -1936,7 +1966,7 @@ function get_users_by_superusers_and_type( $SUID, $type )
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8"); 
 
-  $query0 = mysqli_query($link, "SELECT g.USERID FROM GROUPS g inner join employees e on g.userid = e.id where g.SUPERVISORID = '$SUID' and g.type = '$type' order by e.SURNAME asc"); 
+  $query0 = db_query($link, "SELECT g.USERID FROM GROUPS g inner join employees e on g.userid = e.id where g.SUPERVISORID = ? and g.type = ? order by e.SURNAME asc", 'ii', array((int)$SUID, (int)$type));
 
   $rets = Array();
 
@@ -1955,7 +1985,7 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8");
 
-  $query0 = mysqli_query($link, "SELECT distinct id, date, supervisorID, explaneDesk, acceptorID, penaltyID, penaltyReply, status FROM Delays where date >= '$startDate' and date <= '$stopDate' and userID = '$userID' order by date desc"); 
+  $query0 = db_query($link, "SELECT distinct id, date, supervisorID, explaneDesk, acceptorID, penaltyID, penaltyReply, status FROM Delays where date >= ? and date <= ? and userID = ? order by date desc", 'ssi', array($startDate, $stopDate, (int)$userID));
   $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
@@ -1978,7 +2008,7 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
     $penaltyReply = $row0["penaltyReply"];
     $status = $row0["status"];
     
-    $query1 = mysqli_query($link, "SELECT in_time FROM visiting where user_id = '$userID' and date = '$delayDate'"); 
+    $query1 = db_query($link, "SELECT in_time FROM visiting where user_id = ? and date = ?", 'is', array((int)$userID, $delayDate));
 
     $found = 0;
 
@@ -2006,7 +2036,6 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
       if ( $found == 1 )
       {
 
-echo "sdas";
         $rets[0] = $ID;
         $rets[1] = $supervisorID;
         $rets[2] = $agreed;
@@ -2084,7 +2113,7 @@ function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
   $paramArr = get_dbsetup_param( 'delay_journal_deep_day' );
   $paramInt = (-1)*$paramArr[1];
   
-  $query = mysqli_query($link, "SELECT distinct a.id, a.date, b.in_dt, a.supervisorID, a.explaneDesk, a.acceptorID, a.penaltyID, a.penaltyReply, a.status, b.timeZoneSec
+  $query = db_query($link, "SELECT distinct a.id, a.date, b.in_dt, a.supervisorID, a.explaneDesk, a.acceptorID, a.penaltyID, a.penaltyReply, a.status, b.timeZoneSec
                          FROM Delays a 
                          join visiting b
                          on 
@@ -2092,12 +2121,12 @@ function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
                          and
                            a.userID = b.user_id    
                          where 
-                           a.userID = '$userID' 
+                           a.userID = ?
                              and
-                           a.date > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )
+                           a.date > ADDDATE(?, INTERVAL ? DAY)
                              and
                            b.remoteWorkState = 0
-                         order by date desc"); 
+                         order by date desc", 'isi', array((int)$userID, $currentDate, (int)$paramInt));
 
   $merr=mysqli_error($link);
   if ( !$query ) 
@@ -2158,7 +2187,7 @@ function get_reasons()
 
   $sqlQuery = "SELECT DISTINCT a.ID, a.DESCRIPTION FROM REASONS a where a.ID > 0";
                
-  $query0 = mysqli_query($link, $sqlQuery); 
+  $query0 = db_query($link, $sqlQuery);
 
   $merr=mysqli_error($link);
   if ( !$query0 ) 
@@ -2187,7 +2216,7 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8"); 
 
-  $sqlQuery = "SELECT DISTINCT a.ID, a.START_DT, a.STOP_DT, a.SUIR, a.REASON, b.DESCRIPTION as REASONDESCRIPTION, a.DESCRIPTION, a.SUPERVISORDESC, a.APPROVED, a.PAUSE_MODE 
+  $sqlQuery = "SELECT DISTINCT a.ID, a.START_DT, a.STOP_DT, a.SUIR, a.REASON, b.DESCRIPTION as REASONDESCRIPTION, a.DESCRIPTION, a.SUPERVISORDESC, a.APPROVED, a.PAUSE_MODE
                FROM 
                ADD_TIME a
                JOIN 
@@ -2195,17 +2224,23 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
                ON a.REASON = b.ID
                WHERE
                (
-                    ( a.START_DT <= '$startDTStr' AND a.STOP_DT >= '$stopDTStr' )
-                 OR ( a.START_DT >= '$startDTStr' AND a.STOP_DT <= '$stopDTStr' )      
-                 OR ( a.START_DT <= '$startDTStr' AND a.STOP_DT <= '$stopDTStr' and a.STOP_DT >= '$startDTStr' )      
-                 OR ( a.START_DT >= '$startDTStr' AND a.STOP_DT >= '$stopDTStr' and a.START_DT <= '$stopDTStr')
+                    ( a.START_DT <= ? AND a.STOP_DT >= ? )
+                 OR ( a.START_DT >= ? AND a.STOP_DT <= ? )
+                 OR ( a.START_DT <= ? AND a.STOP_DT <= ? and a.STOP_DT >= ? )
+                 OR ( a.START_DT >= ? AND a.STOP_DT >= ? and a.START_DT <= ?)
                )
                AND
-                 a.USERID = '$userID' 
+                 a.USERID = ?
                ORDER BY START_DT";
 
                
-  $query = mysqli_query($link, $sqlQuery ); 
+  $query = db_query($link, $sqlQuery, 'ssssssssssi', array(
+    $startDTStr, $stopDTStr,
+    $startDTStr, $stopDTStr,
+    $startDTStr, $stopDTStr, $startDTStr,
+    $startDTStr, $stopDTStr, $stopDTStr,
+    (int)$userID
+  ));
 
   $merr=mysqli_error($link);
   if ( !$query ) {
@@ -2267,7 +2302,7 @@ function get_all_add_work_info_by_user( $userID, $pauseMode = 0 )
   $stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME', $link);
   $results = Array();
 
-  $query = mysqli_query($link, "SELECT DISTINCT a.ID,
+  $query = db_query($link, "SELECT DISTINCT a.ID,
                          $startExpr AS START_DT_EFFECTIVE,
                          $stopExpr AS STOP_DT_EFFECTIVE,
                          a.SUIR, a.REASON, b.DESCRIPTION as REASONDESCRIPTION, a.DESCRIPTION, a.SUPERVISORDESC,
@@ -2277,15 +2312,15 @@ function get_all_add_work_info_by_user( $userID, $pauseMode = 0 )
                          JOIN 
                          REASONS b
                          ON a.REASON = b.ID
-                         where a.USERID = '$userID'
-                           AND a.PAUSE_MODE = '$pauseMode'
+                         where a.USERID = ?
+                           AND a.PAUSE_MODE = ?
                            AND $startExpr <> '0000-00-00 00:00:00'
                            AND $stopExpr <> '0000-00-00 00:00:00'
                            AND $stopExpr > $startExpr
                            AND (
-                             $stopExpr > ADDDATE( '$currentDate', INTERVAL $paramInt DAY )
+                             $stopExpr > ADDDATE(?, INTERVAL ? DAY)
                            )
-                         order by START_DT_EFFECTIVE DESC");
+                         order by START_DT_EFFECTIVE DESC", 'iisi', array((int)$userID, (int)$pauseMode, $currentDate, (int)$paramInt));
 
   $merr=mysqli_error($link);
   if ( !$query ) 
@@ -2328,7 +2363,7 @@ function get_add_work_info_by_user_and_day_range( $userID_, $startDate, $stopDat
   include __DIR__ . "/php_tori/connect.php";  
   mysqli_set_charset($link, "utf8"); 
 
-  $query0 = mysqli_query($link, "SELECT DISTINCT ID, STARTDATE, SUIR, STARTTIME, STOPTIME, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE FROM ADD_TIME where STARTDATE >= '$startDate' and STARTDATE <= '$stopDate' and USERID = '$userID_' order by STARTDATE desc, STARTTIME desc"); 
+  $query0 = db_query($link, "SELECT DISTINCT ID, STARTDATE, SUIR, STARTTIME, STOPTIME, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE FROM ADD_TIME where STARTDATE >= ? and STARTDATE <= ? and USERID = ? order by STARTDATE desc, STARTTIME desc", 'ssi', array($startDate, $stopDate, (int)$userID_));
   $merr=mysqli_error($link);
   if ( !$query0 ) 
   {
@@ -3336,7 +3371,7 @@ function get_user_defStartTime_and_allowedDelay( $USERiD, &$user_defaultStartTim
 {
   include __DIR__ . "/php_tori/connect.php";  
 
-  $query = mysqli_query($link, "SELECT defaultStartTime, AllowedDelayMinutes FROM employees where ID = '$USERiD' ");
+  $query = db_query($link, "SELECT defaultStartTime, AllowedDelayMinutes FROM employees where ID = ?", 'i', array((int)$USERiD));
 
   $ret = 0;
 
@@ -3692,8 +3727,13 @@ function get_and_update_start_time_status( $userID ){
   $currentTimeHHMMSS = $dtArr[1]; 
 
   $isThereDelay = 0;
+  $ss_defaultStartTime = '';
+  $ss_allowedDelay = 0;
+  $ss_defaultStartTimeWithDelay = '';
+  $ss_defaultStartTimeWithDelayVal = 0;
+  $ss_RemoteWork = 0;
 
-  $query = mysqli_query($link, "SELECT defaultStartTime, allowedDelayMinutes, remoteWork FROM employees WHERE id='$userID'"); 
+  $query = db_query($link, "SELECT defaultStartTime, allowedDelayMinutes, remoteWork FROM employees WHERE id = ?", 'i', array((int)$userID));
   $merr = mysqli_error($link);
 
   if ( !$query ) {
@@ -3740,18 +3780,14 @@ function get_and_update_start_time_status( $userID ){
 
 function apply_staff_leaves_to_days_norm($link, $userID, $startDate, $stopDate, $days_dates_set, $days_norm)
 {
-  $userID = mysqli_real_escape_string($link, $userID);
-  $startDateEsc = mysqli_real_escape_string($link, $startDate);
-  $stopDateEsc = mysqli_real_escape_string($link, $stopDate);
-
-  $query = mysqli_query($link, "
+  $query = db_query($link, "
     SELECT start_date, stop_date, event
     FROM staff_leaves
-    WHERE user_id = '$userID'
+    WHERE user_id = ?
       AND event IN ('Отпуск', 'Больничный')
-      AND start_date <= '$stopDateEsc'
-      AND stop_date >= '$startDateEsc'
-  ");
+      AND start_date <= ?
+      AND stop_date >= ?
+  ", 'iss', array((int)$userID, $stopDate, $startDate));
 
   $merr = mysqli_error($link);
   if (!$query) {
@@ -3787,18 +3823,14 @@ function get_staff_leave_events_by_days($link, $userID, $startDate, $stopDate, $
 {
   $leaveEvents = array_fill(0, count($days_dates_set), "NDF");
 
-  $userID = mysqli_real_escape_string($link, $userID);
-  $startDate = mysqli_real_escape_string($link, $startDate);
-  $stopDate = mysqli_real_escape_string($link, $stopDate);
-
-  $query = mysqli_query($link, "
+  $query = db_query($link, "
     SELECT start_date, stop_date, event
     FROM staff_leaves
-    WHERE user_id = '$userID'
+    WHERE user_id = ?
       AND event IN ('Отпуск', 'Больничный')
-      AND start_date <= '$stopDate'
-      AND stop_date >= '$startDate'
-  ");
+      AND start_date <= ?
+      AND stop_date >= ?
+  ", 'iss', array((int)$userID, $stopDate, $startDate));
 
   if (!$query) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -3826,16 +3858,13 @@ function get_work_dayoff_types_by_range($link, $startDate, $stopDate)
 {
   $result = array();
 
-  $startDate = mysqli_real_escape_string($link, $startDate);
-  $stopDate = mysqli_real_escape_string($link, $stopDate);
-
-  $query = mysqli_query($link, "
+  $query = db_query($link, "
     SELECT date, type
     FROM work_dayoff
-    WHERE date >= '$startDate'
-      AND date <= '$stopDate'
+    WHERE date >= ?
+      AND date <= ?
       AND type IN (0, 1, 2)
-  ");
+  ", 'ss', array($startDate, $stopDate));
 
   if (!$query) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);

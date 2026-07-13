@@ -9,11 +9,11 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 include __DIR__ . "/../php_tori/connect.php";
 include_once __DIR__ . "/../funcs.php";
 
-$userID = $_SESSION['ss_id'];
+$userID = (int)$_SESSION['ss_id'];
 
 mysqli_set_charset($link, "utf8");
 
-$query = mysqli_query($link, "SELECT * FROM gym_schedule WHERE USERID = '$userID' ORDER BY DATE_TRAIN");
+$query = db_query($link, "SELECT * FROM gym_schedule WHERE USERID = ? ORDER BY DATE_TRAIN", 'i', array($userID));
 
 $content = "<div id=\"delete_schedule\">";
   $content .= "<div class=\"schedule_text\">";
@@ -22,14 +22,14 @@ $content = "<div id=\"delete_schedule\">";
   $content .= "<div id=\"schedule_box\">";
 
 while($row = mysqli_fetch_assoc($query)){
-    $userId = $row["USERID"];
+    $userId = (int)$row["USERID"];
     $date_train = $row['DATE_TRAIN'];
     $start_time = $row["START_TIME"];
     $stop_time = $row["STOP_TIME"];
         
     $content .= "<div id=\"textarea_schedule\">";
-    $content .= "<textarea class=\"schedule\" cols=\"33\" rows=\"2\">$date_train "." $start_time "." $stop_time</textarea>";
-    $content .= "<button id=\"delete_button_schd\" onclick=\"delete_gym_schedule('$date_train', '$start_time', '$stop_time');\"><img src=\"img/delete_small.bmp\"></button>";
+    $content .= "<textarea class=\"schedule\" cols=\"33\" rows=\"2\">" . html_escape("$date_train $start_time $stop_time") . "</textarea>";
+    $content .= "<button id=\"delete_button_schd\" onclick=\"delete_gym_schedule(" . html_escape(js_encode($date_train)) . ", " . html_escape(js_encode($start_time)) . ", " . html_escape(js_encode($stop_time)) . ");\"><img src=\"img/delete_small.bmp\" alt=\"\"></button>";
     $content .= "</div>";
 }
   $content .= "</div>";

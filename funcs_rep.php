@@ -121,13 +121,13 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   unset($tempDates);
   $tempDates = array();   
 
-  $query = mysqli_query($link, "SELECT DISTINCT dayTransitionTime, user_id, state, in_dt, eat_start_dt, eat_stop_dt, out_dt, remoteWorkState, timeZoneSec, dayTransitionTime, 
-                        TIMESTAMP('$startDate', dayTransitionTime) as dt1, TIMESTAMP('$stopDate', dayTransitionTime) as dt2
+  $query = db_query($link, "SELECT DISTINCT dayTransitionTime, user_id, state, in_dt, eat_start_dt, eat_stop_dt, out_dt, remoteWorkState, timeZoneSec, dayTransitionTime,
+                        TIMESTAMP(?, dayTransitionTime) as dt1, TIMESTAMP(?, dayTransitionTime) as dt2
                         FROM visiting 
                         where 
-                        in_dt >= TIMESTAMP('$startDate', dayTransitionTime) 
+                        in_dt >= TIMESTAMP(?, dayTransitionTime)
                           and 
-                        user_id = '$userID'"); 
+                        user_id = ?", 'sssi', array($startDate, $stopDate, $startDate, (int)$userID));
 
   $merr=mysqli_error($link);
   if ( !$query ) 
@@ -277,9 +277,9 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   unset($tempDates);
   $tempDates = array();   
  
-  $query = mysqli_query($link, "SELECT distinct a.date, a.supervisorID, a.reason, b.duration 
-                        FROM Penalty a join Delays b on a.id = b.penaltyID 
-                        WHERE a.date >= '$startDate' AND a.date <= '$stopDate' AND a.userID = '$userID'"); 
+  $query = db_query($link, "SELECT distinct a.date, a.supervisorID, a.reason, b.duration
+                        FROM Penalty a join Delays b on a.id = b.penaltyID
+                        WHERE a.date >= ? AND a.date <= ? AND a.userID = ?", 'ssi', array($startDate, $stopDate, (int)$userID));
 
   $merr=mysqli_error($link);
   if ( !$query ) 
