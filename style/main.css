@@ -4103,6 +4103,43 @@ h5.activ_time {
   background: #ffaaaa;
 }
 
+.journal-entry-delay-date-cell,
+.journal-entry-delay-in-cell,
+.journal-entry-delay-schedule-cell,
+.journal-entry-delay-duration-cell,
+.journal-entry-delay-agreement-cell,
+.journal-entry-delay-acceptor-cell,
+.journal-entry-delay-status-cell,
+.journal-entry-delay-actions-cell {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.journal-entry-delay-comment-cell,
+.journal-entry-delay-reply-cell {
+  vertical-align: middle;
+  text-align: left;
+}
+
+.journal-entry-delay-date-cell { width: 70px; }
+.journal-entry-delay-in-cell { width: 105px; }
+.journal-entry-delay-schedule-cell { width: 185px; }
+.journal-entry-delay-duration-cell { width: 95px; }
+.journal-entry-delay-comment-cell { width: 140px; }
+.journal-entry-delay-agreement-cell,
+.journal-entry-delay-acceptor-cell { width: 200px; }
+.journal-entry-delay-reply-cell { width: 120px; }
+.journal-entry-delay-status-cell { width: 130px; }
+.journal-entry-delay-actions-cell { width: 160px; }
+
+.journal-entry-agreed {
+  background: #aaffaa;
+}
+
+.journal-entry-unagreed {
+  background: #ffaaaa;
+}
+
 .add_time_radio {
   margin-bottom: 5px;
 }

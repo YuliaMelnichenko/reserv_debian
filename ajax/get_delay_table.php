@@ -15,19 +15,19 @@ $user_allowedDelay = (int)$_SESSION['ss_allowedDelay'];
 
 echo "<div class=\"notification-table-scroll notification-table-scroll-full\">";
 
-echo "<table class=\"add_time\" cellpadding=\"0\" cellspacing=\"0\" border=1>";
-echo "<tr bgcolor=\"#DDDDDD\" bordercolor=\"#888888\">";
+echo "<table class=\"add_time journal-entry-table\">";
+echo "<tr class=\"journal-entry-head\">";
 
-echo "<td valign=\"middle\" align=\"center\">"."<h5>Дата</h5>"."</td>";
-echo "<td valign=\"middle\" align=\"center\">"."<h5>Время прихода</h5>"."</td>";
-echo "<td valign=\"middle\" align=\"center\">"."<h5>Время начала рабочего дня<br> + допустимое опоздание</h5>"."</td>";
-echo "<td valign=\"middle\" align=\"center\">"."<h5>Длительность<br>опоздания</h5>"."</td>";
-echo "<td valign=\"middle\" align=\"center\">"."<h5>Комментарий<br>работника</h5>"."</td>";
-echo "<td valign=\"middle\" align=\"center\">"."<h5>С кем предварительно<br>огласовано</h5>"."</td>";
-echo "<td valign=\"middle\" align=\"center\">"."<h5>Лицо, принявшее<br>решение</h5>"."</td>";
-echo "<td valign=\"middle\" align=\"center\">"."<h5>Комментарий лица,<br>принявшего решение</h5>"."</td>";
-echo "<td valign=\"middle\" align=\"center\">"."<h5>Статус</h5>"."</td>";
-echo "<td valign=\"middle\" align=\"center\">"."<h5>Управление</h5>"."</td>";
+echo "<td class=\"journal-entry-head-cell journal-entry-delay-date-cell\"><h5>Дата</h5></td>";
+echo "<td class=\"journal-entry-head-cell journal-entry-delay-in-cell\"><h5>Время прихода</h5></td>";
+echo "<td class=\"journal-entry-head-cell journal-entry-delay-schedule-cell\"><h5>Время начала рабочего дня<br> + допустимое опоздание</h5></td>";
+echo "<td class=\"journal-entry-head-cell journal-entry-delay-duration-cell\"><h5>Длительность<br>опоздания</h5></td>";
+echo "<td class=\"journal-entry-head-cell journal-entry-delay-comment-cell\"><h5>Комментарий<br>работника</h5></td>";
+echo "<td class=\"journal-entry-head-cell journal-entry-delay-agreement-cell\"><h5>С кем предварительно<br>огласовано</h5></td>";
+echo "<td class=\"journal-entry-head-cell journal-entry-delay-acceptor-cell\"><h5>Лицо, принявшее<br>решение</h5></td>";
+echo "<td class=\"journal-entry-head-cell journal-entry-delay-reply-cell\"><h5>Комментарий лица,<br>принявшего решение</h5></td>";
+echo "<td class=\"journal-entry-head-cell journal-entry-delay-status-cell\"><h5>Статус</h5></td>";
+echo "<td class=\"journal-entry-head-cell journal-entry-delay-actions-cell\"><h5>Управление</h5></td>";
 echo "</tr>";
   
 $colorMode = 1;
@@ -67,11 +67,11 @@ foreach( $delays as $delay )
 
   if ( $delSUser != -1 )
   {
-    $agreedColor = "#AAFFAA";
+    $agreedClass = "journal-entry-agreed";
   } 
   else
   {
-    $agreedColor = "#FFAAAA";
+    $agreedClass = "journal-entry-unagreed";
   } 
 
   if ( $delSUser == -1 )
@@ -88,7 +88,7 @@ foreach( $delays as $delay )
   if ( $delStatus == 0 )
   { 
     $approvedStr = journal_status_label("на рассмотрении");
-    $cellColor = ""; 
+    $statusClass = "";
     $buttonAdd1 = "";
     $buttonAdd2 = "onclick=\"delay_set('$delID', '$userID_');\"";
     $buttonAdd3 = "";
@@ -96,7 +96,7 @@ foreach( $delays as $delay )
   else if ( $delStatus == -1 )
   { 
     $approvedStr = journal_status_label("отклонено");
-    $cellColor = "#FFAAAA"; 
+    $statusClass = "journal-entry-status-refused";
     $buttonAdd1 = "disabled";
     $buttonAdd2 = "";
     $buttonAdd3 = "title=\"запись уже заквитирована. Изменение невозможно\"";
@@ -104,23 +104,25 @@ foreach( $delays as $delay )
   else if ( $delStatus == 1 )
   { 
     $approvedStr = journal_status_label("принято");
-    $cellColor = "#AAFFAA"; 
+    $statusClass = "journal-entry-status-accepted";
     $buttonAdd1 = "disabled";
     $buttonAdd2 = "";
     $buttonAdd3 = "title=\"запись уже заквитирована. Изменение невозможно\"";
   }  
 
-  echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-  echo "<td width=70 valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$delDate</h5>"."</td>";
-  echo "<td width=105 valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$delInTime</h5>"."</td>";
-  echo "<td width=185 valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$delDefInTime >> $delDefInTimeWithDelay (+ $delAllowedDelay мин.)</h5>"."</td>";
-  echo "<td width=95 valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$delDurationStr</h5>"."</td>";
-  echo "<td width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($delComment) . "</h5></td>";
-echo "<td width=200 bgcolor=\"$agreedColor\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
-echo "<td width=200 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($acceptorName) . "</h5></td>";
-  echo "<td width=120 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($delAcceptorReply) . "</h5></td>";
-  echo "<td width=130 bgcolor=\"$cellColor\" valign=\"middle\" align=\"center\">$approvedStr</td>";
-  echo "<td width=160 valign=\"middle\" align=\"center\">";
+  $rowClass = $color == $color1 ? "journal-entry-row-alt" : "journal-entry-row";
+
+  echo "<tr class=\"$rowClass\">";
+  echo "<td class=\"journal-entry-delay-date-cell\"><h5 class=\"small\">" . html_escape($delDate) . "</h5></td>";
+  echo "<td class=\"journal-entry-delay-in-cell\"><h5 class=\"small\">" . html_escape($delInTime) . "</h5></td>";
+  echo "<td class=\"journal-entry-delay-schedule-cell\"><h5 class=\"small\">" . html_escape("$delDefInTime >> $delDefInTimeWithDelay (+ $delAllowedDelay мин.)") . "</h5></td>";
+  echo "<td class=\"journal-entry-delay-duration-cell\"><h5 class=\"small\">" . html_escape($delDurationStr) . "</h5></td>";
+  echo "<td class=\"journal-entry-delay-comment-cell\"><h5 class=\"small\">" . html_escape($delComment) . "</h5></td>";
+  echo "<td class=\"journal-entry-delay-agreement-cell $agreedClass\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
+  echo "<td class=\"journal-entry-delay-acceptor-cell\"><h5 class=\"small\">" . html_escape($acceptorName) . "</h5></td>";
+  echo "<td class=\"journal-entry-delay-reply-cell\"><h5 class=\"small\">" . html_escape($delAcceptorReply) . "</h5></td>";
+  echo "<td class=\"journal-entry-delay-status-cell $statusClass\">$approvedStr</td>";
+  echo "<td class=\"journal-entry-delay-actions-cell\">";
     echo "<button class=\"journal-action-button journal-action-button-delay\" $buttonAdd1 $buttonAdd2 $buttonAdd3 name=\"nextBtn\">Внести объяснение</button>";
   echo "</td>";
   echo "</tr>";
