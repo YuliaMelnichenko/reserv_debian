@@ -4144,6 +4144,80 @@ h5.activ_time {
   margin-bottom: 5px;
 }
 
+.add-time-list-actions {
+  width: 1080px;
+  border: 0;
+  border-collapse: collapse;
+}
+
+.add-time-list-action-left,
+.add-time-list-action-right {
+  vertical-align: middle;
+}
+
+.add-time-list-action-left {
+  width: 500px;
+  text-align: left;
+}
+
+.add-time-list-action-right {
+  width: 520px;
+  text-align: right;
+}
+
+.add-time-list-table {
+  border: 1px solid #888888;
+  border-collapse: collapse;
+}
+
+.add-time-list-head {
+  background: #dddddd;
+}
+
+.add-time-list-row {
+  background: #ffffff;
+}
+
+.add-time-list-row-alt {
+  background: transparent;
+}
+
+.add-time-list-date-cell,
+.add-time-list-duration-cell,
+.add-time-list-status-cell,
+.add-time-list-delete-cell {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.add-time-list-reason-cell,
+.add-time-list-comment-cell {
+  vertical-align: middle;
+  text-align: left;
+}
+
+.add-time-list-date-cell,
+.add-time-list-duration-cell { width: 122px; }
+.add-time-list-reason-cell { width: 182px; }
+.add-time-list-comment-cell { width: 250px; }
+.add-time-list-status-cell { width: 130px; }
+.add-time-list-delete-cell { width: 92px; }
+
+.add-time-list-status-accepted {
+  background: #aaffaa;
+}
+
+.add-time-list-status-refused {
+  background: #ffaaaa;
+}
+
+.add-time-list-status-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
 #archiveExcelPreviewOverlay,
 #accountingErrorModalOverlay,
 #accountingErrorStatusModalOverlay {
