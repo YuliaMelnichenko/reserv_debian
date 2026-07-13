@@ -4361,6 +4361,166 @@ h5.activ_time {
 }
 .sport-schedule-time-cell { width: 100px; }
 
+.lunch-state-card {
+  border: 0;
+  background: #ddeeff;
+}
+
+.lunch-state-title {
+  width: 446px;
+  text-align: center;
+}
+
+.lunch-state-back {
+  display: flex;
+  align-items: center;
+  margin-left: 2px;
+}
+
+.lunch-state-heading {
+  margin-right: 135px;
+}
+
+.lunch-state-label {
+  width: 200px;
+}
+
+.time-state-icon-button {
+  width: 40px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid #888888;
+  background: #f8d888;
+  font-size: 100%;
+  cursor: pointer;
+}
+
+.reg-out-time-input {
+  width: 175px;
+}
+
+.entrance-table {
+  border: 1px solid #888888;
+  border-collapse: collapse;
+}
+
+.entrance-table-head { background: #eeeeee; }
+.entrance-row { background: #ffffff; }
+.entrance-row-alt { background: #ddffff; }
+
+.entrance-name-cell,
+.entrance-time-cell,
+.entrance-new-time-cell,
+.entrance-action-cell {
+  vertical-align: middle;
+}
+
+.entrance-name-cell {
+  width: 130px;
+  text-align: left;
+}
+
+.entrance-table-head .entrance-name-cell,
+.entrance-time-cell,
+.entrance-new-time-cell,
+.entrance-action-cell {
+  text-align: center;
+}
+
+.entrance-time-cell { width: 100px; }
+.entrance-new-time-cell { width: 130px; }
+.entrance-time-input { width: 130px; text-align: center; }
+
+.entrance-set-button {
+  width: 90px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid #888888;
+  background: #f8d888;
+  cursor: pointer;
+}
+
+.time-management-table {
+  border: 0;
+  border-collapse: collapse;
+}
+
+.time-primary-button {
+  width: 616px;
+  height: 40px;
+  border: 1px solid #888888;
+  background: #f8d888;
+  font-size: 110%;
+  cursor: pointer;
+}
+
+.time-primary-button-late { background: #f79398; }
+
+.time-change-action-cell {
+  width: 80px;
+  text-align: center;
+}
+
+.time-change-button,
+.time-explanation-button {
+  padding: 0;
+  border: 1px solid #888888;
+  font-size: 80%;
+  cursor: pointer;
+}
+
+.time-change-button { background: #f8d888; }
+.time-change-button-disabled {
+  background: #dddddd;
+  cursor: not-allowed;
+}
+.time-explanation-button { background: #ffffff; }
+
+.time-description-cell { width: 440px; }
+.time-value-cell {
+  width: 176px;
+  text-align: center;
+}
+.time-value-good { background: #aaffaa; }
+.time-value-warning { background: #ffffaa; }
+.time-value-bad { background: #ffaaaa; }
+.time-value-disabled { background: #dddddd; }
+.time-align-right { text-align: right; }
+.time-spacer-row { height: 10px; }
+
+.time-state-actions {
+  width: 50%;
+  margin: 0;
+  padding: 0;
+  text-align: right;
+  font-size: 100%;
+}
+
+.time-state-small-icon {
+  width: 15px;
+  height: 14px;
+}
+
+.time-registration-details {
+  width: 616px;
+  border: 1px solid #888888;
+  border-collapse: collapse;
+}
+
+.time-management-cell {
+  margin: 0;
+  padding: 0;
+  font-size: 100%;
+}
+
+.time-complete-message {
+  color: #ff0000;
+  text-align: center;
+  font: 16px Arial, sans-serif;
+}
+
+.time-section-spacer { height: 12px; }
+
 #archiveExcelPreviewOverlay,
 #accountingErrorModalOverlay,
 #accountingErrorStatusModalOverlay {
