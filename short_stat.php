@@ -34,7 +34,7 @@ function show_month_stat( $monthDate, $user_id, $user_rate, $user_defaultStartTi
 
   if ( $currMonth == $monthNum )
   {
-    $normByCurrentMonthAdd = get_norm_time_by_current_day_sec( $user_id, $user_defaultStartHour, $user_defaultStartMinute );
+    $normByCurrentMonthAdd = get_norm_time_by_current_day_sec( $user_defaultStartHour, $user_defaultStartMinute );
   }
 
   $normByCurrentMonth = $normByCurrentMonth + $normByCurrentMonthAdd;
