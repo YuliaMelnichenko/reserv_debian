@@ -22,16 +22,15 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
 }
 
 {
-  if ( $needToShow == 0 ){ echo "<font size=\"2\" color=\"#000000\" face=\"Arial\">Режим доступа: директор</font>"; }
+  if ( $needToShow == 0 ){ echo "<span class=\"nav-access-mode\">Режим доступа: директор</span>"; }
 
   $dtvalStr = get_current_datetime_in_timezone_str( 1, 0 );
-  echo "<table cellpadding=\"5\" cellspacing=\"0\" border=1>";
+  echo "<table class=\"nav-clock-table\">";
     echo "<tr>";
-      echo "<td class=\"nav-zero-cell\" height = 1>";
+      echo "<td class=\"nav-zero-cell\"></td>";
     echo "</tr>";
     echo "<tr>";
-      echo "</td>";
-      echo "<td class=\"nav-clock-cell\" bgcolor=\"#ddeeff\" valign=\"top\" align=\"center\" width = 225>";
+      echo "<td class=\"nav-clock-cell\">";
         echo "<div id=\"dateTimeFieldNav\">";
           echo "<h1 class=\"clock\">".$dtvalStr."</h1>";
         echo "</div>";
@@ -41,19 +40,19 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
 
   echo "";
 
-  echo "<table cellpadding=\"5\" cellspacing=\"0\" border=0 width = 190>";
-  echo "<tr><td class=\"nav-panel-cell\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 160>";
-  echo "<table cellpadding=\"0\" cellspacing=\"0\" border=0>";
+  echo "<table class=\"nav-panel-table\">";
+  echo "<tr><td class=\"nav-panel-cell\">";
+  echo "<table class=\"nav-brand-table\">";
     echo "<tr>";
-      echo "<td class=\"nav-brand-cell\" width = 205>";
+      echo "<td class=\"nav-brand-cell\">";
         echo "<a class=\"nounder\" href=\"index.php\">";
           echo "<p class=\"nav-brand-title\"><span class=\"nav-brand-prefix\"> В </span><span class=\"nav-brand-name\"> ТОРИ 3.0 </span></p>";
         echo "</a>";
       echo "</td>";
-      echo "<td width=30 align=\"right\" class=\"nav-icon-cell\">";
+      echo "<td class=\"nav-icon-cell\">";
         echo "<img class=\"nav-icon\" title=\"Что нового?\" onclick=\"show_information();\" src=\"img/news.png\">";
       echo "</td>";
-      echo "<td width=30 align=\"right\" class=\"nav-icon-cell\">";
+      echo "<td class=\"nav-icon-cell\">";
         echo "<img class=\"nav-icon\" title=\"Выйти из системы\" onclick=\"log_out();\" src=\"img/logout3.png\">";
       echo "</td>";
     echo "</tr>";
@@ -61,7 +60,8 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
 
   echo "</td></tr>";
   
-  echo "<tr align=\"left\" ><td bgcolor=\"#ddeeff\" valign=\"top\" align=\"left\" width = 370>";
+  echo "<tr><td class=\"nav-menu-cell\">";
+  echo "<table class=\"nav-menu-list\">";
 
   if ( $needToShow == 1 ){ echo "<tr height=50 valign=\"bottom\"><td><button class=\"nav-menu-button nav-menu-button-main nav-menu-button-current\" onclick=\"location.href='index.php'\"><h5 class=\"bigger\">Текущий день</h5></button></td></tr>"; }
                            echo "<tr height=50 valign=\"bottom\"><td><button class=\"nav-menu-button nav-menu-button-main\" onclick=\"location.href='my_report.php'\"><h5 class=\"bigger\">Временной отчет</h5></button></td></tr>";
@@ -134,7 +134,9 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
 
   echo "<tr><td><button class=\"nav-menu-button nav-redmine-button\" onclick=\"window.open('http://192.168.100.17/my') \"><h5 class=\"bigger\">RedMine</h5></button></td></tr>";
   echo "<tr><td height = 3px></td></tr>";
-  
+
+  echo "</table>";
+  echo "</td></tr>";
   echo "</table>";
 }
 ?>

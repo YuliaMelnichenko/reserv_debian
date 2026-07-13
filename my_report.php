@@ -27,7 +27,7 @@ if (
 <META NAME="Author" CONTENT="InTec">
 <link rel="stylesheet" type="text/css" href="style/main.css" />
 </head>
-<body onload="show_selectors()" bgcolor="#ffffff">
+<body class="app-page" onload="show_selectors()">
 
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
 
@@ -182,8 +182,8 @@ echo "</div>";
 echo "<div id=\"penalty_list_header\">";
 echo "</div>";
 
-echo "<div align=\"left\">";
-  echo "<table>";
+echo "<div class=\"report-page-layout\">";
+  echo "<table class=\"report-page-table\">";
     echo "<tr>";
     $ss_id_tmp = $_SESSION['ss_id'];
 
@@ -193,17 +193,17 @@ echo "<div align=\"left\">";
     }  
 
     if ( $directorView == 0 ){
-      echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
+      echo "<td class=\"report-page-nav-cell\">";
       include_once __DIR__ . "/navigate.php";
     }
     else{
-      echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 0>";
+      echo "<td class=\"report-page-nav-cell report-page-nav-hidden\">";
     }
     echo "</td>";
                                     
     $wholeWidth = 1000;
 
-    echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
+    echo "<td class=\"report-page-content-cell\">";
     
 ///***
 
@@ -359,7 +359,7 @@ echo "<div id=\"report_container\">";
       echo "<h4 class=\"small\">Отчетный период: </h4>";
     echo "</div>";
     echo "<div>";
-      echo "<select onchange=\"set_period();\" class=\"flat\" id=\"report_type\" bgcolor=\"#888888\" width = 70 >";
+      echo "<select onchange=\"set_period();\" class=\"flat report-period-select\" id=\"report_type\">";
         echo "<option value=\"1\" $selectedArr[0]>С начала недели</option>";
         echo "<option value=\"2\" $selectedArr[1]>С начала месяца</option>";
         echo "<option value=\"3\" $selectedArr[2]>С начала предыдущего месяца</option>";
@@ -386,8 +386,8 @@ echo "<div id=\"report_container\">";
             $manRepStop = $currDate; 
           }
 
-          echo "<input id=\"report_start_date\" class=\"report-date-input\" align=\"center\" type=\"date\" value=\"$manRepStart\" max=\"2060-12-31\">";
-          echo " - <input id=\"report_stop_date\" class=\"report-date-input\" align=\"center\" type=\"date\" value=\"$manRepStop\" max=\"2060-12-31\">";
+          echo "<input id=\"report_start_date\" class=\"report-date-input\" type=\"date\" value=\"" . html_escape($manRepStart) . "\" max=\"2060-12-31\">";
+          echo " - <input id=\"report_stop_date\" class=\"report-date-input\" type=\"date\" value=\"" . html_escape($manRepStop) . "\" max=\"2060-12-31\">";
           echo "  <button class=\"button_style report-show-button\" onclick=\"manual_report_set();\" name=\"nextBtn\">Показать</button>";
         echo "</div>";
     echo "</div>";
@@ -445,8 +445,8 @@ $cellWidth = 165;
 $layersWidth = $dateWidth + $cellWidth*$userCnt + $userCnt*20;
 $layersWidth = 500;
 
-echo "<table cellpadding=\"0\" cellspacing=\"0\" border=0>";
-  echo "<tr height = 10>";
+echo "<table class=\"report-header-table\">";
+  echo "<tr class=\"report-header-spacer\">";
     echo "<td>";
     echo "</td>";
   echo "</tr>";
@@ -480,7 +480,7 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
                       "firstname" => "",
                       "lastname" => "",
                     );
-                  echo "<td class=\"report_no_padding\" bgcolor=\"#ffffff\" valign=\"middle\" align=\"center\" width = $cellWidth>";
+                  echo "<td class=\"report_no_padding report-user-head-cell\">";
                     echo "<div class=\"report_head_name\">";
                       echo "<div class=\"report_head_fio\">";
                         echo "<div class=\"report_head_surname\">" . html_escape($userNameParts["surname"]) . "</div>";
@@ -495,11 +495,12 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
                   echo "</td>";  
                 }
                 if ( $userCnt >= 9 || $userCnt == 1){
-                  echo "<td class=\"report_no_padding\" bgcolor=\"#ffffff\" valign=\"middle\" align=\"center\">";
+                  echo "<td class=\"report_no_padding report-user-head-cell\">";
                     echo "<div class=\"report_head_stub\">";             
                     echo "</div>";
                   echo "</td>";
                 }
+              echo "</tr>";
             echo "</table>";
           echo "</div>";
         echo "</td>";
@@ -509,13 +510,13 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
           echo "<div class=\"report_window_left\" id=\"report_window_left\">";
             echo "<table class = \"no_padding\">";
               //Левая панель
-              for ( $idx = count( $rowsDTContent ); $idx >= 0; $idx -- ){
+              for ( $idx = count( $rowsDTContent ) - 1; $idx >= 0; $idx -- ){
                 echo "<tr>";
                   echo $rowsDTContent[$idx];  
                 echo "</tr>";
               }     
               echo "<tr>";
-                echo "<td class=\"report_no_padding_no_border\" valign=\"middle\" align=\"center\">";
+                echo "<td class=\"report_no_padding_no_border report-user-head-cell\">";
                   echo "<div class=\"report_head_stub_left\">";
                   echo "</div>";
                 echo "</td>";
@@ -533,7 +534,7 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
           }          
               echo "<table>";
               //Тело
-                for ( $idx = count( $rowsContent ); $idx >= 0; $idx -- ){
+                for ( $idx = count( $rowsContent ) - 1; $idx >= 0; $idx -- ){
                   echo "<tr>";
                     echo $rowsContent[$idx];
                   echo "</tr>";
@@ -552,11 +553,11 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
 echo "</tr>";
 echo "</table>";
 
-echo "<font size=\"2\" color=\"#444444\" face=\"Arial\">";
+echo "<div class=\"app-footer\">";
 
 include_once __DIR__ . "/end.php";
 
-echo "</font>";
+echo "</div>";
 echo "</div>";
 ?>
 
