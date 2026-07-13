@@ -8,7 +8,7 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 
 include_once __DIR__ . "/../funcs.php";
 
-$userID_ = $_SESSION['ss_id']; 
+$userID_ = (int)$_SESSION['ss_id'];
 
 echo "<table id = \"alert_approvement_table_users\" class=\"slim\" border=1>";
 echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
@@ -105,7 +105,7 @@ include __DIR__ . "/../php_tori/connect.php";
 $currentDate = date('Y-m-d');           
 
 mysqli_set_charset($link, "utf8");
-$query = mysqli_query($link, "SELECT * FROM ALERTS where DATE = '$currentDate' and USERID = '$userID_' and VIEWED = '0'"); 
+$query = db_query($link, "SELECT * FROM ALERTS WHERE DATE = ? AND USERID = ? AND VIEWED = 0", 'si', array($currentDate, $userID_));
 
 $merr=mysqli_error($link);
 if ( !$query ){
@@ -114,14 +114,14 @@ if ( !$query ){
 else{
   while ( $row = mysqli_fetch_assoc($query) ){
     $date = $row["DATE"];
-    $id = $row["ID"];
+    $id = (int)$row["ID"];
     $comments = $row["COMMENT"];
 
     echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
     echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$date</h5>"."</td>";
-    echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$comments</h5>"."</td>";
+    echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\"><h5 class=\"middle\">" . html_escape($comments) . "</h5></td>";
     echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
-      echo "<button id = \"explBtn\" class=\"journal-cell-icon-button\" title = \"Отметить как просмотренное\" onclick=\"set_alert_viewed( '$id' );\"><img src=\"img/closeSmall.png\"></button>";
+      echo "<button id=\"explBtn\" class=\"journal-cell-icon-button\" title=\"Отметить как просмотренное\" onclick=\"set_alert_viewed($id);\"><img src=\"img/closeSmall.png\" alt=\"\"></button>";
     echo "</td>";
     echo "</tr>";
   }

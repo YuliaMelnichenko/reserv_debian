@@ -26,7 +26,7 @@ $nextState = (int)$_POST['next'];
 $dtResult = get_current_datetime_in_timezone();
 $dateTimeStr = $dtResult[1];
 
-$id = $_SESSION['ss_id'];
+$id = (int)$_SESSION['ss_id'];
 
 $userDayTransitionTime = isset($_SESSION['ss_dayTransitionTime'])
   ? $_SESSION['ss_dayTransitionTime']
@@ -48,30 +48,25 @@ function reset_time_registration_session()
 
 function sync_time_registration_state_from_db($link, $userID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds)
 {
-  $userID = mysqli_real_escape_string($link, $userID);
-  $startDTStr = mysqli_real_escape_string($link, $startDTStr);
-  $stopDTStr = mysqli_real_escape_string($link, $stopDTStr);
-  $dateTimeStr = mysqli_real_escape_string($link, $dateTimeStr);
-
-  $query = mysqli_query($link, "
+  $query = db_query($link, "
     SELECT ID, state
     FROM visiting
-    WHERE user_id = '$userID'
+    WHERE user_id = ?
       AND (
         (
-          in_dt >= '$startDTStr'
-          AND in_dt < '$stopDTStr'
+          in_dt >= ?
+          AND in_dt < ?
         )
         OR
         (
           state != 0
-          AND in_dt < '$startDTStr'
-          AND TIMESTAMPDIFF(SECOND, '$startDTStr', '$dateTimeStr') <= $maxOpenShiftSeconds
+          AND in_dt < ?
+          AND TIMESTAMPDIFF(SECOND, ?, ?) <= ?
         )
       )
     ORDER BY in_dt DESC, ID DESC
     LIMIT 1
-  ");
+  ", 'isssssi', array((int)$userID, $startDTStr, $stopDTStr, $startDTStr, $startDTStr, $dateTimeStr, (int)$maxOpenShiftSeconds));
 
   if (!$query) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -105,16 +100,15 @@ function get_current_visit_row($link, $userID, $visitID, $startDTStr, $stopDTStr
     return null;
   }
 
-  $userID = mysqli_real_escape_string($link, $userID);
   $visitID = (int)$visitID;
 
-  $query = mysqli_query($link, "
+  $query = db_query($link, "
     SELECT ID, user_id, in_dt, eat_start_dt, eat_stop_dt, out_dt, state
     FROM visiting
-    WHERE ID = '$visitID'
-      AND user_id = '$userID'
+    WHERE ID = ?
+      AND user_id = ?
     LIMIT 1
-  ");
+  ", 'ii', array($visitID, (int)$userID));
 
   if (!$query) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -336,20 +330,20 @@ if ($nextState == 1) {
       exit;
     }
 
-    $res = mysqli_query($link, "
+    $affectedRows = db_execute_affected_rows($link, "
       UPDATE visiting
-      SET eat_start_dt = '$dateTimeStr',
+      SET eat_start_dt = ?,
           state = 3
-      WHERE user_id = '$id'
-        AND ID = '$ss_visiting_ID'
-    ");
+      WHERE user_id = ?
+        AND ID = ?
+    ", 'sii', array($dateTimeStr, $id, $ss_visiting_ID));
 
-    if (!$res) {
+    if ($affectedRows === false) {
       echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
-    if (mysqli_affected_rows($link) <= 0) {
+    if ($affectedRows <= 0) {
       echo "Ошибка: не удалось начать обед. Обновите страницу.";
       exit;
     }
@@ -373,20 +367,20 @@ if ($nextState == 1) {
       exit;
     }
 
-    $res = mysqli_query($link, "
+    $affectedRows = db_execute_affected_rows($link, "
       UPDATE visiting
-      SET eat_stop_dt = '$dateTimeStr',
+      SET eat_stop_dt = ?,
           state = 4
-      WHERE user_id = '$id'
-        AND ID = '$ss_visiting_ID'
-    ");
+      WHERE user_id = ?
+        AND ID = ?
+    ", 'sii', array($dateTimeStr, $id, $ss_visiting_ID));
 
-    if (!$res) {
+    if ($affectedRows === false) {
       echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
-    if (mysqli_affected_rows($link) <= 0) {
+    if ($affectedRows <= 0) {
       echo "Ошибка: не удалось завершить обед. Обновите страницу.";
       exit;
     }
@@ -421,44 +415,40 @@ if ($nextState == 1) {
       exit;
     }
 
-    $dateTimeStrEsc = mysqli_real_escape_string($link, $dateTimeStr);
-    $idEsc = mysqli_real_escape_string($link, $id);
-    $visitIDEsc = mysqli_real_escape_string($link, $visitID);
-
-    $res = mysqli_query($link, "
+    $visitingAffectedRows = db_execute_affected_rows($link, "
       UPDATE visiting
-      SET out_dt = '$dateTimeStrEsc',
+      SET out_dt = ?,
           state = 0
-      WHERE user_id = '$idEsc'
-        AND ID = '$visitIDEsc'
+      WHERE user_id = ?
+        AND ID = ?
         AND state = 4
-    ");
+    ", 'sii', array($dateTimeStr, $id, $visitID));
 
-    if (!$res) {
+    if ($visitingAffectedRows === false) {
       echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
-    $res2 = mysqli_query($link, "
+    $res2 = db_execute($link, "
       UPDATE remote_work
       SET stop_dt = NOW()
-      WHERE user_id = '$idEsc'
+      WHERE user_id = ?
         AND stop_dt IS NULL
-    ");
+    ", 'i', array($id));
 
     if (!$res2) {
       echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
-    if (mysqli_affected_rows($link) <= 0) {
-      $checkQuery = mysqli_query($link, "
+    if ($visitingAffectedRows <= 0) {
+      $checkQuery = db_query($link, "
         SELECT ID, state, out_dt
         FROM visiting
-        WHERE user_id = '$idEsc'
-          AND ID = '$visitIDEsc'
+        WHERE user_id = ?
+          AND ID = ?
         LIMIT 1
-      ");
+      ", 'ii', array($id, $visitID));
 
       if ($checkQuery && mysqli_num_rows($checkQuery) > 0) {
         $checkRow = mysqli_fetch_array($checkQuery, MYSQLI_ASSOC);
@@ -491,21 +481,21 @@ if ($nextState != 1) {
   if ($ss_state == 4) {
     $visitRow = require_current_visit_row($link, $id, $ss_visiting_ID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds, 4);
 
-    $res = mysqli_query($link, "
+    $affectedRows = db_execute_affected_rows($link, "
       UPDATE visiting
       SET eat_stop_dt = '0000-00-00 00:00:00',
           out_dt = '0000-00-00 00:00:00',
           state = 3
-      WHERE user_id = '$id'
-        AND ID = '$ss_visiting_ID'
-    ");
+      WHERE user_id = ?
+        AND ID = ?
+    ", 'ii', array($id, $ss_visiting_ID));
 
-    if (!$res) {
+    if ($affectedRows === false) {
       echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
-    if (mysqli_affected_rows($link) <= 0) {
+    if ($affectedRows <= 0) {
       echo "Ошибка: не удалось выполнить откат состояния. Обновите страницу.";
       exit;
     }
@@ -519,21 +509,21 @@ if ($nextState != 1) {
   if ($ss_state == 3) {
     $visitRow = require_current_visit_row($link, $id, $ss_visiting_ID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds, 3);
 
-    $res = mysqli_query($link, "
+    $affectedRows = db_execute_affected_rows($link, "
       UPDATE visiting
       SET eat_start_dt = '0000-00-00 00:00:00',
           eat_stop_dt = '0000-00-00 00:00:00',
           state = 2
-      WHERE user_id = '$id'
-        AND ID = '$ss_visiting_ID'
-    ");
+      WHERE user_id = ?
+        AND ID = ?
+    ", 'ii', array($id, $ss_visiting_ID));
 
-    if (!$res) {
+    if ($affectedRows === false) {
       echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
-    if (mysqli_affected_rows($link) <= 0) {
+    if ($affectedRows <= 0) {
       echo "Ошибка: не удалось выполнить откат состояния. Обновите страницу.";
       exit;
     }
@@ -547,18 +537,18 @@ if ($nextState != 1) {
   if ($ss_state == 2) {
     $visitRow = require_current_visit_row($link, $id, $ss_visiting_ID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds, 2);
 
-    $res = mysqli_query($link, "
+    $affectedRows = db_execute_affected_rows($link, "
       DELETE FROM visiting
-      WHERE user_id = '$id'
-        AND ID = '$ss_visiting_ID'
-    ");
+      WHERE user_id = ?
+        AND ID = ?
+    ", 'ii', array($id, $ss_visiting_ID));
 
-    if (!$res) {
+    if ($affectedRows === false) {
       echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
-    if (mysqli_affected_rows($link) <= 0) {
+    if ($affectedRows <= 0) {
       echo "Ошибка: не удалось удалить приход. Обновите страницу.";
       exit;
     }
@@ -579,20 +569,20 @@ if ($nextState != 1) {
   if ($ss_state == 0) {
     $visitRow = require_current_visit_row($link, $id, $ss_visiting_ID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds, 0);
 
-    $res = mysqli_query($link, "
+    $affectedRows = db_execute_affected_rows($link, "
       UPDATE visiting
       SET out_dt = '0000-00-00 00:00:00',
           state = 4
-      WHERE user_id = '$id'
-        AND ID = '$ss_visiting_ID'
-    ");
+      WHERE user_id = ?
+        AND ID = ?
+    ", 'ii', array($id, $ss_visiting_ID));
 
-    if (!$res) {
+    if ($affectedRows === false) {
       echo database_error_message($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
-    if (mysqli_affected_rows($link) <= 0) {
+    if ($affectedRows <= 0) {
       echo "Ошибка: не удалось выполнить откат ухода. Обновите страницу.";
       exit;
     }

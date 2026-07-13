@@ -54,3 +54,17 @@ function db_execute($link, $sql, $types = '', $params = array())
     mysqli_stmt_close($stmt);
     return true;
 }
+
+function db_execute_affected_rows($link, $sql, $types = '', $params = array())
+{
+    $stmt = db_prepare_and_execute($link, $sql, $types, $params);
+
+    if (!$stmt) {
+        return false;
+    }
+
+    $affectedRows = mysqli_stmt_affected_rows($stmt);
+    mysqli_stmt_close($stmt);
+
+    return $affectedRows;
+}
