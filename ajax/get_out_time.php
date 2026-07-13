@@ -11,7 +11,7 @@ if (!isset($_SESSION['ss_id'])) {
   exit;
 }
 
-$userID = $_SESSION['ss_id'];
+$userID = (int)$_SESSION['ss_id'];
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
@@ -22,15 +22,15 @@ $currentStartDT = isset($_SESSION['ss_startDTStr'])
   ? $_SESSION['ss_startDTStr']
   : date('Y-m-d 00:00:00');
 
-$query = mysqli_query($link, "
+$query = db_query($link, "
   SELECT ID, in_dt, eat_start_dt, eat_stop_dt, out_dt, state
   FROM visiting
-  WHERE user_id = '$userID'
+  WHERE user_id = ?
     AND state != 0
-    AND in_dt < '$currentStartDT'
+    AND in_dt < ?
   ORDER BY in_dt DESC, ID DESC
   LIMIT 1
-");
+ ", 'is', array($userID, $currentStartDT));
 
 if (!$query) {
   echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -41,7 +41,7 @@ if (mysqli_num_rows($query) == 0) {
   echo "<div class=\"reg_out_time\">";
   echo "<div class=\"reg_out_time_head\">";
   echo "<div class=\"reg_out_time_text\"><h5 class=\"big\">Незакрытых предыдущих дней не найдено</h5></div>";
-  echo "<div class=\"reg_out_time_close\"><img onclick=\"close_out_time();\" src=\"img/closeSmall.png\"></div>";
+  echo "<div class=\"reg_out_time_close\"><button class=\"pause-dialog-close\" title=\"Закрыть\" onclick=\"close_out_time();\"><img src=\"img/closeSmall.png\" alt=\"\"></button></div>";
   echo "</div>";
   echo "<div class=\"reg_out_time_footer\">";
   echo "<button class=\"reg_out_time_button_close\" onclick=\"close_out_time();\">Закрыть</button>";
@@ -76,14 +76,14 @@ echo "<div class=\"reg_out_time\">";
       echo "<h5 class=\"big\">Введите дату и время ухода!</h5>";
     echo "</div>";
     echo "<div class=\"reg_out_time_close\">";
-      echo "<img onclick=\"close_out_time();\" src=\"img/closeSmall.png\">";
+      echo "<button class=\"pause-dialog-close\" title=\"Закрыть\" onclick=\"close_out_time();\"><img src=\"img/closeSmall.png\" alt=\"\"></button>";
     echo "</div>";
   echo "</div>";
 
   echo "<div class=\"reg_out_time_body\">";
-    echo "<h5 class=\"middle\">Незакрытый приход: " . htmlspecialchars($inDT) . "</h5>";
+    echo "<h5 class=\"middle\">Незакрытый приход: " . html_escape($inDT) . "</h5>";
     echo "<input id=\"change_visit_id\" type=\"hidden\" value=\"$visitID\">";
-    echo "<input id=\"add_stop_time\" align=\"middle\" style=\"width:175px;\" type=\"datetime-local\" value=\"$defaultValue\" min=\"$minValue\" max=\"$maxValue\">";
+    echo "<input id=\"add_stop_time\" class=\"reg-out-time-input\" type=\"datetime-local\" value=\"" . html_escape($defaultValue) . "\" min=\"" . html_escape($minValue) . "\" max=\"" . html_escape($maxValue) . "\">";
   echo "</div>";
 
   echo "<div class=\"reg_out_time_footer\">";

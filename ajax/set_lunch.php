@@ -14,7 +14,7 @@ if (!isset($_SESSION['ss_id']) || !isset($_SESSION['ss_visiting_ID'])) {
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-$userID = $_SESSION['ss_id'];
+$userID = (int)$_SESSION['ss_id'];
 $visitingID = (int)$_SESSION['ss_visiting_ID'];
 
 mysqli_set_charset($link, "utf8");
@@ -38,30 +38,34 @@ $stopDTStr = $dateArr[1];
 $maxOpenShiftHours = 3;
 $maxOpenShiftSeconds = $maxOpenShiftHours * 60 * 60;
 
-$userID = mysqli_real_escape_string($link, $userID);
-$currentDateTimeEsc = mysqli_real_escape_string($link, $currentDateTime);
-$startDTStrEsc = mysqli_real_escape_string($link, $startDTStr);
-$stopDTStrEsc = mysqli_real_escape_string($link, $stopDTStr);
-
-$query = mysqli_query($link, "
+$query = db_query($link, "
   SELECT ID, in_dt, eat_start_dt, eat_stop_dt, state
   FROM visiting
-  WHERE ID = '$visitingID'
-    AND user_id = '$userID'
+  WHERE ID = ?
+    AND user_id = ?
     AND (
       (
-        in_dt >= '$startDTStrEsc'
-        AND in_dt < '$stopDTStrEsc'
+        in_dt >= ?
+        AND in_dt < ?
       )
       OR
       (
         state != 0
-        AND in_dt < '$startDTStrEsc'
-        AND TIMESTAMPDIFF(SECOND, '$startDTStr', '$currentDateTimeEsc') <= $maxOpenShiftSeconds
+        AND in_dt < ?
+        AND TIMESTAMPDIFF(SECOND, ?, ?) <= ?
       )
     )
   LIMIT 1
-");
+ ", 'iisssssi', array(
+  $visitingID,
+  $userID,
+  $startDTStr,
+  $stopDTStr,
+  $startDTStr,
+  $startDTStr,
+  $currentDateTime,
+  $maxOpenShiftSeconds
+));
 
 if (!$query) {
   exit('');
@@ -95,48 +99,46 @@ if ($currentTimestamp === false || $eatStartTimestamp === false || $currentTimes
 $duration = $currentTimestamp - $eatStartTimestamp;
 $durationStr = format_time_d_hhmmss_pure($duration);
 ?>
-<table bgcolor="#FFFFFF" id="lunchPauseFullScreen">
+<table id="lunchPauseFullScreen" class="pause-overlay-table">
   <tr>
-    <td align="center" valign="middle">
-      <table class="add_time" border="0" bgcolor="#ddeeff">
+    <td class="pause-overlay-cell">
+      <table class="add_time lunch-state-card">
         <tr>
-          <td align="center" width="446">
+          <td class="lunch-state-title">
             <div id="lunch_head_block">
-              <div class="left_button" style="display: flex; align-items: center; margin-left: 2px">
-                <button id ="lunch_time_back" title="возврат состояния регистрации времени до предыдущего" style="font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;" onclick="rollback_state();"><img src="img/rollbackState.png"></button>
+              <div class="left_button lunch-state-back">
+                <button id="lunch_time_back" class="time-state-icon-button" title="Возврат состояния регистрации времени до предыдущего" onclick="rollback_state();"><img src="img/rollbackState.png" alt=""></button>
               </div>
-              <h5 class="bigbig1" style="margin-right: 135px"><br>Сотрудник на обеде<br><br></h5>
+              <h5 class="bigbig1 lunch-state-heading"><br>Сотрудник на обеде<br><br></h5>
             </div>
           </td>
         </tr>
         <tr>
           <td class="report_no_padding_no_border">
-            <table class="no_padding_real" width="450">
+            <table class="no_padding_real pause-state-details">
               <tr>
-                <td class="report_no_padding" valign="middle" align="left" width="200">
+                <td class="report_no_padding pause-state-label lunch-state-label">
                   <h5 class="big">Время начала обеда:</h5>
                 </td>
-                <td class="report_no_padding" valign="middle" align="left">
-                  <h5 class="big"><?= htmlspecialchars($eatStart) ?></h5>
+                <td class="report_no_padding pause-state-value">
+                  <h5 class="big"><?= html_escape($eatStart) ?></h5>
                 </td>
               </tr>
-              <tr bgcolor="#ffffff">
-                <td class="report_no_padding" valign="middle" align="left">
+              <tr class="pause-state-row-alt">
+                <td class="report_no_padding pause-state-label">
                   <h5 class="big">Длительность:</h5>
                 </td>
-                <td class="report_no_padding" valign="middle" align="left">
-                  <h5 class="big" id="lunchDurationTimer"><?= htmlspecialchars($durationStr) ?></h5>
+                <td class="report_no_padding pause-state-value">
+                  <h5 class="big" id="lunchDurationTimer"><?= html_escape($durationStr) ?></h5>
                 </td>
               </tr>
             </table>
           </td>
         </tr>
         <tr>
-          <td class="report_no_padding" valign="middle" align="center">
+          <td class="report_no_padding pause-state-action-cell">
             <br>
-            <button
-              style="margin:0; padding:0; font-size: 100%; width:390px; height:30px; background-color:#f8d888; border:1px solid #888888;"
-              onclick="reg_eat_stop();">
+            <button class="pause-state-action" onclick="reg_eat_stop();">
               Возобновить учет времени
             </button>
             <br><br>
