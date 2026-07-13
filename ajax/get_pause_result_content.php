@@ -6,7 +6,7 @@ header("Content-type: text/plain; charset=utf-8");
 header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 
-$userID = $_SESSION['ss_id']; 
+$userID = (int)$_SESSION['ss_id'];
 $currentDate = date('Y-m-d');
 
 include_once __DIR__ . "/../funcs.php";
@@ -14,7 +14,12 @@ include_once __DIR__ . "/../php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8"); 
 
-$query = mysqli_query($link, "SELECT ID, SUIR, STARTTIME, STOPTIME, DESCRIPTION FROM ADD_TIME WHERE STARTDATE = '$currentDate' AND USERID = '$userID' AND PAUSE_MODE = 1 ORDER BY STARTDATE DESC, STARTTIME DESC limit 1");
+$query = db_query(
+  $link,
+  'SELECT ID, SUIR, STARTTIME, STOPTIME, DESCRIPTION FROM ADD_TIME WHERE STARTDATE = ? AND USERID = ? AND PAUSE_MODE = 1 ORDER BY STARTDATE DESC, STARTTIME DESC LIMIT 1',
+  'si',
+  array($currentDate, $userID)
+);
 
 $merr = mysqli_error($link);
 
@@ -33,8 +38,8 @@ else
   {
     if ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
     {  
-      $id = $row["ID"];
-      $suid = $row["SUIR"];
+      $id = (int)$row["ID"];
+      $suid = (int)$row["SUIR"];
       $startTime = $row["STARTTIME"];
       $stopTime = $row["STOPTIME"];
       $desk = $row["DESCRIPTION"];
@@ -42,57 +47,58 @@ else
       $duration = strtotime( $stopTime ) - strtotime( $startTime );
       $durationStr = format_time_d_hhmmss_pure( $duration );
 
-            echo "<table id=\"resultContentTable\" border=\"1\">";  
+            echo "<table id=\"resultContentTable\" class=\"pause-result-table\">";
               echo "<tr>";
-                echo "<td align=\"left\" width = \"450\">";
+                echo "<td class=\"pause-result-title\">";
                   echo "<h5 class=\"bigbig1\">Учет времени возобновлен</h5>";
                 echo "</td>";
               echo "</tr>";
               echo "<tr>";
                 echo "<td>";  
 
-                  echo "<table cellpadding=\"0\" cellspacing=\"0\" border=0 style=\"margin:0; padding:0; margin-left:0;\" >";  
+                  echo "<table class=\"pause-state-details\">";
                     echo "<tr>";
-                      echo "<td valign=\"middle\" align=\"left\">";
+                      echo "<td class=\"pause-state-label\">";
                         echo "<h5 class=\"big\">время начала</h5>";
                       echo "</td>";
-                      echo "<td valign=\"middle\" align=\"left\">";
-                        echo "<h5 class=\"big\">$startTime</h5>";
+                      echo "<td class=\"pause-state-value\">";
+                        echo "<h5 class=\"big\">" . html_escape($startTime) . "</h5>";
                       echo "</td>";
                     echo "</tr>";
 
-                    echo "<td valign=\"middle\" align=\"left\">";
+                    echo "<tr>";
+                      echo "<td class=\"pause-state-label\">";
                         echo "<h5 class=\"big\">время окончания</h5>";
                       echo "</td>";
-                      echo "<td valign=\"middle\" align=\"left\">";
-                        echo "<h5 class=\"big\">$stopTime</h5>";
+                      echo "<td class=\"pause-state-value\">";
+                        echo "<h5 class=\"big\">" . html_escape($stopTime) . "</h5>";
                       echo "</td>";
                     echo "</tr>";
 
                     
                     echo "<tr>";
-                      echo "<td valign=\"middle\" align=\"left\">";
+                      echo "<td class=\"pause-state-label\">";
                         echo "<h5 class=\"big\">длительность</h5>";
                       echo "</td>";
-                      echo "<td valign=\"middle\" align=\"left\">";
-                        echo "<h5 class=\"big\">$durationStr</h5>";
+                      echo "<td class=\"pause-state-value\">";
+                        echo "<h5 class=\"big\">" . html_escape($durationStr) . "</h5>";
                       echo "</td>";
                     echo "</tr>";
                     
                     echo "<tr>";
-                      echo "<td valign=\"middle\" align=\"left\">";
+                      echo "<td class=\"pause-state-label\">";
                         echo "<h5 class=\"big\">согласовано</h5>";
                       echo "</td>";
-                      echo "<td valign=\"middle\" align=\"left\">";
-                        echo "<h5 class=\"big\">$SUName</h5>";
+                      echo "<td class=\"pause-state-value\">";
+                        echo "<h5 class=\"big\">" . html_escape($SUName) . "</h5>";
                       echo "</td>";
                     echo "</tr>";
                     
                     echo "<tr>";
-                      echo "<td valign=\"middle\" align=\"left\">";
+                      echo "<td class=\"pause-state-label\">";
                         echo "<h5 class=\"big\">комментарий</h5>";
                       echo "</td>";
-                      echo "<td valign=\"middle\" align=\"left\">";
+                      echo "<td class=\"pause-state-value\">";
 echo "<h5 class=\"big\">" . html_escape($desk) . "</h5>";
                       echo "</td>";
                     echo "</tr>";
@@ -101,8 +107,8 @@ echo "<h5 class=\"big\">" . html_escape($desk) . "</h5>";
                 echo "</td>";
               echo "</tr>";
               echo "<tr>";
-                echo "<td valign=\"middle\" align=\"center\">";
-                   echo "<button style=\"margin:0; padding:0; font-size: 100%; width:390px; height:30px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"close_pause_result_head();\">Закрыть</button>";
+                echo "<td class=\"pause-state-action-cell\">";
+                   echo "<button class=\"pause-state-action\" onclick=\"close_pause_result_head();\">Закрыть</button>";
                 echo "</td>";
               echo "</tr>";
             echo "</table>"; 
