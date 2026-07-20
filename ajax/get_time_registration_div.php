@@ -74,6 +74,7 @@ function change_time ($user) {
 }
 
 function change_out_time ( $out_value, $currentTime ) {
+  $bgcolor = "#AAFFAA";
   $content = "";
 
   if ( $out_value == "0000-00-00 00:00:00" ) {
@@ -81,8 +82,8 @@ function change_out_time ( $out_value, $currentTime ) {
       $content .= "<td class=\"nopadding_s\">";
       $content .= "<h5 class=\"change_time\">Добавить время ухода?</h5>";
       $content .= "</td>";
-      $content .= "<td class=\"nopadding_s time-change-action-cell time-value-good\">";
-      $content .= "<button id=\"add_out_time\" class=\"time-change-button\" title=\"Добавить время\" onclick=\"enter_out_time();\"><img src=\"img/red.png\" alt=\"\"></button>";
+      $content .= "<td class=\"nopadding_s\" bgcolor=\"$bgcolor\" width=80 align = \"center\">";
+      $content .= "<button id = \"add_out_time\" title = \"Добавить время.\" style=\"font-size: 80%; padding: 0px 0px 0px 0px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"enter_out_time();\"><img src=\"img/red.png\"></button>";
       $content .= "</td>";
     }
   }
@@ -97,8 +98,8 @@ function change_out_time_disabled ( $out_value, $currentTime ) {
       $content .= "<td class=\"nopadding_s\">";
       $content .= "<h5 class=\"change_time\">Добавить время ухода?</h5>";
       $content .= "</td>";
-      $content .= "<td class=\"nopadding_s time-change-action-cell time-value-disabled\">";
-      $content .= "<button id=\"add_out_time_disabled\" class=\"time-change-button time-change-button-disabled\" disabled title=\"Сначала добавьте время прихода с обеда\"><img src=\"img/red.png\" alt=\"\"></button>";
+      $content .= "<td class=\"nopadding_s\" bgcolor=\"#DDDDDD\" width=80 align=\"center\">";
+      $content .= "<button id=\"add_out_time_disabled\" disabled title=\"Сначала добавьте время прихода с обеда.\" style=\"font-size: 80%; padding: 0px 0px 0px 0px; background-color:#dddddd; border:1px solid #888888; cursor:not-allowed;\"><img src=\"img/red.png\"></button>";
       $content .= "</td>";
     }
   }
@@ -107,37 +108,38 @@ function change_out_time_disabled ( $out_value, $currentTime ) {
 }
 
 function change_eat_stop_time ( $currentTime ) {
+  $bgcolor = "#AAFFAA";
   $content = "";
 
   if ( $currentTime >= "09:00:00" && $currentTime < "11:30:00" ) {
     $content .= "<td class=\"nopadding_s\">";
     $content .= "<h5 class=\"change_time\">Добавить время прихода с обеда?</h5>";
     $content .= "</td>";
-    $content .= "<td class=\"nopadding_s time-change-action-cell time-value-good\">";
-    $content .= "<button id=\"add_stop_eat\" class=\"time-change-button\" title=\"Добавить время\" onclick=\"enter_stop_eat_time();\"><img src=\"img/din.png\" alt=\"\"></button>";
+    $content .= "<td class=\"nopadding_s\" bgcolor=\"$bgcolor\" width=80 align = \"center\">";
+    $content .= "<button id = \"add_stop_eat\" title = \"Добавить время.\" style=\"font-size: 80%; padding: 0px 0px 0px 0px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"enter_stop_eat_time();\"><img src=\"img/din.png\"></button>";
     $content .= "</td>";
   }
   return $content;
 }
 
 function in_time_part( $datetime, $crossDay, $isThereDelay, $timeRestributionDescWidth, $timeRestributionValWidth ) {
-  $valueClass = "";
+  $bgcolor = "";
   $content = "";
   $content .= "<tr>";
-    $content .= "<td class=\"nopadding_s time-description-cell\">";
+    $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionDescWidth\">";
       $content .= "<h5 class=\"big\">Время прихода на рабочее место</h5>";
     $content .= "</td>";
 
     if ( $isThereDelay == 1 ) {
-      $valueClass = 'time-value-warning';
+      $bgcolor = '#FFFFAA';
     }
     if ( $isThereDelay == 2 ) {
-      $valueClass = 'time-value-bad';
+      $bgcolor = '#FFAAAA';
     }
 
-    $content .= "<td class=\"nopadding_s time-value-cell $valueClass\">";
-    if ( $isThereDelay == 2 ) { 
-      if ( $crossDay == 1 ) { 
+    $content .= "<td class=\"nopadding_s\" bgcolor=\"$bgcolor\" width = \"$timeRestributionValWidth\" align = \"center\">";
+    if ( $isThereDelay == 2 ) {
+      if ( $crossDay == 1 ) {
         $datetime = split_data_and_time_by_nl_str( $datetime );
         $content .= "<h5 class=\"big\">".$datetime."</h5>";
       }
@@ -145,10 +147,10 @@ function in_time_part( $datetime, $crossDay, $isThereDelay, $timeRestributionDes
         $datetime = datetime_to_time_str( $datetime );
         $content .= "<h5 class=\"big\">".$datetime."</h5>";
       }
-      $content .= " <button id=\"explBtn\" class=\"time-explanation-button\" title=\"Внести объяснение к опозданию\" onclick=\"add_expl();\"><img src=\"img/report_small.png\" alt=\"\"></button>";
+      $content .= " <button id = \"explBtn\" title = \"Внести объяснения к опозданию.\" style=\"font-size: 80%; padding: 0px 0px 0px 0px; background-color:#ffffff; border:1px solid #888888;\" onclick=\"add_expl();\"><img src=\"img/report_small.png\"></button>";
     }
     else {
-      if ( $crossDay == 1 ) { 
+      if ( $crossDay == 1 ) {
         $datetime = split_data_and_time_by_nl_str( $datetime );
         $content .= "<h5 class=\"big\">".$datetime."</h5>";
       }
@@ -165,11 +167,11 @@ function in_time_part( $datetime, $crossDay, $isThereDelay, $timeRestributionDes
 function eat_start_part( $datetime, $crossDay, $timeRestributionDescWidth, $timeRestributionValWidth ) {
   $content = "";
   $content .= "<tr>";
-    $content .= "<td class=\"nopadding_s time-description-cell\">";
+    $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionDescWidth\">";
       $content .= "<h5 class=\"big\">Время ухода на обед</h5>";
     $content .= "</td>";
-    $content .= "<td class=\"nopadding_s time-value-cell\">";
-    if ( $crossDay == 1 ) { 
+    $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionValWidth\" align = \"center\">";
+    if ( $crossDay == 1 ) {
       $datetime = split_data_and_time_by_nl_str( $datetime );
       $content .= "<h5 class=\"big\">".$datetime."</h5>";
     }
@@ -185,11 +187,11 @@ function eat_start_part( $datetime, $crossDay, $timeRestributionDescWidth, $time
 function eat_stop_part( $datetime, $crossDay, $timeRestributionDescWidth, $timeRestributionValWidth ) {
   $content = "";
     $content .= "<tr>";
-      $content .= "<td class=\"nopadding_s time-description-cell\">";
+      $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionDescWidth\">";
         $content .= "<h5 class=\"big\">Время прихода с обеда</h5>";
       $content .= "</td>";
-      $content .= "<td class=\"nopadding_s time-value-cell\">";
-      if ( $crossDay == 1 ) { 
+      $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionValWidth\" align = \"center\">";
+      if ( $crossDay == 1 ) {
         $datetime = split_data_and_time_by_nl_str( $datetime );
         $content .= "<h5 class=\"big\">".$datetime."</h5>";
       }
@@ -203,13 +205,14 @@ function eat_stop_part( $datetime, $crossDay, $timeRestributionDescWidth, $timeR
 }
 
 function out_time_part( $datetime, $crossDay, $timeRestributionDescWidth, $timeRestributionValWidth ) {
+  $bgcolor = "#AAFFAA";
   $content = "";
   $content .= "<tr>";
-    $content .= "<td class=\"nopadding_s time-description-cell\">";
+    $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionDescWidth\">";
       $content .= "<h5 class=\"big\">Время ухода с рабочего места</h5>";
     $content .= "</td>";
-    $content .= "<td class=\"nopadding_s time-value-cell time-value-good\">";
-    if ( $crossDay == 1 ) { 
+    $content .= "<td class=\"nopadding_s\" bgcolor=\"$bgcolor\" width = \"$timeRestributionValWidth\" align = \"center\">";
+    if ( $crossDay == 1 ) {
       $datetime = split_data_and_time_by_nl_str( $datetime );
       $content .= "<h5 class=\"big\">".$datetime."</h5>";
     }
@@ -224,43 +227,43 @@ function out_time_part( $datetime, $crossDay, $timeRestributionDescWidth, $timeR
 
 function empty_line() {
   $content = "";
-  $content .= "<tr class=\"time-spacer-row\">";
-  $content .=   "<td class=\"nopadding_s time-align-right\">";
+  $content .= "<tr height = 10 >";
+  $content .=   "<td align = \"right\" class=\"nopadding_s\">";
   $content .=   "</td>";
   $content .= "</tr>";
   return $content;
 }
 
 function pure_work_day_duration_part( $time, $norm, $check, $timeRestributionDescWidth, $timeRestributionValWidth, $msg, $rightAlign, $showRMTime ) {
-  $valueClass = "";
+  $bgcolor = "";
   $addonStr = "";
 
   if ( $showRMTime == 1 ) {
-    $tms = time_to_second( $time ); 
+    $tms = time_to_second( $time );
     $formatedTime =redmine_represent( $tms );
     $addonStr = " (RM: ".$formatedTime.")";
   }
 
   if( $check == 1 ) {
     if ( strtotime( $time ) >= strtotime( $norm ) ) {
-      $valueClass = "time-value-good";
+      $bgcolor = "#AAFFAA";
     }
     else {
-      $valueClass = "time-value-bad";
-    }    
+      $bgcolor = "#FFAAAA";
+    }
   }
   $content = "";
   $content .= "<tr>";
     if ( $rightAlign == 1 ) {
-      $content .= "<td class=\"nopadding_s time-description-cell time-align-right\">";
+      $content .= "<td align = \"right\" class=\"nopadding_s\" width = \"$timeRestributionDescWidth\">";
       $content .= "<h5 class=\"biggreen1\">$msg</h5>";
     }
     else {
-      $content .= "<td class=\"nopadding_s time-description-cell\">";
+      $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionDescWidth\">";
       $content .= "<h5 class=\"biggreen1\">$msg</h5>";
     }
     $content .= "</td>";
-    $content .= "<td class=\"nopadding_s time-value-cell $valueClass\" title=\"Зеленый: продолжительность не менее нормы. Красный: меньше нормы\">";
+    $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionValWidth\" title=\"выделение цветом: \nзеленый - продолжительность рабочего времени не менее нормы\nкрасный - меньше\" bgcolor=\"$bgcolor\" width=80 align = \"center\">";
       $content .= "<h5 class=\"big\">".$time.$addonStr."</h5>";
     $content .= "</td>";
   $content .= "</tr>";
@@ -269,54 +272,54 @@ function pure_work_day_duration_part( $time, $norm, $check, $timeRestributionDes
 
 function add_time_work_day_duration_part( $time, $valid, $timeRestributionDescWidth, $timeRestributionValWidth ) {
   $content = "";
- 
+
   if ( $valid ) {
     $content .= "<tr>";
-      $content .= "<td class=\"nopadding_s time-description-cell\">";
+      $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionDescWidth\">";
         $content .= "<h5 class=\"biggreen1\">Продолжительность работы вне офиса</h5>";
       $content .= "</td>";
-      $content .= "<td class=\"nopadding_s time-value-cell\">";
+      $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionValWidth\" align = \"center\">";
         $content .= "<h5 class=\"big\">".$time."</h5>";
       $content .= "</td>";
     $content .= "</tr>";
-  } 
+  }
   return $content;
 }
 
 function add_pause_work_day_duration_part( $time, $valid, $timeRestributionDescWidth, $timeRestributionValWidth ) {
   $content = "";
- 
+
   if ( $valid ) {
     $content .= "<tr>";
-      $content .= "<td class=\"nopadding_s time-description-cell\">";
+      $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionDescWidth\">";
         $content .= "<h5 class=\"bigred\">Продолжительность приостановки учета времени</h5>";
       $content .= "</td>";
-      $content .= "<td class=\"nopadding_s time-value-cell\">";
+      $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionValWidth\" align = \"center\">";
         $content .= "<h5 class=\"big\">".$time."</h5>";
       $content .= "</td>";
     $content .= "</tr>";
-  } 
+  }
   return $content;
 }
 
 function eat_duration_part( $time, $norm, $check, $timeRestributionDescWidth, $timeRestributionValWidth ) {
-  $valueClass = "";
+  $bgcolor = "";
 
   if( $check == 1 ) {
     if ( strtotime( $time ) <= strtotime( $norm ) ) {
-      $valueClass = "time-value-good";
+      $bgcolor = "#AAFFAA";
     }
     else {
-      $valueClass = "time-value-bad";
-    }    
+      $bgcolor = "#FFAAAA";
+    }
   }
 
   $content = "";
   $content .= "<tr>";
-    $content .= "<td class=\"nopadding_s time-description-cell\">";
+    $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionDescWidth\">";
       $content .= "<h5 class=\"biggreen1\">Продолжительность обеденного времени</h5>";
     $content .= "</td>";
-    $content .= "<td class=\"nopadding_s time-value-cell $valueClass\" title=\"Зеленый: обед не более часа. Красный: свыше часа\">";
+    $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionValWidth\" title=\"выделение цветом: \nзеленый - продолжительность обеда не более 1 часа\nкрасный - свыше\" bgcolor=\"$bgcolor\" width=80 align = \"center\">";
       $content .= "<h5 class=\"big\">".$time."</h5>";
     $content .= "</td>";
   $content .= "</tr>";
@@ -327,10 +330,10 @@ function delay_part( $time, $valid, $timeRestributionDescWidth, $timeRestributio
   $content = "";
   if ( $valid ) {
     $content .= "<tr>";
-      $content .= "<td class=\"nopadding_s time-description-cell\">";
+      $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionDescWidth\">";
         $content .= "<h5 class=\"biggreen1\">Длительность опоздания</h5>";
       $content .= "</td>";
-      $content .= "<td class=\"nopadding_s time-value-cell\">";
+      $content .= "<td class=\"nopadding_s\" width = \"$timeRestributionValWidth\" align = \"center\">";
         $content .= "<h5 class=\"big\">".$time."</h5>";
       $content .= "</td>";
     $content .= "</tr>";
@@ -388,10 +391,10 @@ $isThereDelayVal = isset($_SESSION['ss_there_is_delay'])
   ? $_SESSION['ss_there_is_delay']
   : 0;
 
-$dateArr = datetimestr_to_day_start_stop_DT_ex_str( $currentDate, $user_dayTransitionTime );  
-                                                                                                                                         
+$dateArr = datetimestr_to_day_start_stop_DT_ex_str( $currentDate, $user_dayTransitionTime );
+
 $startDTStr = $dateArr[0];
-$stopDTStr = $dateArr[1];    
+$stopDTStr = $dateArr[1];
 
 $maxOpenShiftHours = 3;
 $maxOpenShiftSeconds = $maxOpenShiftHours * 60 * 60;
@@ -414,7 +417,7 @@ $query = db_query($link, "
     )
   ORDER BY in_dt DESC, ID DESC
   LIMIT 1
- ", 'isssssi', array(
+", 'isssssi', array(
   $userID,
   $startDTStr,
   $stopDTStr,
@@ -428,7 +431,7 @@ if (!$query) {
   echo database_error_message($link, __FILE__ . ':' . __LINE__);
   exit;
 }
- 
+
 $btnWidth = 616;
 $btnHeight = 40;
 
@@ -439,9 +442,9 @@ if ( $vn == 0 ) {
 
   $dtArr = get_splited_current_date_time_in_timezone();
 
-  $currentTimeHHMMSS = $dtArr[1]; 
+  $currentTimeHHMMSS = $dtArr[1];
 
-  echo "<table class=\"time-management-table\">";
+  echo "<table cellpadding=\"0\" cellspacing=\"0\" border=0>";
   echo "<tr>";
 
   $retArr = get_and_update_start_time_status( $userID );
@@ -460,7 +463,7 @@ if ( $vn == 0 ) {
     $_SESSION['ss_delay_duration'] = 0;
 
     echo "<td>";
-      echo "<button id=\"reg_in_work_button\" class=\"time-primary-button\" onclick=\"reg_in_work();\">Зарегистрировать время прихода</button>";
+      echo "<button id=\"reg_in_work_button\" style=\"font-size: 110%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"reg_in_work();\">Зарегистрировать время прихода</button>";
     echo "</td>";
   }
   else {
@@ -473,14 +476,14 @@ if ( $vn == 0 ) {
     $_SESSION['ss_delay_duration'] = $delayDuration;
 
     echo "<td>";
-      echo "<button class=\"time-primary-button time-primary-button-late\" onclick=\"reg_in_work_with_delay();\">Зарегистрировать приход с опозданием!</button>";
+      echo "<button style=\"font-size: 110%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f79398; border:1px solid #888888;\" onclick=\"reg_in_work_with_delay();\">Зарегистрировать приход с опозданием!</button>";
     echo "</td>";
   }
 
   echo "</tr>";
   echo "</table>";
 }
-else { 
+else {
   $row1 = mysqli_fetch_assoc($query);
 
   $in_dt = $row1["in_dt"];
@@ -528,7 +531,7 @@ else {
   $state = $state_db;
   $state_db = $state;
   $_SESSION['ss_visiting_ID'] = $visitID;
-  
+
   $changesArr = is_there_day_change( $in_dt, $eat_start_dt, $eat_stop_dt, $out_dt, $currentDate, $state );
 
   $changeIn = $changesArr[0];
@@ -536,9 +539,9 @@ else {
   $changeEatStop = $changesArr[2];
   $changeOut = $changesArr[3];
 
-  // $currentTimeHHMMSS = strtotime( $day_work_start ); 
+  // $currentTimeHHMMSS = strtotime( $day_work_start );
 
-  echo "<table class=\"time-management-table\">";
+  echo "<table border=0>";
   echo "<tr><td>";
 
   $userRate = get_user_rate( $userID );
@@ -546,23 +549,23 @@ else {
   $userDayNormSec = format_time_d_hhmmss_pure( $userDayNormSec );
 
   $eatNorm = "01:00:00";
-  
+
   $addTimesArray = get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr, 1 );
 
   $currentDay = 1;
   if ( $state == 0 ){ $currentDay = 0; }
- 
+
   $errorDur = 0;
- 
+
   $durations = get_durations( $in_dt, $out_dt, $eat_start_dt, $eat_stop_dt, $addTimesArray, $state, $currentDay );
 
   $resultPureDurationWOEat = $durations[0];
   $resultPureDuration = $durations[3];
-                 
+
   $addTimeDuration = $durations[2];
   $pauseTimeDuration = $durations[5];
 
-  $lunchDuration = $durations[1];  
+  $lunchDuration = $durations[1];
 
   $resultPureDurationWOEatStr = format_time_d_hhmmss_pure( $resultPureDurationWOEat );
   $resultPureDurationStr = format_time_d_hhmmss_pure( $resultPureDuration );
@@ -577,46 +580,48 @@ else {
     $delayVal = $delayRets[0][7];
   }
 
-  $delayStr = format_time_d_hhmmss_pure( $delayVal); 
+  $delayStr = format_time_d_hhmmss_pure( $delayVal);
 
   $timeRestribution = "";
   $timeManagement = "";
 
   echo "<div id=\"state_buttons\">";
     echo "<div class=\"left_button\">";
-      echo "<button id=\"time_back\" class=\"time-state-icon-button\" title=\"Возврат состояния регистрации времени до предыдущего\" onclick=\"rollback_state();\"><img src=\"img/rollbackState.png\" alt=\"\"></button>";
+      echo "<button id =\"time_back\" title=\"возврат состояния регистрации времени до предыдущего\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"rollback_state();\"><img src=\"img/rollbackState.png\"></button>";
     echo "</div>";
-    echo "<div class=\"nopadding_s time-state-actions\">";
+    echo "<div class=\"nopadding_s\" align=\"right\" width=50% style=\"font-size: 100%; margin:0; padding:0; margin-left:0;\">";
       if ($state == 3 || $state == 0) {
         echo "<div class=\"right_button\">";
-        echo "<button class=\"pauseBtn_des time-state-icon-button\" title=\"В этом состоянии изменения запрещены\" onclick=\"remote_work();\"><img class=\"time-state-small-icon\" src=\"img/remoteWorkIcon2.png\" alt=\"\"></button>";
-        echo "<button class=\"pauseBtn_des time-state-icon-button\" title=\"В этом состоянии посещение спортзала запрещено\" onclick=\"disclamer($state_db);\"><img src=\"img/sport_disabled.png\" alt=\"\"></button>";
-        echo "<button class=\"pauseBtn_des time-state-icon-button\" title=\"В этом состоянии приостановка запрещена\" onclick=\"disclamer($state_db);\"><img src=\"img/pauseDisabled.png\" alt=\"\"></button>";
+        echo "<button class=\"pauseBtn_des\" title=\"в обеденное время и при отметке об уходе с рабочего места изменения запрещены!\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"remote_work();\"><img src=\"img/remoteWorkIcon2.png\" style=\"width: 15px; height: 14px;\"></button>";
+        echo "<button class=\"pauseBtn_des\" title=\"в обеденное время и при отметке об уходе с рабочего места приостановка учета времени запрещена!\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"disclamer( '$state_db' );\"><img src=\"img/sport_disabled.png\"></button>";
+        echo "<button class=\"pauseBtn_des\" title=\"в обеденное время и при отметке об уходе с рабочего места приостановка учета времени запрещена!\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"disclamer( '$state_db' );\"><img src=\"img/pauseDisabled.png\"></button>";
         echo "</div>";
       }
       else {
-        echo "<div class=\"right_button\">"; 
-        echo "<button class=\"pauseBtn time-state-icon-button\" title=\"Удаленная работа\" onclick=\"remote_work();\"><img class=\"time-state-small-icon\" src=\"img/remoteWorkIcon2.png\" alt=\"\"></button>";
-        echo "<button class=\"pauseBtn time-state-icon-button\" title=\"Посещение тренажерного зала\" onclick=\"set_sport_pause();\"><img src=\"img/sport.png\" alt=\"\"></button>";
-        echo "<button class=\"pauseBtn time-state-icon-button\" title=\"Приостановка учета времени\" onclick=\"set_pause_header();\"><img src=\"img/pause.png\" alt=\"\"></button>";
+        echo "<div class=\"right_button\">";
+        echo "<button class=\"pauseBtn\" title=\"Удаленная работа\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"remote_work();\"><img src=\"img/remoteWorkIcon2.png\" style=\"width: 15px; height: 14px;\"></button>";
+        echo "<button class=\"pauseBtn\" title=\"Посещение тренажерного зала\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"set_sport_pause();\"><img src=\"img/sport.png\"></button>";
+        echo "<button class=\"pauseBtn\" title=\"Приостановка учета времени\" style=\"font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"set_pause_header();\"><img src=\"img/pause.png\"></button>";
         echo "</div>";
       }
     echo "</div>";
   echo "</div>";
 
-  $timeManagement .= "<table class=\"time-management-table\"><tr>";
-  
+  $timeManagement .= "<table border=0><tr>";
+
   $timeRestributionWholeWidth = $btnWidth;
   $timeRestributionDescWidth = 440;
   $timeRestributionValWidth = $timeRestributionWholeWidth - $timeRestributionDescWidth;
- 
-  $timeRestribution .= "<table class=\"time-registration-details\">";
-  $timeRestributionStat = "<table class=\"time-registration-details\">";
+
+  $timeRestribution .= "<table width=$timeRestributionWholeWidth  bordercolor=\"#888888\"  border=1>";
+  $timeRestributionStat = "<table width=$timeRestributionWholeWidth  bordercolor=\"#888888\"  border=1>";
 
 
   if ( $state == 0 ) {
-    $timeManagement .= "<td class=\"nopadding_s time-complete-message\">";
-      $timeManagement .= "<strong><br>Сведения за текущий рабочий день уже внесены!</strong>";
+    $timeManagement .= "<td class=\"nopadding_s\" align=\"center\">";
+      $timeManagement .= "<font size=\"4\" color=\"#ff0000\" face=\"Arial\">";
+        $timeManagement .= "<b><br>Сведения за текущий рабочий день уже внесены!</b>";
+      $timeManagement .= "</font>";
     $timeManagement .= "</td>";
 
     $timeRestribution .= in_time_part( $in_dt, $changeIn, $isThereDelayVal, $timeRestributionDescWidth, $timeRestributionValWidth );
@@ -635,10 +640,10 @@ else {
   }
   if ( $state == 2 ) {
     $timeManagement .= "<td class=\"nopadding_s\" height=10></td></tr><tr>";
-    $timeManagement .= "<td class=\"nopadding_s time-management-cell\">";
-    $timeManagement .= "<button class=\"time-primary-button\" onclick=\"reg_eat_start(); return false;\">Зарегистрировать время ухода на обед</button>";
+    $timeManagement .= "<td class=\"nopadding_s\" style=\"font-size: 100%; margin:0; padding:0; margin-left:0;\">";
+    $timeManagement .= "<button style=\"font-size: 110%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f8d888; border:1px solid #888888; cursor:pointer;\" onclick=\"reg_eat_start(); return false;\">Зарегистрировать время ухода на обед</button>";
     $timeManagement .= "</td>";
-    
+
     $timeRestribution .= change_time( $userID );
     $timeRestribution .= in_time_part( $in_dt, $changeIn, $isThereDelayVal, $timeRestributionDescWidth, $timeRestributionValWidth );
 
@@ -651,8 +656,8 @@ else {
   }
   if ( $state == 3 ) {
     $timeManagement .= "<td class=\"nopadding_s\" height=10></td></tr><tr>";
-    $timeManagement .= "<td class=\"nopadding_s time-management-cell\">";
-      $timeManagement .= "<button class=\"time-primary-button\" onclick=\"reg_eat_stop();\">Зарегистрировать время прихода с обеда</button>";
+    $timeManagement .= "<td class=\"nopadding_s\" style=\"font-size: 100%; margin:0; padding:0; margin-left:0;\">";
+      $timeManagement .= "<button style=\"font-size: 100%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f8d888; border:1px solid #888888; cursor:pointer;\" onclick=\"reg_eat_stop();\">Зарегистрировать время прихода с обеда</button>";
     $timeManagement .= "</td>";
 
     $timeRestribution .= change_time( $userID );
@@ -667,10 +672,10 @@ else {
     $timeRestributionStat .= empty_line();
     $timeRestributionStat .= pure_work_day_duration_part( $resultPureDurationStr, 0, 0, $timeRestributionDescWidth, $timeRestributionValWidth, 'Итог:', 1, 1 );
   }
-  if ( $state == 4 ) {  
+  if ( $state == 4 ) {
     $timeManagement .= "<td class=\"nopadding_s\" height=10></td></tr><tr>";
-    $timeManagement .= "<td class=\"nopadding_s time-management-cell\">";
-      $timeManagement .= "<button class=\"time-primary-button\" onclick=\"reg_out_work(); return false;\">Зарегистрировать время ухода с рабочего места</button>";
+    $timeManagement .= "<td class=\"nopadding_s\" style=\"font-size: 100%; margin:0; padding:0; margin-left:0;\">";
+      $timeManagement .= "<button style=\"font-size: 100%; width:".$btnWidth."px; height:".$btnHeight."px; background-color:#f8d888; border:1px solid #888888; cursor:pointer;\" onclick=\"reg_out_work(); return false;\">Зарегистрировать время ухода с рабочего места</button>";
     $timeManagement .= "</td>";
 
     $timeRestribution .= change_time( $userID );
@@ -685,15 +690,15 @@ else {
     $timeRestributionStat .= delay_part( $delayStr, $delayVal > 0, $timeRestributionDescWidth, $timeRestributionValWidth );
     $timeRestributionStat .= empty_line();
     $timeRestributionStat .= pure_work_day_duration_part( $resultPureDurationStr, 0, 0, $timeRestributionDescWidth, $timeRestributionValWidth, 'Итог:', 1, 1 );
-  }   
+  }
   $timeManagement .= "</tr>";
   $timeManagement .= "</table>";
 
   $timeRestribution .= "</table>";
-    
-  echo "<div class=\"time-section-spacer\"></div>";
+
+  echo "<table border=0><tr height = 12><td></td></tr></table>";
   echo $timeRestribution;
-  echo "<div class=\"time-section-spacer\"></div>";
+  echo "<table border=0><tr height = 12><td></td></tr></table>";
   echo $timeRestributionStat;
   echo $timeManagement;
 

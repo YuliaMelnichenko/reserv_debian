@@ -13,12 +13,12 @@ $userID_ = (int)$_SESSION['ss_id'];
 
 $currentTime = date("H:i:s");
 
-echo "<table id=\"entrance_approvement_table_users\" class=\"entrance-table\">";
-echo "<tr class=\"entrance-table-head\">";
-echo "<td class=\"nopadding_s entrance-name-cell\"><h5 class=\"big\">Сотрудник</h5></td>";
-echo "<td class=\"nopadding_s entrance-time-cell\"><h5 class=\"big\">Зарегистрированное<br>время прихода</h5></td>";
-echo "<td class=\"nopadding_s entrance-new-time-cell\"><h5 class=\"big\">Новое значение<br>времени прихода</h5></td>";
-echo "<td class=\"nopadding_s entrance-action-cell\"><h5 class=\"big\">Управление</h5></td>";
+echo "<table id = \"entrance_approvement_table_users\" class=\"slim\" border=1>";
+echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
+echo "<td width=130 class=\"nopadding_s\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Сотрудник</h5>"."</td>";
+echo "<td width=100 class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"big\">Зарегистрированное<br>время прихода</h5>"."</td>";
+echo "<td width=130 class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"big\">Новое значение<br>времени прихода</h5>"."</td>";
+echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"big\">Управление</h5>"."</td>";
 echo "</tr>";
 
 $colorMode = 1;
@@ -53,16 +53,14 @@ foreach( $userInTimes as $userInTime )
 
   $rowID = "newInTime".$rowID;
  
-  $rowClass = $color == $color1 ? "entrance-row-alt" : "entrance-row";
-
-  echo "<tr class=\"$rowClass\">";
-  echo "<td class=\"nopadding_s entrance-name-cell\"><h5 class=\"middle\">" . html_escape($userName) . "</h5></td>";
-  echo "<td class=\"nopadding_s entrance-time-cell\"><h5 class=\"big\">" . html_escape($retUserInTime) . "</h5></td>";
-  echo "<td class=\"nopadding_s entrance-new-time-cell\"><h5 class=\"big\">";
-    echo "<input id=\"$rowID\" class=\"entrance-time-input\" type=\"text\" value=\"" . html_escape($currentTime) . "\">";
+  echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
+  echo "<td nowrap width=130 class=\"nopadding_s\" valign=\"middle\" align=\"left\"><h5 class=\"middle\">" . html_escape($userName) . "</h5></td>";
+  echo "<td width=100 class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"big\">" . html_escape($retUserInTime) . "</h5></td>";
+  echo "<td width=130 class=\"nopadding_s\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">";
+    echo "<input id=\"" . html_escape($rowID) . "\" align=\"center\" style=\"width:130px;\" type=\"text\" value=\"" . html_escape($currentTime) . "\">";
   echo "</td>";
-  echo "<td class=\"nopadding_s entrance-action-cell\"><h5 class=\"big\">";
-    echo "<button class=\"entrance-set-button\" title=\"Задать новое время\" onclick=\"set_new_entrance_time($retUserID, " . html_escape(js_encode($retUserInTime)) . ", document.getElementById(" . html_escape(js_encode($rowID)) . ").value);\">Задать</button>";
+  echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">";
+    echo "<button id = \"explBtn\" title = \"Просмотреть\" style=\"padding: 0px 0px 0px 0px; width:90px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"set_new_entrance_time($retUserID, " . html_escape(js_encode($retUserInTime)) . ", document.getElementById(" . html_escape(js_encode($rowID)) . ").value);\">Задать</button>";
   echo "</td>";
   echo "</tr>";  
 }

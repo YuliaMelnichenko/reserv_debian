@@ -13,12 +13,12 @@ include_once __DIR__ . "/../funcs.php";
 
 echo "<h5 class=\"big\"> Текущая загруженность тренажерного зала </h5>";
 
-echo "<table id=\"add_time_sport_table\" class=\"sport-table sport-table-current\">";
-echo "<tr class=\"sport-table-head sport-table-head-short\">";
-echo "<td class=\"add_time_sport sport-name-cell\">";
+echo "<table id=\"add_time_sport_table\" border=1 style=\"margin-top: 10px\">";
+echo "<tr bgcolor=\"#DDDDDD\" bordercolor=\"#888888\" height=\"20px\">";
+echo "<td class=\"add_time_sport\" valign=\"middle\" align=\"center\" width=490>";
 echo "<div class=\"person\">"."<h5 class=\"data_train\">Сотрудник</h5>"."</div>";
 echo "</td>";
-echo "<td class=\"add_time_sport sport-time-cell\">";
+echo "<td class=\"add_time_sport\" valign=\"middle\" align=\"center\" width=200>";
 echo "<div class=\"training\">"."<h5 class=\"data_train\">Время прихода</h5>"."</div>";
 echo "</td>";
 echo "</tr>";
@@ -48,8 +48,8 @@ if (!$query) {
 $res = mysqli_num_rows($query);
 
 if ($res == 0) {
-    echo "<tr class=\"sport-empty-row\">";
-    echo "<td colspan=\"2\" class=\"sport-empty-cell\"><h5>Тренажерный зал пуст</h5></td>";
+    echo "<tr bordercolor=\"#888888\" height=\"40px\">";
+    echo "<td colspan=3 align=\"center\"><h5>Тренажерный зал пуст</h5></td>";
     echo "</tr>";
 }
 else {
@@ -78,9 +78,9 @@ else {
         $lastname = $row2["lastname"];
         $surname = $row2["surname"];
     
-        echo "<tr class=\"sport-current-row\">";
-        echo "<td class=\"add_time_sport sport-name-cell\"><h2 class=\"full_name sport\">" . html_escape($surname . " " . $firstname . " " . $lastname) . "</h2></td>";
-        echo "<td class=\"add_time_sport sport-time-cell\"><h2 class=\"sport\">" . html_escape($time) . "</h2></td>";
+        echo "<tr bgcolor=\"#ddffff\" bordercolor=\"#888888\" height=\"60px\">";
+echo "<td width=490 class=\"add_time_sport\" valign=\"middle\" align=\"center\"><h2 class=\"full_name sport\">" . html_escape($surname . " " . $firstname . " " . $lastname) . "</h2></td>";
+        echo "<td width=200 class=\"add_time_sport\" valign=\"middle\" align=\"center\"><h2 class=\"sport\">" . html_escape($time) . "</h2></td>";
         echo "</tr>";
     }
 }
@@ -115,20 +115,20 @@ else {
 }
 echo "</div>";
 
-echo "<table id=\"schedule_training\" class=\"sport-table\">";
-echo "<tr class=\"sport-table-head sport-table-head-short\">";
-echo "<td class=\"add_time_sport sport-schedule-name-cell\" rowspan=\"2\">";
+echo "<table id=\"schedule_training\" border=1>";
+echo "<tr bgcolor=\"#DDDDDD\" bordercolor=\"#888888\" height=\"20px\">";
+echo "<td class=\"add_time_sport\" valign=\"middle\" align=\"center\" rowspan=2>";
 echo "<div class=\"person\">"."<h5 class=\"data_train\">Сотрудник</h5>"."</div>";
 echo "</td>";
-echo "<td class=\"add_time_sport sport-schedule-cell\" colspan=\"2\">";
+echo "<td class=\"add_time_sport\" valign=\"middle\" align=\"center\" colspan=2>";
 echo "<div class=\"training\">"."<h5 class=\"data_train\">График</h5>"."</div>";
 echo "</td>";
 echo "</tr>";
-echo "<tr class=\"sport-table-head sport-table-head-short\">";
-echo "<td class=\"sport-schedule-cell\">";
+echo "<tr bgcolor=\"#DDDDDD\" bordercolor=\"#888888\" height=\"20px\">";
+echo "<td align=\"center\">";
 echo "<div>"."<h5 class=\"data_train\">Дата</h5>"."</div>";
 echo "</td>";
-echo "<td class=\"sport-schedule-cell\">";
+echo "<td align=\"center\">";
 echo "<div>"."<h5 class=\"data_train\">Время</h5>"."</div>";
 echo "</td>";
 echo "</tr>";
@@ -144,8 +144,8 @@ if (!$query3) {
 $res1 = mysqli_num_rows($query3);
 
 if ($res1 === 0) {
-    echo "<tr class=\"sport-empty-row\">";
-    echo "<td colspan=\"3\" class=\"sport-empty-cell\"><h5>Записи отсутствуют</h5></td>";
+    echo "<tr bordercolor=\"#888888\" height=\"40px\">";
+    echo "<td colspan=3 align=\"center\"><h5>Записи отсутствуют</h5></td>";
     echo "</tr>";
 }
 else {
@@ -272,10 +272,10 @@ else {
                 $output_date = '<h5>' . implode('<br>', $parts) . '</h5>';
             }
         }
-        echo "<tr class=\"sport-schedule-row\">";
-        echo "<td class=\"add_time_sport sport-schedule-name-cell\"><h5>" . html_escape($surname4 . " " . $firstname4 . " " . $lastname4) . "</h5></td>";
-        echo "<td class=\"add_time_sport sport-schedule-date-cell\">$output_date</td>";
-        echo "<td class=\"add_time_sport sport-schedule-time-cell\"><h5>$time</h5></td>";
+        echo "<tr bordercolor=\"#888888\" height=\"40px\">";
+echo "<td width=450 class=\"add_time_sport\" valign=\"middle\" align=\"left\" style=\"padding-left:5px\"><h5>" . html_escape($surname4 . " " . $firstname4 . " " . $lastname4) . "</h5></td>";
+        echo "<td width=100 class=\"add_time_sport\" valign=\"middle\" align=\"left\" style=\"padding-left:35px\">" . html_escape($output_date) . "</td>";
+        echo "<td width=100 class=\"add_time_sport\" valign=\"middle\" align=\"center\"><h5>" . html_escape($time) . "</h5></td>";
         echo "</tr>";
     }
 }

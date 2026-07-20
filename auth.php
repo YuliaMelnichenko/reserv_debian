@@ -73,9 +73,9 @@ function set_focus()
 }
 </script>
 <?php
-echo "<body class=\"app-page\" onload=\"set_focus();\">";
+echo "<body bgcolor=\"#ffffff\" onload=\"set_focus();\">";
                                                               
-echo "<div class=\"auth-page-layout\">";
+echo "<div align=\"center\">";
 
 if ( !isset($_SESSION['ss_id']) )
 {
@@ -88,20 +88,20 @@ if ( !isset($_SESSION['ss_id']) )
 
   echo "<h6>Учет времени присутствия сотрудников. <br></h1>";
 
-  echo "<table class=\"auth-page-table\">";
+  echo "<table cellpadding=\"10\" cellspacing=\"0\" border=0>";
   echo "<tr>";
-  echo "<td class=\"auth-page-cell\">";
+  echo "<td bgcolor=\"#ffffff\"  valign=\"top\" align=\"left\" width = 460>";
 
-  echo "<table class=\"auth-form-table\">";
+  echo "<table cellpadding=\"10\" cellspacing=\"0\" border=1>";
   echo "<tr>";
-  echo "<td class=\"auth-form-cell\">";
+  echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 460>";
 
   echo "<h4>Для продолжения необходима авторизация</h4><br><br>";
 
   echo "<span class=\"auth-label\">Логин: </span><input class=\"auth-login-input\" type=\"text\" id=\"login\" />";
   echo "<span class=\"auth-label\"> Пароль: </span><input class=\"auth-password-input\" type=\"password\" id=\"passwd\" /><br />";
 
-  echo "<table class=\"auth-options-table\">";
+  echo "<table border=0>";
     echo "<tr>";
       echo "<td height = 10>";
       echo "</td>";
@@ -109,10 +109,10 @@ if ( !isset($_SESSION['ss_id']) )
       echo "</td>";
     echo "</tr>";
     echo "<tr>";
-      echo "<td class=\"auth-checkbox-cell\">";
+      echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 20>";
         echo "<input class=\"no_padding auth-checkbox\" checked type=\"checkbox\" id=\"autologin\" value=\"1\" >";
       echo "</td>";
-      echo "<td class=\"auth-remember-cell\">";
+      echo "<td bgcolor=\"#ddeeff\" valign=\"top\" align=\"left\" width = 400>";
         echo "<h5 class=\"middle\">запомнить логин</h5>";
       echo "</td>";
     echo "</tr>";
