@@ -1,11 +1,11 @@
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
-<script type="text/javascript" charset="utf-8"> 
+<script type="text/javascript" charset="utf-8">
 
 function log_out(){
   let perform = confirm('Выйти из системы?')
   if ( perform == true ){
     unset_cookie();
-    location.href='exit.php';   
+    location.href='exit.php';
   }
 }
 
@@ -22,15 +22,16 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
 }
 
 {
-  if ( $needToShow == 0 ){ echo "<span class=\"nav-access-mode\">Режим доступа: директор</span>"; }
+  if ( $needToShow == 0 ){ echo "<font size=\"2\" color=\"#000000\" face=\"Arial\">Режим доступа: директор</font>"; }
 
   $dtvalStr = get_current_datetime_in_timezone_str( 1, 0 );
-  echo "<table class=\"nav-clock-table\">";
+  echo "<table cellpadding=\"5\" cellspacing=\"0\" border=1>";
     echo "<tr>";
-      echo "<td class=\"nav-zero-cell\"></td>";
+      echo "<td class=\"nav-zero-cell\" height = 1>";
+      echo "</td>";
     echo "</tr>";
     echo "<tr>";
-      echo "<td class=\"nav-clock-cell\">";
+      echo "<td class=\"nav-clock-cell\" bgcolor=\"#ddeeff\" valign=\"top\" align=\"center\" width = 225>";
         echo "<div id=\"dateTimeFieldNav\">";
           echo "<h1 class=\"clock\">".$dtvalStr."</h1>";
         echo "</div>";
@@ -40,28 +41,28 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
 
   echo "";
 
-  echo "<table class=\"nav-panel-table\">";
-  echo "<tr><td class=\"nav-panel-cell\">";
-  echo "<table class=\"nav-brand-table\">";
+  echo "<table cellpadding=\"5\" cellspacing=\"0\" border=0 width = 190>";
+  echo "<tr><td class=\"nav-panel-cell\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 160>";
+  echo "<table cellpadding=\"0\" cellspacing=\"0\" border=0>";
     echo "<tr>";
-      echo "<td class=\"nav-brand-cell\">";
+      echo "<td class=\"nav-brand-cell\" width = 205>";
         echo "<a class=\"nounder\" href=\"index.php\">";
           echo "<p class=\"nav-brand-title\"><span class=\"nav-brand-prefix\"> В </span><span class=\"nav-brand-name\"> ТОРИ 3.0 </span></p>";
         echo "</a>";
       echo "</td>";
-      echo "<td class=\"nav-icon-cell\">";
+      echo "<td width=30 align=\"right\" class=\"nav-icon-cell\">";
         echo "<img class=\"nav-icon\" title=\"Что нового?\" onclick=\"show_information();\" src=\"img/news.png\">";
       echo "</td>";
-      echo "<td class=\"nav-icon-cell\">";
+      echo "<td width=30 align=\"right\" class=\"nav-icon-cell\">";
         echo "<img class=\"nav-icon\" title=\"Выйти из системы\" onclick=\"log_out();\" src=\"img/logout3.png\">";
       echo "</td>";
     echo "</tr>";
   echo "</table>";
 
   echo "</td></tr>";
-  
-  echo "<tr><td class=\"nav-menu-cell\">";
-  echo "<table class=\"nav-menu-list\">";
+
+  echo "<tr align=\"left\"><td bgcolor=\"#ddeeff\" valign=\"top\" align=\"left\" width = 370>";
+  echo "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\">";
 
   if ( $needToShow == 1 ){ echo "<tr height=50 valign=\"bottom\"><td><button class=\"nav-menu-button nav-menu-button-main nav-menu-button-current\" onclick=\"location.href='index.php'\"><h5 class=\"bigger\">Текущий день</h5></button></td></tr>"; }
                            echo "<tr height=50 valign=\"bottom\"><td><button class=\"nav-menu-button nav-menu-button-main\" onclick=\"location.href='my_report.php'\"><h5 class=\"bigger\">Временной отчет</h5></button></td></tr>";
@@ -114,7 +115,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
     $accountingErrorsNotifCount = isset($link) && $link
       ? get_accounting_errors_notification_count($link, $sv_id)
       : 0;
-    
+
     $counterStr = "";
     $delayNotifCountStr = "";
     $pauseNotifCountStr = "";
@@ -129,7 +130,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
     echo "<tr><td><button id=\"notifDelayBtn\" class=\"nav-menu-button nav-notification-button\" onclick=\"delay_set_start(); location.href='delay_approvement.php'\"><h5 class=\"biggersmall\">По опозданиям $delayNotifCountStr</h5></button></td></tr>";
     if ( $needToShow == 1 ){ echo "<tr><td><button id=\"notifPauseBtn\" class=\"nav-menu-button nav-notification-button\" onclick=\"pause_set_start(); location.href='pause_view.php'\"><h5 class=\"biggersmall\">По приостановкам учета времени $pauseNotifCountStr</h5></button></td></tr>"; }
     echo "<tr><td><button id=\"notifAccountingErrorsBtn\" class=\"nav-menu-button nav-notification-button\" onclick=\"location.href='accounting_errors_approvement.php'\"><h5 class=\"biggersmall\">По ошибкам учета $accountingErrorsNotifCountStr</h5></button></td></tr>";
-  } 
+  }
   echo "<tr><td class=\"nav-spacer-cell\" height=8px></td></tr>";
 
   echo "<tr><td><button class=\"nav-menu-button nav-redmine-button\" onclick=\"window.open('http://192.168.100.17/my') \"><h5 class=\"bigger\">RedMine</h5></button></td></tr>";

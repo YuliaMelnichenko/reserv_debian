@@ -27,7 +27,7 @@ if (
 <META NAME="Author" CONTENT="InTec">
 <link rel="stylesheet" type="text/css" href="style/main.css" />
 </head>
-<body class="app-page" onload="show_selectors()">
+<body onload="show_selectors()" bgcolor="#ffffff">
 
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
 
@@ -182,8 +182,8 @@ echo "</div>";
 echo "<div id=\"penalty_list_header\">";
 echo "</div>";
 
-echo "<div class=\"report-page-layout\">";
-  echo "<table class=\"report-page-table\">";
+echo "<div align=\"left\">";
+  echo "<table>";
     echo "<tr>";
     $ss_id_tmp = $_SESSION['ss_id'];
 
@@ -193,17 +193,17 @@ echo "<div class=\"report-page-layout\">";
     }  
 
     if ( $directorView == 0 ){
-      echo "<td class=\"report-page-nav-cell\">";
+      echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
       include_once __DIR__ . "/navigate.php";
     }
     else{
-      echo "<td class=\"report-page-nav-cell report-page-nav-hidden\">";
+      echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 0>";
     }
     echo "</td>";
                                     
     $wholeWidth = 1000;
 
-    echo "<td class=\"report-page-content-cell\">";
+    echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
     
 ///***
 
@@ -359,7 +359,7 @@ echo "<div id=\"report_container\">";
       echo "<h4 class=\"small\">Отчетный период: </h4>";
     echo "</div>";
     echo "<div>";
-      echo "<select onchange=\"set_period();\" class=\"flat report-period-select\" id=\"report_type\">";
+      echo "<select onchange=\"set_period();\" class=\"flat\" id=\"report_type\" bgcolor=\"#888888\" width = 70 >";
         echo "<option value=\"1\" $selectedArr[0]>С начала недели</option>";
         echo "<option value=\"2\" $selectedArr[1]>С начала месяца</option>";
         echo "<option value=\"3\" $selectedArr[2]>С начала предыдущего месяца</option>";
@@ -386,8 +386,8 @@ echo "<div id=\"report_container\">";
             $manRepStop = $currDate; 
           }
 
-          echo "<input id=\"report_start_date\" class=\"report-date-input\" type=\"date\" value=\"" . html_escape($manRepStart) . "\" max=\"2060-12-31\">";
-          echo " - <input id=\"report_stop_date\" class=\"report-date-input\" type=\"date\" value=\"" . html_escape($manRepStop) . "\" max=\"2060-12-31\">";
+          echo "<input id=\"report_start_date\" class=\"report-date-input\" align=\"center\" type=\"date\" value=\"" . html_escape($manRepStart) . "\" max=\"2060-12-31\">";
+          echo " - <input id=\"report_stop_date\" class=\"report-date-input\" align=\"center\" type=\"date\" value=\"" . html_escape($manRepStop) . "\" max=\"2060-12-31\">";
           echo "  <button class=\"button_style report-show-button\" onclick=\"manual_report_set();\" name=\"nextBtn\">Показать</button>";
         echo "</div>";
     echo "</div>";
@@ -445,8 +445,8 @@ $cellWidth = 165;
 $layersWidth = $dateWidth + $cellWidth*$userCnt + $userCnt*20;
 $layersWidth = 500;
 
-echo "<table class=\"report-header-table\">";
-  echo "<tr class=\"report-header-spacer\">";
+echo "<table cellpadding=\"0\" cellspacing=\"0\" border=0>";
+  echo "<tr height = 10>";
     echo "<td>";
     echo "</td>";
   echo "</tr>";
@@ -480,7 +480,7 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
                       "firstname" => "",
                       "lastname" => "",
                     );
-                  echo "<td class=\"report_no_padding report-user-head-cell\">";
+                  echo "<td class=\"report_no_padding\" bgcolor=\"#ffffff\" valign=\"middle\" align=\"center\" width = $cellWidth>";
                     echo "<div class=\"report_head_name\">";
                       echo "<div class=\"report_head_fio\">";
                         echo "<div class=\"report_head_surname\">" . html_escape($userNameParts["surname"]) . "</div>";
@@ -495,7 +495,7 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
                   echo "</td>";  
                 }
                 if ( $userCnt >= 9 || $userCnt == 1){
-                  echo "<td class=\"report_no_padding report-user-head-cell\">";
+                  echo "<td class=\"report_no_padding\" bgcolor=\"#ffffff\" valign=\"middle\" align=\"center\">";
                     echo "<div class=\"report_head_stub\">";             
                     echo "</div>";
                   echo "</td>";
@@ -516,7 +516,7 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
                 echo "</tr>";
               }     
               echo "<tr>";
-                echo "<td class=\"report_no_padding_no_border report-user-head-cell\">";
+                echo "<td class=\"report_no_padding_no_border\" valign=\"middle\" align=\"center\">";
                   echo "<div class=\"report_head_stub_left\">";
                   echo "</div>";
                 echo "</td>";
@@ -553,11 +553,11 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
 echo "</tr>";
 echo "</table>";
 
-echo "<div class=\"app-footer\">";
+echo "<font size=\"2\" color=\"#444444\" face=\"Arial\">";
 
 include_once __DIR__ . "/end.php";
 
-echo "</div>";
+echo "</font>";
 echo "</div>";
 ?>
 

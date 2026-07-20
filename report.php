@@ -14,8 +14,8 @@ require_page_auth();
 <META NAME="Author" CONTENT="InTec">
 <link rel="stylesheet" type="text/css" href="style/main.css" />
 </head>
-<body class="app-page">
-<div class="legacy-report-layout">
+<body bgcolor="#ffffff">
+<div align="left">
 
 <?php
 $report_start_date = "2013-01-01";
@@ -127,9 +127,9 @@ include_once __DIR__ . "/php_tori/connect.php";
 
   $color_code = 0;
  
-  echo "<table class=\"legacy-report-table\">";
+  echo "<table border=\"1\">";
 
-  echo "<tr class=\"legacy-report-head\">";
+  echo "<tr align = \"center\">";
   echo "<td><h5 class=\"fio\">Дата</h5></td>";
   
   for ( $i = 0; $i < count($ids); $i++ ){
@@ -367,13 +367,13 @@ include_once __DIR__ . "/php_tori/connect.php";
       }
 
       if ( $is_day_off == 1 ){
-        echo "<td class=\"report-day-off legacy-report-day-cell\">";
+        echo "<td class=\"report-day-off\" align = \"center\" valign = \"middle\">";
 
         echo "<h5 class=\"lite\">";
         echo "выходной";
       }
       else{
-        echo "<td class=\"report-day-missing legacy-report-day-cell\">";
+        echo "<td class=\"report-day-missing\" align = \"center\" valign = \"middle\">";
         echo "<h5 class=\"alarm\">";
         echo "Недостаточно<br>сведений!";                
       }
@@ -381,9 +381,9 @@ include_once __DIR__ . "/php_tori/connect.php";
   }
   else{
     if ( isset( $state ) AND $state == 0 )
-	    echo "<td class=\"report-day-worked legacy-report-day-cell\">";
+	    echo "<td class=\"report-day-worked\" valign = \"middle\" >";
 	  else
-      echo "<td class=\"report-day-off legacy-report-day-cell\">";
+      echo "<td class=\"report-day-off\" valign = \"middle\" >";
 
 	    echo "<h5 class=\"info\">";
 
@@ -413,7 +413,7 @@ include_once __DIR__ . "/php_tori/connect.php";
   if ( $in_time != "??:??:??" )
     echo $in_time;
 	else{
-    echo "<span class=\"report-missing-value\">??:??:??</span>";
+    echo "<font color=\"#ff0000\">??:??:??</font>";
   }
 
   echo " до ";
@@ -421,27 +421,27 @@ include_once __DIR__ . "/php_tori/connect.php";
 	if ( $out_time != "??:??:??" )
     echo $out_time."<br>";
   else{
-    echo "<span class=\"report-missing-value\">??:??:??</span><br>";
+    echo "<font color=\"#ff0000\">??:??:??</font><br>";
   }
 
   echo "Обед с ";
 	if ( $eat_start != "??:??:??" )
     echo $eat_start;
 	else{
-    echo "<span class=\"report-missing-value\">??:??:??</span>";
+    echo "<font color=\"#ff0000\">??:??:??</font>";
   }
               
   echo " до ";
 	if ( $eat_stop != "??:??:??" )
     echo $eat_stop;
 	else{
-    echo "<span class=\"report-missing-value\">??:??:??</span>";
+    echo "<font color=\"#ff0000\">??:??:??</font>";
   }
 
   if ( strtotime( $work_eat_duration ) > 0 AND $work_eat_duration != "00:00:00" )
     echo " (".$work_eat_duration.")";
 	else{
-    echo "<span class=\"report-missing-value\"> (??:??:??)</span>";
+    echo "<font color=\"#ff0000\"> (??:??:??)</font>";
   }
     
   if ( $state == 0 )
@@ -452,7 +452,7 @@ include_once __DIR__ . "/php_tori/connect.php";
 		  echo "<br><br>Раб. вр. - обед: ".$work_day_duration; 
 		  if ( $work_day_duration_time == 0 ) {
         echo "<br><br>Раб. вр. - обед: ";
-        echo "<span class=\"report-missing-value\"> (??:??:??)</span>";
+        echo "<font color=\"#ff0000\"> (??:??:??)</font>";
       }
     }
   }
@@ -482,7 +482,7 @@ else{
   }
 
   if ( $is_day_off == 1 ){ 
-    echo "<td class=\"report-day-muted-off legacy-report-day-cell\">";
+    echo "<td class=\"report-day-muted-off\" align = \"center\" valign = \"middle\">";
     echo "<h5 class=\"lite\">";
     echo "выходной</td>";
   }
