@@ -8,6 +8,7 @@ require_once __DIR__ . '/inc/output.php';
 require_once __DIR__ . '/inc/accounting_errors.php';
 require_once __DIR__ . '/inc/workday_period.php';
 require_once __DIR__ . '/inc/time_format.php';
+require_once __DIR__ . '/inc/calendar.php';
 
 function get_current_datetime_in_timezone(){
   $valid = 0;
@@ -493,62 +494,6 @@ function journal_status_label($text, $class = "middleBold_r")
   return "<h5 class=\"" . html_escape($class) . "\">" . html_escape($text) . "</h5>";
 }
 
-function GetWeekDay( $date_one )
-{
-  return date('w',strtotime( $date_one ));
-}
-
-function GetMonthDay( $date_one )
-{
-  return date('d',strtotime( $date_one ));
-}
-
-function GetWeekDayName( $week_day )
-{
-  if ( $week_day == 1 )
-    return "Понедельник";
-  if ( $week_day == 2 )
-    return "Вторник";
-  if ( $week_day == 3 )
-    return "Среда";
-  if ( $week_day == 4 )
-    return "Четверг";
-  if ( $week_day == 5 )
-    return "Пятница";
-  if ( $week_day == 6 )
-    return "Суббота";
-  if ( $week_day == 0 )
-    return "Воскресенье";
-}
-
-function GetMonthName( $month )
-{
-  if ( $month == 1 )
-    return "Январь";
-  if ( $month == 2 )
-    return "Февраль";
-  if ( $month == 3 )
-    return "Март";
-  if ( $month == 4 )
-    return "Апрель";
-  if ( $month == 5 )
-    return "Май";
-  if ( $month == 6 )
-    return "Июнь";
-  if ( $month == 7 )
-    return "Июль";
-  if ( $month == 8 )
-    return "Август";
-  if ( $month == 9 )
-    return "Сентябрь";
-  if ( $month == 10 )
-    return "Октябрь";
-  if ( $month == 11 )
-    return "Ноябрь";
-  if ( $month == 12 )
-    return "Декабрь";
-}
-
 function GetHourNormByMonth( $date, $rate ){
   include __DIR__ . "/php_tori/connect.php";
 
@@ -578,28 +523,6 @@ function GetHourNormByMonth( $date, $rate ){
     }  
   }
   return $duration; 	
-}
-
-function DayInc( $day )
-{
-  return strtotime( "+1 day", $day );
-}
-
-function get_current_quarter_date_range($stopAtYesterday = false)
-{
-  $month = (int)date('n');
-  $year = (int)date('Y');
-  $quarterStartMonth = ((int)(($month - 1) / 3)) * 3 + 1;
-  $startDate = date('Y-m-d', mktime(0, 0, 0, $quarterStartMonth, 1, $year));
-  $stopDate = $stopAtYesterday ? date('Y-m-d', strtotime('-1 day')) : date('Y-m-d');
-  $stopExclusive = date('Y-m-d', strtotime($stopDate . ' +1 day'));
-
-  return array($startDate, $stopDate, $stopExclusive);
-}
-
-function format_date_range_label($startDate, $stopDate)
-{
-  return date('d.m.Y', strtotime($startDate)) . ' - ' . date('d.m.Y', strtotime($stopDate));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -885,15 +808,6 @@ function get_delay_notification_count( $user_id ){
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function isWeekEnd( $day ){
-  $week_day = GetWeekDayD( $day );
-
-  if ( $week_day == 6 OR $week_day == 7 )
-    return 1;
-  else
-    return 0;
-}
 
 function get_workdays_holidays_bay_range( $startDate, $stopDate )
 {
@@ -3077,159 +2991,6 @@ function get_user_defStartTime_and_allowedDelay( $USERiD, &$user_defaultStartTim
   
 
 
-function GetWeekDayD( $date_one )
-{
-  $curWeekDay = date('w',strtotime( $date_one ));
-  if ( $curWeekDay == 0 )
-    $curWeekDay = 7;
-
-  return $curWeekDay;
-}
-
-function is_first_week_day( $date_one )
-{
-  if ( date('w',strtotime( $date_one )) == 1 )
-    return 1;
-  else
-    return 0;
-}
-
-function is_first_month_day( $date_one )
-{
-  if ( date('d',strtotime( $date_one )) == "01" )
-    return 1;
-  else
-    return 0;
-}
-
-function is_first_quarter_day( $date_one )
-{
-  $day = (int)(GetMonthDayD( $date_one ));
-  $month = (int)(GetMonthD( $date_one ));
-
-  if ( $day != 1 )
-  {
-    return 0;
-  }
-  if ( $month != 1 AND $month != 4 AND $month != 7 AND $month != 10 )
-  {
-    return 0;
-  }
-  return 1;
-}
-
-function is_first_year_day( $date_one )
-{
-  if ( date('d',strtotime( $date_one )) == "01" AND date('m',strtotime( $date_one )) == "01" )
-    return 1;
-  else
-    return 0;
-}
-
-function GetMonthDayD( $date_one )
-{
-  return date('d',strtotime( $date_one ));
-}
-
-function GetMonthD( $date_one )
-{
-  return date('m',strtotime( $date_one ));
-}
-
-function GetCurrentYearD( $date_one )
-{
-  return date('Y',strtotime( $date_one ));
-}
-
-function GetCurrentDate()
-{
-  return date("Y-m-d");
-}
-
-function GetFirstYearDay( $year ){
-  return date("Y-m-d", mktime(00, 00, 00, 1, 1, $year));
-}
-
-function GetFirstYearDayEx( $date ){
-  $year = GetCurrentYearD( $date );
-  return date("Y-m-d", mktime(00, 00, 00, 1, 1, $year));
-}
-
-function GetFirstMonthDayEx( $date ){
-  $monthDay = (-1)*GetMonthDayD( $date ) + 1;
-
-  return DayIncDN( $date, $monthDay );
-}
-
-function GetFirstQuarterDayEx( $date ){
-  return MonthDecDN( $date, 3 );
-}
-
-function GetWeekDayNameD( $day ){
-  $week_day = GetWeekDayD( $day );
-
-  if ( $week_day == 1 )
-    return "Понедельник";
-  if ( $week_day == 2 )
-    return "Вторник";
-  if ( $week_day == 3 )
-    return "Среда";
-  if ( $week_day == 4 )
-    return "Четверг";
-  if ( $week_day == 5 )
-    return "Пятница";
-  if ( $week_day == 6 )
-    return "Суббота";
-  if ( $week_day == 7 )
-    return "Воскресенье";
-}
-
-function GetMonthNameByDate( $date ){
-  $month = (int)(GetMonthD( $date ));
-
-  if ( $month == 1 )
-    return "Январь";
-  if ( $month == 2 )
-    return "Февраль";
-  if ( $month == 3 )
-    return "Март";
-  if ( $month == 4 )
-    return "Апрель";
-  if ( $month == 5 )
-    return "Май";
-  if ( $month == 6 )
-    return "Июнь";
-  if ( $month == 7 )
-    return "Июль";
-  if ( $month == 8 )
-    return "Август";
-  if ( $month == 9 )
-    return "Сентябрь";
-  if ( $month == 10 )
-    return "Октябрь";
-  if ( $month == 11 )
-    return "Ноябрь";
-  if ( $month == 12 )
-    return "Декабрь";
-}
-
-function GetQuarterRomNumByDate( $date )
-{
-  $month = (int)(GetMonthD( $date ));
-
-  if ( $month >= 1 AND $month <= 3 )
-    return "I";
-
-  if ( $month >= 4 AND $month <= 6 )
-    return "II";
-
-  if ( $month >= 7 AND $month <= 9 )
-    return "III";
-
-  if ( $month >= 10 AND $month <= 12 )
-    return "IV";
-}
-
 function HourIncDN( $time, $cnt )
 {
   return date("H:i:s", strtotime( "+$cnt hour", strtotime( $time ) ) );
@@ -3265,47 +3026,6 @@ function inc_time_by_time( $inTime, $offsetTime )
   if ( $sec > 0 ){ $inTime = SecondIncDN( $inTime, $sec ); }
 
   return $inTime;
-}
-
-function DayIncDN( $day, $cnt )
-{
-  set_time_limit(120);
-  return date("Y-m-d", strtotime( "+$cnt day", strtotime( $day ) ) );
-}
-
-function DayDecDN( $day, $cnt )
-{
-  return date("Y-m-d", strtotime( "-$cnt day", strtotime( $day ) ) );
-}
-
-function set_to_first_month_day( $date )
-{
-  $dayNum = GetMonthDayD( $date ) - 1;
-
-  $date = DayDecDN( $date, $dayNum ); 
-
-  return $date;
-}
-
-function MonthDecDN( $day, $cnt )
-{
-  if ( $cnt == 0 )
-    return $day;
-  return date("Y-m-d", strtotime( "-$cnt month", strtotime( $day ) ) );
-}
-
-function GetFirstMonthDay( $date )
-{
-  return date("Y-m-d", mktime(00, 00, 00, GetMonthD( $date ), 1, GetCurrentYearD( $date ) ));
-}
-
-function GetLastMonthDay( $date )
-{
-  $tempDate = MonthDecDN( $date, -1 );
-  $tempDate = GetFirstMonthDay( $tempDate );
-  $tempDate = DayDecDN( $tempDate, 1 );
-	
-  return date("Y-m-d", mktime(00, 00, 00, GetMonthD( $tempDate ), GetMonthDayD( $tempDate ), GetCurrentYearD( $tempDate ) ));
 }
 
 function getMaskedUID( $symcnt, $uid )
