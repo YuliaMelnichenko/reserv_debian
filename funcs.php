@@ -10,6 +10,7 @@ require_once __DIR__ . '/inc/workday_period.php';
 require_once __DIR__ . '/inc/time_format.php';
 require_once __DIR__ . '/inc/calendar.php';
 require_once __DIR__ . '/inc/work_duration.php';
+require_once __DIR__ . '/inc/delay.php';
 
 function get_current_datetime_in_timezone(){
   $valid = 0;
@@ -1581,8 +1582,6 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
 
     if ( $query1 ) 
     {
-      $in_time_def = strtotime( $defauiltInTime );
-      $in_time_defStr = format_time_d_hhmmss_pure( $in_time_def );
       $in_time = 0;
 
       if ( $row1 = mysqli_fetch_array($query1,MYSQLI_ASSOC) )
@@ -1591,12 +1590,8 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
         $found = 1;
       }
 
-      $delayVal = 0; 
-
-      if ( strtotime( $in_time ) > $in_time_def )
-      {
-        $delayVal = strtotime( $in_time ) - $in_time_def;
-      }
+      $delayArr = get_delay_value($in_time, $defauiltInTime, $allowedDelay);
+      $delayVal = $delayArr[1];
       unset( $rets );
       $rets = Array();   
       
@@ -1623,50 +1618,6 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
   }
   return $retArray;
 } 
-
-function get_delay_value( $in_dt, $defauiltInTime, $allowedDelay ){
-  $isThereDelay = 0;
-  $delay_val = 0;
-
-  if (
-    !isset($in_dt) ||
-    !isset($defauiltInTime) ||
-    $in_dt == "" ||
-    $defauiltInTime == "" ||
-    $defauiltInTime == "NDF" ||
-    $in_dt == "0000-00-00 00:00:00"
-  ){
-    return array($isThereDelay, $delay_val);
-  }
-
-  $in_time_val = strtotime($in_dt);
-
-  if ($in_time_val === false){
-    return array($isThereDelay, $delay_val);
-  }
-
-  if (strlen($defauiltInTime) == 5){
-    $defauiltInTime .= ":00";
-  }
-
-  $in_date = date("Y-m-d", $in_time_val);
-  $defailt_in_time_val = strtotime($in_date . " " . $defauiltInTime);
-
-  if ($defailt_in_time_val === false){
-    return array($isThereDelay, $delay_val);
-  }
-
-  $allowedDelay = (int)$allowedDelay;
-  $defailt_in_time_with_delay_val = $defailt_in_time_val + $allowedDelay * 60;
-
-  if ( $in_time_val > $defailt_in_time_with_delay_val ){
-    $isThereDelay = 1;
-    $delay_val = $in_time_val - $defailt_in_time_with_delay_val;
-  }
-
-  return array($isThereDelay, $delay_val);
-}
-
 
 function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
 {
