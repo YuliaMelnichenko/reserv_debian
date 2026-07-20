@@ -9,6 +9,7 @@ require_once __DIR__ . '/inc/accounting_errors.php';
 require_once __DIR__ . '/inc/workday_period.php';
 require_once __DIR__ . '/inc/time_format.php';
 require_once __DIR__ . '/inc/calendar.php';
+require_once __DIR__ . '/inc/work_duration.php';
 
 function get_current_datetime_in_timezone(){
   $valid = 0;
@@ -1308,13 +1309,6 @@ function is_there_additional_alerts( $userID ){
   return 0;
 }
 
-function is_time_defined( $time ){
-  if ( $time != "" AND $time != "NDF" AND $time != "00:00:00" AND $time != "0000-00-00 00:00:00" ){
-    return 1;
-  }
-  return 0;
-}
-
 function represent_is_time_defined( $time, $crossDayPeriod ){
   $valid = 1;
 
@@ -1376,29 +1370,6 @@ function get_range_by_times_pair( $firstTime, $secondTime, $currentDay, $workTim
   }
 
   return $result;  
-}
-
-function get_pause_time_duration_by_times( $addTimeInfo )
-{
-  $result = 0;
-
-  if ( is_time_defined( $addTimeInfo ) == 1 )
-  {
-    for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
-    {
-      $addInf = $addTimeInfo[$idx];
-
-      if ( $addInf[7] == 1 ) 
-      {
-
-        if ( strtotime( $addInf[1] ) > strtotime( $addInf[0] ) )
-        {
-          $result = $result + ( strtotime( $addInf[1] ) - strtotime( $addInf[0] ) );
-        }  
-      }
-    } 
-  }  
-  return $result;
 }
 
 function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime, $allowedDelay ){
@@ -1989,107 +1960,6 @@ function get_add_work_info_by_user_and_day_range( $userID_, $startDate, $stopDat
   }
 
   return $results;
-}
-
-function get_work_time_duration_by_times_ex( $inTime, $outTime, $eatStartTime, $eatStopTime, $state, $currentDay )
-{
-  $result = 0;
-
-  $timeRes = get_current_datetime_in_timezone();
-
-  $CurrentDateTime = $timeRes[1];
-
-  $stateStr = $state;
-  $state = (int)$state;
-
-  if ( $stateStr != "NDF" )
-  {
-    if ( $state == 0 )
-    {
-      $result = strtotime( $outTime ) - strtotime( $inTime );
-    }
-    else
-    {
-      if ( $currentDay == 1 )
-      {
-        $result = strtotime( $CurrentDateTime ) - strtotime( $inTime );
-      }
-    }
-  }
-
-  return $result;
-}
-
-
-function get_eat_time_duration_by_times_ex( $eatStartTime, $eatStopTime, $state, $currentDay )
-{
-  $result = 0;
-
-  $timeRes = get_current_datetime_in_timezone();
-
-  $CurrentDateTime = $timeRes[1];
-
-  $stateStr = $state;
-  $state = (int)$state;
-
-  if ( $stateStr != "NDF" )
-  {
-    if ( $state == 0 OR $state == 4 )
-    {
-      $result = strtotime( $eatStopTime ) - strtotime( $eatStartTime );
-    }
-    else
-    {
-      if ( $state == 3 )
-      {
-        if ( $currentDay == 1 )
-        {
-          $result = strtotime( $CurrentDateTime ) - strtotime( $eatStartTime );
-        }
-      }
-    }
-  }
-  
-  return $result;
-}
-
-function get_add_time_duration_by_times_ex( $addTimeInfo ){
-  $result = 0;
-
-  if ( is_time_defined( $addTimeInfo ) == 1 ){
-    for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ ){
-      $addInf = $addTimeInfo[$idx];
-
-      if ( $addInf[4] != -1 AND $addInf[4] != 99 AND $addInf[4] != 100 AND $addInf[4] != 101 AND $addInf[7] == 0 ) {
-        if ( strtotime( $addInf[1] ) > strtotime( $addInf[0] ) ){
-          $result = $result + ( strtotime( $addInf[1] ) - strtotime( $addInf[0] ) );
-        }  
-      }
-    } 
-  }  
-  return $result;
-}
-
-function get_durations( $inTime, $outTime, $eatStartTime, $eatStopTime, $addTimeInfo, $state, $currentDay ){
-  $user_defaultStartTimeStr = $_SESSION['ss_defaultStartTime'];
-  $user_allowedDelay = $_SESSION['ss_allowedDelay'];
-  $allowedStartTime = strtotime( $user_defaultStartTimeStr ) + $user_allowedDelay * 60;
-
-  $result = Array();
-
-  $result[0] = get_work_time_duration_by_times_ex( $inTime, $outTime, $eatStartTime, $eatStopTime, $state, $currentDay ); 
-  $result[1] = get_eat_time_duration_by_times_ex( $eatStartTime, $eatStopTime, $state, $currentDay );
-  $result[2] = get_add_time_duration_by_times_ex( $addTimeInfo );
-  $result[4] = 0;
-
-  if ( strtotime( $inTime ) > $allowedStartTime ){
-    $result[4] = strtotime( $inTime )." ** ".$allowedStartTime."  ---   ".strtotime( $inTime ) - $allowedStartTime; 
-  }
-  $result[5] = get_pause_time_duration_by_times( $addTimeInfo );
-
-  $result[3] = $result[0] + $result[2] - $result[1] - $result[5];
-
-  return $result;
 }
 
 function colored_result( $prefix, $realTime, $needTime, $inverse, $check, $isresult ){
