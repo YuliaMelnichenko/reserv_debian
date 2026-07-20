@@ -6,6 +6,7 @@ require_once __DIR__ . '/inc/database.php';
 require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/output.php';
 require_once __DIR__ . '/inc/accounting_errors.php';
+require_once __DIR__ . '/inc/workday_period.php';
 
 function get_current_datetime_in_timezone(){
   $valid = 0;
@@ -218,95 +219,6 @@ function datetime_to_time_str( $indatetime )
     $retStr = $timePart;
 
     return $retStr;
-}
-
-function get_standard_day_transition_time()
-{
-  return "00:00:00";
-}
-
-function normalize_day_transition_time($dayTransitionTime)
-{
-  return get_standard_day_transition_time();
-}
-
-function datetimestr_to_day_start_stop_DT_ex_str($dateTimeStr, $dayTransitionTime)
-{
-  $dayTransitionTime = normalize_day_transition_time($dayTransitionTime);
-
-  if ($dayTransitionTime == "" || $dayTransitionTime == "NDF") {
-    $dayTransitionTime = "00:00:00";
-  }
-
-  if (strlen($dayTransitionTime) == 5) {
-    $dayTransitionTime .= ":00";
-  }
-
-  $currentTimestamp = strtotime($dateTimeStr);
-
-  if ($currentTimestamp === false) {
-    $currentTimestamp = time();
-  }
-
-  $currentDate = date("Y-m-d", $currentTimestamp);
-  $todayStartTimestamp = strtotime($currentDate . " " . $dayTransitionTime);
-
-  if ($todayStartTimestamp === false) {
-    $todayStartTimestamp = strtotime($currentDate . " 00:00:00");
-  }
-
-  if ($currentTimestamp < $todayStartTimestamp) {
-    $startTimestamp = strtotime("-1 day", $todayStartTimestamp);
-  }
-  else {
-    $startTimestamp = $todayStartTimestamp;
-  }
-
-  $stopTimestamp = strtotime("+1 day", $startTimestamp) - 1;
-
-  return array(
-    date("Y-m-d H:i:s", $startTimestamp),
-    date("Y-m-d H:i:s", $stopTimestamp)
-  );
-}
-
-function datetimestr_to_day_start_stop_DT_ex_str_idx($dateTimeStr, $dayTransitionTime){
-  $dayTransitionTime = normalize_day_transition_time($dayTransitionTime);
-
-  if ($dayTransitionTime == "" || $dayTransitionTime == "NDF") {
-    $dayTransitionTime = "00:00:00";
-  }
-
-  if (strlen($dayTransitionTime) == 5) {
-    $dayTransitionTime .= ":00";
-  }
-
-  $currentTimestamp = strtotime($dateTimeStr);
-
-  if ($currentTimestamp === false) {
-    $currentTimestamp = time();
-  }
-
-  $currentDate = date("Y-m-d", $currentTimestamp);
-  $todayStartTimestamp = strtotime($currentDate . " " . $dayTransitionTime);
-
-  if ($todayStartTimestamp === false) {
-    $todayStartTimestamp = strtotime($currentDate . " 00:00:00");
-  }
-
-  if ($currentTimestamp < $todayStartTimestamp) {
-    $startTimestamp = strtotime("-1 day", $todayStartTimestamp);
-  }
-  else {
-    $startTimestamp = $todayStartTimestamp;
-  }
-
-  $stopTimestamp = strtotime("+1 day", $startTimestamp) - 1;
-
-  return array(
-    date("Y-m-d H:i:s", $startTimestamp),
-    date("Y-m-d H:i:s", $stopTimestamp)
-  );
 }
 
 function time_to_second( $timeStr )
