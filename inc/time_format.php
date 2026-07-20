@@ -155,3 +155,46 @@ function format_time_d_hhmmss_pure_styled($seconds)
 
     return '<h5 class="' . $class . '">' . $result . '</h5>';
 }
+
+function HourIncDN($time, $count)
+{
+    return date('H:i:s', strtotime("+$count hour", strtotime($time)));
+}
+
+function MinuteIncDN($time, $count)
+{
+    return date('H:i:s', strtotime("+$count minute", strtotime($time)));
+}
+
+function SecondIncDN($time, $count)
+{
+    return date('H:i:s', strtotime("+$count second", strtotime($time)));
+}
+
+function timeStrToParts($time, &$hour, &$minute, &$second)
+{
+    $hour = (int)substr($time, 0, 2);
+    $minute = (int)substr($time, 3, 2);
+    $second = (int)substr($time, 6, 2);
+}
+
+function inc_time_by_time($time, $offsetTime)
+{
+    $hour = 0;
+    $minute = 0;
+    $second = 0;
+
+    timeStrToParts($offsetTime, $hour, $minute, $second);
+
+    if ($hour > 0) {
+        $time = HourIncDN($time, $hour);
+    }
+    if ($minute > 0) {
+        $time = MinuteIncDN($time, $minute);
+    }
+    if ($second > 0) {
+        $time = SecondIncDN($time, $second);
+    }
+
+    return $time;
+}

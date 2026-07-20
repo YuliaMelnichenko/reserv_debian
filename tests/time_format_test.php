@@ -19,4 +19,15 @@ return function () {
     test_assert_same(1, time_defined('08:00:00'), 'A non-zero database time must be defined');
     test_assert_same(120, round_to_minute(91), 'More than 30 seconds must round up');
     test_assert_same(60, round_to_minute(90), 'Exactly 30 seconds must retain legacy rounding');
+
+    test_assert_same('01:30:00', HourIncDN('23:30:00', 2), 'Hour addition must cross midnight');
+    test_assert_same('11:01:30', MinuteIncDN('10:59:30', 2), 'Minute addition must carry into the next hour');
+    test_assert_same('10:01:01', SecondIncDN('10:00:59', 2), 'Second addition must carry into the next minute');
+    test_assert_same('01:16:10', inc_time_by_time('22:30:30', '02:45:40'), 'A compound offset must cross midnight');
+
+    $hour = null;
+    $minute = null;
+    $second = null;
+    timeStrToParts('08:09:10', $hour, $minute, $second);
+    test_assert_same(array(8, 9, 10), array($hour, $minute, $second), 'A time value must split into integer parts');
 };

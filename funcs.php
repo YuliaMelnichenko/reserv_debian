@@ -2991,43 +2991,6 @@ function get_user_defStartTime_and_allowedDelay( $USERiD, &$user_defaultStartTim
   
 
 
-function HourIncDN( $time, $cnt )
-{
-  return date("H:i:s", strtotime( "+$cnt hour", strtotime( $time ) ) );
-}
-
-function MinuteIncDN( $time, $cnt )
-{
-  return date("H:i:s", strtotime( "+$cnt minute", strtotime( $time ) ) );
-}
-
-function SecondIncDN( $time, $cnt )
-{
-  return date("H:i:s", strtotime( "+$cnt second", strtotime( $time ) ) );
-}
-
-function timeStrToParts( $time, &$hour, &$min, &$sec )
-{
-  $hour = (int)( substr( $time, 0, 2 ) );
-  $min  = (int)( substr( $time, 3, 2 ) );
-  $sec  = (int)( substr( $time, 6, 2 ) );
-}
-
-function inc_time_by_time( $inTime, $offsetTime )
-{
-  $hour = 0;
-  $min  = 0;
-  $sec  = 0;
-
-  timeStrToParts( $offsetTime, $hour, $min, $sec );
-
-  if ( $hour > 0 ){ $inTime = HourIncDN( $inTime, $hour ); }
-  if ( $min > 0 ){ $inTime = MinuteIncDN( $inTime, $min ); }
-  if ( $sec > 0 ){ $inTime = SecondIncDN( $inTime, $sec ); }
-
-  return $inTime;
-}
-
 function getMaskedUID( $symcnt, $uid )
 {
   $valStr = "";
