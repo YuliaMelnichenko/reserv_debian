@@ -20,6 +20,7 @@ $testFiles = array(
     __DIR__ . '/calendar_test.php',
     __DIR__ . '/date_range_test.php',
     __DIR__ . '/delay_test.php',
+    __DIR__ . '/overtime_test.php',
     __DIR__ . '/report_renderer_test.php',
     __DIR__ . '/time_format_test.php',
     __DIR__ . '/work_duration_test.php',

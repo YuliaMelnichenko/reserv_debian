@@ -3,109 +3,23 @@ ob_start();
 require_once __DIR__ . '/inc/session.php';
 include_once __DIR__ . "/funcs.php";
 require_once __DIR__ . '/inc/access.php';
+require_once __DIR__ . '/inc/overtime.php';
 save_last_location("time_add.php");
 require_page_work_overtime_access();
 include __DIR__ . "/php_tori/connect.php";
-
-function getPeriodBounds (string $period): array {
-    $today = date('Y-m-d 23:59:59');
-
-    switch ($period) {
-        case 'week':
-            $start = date('Y-m-d 00:00:00', strtotime('monday this week'));
-            // $end = $today;
-            break;
-        case 'month':
-            $start = date('Y-m-01 00:00:00');
-            // $end = $today;
-            break;
-        case 'quarter':
-        default:
-            $year = intval(date('Y'));
-            $month = intval(date('n'));
-            $quarter = intval(ceil($month / 3));
-            $start_month = ($quarter - 1) * 3 + 1;
-            $start = date("$year-$start_month-01 00:00:00");
-            break;
-    }
-    return [$start, $today];
-}
-
-function formatHours($hours) {
-    $minutes = intval(round($hours * 60));
-
-    if ($minutes <= 0) return '—';
-
-    $h = intdiv($minutes, 60);
-    $m = $minutes % 60;
-
-    if ($h > 0 && $m > 0) return "$h ч $m мин";
-
-    if ($h > 0) return "$h ч";
-    return "$m мин";
-}
-
-function overtimeNumbersSql(): string {
-    $digits = "SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9";
-
-    return "
-        SELECT ones.n + tens.n * 10 + hundreds.n * 100 AS n
-        FROM ($digits) ones
-        CROSS JOIN ($digits) tens
-        CROSS JOIN ($digits) hundreds
-        WHERE ones.n + tens.n * 10 + hundreds.n * 100 <= 730
-    ";
-}
-
-function overtimeAddTimeSqlParts(): array {
-    $numbersSql = overtimeNumbersSql();
-    $workDateSql = "DATE_ADD(DATE(a.START_DT), INTERVAL n.n DAY)";
-    $rangeSql = "
-        a.START_DT < ? AND a.STOP_DT > ?
-        AND $workDateSql >= DATE(?)
-        AND $workDateSql <= DATE(?)
-        AND a.START_DT IS NOT NULL
-        AND a.START_DT != '0000-00-00 00:00:00'
-        AND a.STOP_DT IS NOT NULL
-        AND a.STOP_DT != '0000-00-00 00:00:00'
-        AND a.STOP_DT > a.START_DT
-    ";
-    $durationSql = "
-        GREATEST(
-            0,
-            TIME_TO_SEC(
-                TIMEDIFF(
-                    LEAST(a.STOP_DT, DATE_ADD($workDateSql, INTERVAL 1 DAY)),
-                    GREATEST(a.START_DT, $workDateSql)
-                )
-            )
-        )
-    ";
-
-    return [$numbersSql, $workDateSql, $rangeSql, $durationSql];
-}
 
 // === AJAX: список сотрудников с количеством переработок >= hours (текущий квартал) ===
 if (isset($_GET['action']) && $_GET['action'] === 'load') {
     header('Content-Type: application/json; charset=utf-8');
 
     try {
-        $hours = isset($_GET['hours']) ? floatval($_GET['hours']) : 9.0;
+        $hours = normalizeOvertimeThreshold($_GET['hours'] ?? null);
         $period = $_GET['period'] ?? 'quarter';
-
-        if ($period === 'custom') {
-            $start = $_GET['start'] ?? '';
-            $end = $_GET['end'] ?? '';
-
-            if (!$start || !$end) {
-                throw new Exception('Не заданы даты для ручного ввода');
-            }
-
-            $qstart = date('Y-m-d 00:00:00', strtotime($start));
-            $qend = date('Y-m-d 23:59:59', strtotime($end));
-        } else {
-            list($qstart, $qend) = getPeriodBounds($period);
-        }
+        list($qstart, $qend) = getOvertimePeriodBounds(
+            $period,
+            $_GET['start'] ?? '',
+            $_GET['end'] ?? ''
+        );
 
         list($numbersSql, $addWorkDateSql, $addRangeSql, $addDurationSql) = overtimeAddTimeSqlParts();
 
@@ -244,23 +158,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
         $empId = intval($_GET['id']);
         if ($empId <= 0) throw new Exception('Некорректный ID сотрудника');
 
-        $hours = isset($_GET['hours']) ? floatval($_GET['hours']) : 9.0;
-        if ($hours <= 0) $hours = 9.0;
-
+        $hours = normalizeOvertimeThreshold($_GET['hours'] ?? null);
         $period = $_GET['period'] ?? 'quarter';
-
-        if ($period === 'custom') {
-            $start = $_GET['start'] ?? '';
-            $end = $_GET['end'] ?? '';
-
-            if (!$start || !$end) {
-                throw new Exception('Не заданы даты для ручного ввода');
-            }
-            $qstart = date('Y-m-d 00:00:00', strtotime($start));
-            $qend = date('Y-m-d 23:59:59', strtotime($end));
-        } else {
-            list($qstart, $qend) = getPeriodBounds($period);
-        }
+        list($qstart, $qend) = getOvertimePeriodBounds(
+            $period,
+            $_GET['start'] ?? '',
+            $_GET['end'] ?? ''
+        );
 
         list($numbersSql, $addWorkDateSql, $addRangeSql, $addDurationSql) = overtimeAddTimeSqlParts();
 
