@@ -19,6 +19,7 @@ function test_assert_same($expected, $actual, $message)
 $testFiles = array(
     __DIR__ . '/calendar_test.php',
     __DIR__ . '/time_format_test.php',
+    __DIR__ . '/work_duration_test.php',
     __DIR__ . '/workday_period_test.php',
     __DIR__ . '/workday_state_test.php',
 );
