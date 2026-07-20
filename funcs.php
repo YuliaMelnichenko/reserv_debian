@@ -11,6 +11,7 @@ require_once __DIR__ . '/inc/time_format.php';
 require_once __DIR__ . '/inc/calendar.php';
 require_once __DIR__ . '/inc/work_duration.php';
 require_once __DIR__ . '/inc/delay.php';
+require_once __DIR__ . '/inc/date_range.php';
 
 function get_current_datetime_in_timezone(){
   $valid = 0;
@@ -1774,12 +1775,14 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
     $STOP_DT_VAL = $row["STOP_DT"];
 
     if ( $restrictDTRangeToCurrentDay == 1 ){
-      if ( strtotime($START_DT_VAL) <= strtotime($startDTStr) ){
-        $START_DT_VAL = $startDTStr;
+      $clippedRange = clip_datetime_range($START_DT_VAL, $STOP_DT_VAL, $startDTStr, $stopDTStr);
+
+      if ($clippedRange === null) {
+        continue;
       }
-      if ( strtotime($STOP_DT_VAL) >= strtotime($stopDTStr) ){
-        $STOP_DT_VAL = $stopDTStr;
-      }
+
+      $START_DT_VAL = $clippedRange['start'];
+      $STOP_DT_VAL = $clippedRange['stop'];
     }
 
     $result8 = $row["ID"];  
@@ -1797,10 +1800,7 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
     $result[9] = $row["START_DT"];  
     $result[10]= $row["SUPERVISORDESC"];  
     $result[11] = $row["REASONDESCRIPTION"];
-    if ( strtotime( $result[1] ) > strtotime( $result[0] ) )
-    {
-        $result[6] = strtotime( $result[1] ) - strtotime( $result[0] );
-    }
+    $result[6] = get_defined_time_range_duration($result[0], $result[1]);
      
     $results[] = $result;
   }

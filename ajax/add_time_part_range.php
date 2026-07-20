@@ -18,8 +18,8 @@ $add_time_part_start_date = isset($_POST['add_time_part_start_date']) ? $_POST['
 $add_time_part_stop_date = isset($_POST['add_time_part_stop_date']) ? $_POST['add_time_part_stop_date'] : "";
 $add_time_part_start_time = isset($_POST['add_time_part_start_time']) ? $_POST['add_time_part_start_time'] : "";
 $add_time_part_stop_time = isset($_POST['add_time_part_stop_time']) ? $_POST['add_time_part_stop_time'] : "";
-$add_time_part_base = isset($_POST['add_time_part_base']) ? $_POST['add_time_part_base'] : "";
-$add_time_part_desk = isset($_POST['add_time_part_desk']) ? $_POST['add_time_part_desk'] : "";
+$add_time_part_base = isset($_POST['add_time_part_base']) ? (int)$_POST['add_time_part_base'] : 0;
+$add_time_part_desk = isset($_POST['add_time_part_desk']) ? trim((string)$_POST['add_time_part_desk']) : "";
 $exclude_weekend_holidays = isset($_POST['exclude_weekend_holidays']) ? (int)$_POST['exclude_weekend_holidays'] : 0;
 
 if (isset($_POST['byAlert']) && $_POST['byAlert'] == 1) {
@@ -52,14 +52,15 @@ if ($add_time_part_start_time >= $add_time_part_stop_time) {
 include __DIR__ . "/../php_tori/connect.php";
 include_once __DIR__ . "/../funcs.php";
 
-function get_days_range_inclusive($startDate, $stopDate){
-  $days = array();
+if (!preg_match('/^(?:[01][0-9]|2[0-3]):[0-5][0-9]$/', $add_time_part_start_time)
+    || !preg_match('/^(?:[01][0-9]|2[0-3]):[0-5][0-9]$/', $add_time_part_stop_time)) {
+  echo "Некорректное время начала или окончания";
+  exit;
+}
 
-  for ($day = $startDate; strtotime($day) <= strtotime($stopDate); $day = date('Y-m-d', strtotime($day . ' +1 day'))) {
-    $days[] = $day;
-  }
-
-  return $days;
+if ($add_time_part_base <= 0) {
+  echo "Не выбрано основание работы вне офиса";
+  exit;
 }
 
 $supervisor_query = db_query($link, "SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 AND USERID = ? LIMIT 1", 'i', array($userID_));
@@ -72,7 +73,12 @@ if (!$supervisor_query) {
 $sv_ID = 0;
 
 if ($row = mysqli_fetch_array($supervisor_query, MYSQLI_ASSOC)) {
-  $sv_ID = $row["SUPERVISORID"];
+  $sv_ID = (int)$row["SUPERVISORID"];
+}
+
+if ($sv_ID <= 0) {
+  echo "Не найден руководитель для согласования";
+  exit;
 }
 
 $daysRange = get_days_range_inclusive($add_time_part_start_date, $add_time_part_stop_date);
@@ -121,16 +127,20 @@ $err = "";
 foreach ($newDaysRange as $rDay) {
   $start = $rDay . " " . $add_time_part_start_time . ":00";
   $stop = $rDay . " " . $add_time_part_stop_time . ":00";
+  $range = get_valid_datetime_range($start, $stop);
 
-  if (strtotime($start) >= strtotime($stop)) {
+  if ($range === null) {
     $err .= "Некорректный интервал времени для даты $rDay<br>";
     break;
   }
 
+  $start = $range['start'];
+  $stop = $range['stop'];
+
   $query = db_execute($link, "INSERT INTO ADD_TIME
     (ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE, BYALERT)
     VALUES
-    (?, ?, ?, ?, ?, ?, ?, '', 0, 0, ?)", 'siissssi', array($currentDate, $sv_ID, $userID_, $start, $stop, $add_time_part_base, $add_time_part_desk, $byAlert));
+    (?, ?, ?, ?, ?, ?, ?, '', 0, 0, ?)", 'siissisi', array($currentDate, $sv_ID, $userID_, $start, $stop, $add_time_part_base, $add_time_part_desk, $byAlert));
 
   if (!$query) {
     $err = database_error_message($link, __FILE__ . ':' . __LINE__);
