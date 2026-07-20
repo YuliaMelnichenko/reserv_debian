@@ -7,6 +7,7 @@ require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/output.php';
 require_once __DIR__ . '/inc/accounting_errors.php';
 require_once __DIR__ . '/inc/workday_period.php';
+require_once __DIR__ . '/inc/time_format.php';
 
 function get_current_datetime_in_timezone(){
   $valid = 0;
@@ -220,17 +221,6 @@ function datetime_to_time_str( $indatetime )
 
     return $retStr;
 }
-
-function time_to_second( $timeStr )
-{
-    $hourVal = (int)date("H", strtotime($timeStr));
-    $minuteVal = (int)date("i", strtotime($timeStr));
-    $secondVal = (int)date("s", strtotime($timeStr));
-
-    $timeVal = $hourVal * 3600 + $minuteVal * 60 + $secondVal;
-   
-    return $timeVal;
-}   
 
 function save_last_location( $location ){
   $_SESSION['ss_last_location'] = $location;
@@ -498,96 +488,9 @@ function get_name_by_userid( $user_id )
   } 
 }  
 
-function format_time_( $short_time_ )
-{
-  $short_time_ = (int)$short_time_;
-
-  if ( $short_time_ < 0 ){
-    $short_time_ = 0;
-  }
-
-  $hours = (int)($short_time_ / 3600);
-  $mins = (int)(($short_time_ % 3600) / 60);
-  $secs = (int)($short_time_ % 60);
-  $timePart = sprintf("%02d:%02d:%02d", $hours % 24, $mins, $secs);
-
-  if ( $hours >= 24 )
-  {
-    $days = (int)($hours / 24);
-    $result_time = $days . "д " . $timePart;
-  }
-  else
-  {
-    $result_time = $timePart;
-  }
-
-  return $result_time;
-}
-
 function journal_status_label($text, $class = "middleBold_r")
 {
   return "<h5 class=\"" . html_escape($class) . "\">" . html_escape($text) . "</h5>";
-}
-
-function format_time_hour_min( $short_time_ )
-{
-  $hours = (int)($short_time_/(3600));
-
-  $mins	= (int)($short_time_/(60) - $hours*(60));
-
-  $secs = (int)($short_time_ - $hours*(3600) - $mins*(60) );
-  
-  if ( $secs > 30 )
-    $short_time_ = $short_time_ - $secs + 60;
-
-  $hours = (int)($short_time_/(3600));
-
-  $mins	= (int)($short_time_/(60) - $hours*(60));
-  
-  if ( $hours < 10 )
-   $hours = "0".$hours;
-
-  if ( $mins < 10 )
-   $mins = "0".$mins;
-
-  $result_time = $hours.":".$mins;
-  return $result_time;
-}
-
-function format_time_differs_from_norm_hour_min( $short_time_, $norm )
-{
-  $hours = (int)($short_time_/(3600)); 
-
-  $mins	= (int)($short_time_/(60) - $hours*(60));
-
-  $secs = (int)($short_time_ - $hours*(3600) - $mins*(60) );
-  
-  if ( $secs > 30 )
-    $short_time_ = $short_time_ - $secs + 60;
-
-  $hours = (int)($short_time_/(3600));
-
-  $mins	= (int)($short_time_/(60) - $hours*(60));
-
-  $minutes_ = $hours*60 + $mins - $norm*60;
-
-  if ( $minutes_ < 0 )
-    $minutes_ = $minutes_ * ( -1 );  
-
-  $hours = (int)($minutes_/(60));
-
-  $mins = (int)($minutes_ - $hours*(60));
-
-  if ( $hours < 10 )
-   $hours = "0".$hours;
-
-  if ( $mins < 10 )
-   $mins = "0".$mins;
-
-  $result_time = $hours.":".$mins;
-  #$result_time = $minutes_;
-
-  return $result_time;
 }
 
 function GetWeekDay( $date_one )
@@ -983,15 +886,6 @@ function get_delay_notification_count( $user_id ){
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function time_defined( $time_ ){
-  if ( $time_ == "00:00:00" ){
-    return 0;
-  }
-  else{
-    return 1;
-  }
-}
-
 function isWeekEnd( $day ){
   $week_day = GetWeekDayD( $day );
 
@@ -999,130 +893,6 @@ function isWeekEnd( $day ){
     return 1;
   else
     return 0;
-}
-
-function round_to_minute( $time ){
-  $timeMinutes = $time / 60;
-  $timeMinutes = (int)$timeMinutes;
-  $seconds = $time - $timeMinutes * 60;
-  $timeMinutes = $timeMinutes * 60;
-
-  if ( $seconds > 30 ){
-    $timeMinutes = $timeMinutes + 60;
-  }
-  return $timeMinutes;
-}
-
-function work_day_duration( $in_time, $out_time, $eat_start, $eat_stop, $add_time_duration ){
-  if ( time_defined( $in_time ) == 0 OR time_defined( $out_time ) == 0 OR time_defined( $eat_start ) == 0 OR time_defined( $eat_stop ) == 0 ){
-    if ( $add_time_duration == 0 )
-      return "-1";
-    else 
-      return format_time_d( $add_time_duration );
-  }
-  else{
-    return format_time_d( strtotime($out_time) - strtotime($in_time) - (strtotime($eat_stop) - strtotime($eat_start) ) + $add_time_duration );  
-  }
-}
-
-function format_time_d( $short_time_ ){
-  $hours = (int)($short_time_/(3600));
-
-  $mins	= (int)($short_time_/(60) - $hours*(60));
-  $secs = (int)($short_time_ - $hours*(3600) - $mins*(60) );
-  
-  if ( $hours < 10 )
-   $hours = "0".$hours;
-
-  if ( $mins < 10 )
-   $mins = "0".$mins;
-
-  if ( $secs < 10 )
-   $secs = "0".$secs;
-
-  $result_time = $hours.":".$mins.":".$secs;
-  return "<font size=\"2\" color=\"#000000\" face=\"Arial\">".$result_time."</font>";
-}
-
-function format_time_d_hhmm_pure( $short_time_ ){
-  $hours = (int)($short_time_/(3600));
-
-  $mins	= (int)($short_time_/(60) - $hours*(60));
-  $secs = (int)($short_time_ - $hours*(3600) - $mins*(60) );
-
-  if( $secs >= 30 )
-    $mins = $mins + 1;
-  
-  if ( $hours < 10 )
-   $hours = "0".$hours;
-
-  if ( $mins < 10 )
-   $mins = "0".$mins;
-
-  $result_time = $hours.":".$mins;
-  return $result_time;
-}
-
-function format_time_d_hhmmss_pure( $short_time_ ){
-  if ( $short_time_ >= 0 ){
-    $hours = (int)($short_time_/(3600));
-  
-    $mins	= (int)($short_time_/(60) - $hours*(60));
-    $secs = (int)($short_time_ - $hours*(3600) - $mins*(60) );
- 
-    if( $secs < 10 )
-      $secs = "0".$secs;
-    
-    if ( $hours < 10 )
-     $hours = "0".$hours;
-  
-    if ( $mins < 10 )
-     $mins = "0".$mins;
-  
-    $result_time = "$hours:$mins:$secs";
-  }
-  else{
-    $result_time = "ERR (time<0)";
-  }
-  return $result_time;
-}
-
-function format_time_d_hhmmss_pure_partial( $short_time_ ){
-  if ( $short_time_ >= 0 ){
-    $hoursPart = (float)($short_time_/(3600));
-
-    $result_time = sprintf("%2.2f", $hoursPart);
-  }
-  return $result_time;
-}
-
-function format_time_d_hhmmss_pure_HH( $short_time_ ){
-  if ( $short_time_ >= 0 ){
-    $hours = (int)($short_time_/(3600));
-
-    if ( $hours < 10 )
-     $hours = "0".$hours;
-    $result_time = "$hours";
-  }
-  else{
-    $result_time = "ERR (time<0)";
-  }
-  return $result_time;
-}
-
-function format_time_d_hhmmss_pure_styled( $short_time_ )
-{
-  $result_time = format_time_d_hhmmss_pure( $short_time_ );
-
-  if ( $short_time_ > 0 )
-  {
-    $result_time = "<h5 class=\"middle\">".$result_time."</h5>";
-  }
-  else
-  {
-    $result_time = "<h5 class=\"middleGrey\">".$result_time."</h5>";
-  }
-  return $result_time;
 }
 
 function get_workdays_holidays_bay_range( $startDate, $stopDate )
