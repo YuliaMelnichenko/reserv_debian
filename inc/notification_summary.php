@@ -4,6 +4,102 @@ require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/calendar.php';
 require_once __DIR__ . '/time_journal_repository.php';
 
+function get_supervisor_notification_counts($link, $supervisorID, $currentDateTime)
+{
+    $depthResult = db_query($link, "
+        SELECT paramName, valueInt
+        FROM DBSETUP
+        WHERE paramName IN ('add_time_journal_deep_day', 'delay_journal_deep_day')
+    ");
+
+    if (!$depthResult) {
+        return false;
+    }
+
+    $depthDays = array(
+        'add_time_journal_deep_day' => 180,
+        'delay_journal_deep_day' => 180,
+    );
+
+    while ($row = mysqli_fetch_assoc($depthResult)) {
+        $paramName = (string)$row['paramName'];
+
+        if (array_key_exists($paramName, $depthDays)) {
+            $depthDays[$paramName] = abs((int)$row['valueInt']);
+        }
+    }
+
+    $currentDate = substr((string)$currentDateTime, 0, 10);
+    $dateTimeExpressions = time_journal_add_work_datetime_expressions($link);
+    $startExpression = $dateTimeExpressions['start'];
+    $stopExpression = $dateTimeExpressions['stop'];
+    $countResult = db_query($link, "
+        SELECT
+          (
+            SELECT COUNT(DISTINCT a.ID)
+            FROM ADD_TIME a
+            WHERE a.APPROVED = 0
+              AND a.PAUSE_MODE = 0
+              AND $startExpression <> '0000-00-00 00:00:00'
+              AND $stopExpression <> '0000-00-00 00:00:00'
+              AND $stopExpression > $startExpression
+              AND $stopExpression > ADDDATE(?, INTERVAL ? DAY)
+              AND EXISTS (
+                SELECT 1
+                FROM GROUPS membership
+                WHERE membership.USERID = a.USERID
+                  AND membership.SUPERVISORID = ?
+                  AND TRIM(membership.TYPE) = ?
+              )
+          ) AS ADD_TIME_COUNT,
+          (
+            SELECT COUNT(DISTINCT delay_entry.id)
+            FROM Delays delay_entry
+            WHERE delay_entry.status = 0
+              AND delay_entry.date > ADDDATE(?, INTERVAL ? DAY)
+              AND EXISTS (
+                SELECT 1
+                FROM GROUPS membership
+                WHERE membership.USERID = delay_entry.userID
+                  AND membership.SUPERVISORID = ?
+                  AND TRIM(membership.TYPE) = ?
+              )
+              AND EXISTS (
+                SELECT 1
+                FROM visiting visit
+                WHERE visit.user_id = delay_entry.userID
+                  AND visit.in_dt >= delay_entry.date
+                  AND visit.in_dt < ADDDATE(delay_entry.date, INTERVAL 1 DAY)
+                  AND visit.remoteWorkState = 0
+              )
+          ) AS DELAY_COUNT
+    ", 'siissiis', array(
+        $currentDateTime,
+        -$depthDays['add_time_journal_deep_day'],
+        (int)$supervisorID,
+        '0',
+        $currentDate,
+        -$depthDays['delay_journal_deep_day'],
+        (int)$supervisorID,
+        '3',
+    ));
+
+    if (!$countResult) {
+        return false;
+    }
+
+    $counts = mysqli_fetch_assoc($countResult);
+
+    if (!$counts) {
+        return false;
+    }
+
+    return array(
+        'add_time_count' => (int)$counts['ADD_TIME_COUNT'],
+        'delay_count' => (int)$counts['DELAY_COUNT'],
+    );
+}
+
 function get_delay_notification_summary($link, $supervisorID, $currentDate)
 {
     $depthResult = db_query($link, "

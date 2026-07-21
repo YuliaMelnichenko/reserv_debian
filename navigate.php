@@ -14,6 +14,7 @@ function log_out(){
 <?php
 include_once __DIR__ . "/funcs.php";
 require_once __DIR__ . '/inc/access.php';
+require_once __DIR__ . '/inc/notification_summary.php';
 
 $needToShow = 1;
 
@@ -110,8 +111,18 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
   if ( am_i_superuser( $_SESSION['ss_id'] ) == 1 ){
     $sv_id = $_SESSION['ss_id'];
 
-    $notifCount = get_notification_count( $sv_id );
-    $delayNotifCount = get_delay_notification_count( $sv_id );
+    $notifCount = 0;
+    $delayNotifCount = 0;
+    $notificationCounts = get_supervisor_notification_counts($link, $sv_id, $dtvalStr);
+
+    if ($notificationCounts === false) {
+      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    }
+    else {
+      $notifCount = $notificationCounts['add_time_count'];
+      $delayNotifCount = $notificationCounts['delay_count'];
+    }
+
     $accountingErrorsNotifCount = isset($link) && $link
       ? get_accounting_errors_notification_count($link, $sv_id)
       : 0;

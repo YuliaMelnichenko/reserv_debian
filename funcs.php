@@ -526,46 +526,6 @@ function am_i_superuser( $userID ) {
   return 0;
 }
 
-function get_notification_count( $user_id ){
-  include __DIR__ . "/php_tori/connect.php";
-
-  $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
-
-  $paramArr = get_dbsetup_param( 'add_time_journal_deep_day' );
-  
-  $paramInt = (-1)*$paramArr[1];
-  
-  $query = time_journal_query_pending_add_time($link, $user_id, $currentDate, $paramInt);
-
-  $merr=mysqli_error($link);
-  if ( !$query ) {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
-  }
-  else{
-    return mysqli_num_rows($query);
-  }
-}
-
-function get_delay_notification_count( $user_id ){
-  include __DIR__ . "/php_tori/connect.php";
-
-  $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
-
-  $paramArr = get_dbsetup_param( 'delay_journal_deep_day' );
-  
-  $paramInt = (-1)*$paramArr[1];
-  
-  $query = time_journal_query_pending_delays($link, $user_id, $currentDate);
-
-  $merr=mysqli_error($link);
-  if ( !$query ) {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
-  }
-  else{
-    return mysqli_num_rows($query);
-  }
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function get_workdays_holidays_bay_range( $startDate, $stopDate )

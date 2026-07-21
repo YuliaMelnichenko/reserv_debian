@@ -54,6 +54,43 @@ return function () {
         'The pause notification counter must not perform SQL or use the legacy helper'
     );
 
+    $menuCountControllers = array(
+        __DIR__ . '/../ajax/get_add_time_notif_count.php',
+        __DIR__ . '/../ajax/get_delay_notif_count.php',
+    );
+
+    foreach ($menuCountControllers as $controllerPath) {
+        $controller = file_get_contents($controllerPath);
+        test_assert_true(
+            strpos($controller, 'inc/notification_summary.php') !== false,
+            'Menu notification counters must load the shared service in ' . basename($controllerPath)
+        );
+        test_assert_true(
+            strpos($controller, 'get_supervisor_notification_counts') !== false,
+            'Menu notification counters must use the shared count query in ' . basename($controllerPath)
+        );
+        test_assert_same(
+            0,
+            preg_match('/\b(?:SELECT|db_query|get_notification_count|get_delay_notification_count)\b/i', $controller),
+            'Menu notification counters must not perform SQL or use legacy helpers in ' . basename($controllerPath)
+        );
+        test_assert_true(
+            strpos($controller, 'echo "<h5 class=\\"biggersmall\\">') !== false,
+            'Menu notification counters must preserve their label when the count is zero in ' . basename($controllerPath)
+        );
+    }
+
+    $navigation = file_get_contents(__DIR__ . '/../navigate.php');
+    test_assert_true(
+        strpos($navigation, 'get_supervisor_notification_counts') !== false,
+        'Navigation must load both notification counters through the shared service'
+    );
+    test_assert_same(
+        0,
+        preg_match('/\b(?:get_notification_count|get_delay_notification_count)\s*\(/', $navigation),
+        'Navigation must not use legacy notification counters'
+    );
+
     $pages = array(
         __DIR__ . '/../delay_approvement.php',
         __DIR__ . '/../pause_view.php',
@@ -123,6 +160,10 @@ return function () {
     test_assert_true(
         strpos($service, 'function get_pause_notification_count') !== false,
         'The shared service must provide the personal pause notification counter'
+    );
+    test_assert_true(
+        strpos($service, 'function get_supervisor_notification_counts') !== false,
+        'The shared service must provide combined supervisor notification counters'
     );
     test_assert_same(0, preg_match('/SELECT\s+\*/i', $service), 'Summary queries must select explicit fields');
 };
