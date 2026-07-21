@@ -47,6 +47,13 @@ return function () {
         'Legacy ADD_TIME reads must stay inside the documented compatibility layer'
     );
 
+    $functionsSource = file_get_contents($projectRoot . '/funcs.php');
+    test_assert_same(
+        0,
+        preg_match('/SELECT\s+[^;]*\b(?:in_time|out_time|eat_start|eat_stop)\b[^;]*FROM\s+visiting\b/is', $functionsSource),
+        'Shared functions must use visiting DATETIME columns'
+    );
+
     $auditSql = file_get_contents($projectRoot . '/sql/legacy_datetime_audit.sql');
     $sqlWithoutComments = preg_replace('/^\s*--.*$/m', '', $auditSql);
     test_assert_same(

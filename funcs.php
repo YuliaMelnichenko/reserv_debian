@@ -1042,7 +1042,7 @@ function get_penalties( $userDays, $userID )
     {
       $penaltyDate = $row["date"];
 
-      for ( $idx2 = 1; $idx2 < count( $userDays ); $idx2 ++ )
+      for ( $idx2 = 1; $idx2 <= count( $userDays ); $idx2 ++ )
       {
         if ( $userDays[$idx2] == $penaltyDate )  
         {
@@ -1110,26 +1110,34 @@ function get_norm_by_range_sec( $startDate, $stopDate, $userID ){
 function get_current_day_duration_sec( $userID, $defaultStartTime ){
   include __DIR__ . "/php_tori/connect.php";
 
-  $inTime = 0;
+  $currentDateTime = get_current_datetime_in_timezone()[1];
+  $dateRange = datetimestr_to_day_start_stop_DT_ex_str($currentDateTime, '00:00:00');
 
-  $query = db_query($link, "SELECT in_time FROM visiting where USER_ID = ?", 'i', array((int)$userID));
+  $query = db_query($link, "
+    SELECT in_dt
+    FROM visiting
+    WHERE user_id = ?
+      AND state != 0
+      AND in_dt >= ?
+      AND in_dt <= ?
+    ORDER BY in_dt DESC, ID DESC
+    LIMIT 1
+  ", 'iss', array((int)$userID, $dateRange[0], $dateRange[1]));
 
-  $merr=mysqli_error($link);
-  if ( !$query ) {
+  if (!$query) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
-  }
-  else{
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
-      $inTime = $row["in_time"];
-    }
+    return 0;
   }
 
-  $result = strtotime(date("H:i:s")) - strtotime( $inTime );
-  // $result = $result;
-  $result = (int)$result;
+  $row = mysqli_fetch_assoc($query);
 
-  return $result;
+  if (!$row) {
+    return 0;
+  }
+
+  return get_defined_time_range_duration($row["in_dt"], $currentDateTime);
 }
+
 
 function get_norm_time_by_current_day_sec( $user_defaultStartHour, $user_defaultStartMinute ){
   $hours = date("H");
@@ -1162,13 +1170,10 @@ function is_there_add_time_by_alert( $Date, $userID ){
 function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTime, $user_allowedDelay ){
   include __DIR__ . "/php_tori/connect.php";
 
-  $statArr = array();
-  $holidays = array();
-  $workDays = array();
-
   $holidays = get_holidays();
   $workDays = get_work_day();
-  $delaysAcceptedAsValid = get_penalties( $startDate, $stopDate, $userID );
+  $daysRange = get_days_range($startDate, $stopDate);
+  $penaltyDates = get_penalties($daysRange, $userID);
 
   $add_time_work_dayduration = 0;
   $full_work_day_duration = 0;
@@ -1177,20 +1182,15 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
   $delay_count = 0;
   $delay_duration = 0;
 
-  $currentDate = Date("Y-m-d");
-
-  $def_in_time = strtotime( $user_defaultStartTime ) + $user_allowedDelay * 60;
-
   $periodStart = $startDate . ' 00:00:00';
   $periodStop = date('Y-m-d 00:00:00', strtotime($stopDate . ' +1 day'));
   $query1 = time_journal_query_approved_add_time($link, $userID, $periodStart, $periodStop);
 
-  $merr=mysqli_error($link);
-  if ( !$query1 ) {
+  if (!$query1) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
-  else{
-    while ( $row1 = mysqli_fetch_array($query1, MYSQLI_ASSOC) ){
+  else {
+    while ($row1 = mysqli_fetch_array($query1, MYSQLI_ASSOC)) {
       $clippedRange = clip_datetime_range($row1['START_DT'], $row1['STOP_DT'], $periodStart, $periodStop);
 
       if ($clippedRange !== null) {
@@ -1199,71 +1199,65 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
     }
   }
 
-  $query2 = db_query($link, "SELECT date, in_time, out_time, eat_start, eat_stop, state FROM visiting where date >= ? and date <= ? and user_id = ? and state = 0", 'ssi', array($startDate, $stopDate, (int)$userID));
-  $merr=mysqli_error($link);
-  if ( !$query2 ) {
+  $query2 = db_query($link, "
+    SELECT in_dt, out_dt, eat_start_dt, eat_stop_dt
+    FROM visiting
+    WHERE in_dt >= ?
+      AND in_dt < ?
+      AND user_id = ?
+      AND state = 0
+      AND out_dt > in_dt
+    ORDER BY in_dt
+  ", 'ssi', array($periodStart, $periodStop, (int)$userID));
+
+  if (!$query2) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
-  else{
+  else {
+    while ($row2 = mysqli_fetch_array($query2, MYSQLI_ASSOC)) {
+      $visitStat = get_completed_visit_statistics(
+        $row2["in_dt"],
+        $row2["out_dt"],
+        $row2["eat_start_dt"],
+        $row2["eat_stop_dt"],
+        $user_defaultStartTime,
+        $user_allowedDelay
+      );
 
-    while ( $row2 = mysqli_fetch_array($query2, MYSQLI_ASSOC) ){
-      $date = $row2["date"];
-
-      $step_full_work_day_duration = strtotime($row2["out_time"]) - strtotime($row2["in_time"]); 
-      $step_eat_work_day_duration = strtotime($row2["eat_stop"]) - strtotime($row2["eat_start"]); 
-      $step_pure_work_day_duration = $step_full_work_day_duration - $step_eat_work_day_duration;
-
-      $step_in_time = strtotime( $row2["in_time"] );
-
-      $takeIntoAccount = 1; 
-      if ( isWeekEnd( $date ) ){
-        $takeIntoAccount = 0;
-        for ( $idx = 1; $idx < count( $workDays ) + 1; $idx ++ ){ 
-	      if ( $workDays[$idx] == $date ){
-          $takeIntoAccount = 1;
-          break;
-        }
-      } 
-    }	
-      else{ 
-        $takeIntoAccount = 1;
-        for ( $idx = 1; $idx < count( $holidays ) + 1; $idx ++ ){
-	        if ( $holidays[$idx] == $date ){
-            $takeIntoAccount = 0;
-            break;
-          }
-        }
-      }
-         
-      if ( $takeIntoAccount AND $step_in_time > $def_in_time ){
-	      $isTherePenalty = 0;
-        for ( $idx2 = 1; $idx2 < count( $delaysAcceptedAsValid ) + 1; $idx2 ++ ){
-          if ( $delaysAcceptedAsValid[$idx2] == $date ){ 
-            $isTherePenalty = 1;
-            break;  
-          }
-        }
-        if ( $isTherePenalty ){
-          $delay_count = $delay_count + 1;
-  	      $delay_duration = $delay_duration + ( $step_in_time - $def_in_time );  
-        }
+      if ($visitStat === null) {
+        continue;
       }
 
-      $full_work_day_duration += $step_full_work_day_duration;
-      $eat_work_day_duration += $step_eat_work_day_duration;
-      $pure_work_day_duration += $step_pure_work_day_duration;
+      $date = $visitStat['date'];
+      $takeIntoAccount = !isWeekEnd($date)
+        ? !in_array($date, $holidays, true)
+        : in_array($date, $workDays, true);
+
+      if (
+        $takeIntoAccount
+        && $visitStat['delay_duration'] > 0
+        && in_array($date, $penaltyDates, true)
+      ) {
+        $delay_count++;
+        $delay_duration += $visitStat['delay_duration'];
+      }
+
+      $full_work_day_duration += $visitStat['full_duration'];
+      $eat_work_day_duration += $visitStat['lunch_duration'];
+      $pure_work_day_duration += $visitStat['pure_duration'];
     }
   }
 
-  $statArr[1] = $full_work_day_duration;
-  $statArr[2] = $pure_work_day_duration;
-  $statArr[3] = $add_time_work_dayduration;
-  $statArr[4] = $eat_work_day_duration;
-  $statArr[5] = $delay_count;
-  $statArr[6] = $delay_duration;
-  
-  return $statArr;
+  return array(
+    1 => $full_work_day_duration,
+    2 => $pure_work_day_duration,
+    3 => $add_time_work_dayduration,
+    4 => $eat_work_day_duration,
+    5 => $delay_count,
+    6 => $delay_duration,
+  );
 }
+
 
 function is_there_additional_alerts( $userID ){
   $currentDate = date('Y-m-d');
