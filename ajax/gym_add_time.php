@@ -6,26 +6,18 @@ ajax_text_headers();
 
 $userID_ = (int)$_SESSION['ss_id'];
 
-$training_date = (string) ($_POST['training_date'] ?? '');
-$training_start_time = (string) ($_POST['training_start_time'] ?? '');
-$training_stop_time = (string) ($_POST['training_stop_time'] ?? '');
+$training_date = request_post_date('training_date');
+$training_start_time = request_post_time('training_start_time');
+$training_stop_time = request_post_time('training_stop_time');
 
 include __DIR__ . "/../php_tori/connect.php";
 
-$dateParts = explode('-', $training_date);
-$validDate = count($dateParts) === 3
-  && ctype_digit($dateParts[0])
-  && ctype_digit($dateParts[1])
-  && ctype_digit($dateParts[2])
-  && checkdate((int)$dateParts[1], (int)$dateParts[2], (int)$dateParts[0]);
-$validTimePattern = '/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/';
-
 if (
-  !$validDate
-  || !preg_match($validTimePattern, $training_start_time)
-  || !preg_match($validTimePattern, $training_stop_time)
+  $training_date === null
+  || $training_start_time === null
+  || $training_stop_time === null
   || $training_date < date('Y-m-d')
-  || strtotime('1970-01-01 ' . $training_start_time) >= strtotime('1970-01-01 ' . $training_stop_time)
+  || $training_start_time >= $training_stop_time
 ) {
   deny_ajax_access(400, 'INVALID_SCHEDULE');
 }

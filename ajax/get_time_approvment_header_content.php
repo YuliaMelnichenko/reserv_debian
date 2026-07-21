@@ -7,8 +7,8 @@ ajax_text_headers();
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-$wholeWidth = $_POST['width'];
-$widthOffs = $_POST['offs'];
+$wholeWidth = request_post_int('width');
+$widthOffs = request_post_int('offs');
 
 $dtvalStr = get_current_datetime_in_timezone_str( 1, 1 );
 $WidthLeft = 300;

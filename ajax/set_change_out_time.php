@@ -16,20 +16,14 @@ if (!request_post_has('visit_id') || !request_post_has('add_stop_time')) {
 
 $userID = (int)$_SESSION['ss_id'];
 $visitID = request_post_int('visit_id');
-$newOutTimeRaw = request_post_string('add_stop_time');
+$newOutTime = request_post_datetime('add_stop_time');
 
 if ($visitID <= 0) {
   echo "Ошибка: некорректная запись посещения";
   exit;
 }
 
-$newOutTime = str_replace('T', ' ', $newOutTimeRaw);
-
-if (strlen($newOutTime) == 16) {
-  $newOutTime .= ":00";
-}
-
-if (strtotime($newOutTime) === false) {
+if ($newOutTime === null) {
   echo "Ошибка: некорректная дата ухода";
   exit;
 }

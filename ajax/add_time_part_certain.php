@@ -11,8 +11,8 @@ $userID = (int)$_SESSION['ss_id'];
 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
-$start_time = request_post_string('add_time_part_start_dt');
-$stop_time = request_post_string('add_time_part_stop_dt');
+$start_time = request_post_datetime('add_time_part_start_dt');
+$stop_time = request_post_datetime('add_time_part_stop_dt');
 $base = request_post_int('add_time_part_base');
 $desk = request_post_trimmed_string('add_time_part_desk');
 

@@ -6,9 +6,13 @@ ajax_text_headers();
 
 $userID = $_SESSION['ss_id'];
 
-$date_train = (string) ($_POST['date_train'] ?? '');
-$start_time = (string) ($_POST['start_time'] ?? '');
-$stop_time = (string) ($_POST['stop_time'] ?? '');
+$date_train = request_post_date('date_train');
+$start_time = request_post_time('start_time');
+$stop_time = request_post_time('stop_time');
+
+if ($date_train === null || $start_time === null || $stop_time === null) {
+  deny_ajax_access(400, 'INVALID_SCHEDULE');
+}
 
 include __DIR__ . "/../php_tori/connect.php";
 

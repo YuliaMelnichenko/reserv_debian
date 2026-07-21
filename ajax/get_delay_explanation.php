@@ -11,10 +11,10 @@ $mode = 0;
 $delayID = 0;
 $userID = $userID_;
 
-if ( isset( $_POST['mode'] ) ){
-  $mode = (int)$_POST['mode'];
-  $delayID = isset($_POST['delayId']) ? (int)$_POST['delayId'] : 0;
-  $userID = isset($_POST['userId']) ? (int)$_POST['userId'] : $userID_;
+if (request_post_has('mode')) {
+  $mode = request_post_int('mode');
+  $delayID = request_post_int('delayId');
+  $userID = request_post_int('userId', $userID_);
 
   if ($mode != 0) {
     require_ajax_self_or_superuser($userID);

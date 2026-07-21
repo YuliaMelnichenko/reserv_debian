@@ -4,11 +4,15 @@ require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
 ajax_text_headers();
 
-$userID = (int) ($_POST['userID'] ?? 0);
-$inTime = (string) ($_POST['inTime'] ?? '');
+$userID = request_post_int('userID');
+$inTime = request_post_time('inTime');
 
 if ($userID <= 0) {
   deny_ajax_access(400, 'INVALID_USER');
+}
+
+if ($inTime === null) {
+  deny_ajax_access(400, 'INVALID_TIME');
 }
 
 require_ajax_self_or_supervisor($userID, 3);

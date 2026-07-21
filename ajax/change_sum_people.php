@@ -6,9 +6,13 @@ ajax_text_headers();
 
 include __DIR__ . "/../php_tori/connect.php";
 
-$date_train = (string) ($_POST['training_date'] ?? '');
-$start_time = (string) ($_POST['training_start_time'] ?? '');
-$stop_time = (string) ($_POST['training_stop_time'] ?? '');
+$date_train = request_post_date('training_date');
+$start_time = request_post_time('training_start_time');
+$stop_time = request_post_time('training_stop_time');
+
+if ($date_train === null || $start_time === null || $stop_time === null) {
+  deny_ajax_access(400, 'INVALID_SCHEDULE');
+}
 
 $query = db_query(
   $link,

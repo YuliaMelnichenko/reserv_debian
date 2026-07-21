@@ -12,27 +12,27 @@ if (!isset($_SESSION['ss_id'])) {
 $userID_ = (int)$_SESSION['ss_id'];
 $currentDate = date('Y-m-d');
 
-$add_time_part_start_date = request_post_string('add_time_part_start_date');
-$add_time_part_stop_date = request_post_string('add_time_part_stop_date');
-$add_time_part_start_time = request_post_string('add_time_part_start_time');
-$add_time_part_stop_time = request_post_string('add_time_part_stop_time');
+$add_time_part_start_date = request_post_date('add_time_part_start_date');
+$add_time_part_stop_date = request_post_date('add_time_part_stop_date');
+$add_time_part_start_time = request_post_time('add_time_part_start_time');
+$add_time_part_stop_time = request_post_time('add_time_part_stop_time');
 $add_time_part_base = request_post_int('add_time_part_base');
 $add_time_part_desk = request_post_trimmed_string('add_time_part_desk');
 $exclude_weekend_holidays = request_post_int('exclude_weekend_holidays');
 
 $byAlert = request_post_int('byAlert') === 1 ? 1 : 0;
 
-if ($add_time_part_start_date == "" || $add_time_part_stop_date == "") {
+if ($add_time_part_start_date === null || $add_time_part_stop_date === null) {
   echo "Укажите дату начала и дату окончания диапазона";
   exit;
 }
 
-if ($add_time_part_start_time == "" || $add_time_part_stop_time == "") {
-  echo "Укажите время начала и время окончания работ";
+if ($add_time_part_start_time === null || $add_time_part_stop_time === null) {
+  echo "Некорректное время начала или окончания";
   exit;
 }
 
-if (strtotime($add_time_part_start_date) > strtotime($add_time_part_stop_date)) {
+if ($add_time_part_start_date > $add_time_part_stop_date) {
   echo "Дата начала диапазона превышает дату окончания";
   exit;
 }
@@ -44,12 +44,6 @@ if ($add_time_part_start_time >= $add_time_part_stop_time) {
 
 include __DIR__ . "/../php_tori/connect.php";
 include_once __DIR__ . "/../funcs.php";
-
-if (!preg_match('/^(?:[01][0-9]|2[0-3]):[0-5][0-9]$/', $add_time_part_start_time)
-    || !preg_match('/^(?:[01][0-9]|2[0-3]):[0-5][0-9]$/', $add_time_part_stop_time)) {
-  echo "Некорректное время начала или окончания";
-  exit;
-}
 
 if ($add_time_part_base <= 0) {
   echo "Не выбрано основание работы вне офиса";
@@ -118,8 +112,8 @@ if (!mysqli_begin_transaction($link)) {
 $err = "";
 
 foreach ($newDaysRange as $rDay) {
-  $start = $rDay . " " . $add_time_part_start_time . ":00";
-  $stop = $rDay . " " . $add_time_part_stop_time . ":00";
+  $start = $rDay . " " . $add_time_part_start_time;
+  $stop = $rDay . " " . $add_time_part_stop_time;
   $range = get_valid_datetime_range($start, $stop);
 
   if ($range === null) {
