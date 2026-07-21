@@ -31,6 +31,7 @@ $testFiles = array(
     __DIR__ . '/gym_schedule_test.php',
     __DIR__ . '/legacy_schema_audit_test.php',
     __DIR__ . '/legacy_function_cleanup_test.php',
+    __DIR__ . '/module_extraction_test.php',
     __DIR__ . '/notification_summary_test.php',
     __DIR__ . '/overtime_test.php',
     __DIR__ . '/pause_service_test.php',
