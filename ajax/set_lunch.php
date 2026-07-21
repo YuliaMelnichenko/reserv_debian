@@ -2,10 +2,7 @@
 require_once __DIR__ . '/../inc/session.php';
 require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
-header("Content-type: text/html; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Pragma: no-cache");
-header("Expires: 0");
+ajax_response_headers('text/html');
 
 if (!isset($_SESSION['ss_id']) || !isset($_SESSION['ss_visiting_ID'])) {
   exit('');
