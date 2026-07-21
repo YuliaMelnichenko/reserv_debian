@@ -11,6 +11,7 @@ return function () {
         'get_name_by_userid',
         'get_notification_count',
         'get_delay_notification_count',
+        'get_dbsetup_param',
     );
 
     foreach ($removedFunctions as $functionName) {
