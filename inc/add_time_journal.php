@@ -3,7 +3,7 @@
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/time_journal_repository.php';
 
-function get_add_time_journal_context($link, $userID, $currentDateTime)
+function get_add_time_journal_context($link, $userID, $currentDateTime, $includeDeleted = true)
 {
     $userResult = db_query($link, "
         SELECT SURNAME, FIRSTNAME, LASTNAME
@@ -53,6 +53,12 @@ function get_add_time_journal_context($link, $userID, $currentDateTime)
     $entries = array();
 
     while ($row = mysqli_fetch_assoc($entryResult)) {
+        $status = (int)$row['APPROVED'];
+
+        if (!$includeDeleted && in_array($status, array(99, 100, 101), true)) {
+            continue;
+        }
+
         $startDateTime = (string)$row['START_DT_EFFECTIVE'];
         $stopDateTime = (string)$row['STOP_DT_EFFECTIVE'];
         $startTimestamp = strtotime($startDateTime);
@@ -72,7 +78,7 @@ function get_add_time_journal_context($link, $userID, $currentDateTime)
             'supervisor_id' => (int)$row['SUIR'],
             'supervisor_name' => trim((string)$row['SUPERVISOR_NAME']),
             'decision_comment' => (string)$row['SUPERVISORDESC'],
-            'status' => (int)$row['APPROVED'],
+            'status' => $status,
         );
     }
 

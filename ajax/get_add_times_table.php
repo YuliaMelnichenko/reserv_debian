@@ -6,8 +6,26 @@ ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/add_time_journal.php";
 
 $userID = (int)$_SESSION['ss_id'];
+$journal = get_add_time_journal_context(
+  $link,
+  $userID,
+  get_current_datetime_in_timezone_str(1, 0),
+  false
+);
+
+if ($journal === false) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+if ($journal === null) {
+  deny_ajax_access(404, 'USER_NOT_FOUND');
+}
+
+$addTimeInfo = $journal['entries'];
 
 echo "<table class=\"journal-entry-layout\">";
 echo "<tr>";
@@ -38,28 +56,20 @@ $colorMode = 1;
 $color1 = "#ddffff";
 $color3 = "#ffffff";
 
-$addTimeInfo = get_all_add_work_info_by_user( $userID, 0 );
-
 for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
 {
   $addInf = $addTimeInfo[$idx];
 
-  $ta_id = (int)$addInf[8];
-  $ta_start_dt = $addInf[0];
-  $ta_stop_dt = $addInf[1];
-  $ta_duration = $addInf[6];
+  $ta_id = $addInf['id'];
+  $ta_start_dt = $addInf['start_datetime'];
+  $ta_stop_dt = $addInf['stop_datetime'];
+  $ta_duration = $addInf['duration'];
 
-  $ta_reason_description = $addInf[11];
-  $ta_description = $addInf[3];
-  $ta_SUdescription = $addInf[10];
-  $ta_approved = $addInf[4];
-  $ta_suir = $addInf[5];
-  $pauseMode = $addInf[7];
-
-  if ( $pauseMode == 1 ){ continue; }    
-  if ( $ta_approved == 99 OR $ta_approved == 100 OR $ta_approved == 101 ){ continue; }    
-
-  $superUserName = get_superuser_name_by_id( $ta_suir );
+  $ta_reason_description = $addInf['reason_description'];
+  $ta_description = $addInf['employee_comment'];
+  $ta_SUdescription = $addInf['decision_comment'];
+  $ta_approved = $addInf['status'];
+  $superUserName = $addInf['supervisor_name'];
 
   if ( $ta_approved == 0 )
   { 

@@ -6,13 +6,22 @@ ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/pause_journal.php";
 
 $userID_ = (int)$_SESSION['ss_id'];
-$currentDate = get_current_datetime_in_timezone_str( 1, 0 );
-list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(false);
-$quarterLabel = format_date_range_label($quarterStartDate, $quarterStopDate);
-$startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME', $link);
-$stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME', $link);
+$journal = get_pause_journal_context($link, $userID_, get_current_datetime_in_timezone_str(1, 0));
+
+if ($journal === false) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+if ($journal === null) {
+  deny_ajax_access(404, 'USER_NOT_FOUND');
+}
+
+$quarterLabel = format_date_range_label($journal['quarter_start_date'], $journal['quarter_stop_date']);
+$pauseEntries = $journal['entries'];
 
 echo "<h5 class=\"big\">Текущий квартал: $quarterLabel</h5>";
 echo "<div class=\"notification-table-scroll notification-table-scroll-medium\">";
@@ -29,38 +38,11 @@ $colorMode = 1;
 $color1 = "#ddffff";
 $color3 = "#ffffff";
 
-mysqli_set_charset($link, "utf8");
-
-$query = db_query(
-  $link,
-  "SELECT a.*,
-          $startExpr AS START_DT_EFFECTIVE,
-          $stopExpr AS STOP_DT_EFFECTIVE
-   FROM ADD_TIME a
-   WHERE a.USERID = ?
-     AND a.PAUSE_MODE = 1
-     AND $startExpr >= ?
-     AND $startExpr < ?
-     AND $startExpr <> '0000-00-00 00:00:00'
-     AND $stopExpr <> '0000-00-00 00:00:00'
-     AND $stopExpr > $startExpr
-   ORDER BY START_DT_EFFECTIVE DESC, a.ID DESC",
-  'iss',
-  array($userID_, $quarterStartDate, $quarterStopExclusive)
-);
-
-if (!$query) {
-  ajax_database_error($link, __FILE__ . ':' . __LINE__);
-  exit;
-}
-
-while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
-  $ta_suir = $row["SUIR"];
-  $ta_start_date = $row["START_DT_EFFECTIVE"];
-  $ta_stop_date = $row["STOP_DT_EFFECTIVE"];
-  $ta_description = $row["DESCRIPTION"];
-
-  $superUserName = get_superuser_name_by_id( $ta_suir );
+foreach ($pauseEntries as $pauseEntry) {
+  $ta_start_date = $pauseEntry['start_datetime'];
+  $ta_stop_date = $pauseEntry['stop_datetime'];
+  $ta_description = $pauseEntry['employee_comment'];
+  $superUserName = $pauseEntry['supervisor_name'];
 
   if ( $colorMode == 0 ) {
     $color = $color1;
@@ -71,7 +53,7 @@ while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
     $colorMode = 0;
   }
                           
-  $time_duration = format_time_(strtotime($ta_stop_date) - strtotime($ta_start_date));
+  $time_duration = format_time_($pauseEntry['duration']);
   	
   $rowClass = $color == $color1 ? "journal-entry-row-alt" : "journal-entry-row";
 
