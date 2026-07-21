@@ -6,17 +6,22 @@ ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/notification_summary.php";
 
-$userID_ = $_SESSION['ss_id']; 
+$userID_ = (int)$_SESSION['ss_id'];
+$currentDate = get_current_datetime_in_timezone()[2];
+$summary = get_delay_notification_summary($link, $userID_, $currentDate);
 
-$paramArr = get_dbsetup_param( 'add_time_journal_deep_day' );
-  
-$paramInt = (int)$paramArr[1];
+if ($summary === false) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
 
-$today = date("d-m-Y");
-$dateForm = date("d.m.Y", strtotime("-$paramInt days"));
+$depthDays = $summary['depth_days'];
+$dateForm = $summary['range_start_label'];
+$today = $summary['range_stop_label'];
 
-echo "<h5 class=\"big\"> Глубина просмотра журнала (180 дней): $dateForm - $today </h5>";
+echo "<h5 class=\"big\"> Глубина просмотра журнала ($depthDays дней): $dateForm - $today </h5>";
 echo "<table class=\"add_time notification-summary-table\" id=\"delay_approvement_table_users\">";
 echo "<tr class=\"notification-table-head\">";
 echo "<td class=\"add_time notification-user-name-cell\"><h5 class=\"big\">Сотрудник</h5></td>";
@@ -31,30 +36,15 @@ echo "</tr>";
 $color = "#ddffff";
 $img = "go1.png";
 
-mysqli_set_charset($link, "utf8");
-$query = db_query(
-  $link,
-  'SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = ? AND TYPE = ? ORDER BY USERID',
-  'ii',
-  array((int)$userID_, 3)
-);
-if (!$query)
+foreach ($summary['entries'] as $entry)
 {
-  ajax_database_error($link, __FILE__ . ':' . __LINE__);
-}
-else
-{
-  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-  {  
-    $userID = (int)$row["USERID"];
-    $userName = get_user_name_by_id($userID);
-
-    $notificationCount = 0;
-    $acceptedNotificationCount = 0;
-    $refusedNotificationCount = 0;
-    $deletedNotificationCount = 0;
-    $newNotificationCount = 0;
-    get_delay_notif_counts( $userID, $notificationCount, $acceptedNotificationCount, $refusedNotificationCount, $deletedNotificationCount, $newNotificationCount );
+    $userID = $entry['user_id'];
+    $userName = $entry['user_name'];
+    $notificationCount = $entry['total_count'];
+    $acceptedNotificationCount = $entry['accepted_count'];
+    $refusedNotificationCount = $entry['refused_count'];
+    $deletedNotificationCount = $entry['deleted_count'];
+    $newNotificationCount = $entry['new_count'];
 
     $cellStype = "middle";
     if ( $newNotificationCount > 0 ){ $cellStype = "middleBlue1"; }
@@ -83,7 +73,6 @@ else
       $color = "#ddffff";
       $img = "go1.png";
     }  
-  }
 }
 
 echo "</table>";
