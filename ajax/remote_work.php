@@ -15,11 +15,11 @@ mysqli_set_charset($link, "utf8");
 // -------------------- POST (SAVE) -------------------- //
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    header('Content-Type: application/json; charset=utf-8');
+    ajax_json_headers();
 
     try {
         if (!$userID) {
-            echo json_encode(["status" => "error", "message" => "Нет userID в сессии"]);
+            ajax_json_response(["status" => "error", "message" => "Нет userID в сессии"]);
             exit;        
         }
 
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $row = mysqli_fetch_assoc($findRes);
 
             if (!$row) {
-                echo json_encode(["status" => "error", "message" => "Запись удалённой работы для завершения не найдена"]);
+                ajax_json_response(["status" => "error", "message" => "Запись удалённой работы для завершения не найдена"]);
                 exit;
             }
             
@@ -55,11 +55,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             mysqli_stmt_bind_param($updStmt, "i", $remoteId);
 
             if (!mysqli_stmt_execute($updStmt)) {
-                echo application_json_error('Remote work finish at ' . __FILE__ . ':' . __LINE__, mysqli_stmt_error($updStmt));
+                ajax_json_application_error('Remote work finish at ' . __FILE__ . ':' . __LINE__, mysqli_stmt_error($updStmt));
                 exit;
             }
 
-            echo json_encode(["status" => "success"]);
+            ajax_json_response(["status" => "success"]);
             exit;
         }
 
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $supervisor_id = intval($_POST['supervisor_id']);
 
             if ($supervisor_id <= 0) {
-                echo json_encode(["status" => "error", "message" => "Некорректный supervisor_id"]);
+                ajax_json_response(["status" => "error", "message" => "Некорректный supervisor_id"]);
                 exit;
             }
 
@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             mysqli_stmt_store_result($supervisorStmt);
             if (mysqli_stmt_num_rows($supervisorStmt) === 0) {
                 http_response_code(403);
-                echo json_encode(["status" => "error", "message" => "Выбранный руководитель недоступен"]);
+                ajax_json_response(["status" => "error", "message" => "Выбранный руководитель недоступен"]);
                 exit;
             }
 
@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $checkRes = mysqli_stmt_get_result($checkStmt);
 
             if (mysqli_num_rows($checkRes) > 0) {
-                echo json_encode(["status" => "error", "message" => "Вы уже начали удалённую работу сегодня"]);
+                ajax_json_response(["status" => "error", "message" => "Вы уже начали удалённую работу сегодня"]);
                 exit;
             }
 
@@ -119,20 +119,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             mysqli_stmt_bind_param($stmt, "ii", $userID, $supervisor_id);
 
             if (!mysqli_stmt_execute($stmt)) {
-                echo application_json_error('Remote work creation at ' . __FILE__ . ':' . __LINE__, mysqli_stmt_error($stmt));
+                ajax_json_application_error('Remote work creation at ' . __FILE__ . ':' . __LINE__, mysqli_stmt_error($stmt));
                 exit;
             }
 
-            echo json_encode(["status" => "success"]);
+            ajax_json_response(["status" => "success"]);
             exit;
         }
 
         // Если POST, но без нужных полей
-        echo json_encode(["status" => "error", "message" => "Неверные данные POST"]);
+        ajax_json_response(["status" => "error", "message" => "Неверные данные POST"]);
         exit;
 
     } catch (Throwable $e) {
-        echo application_json_error('Remote work request at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
+        ajax_json_application_error('Remote work request at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
         exit;
     }
 }

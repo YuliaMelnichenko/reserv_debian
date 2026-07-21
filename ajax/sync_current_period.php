@@ -3,10 +3,7 @@ require_once __DIR__ . '/../inc/session.php';
 require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
 
-header('Content-Type: application/json; charset=utf-8');
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-header('Pragma: no-cache');
-header('Expires: 0');
+ajax_json_headers();
 
 include_once __DIR__ . '/../funcs.php';
 include __DIR__ . '/../php_tori/connect.php';
@@ -39,7 +36,7 @@ $startSettingsOutput = trim(ob_get_clean());
 
 if ($startSettingsOutput !== '') {
   http_response_code(500);
-  echo json_encode(array(
+  ajax_json_response(array(
     'valid' => 0,
     'error' => $startSettingsOutput
   ));
@@ -75,7 +72,7 @@ $syncOutput = trim(ob_get_clean());
 
 if ($syncOutput !== '') {
   http_response_code(500);
-  echo json_encode(array(
+  ajax_json_response(array(
     'valid' => 0,
     'error' => $syncOutput
   ));
@@ -85,7 +82,7 @@ if ($syncOutput !== '') {
 $periodChanged = $oldStartDTStr !== $startDTStr || $oldStopDTStr !== $stopDTStr;
 $startSettingsChanged = $oldDefaultStartTimeWithDelayVal !== $defaultStartTimeWithDelayVal;
 
-echo json_encode(array(
+ajax_json_response(array(
   'valid' => 1,
   'periodChanged' => $periodChanged ? 1 : 0,
   'startSettingsChanged' => $startSettingsChanged ? 1 : 0,

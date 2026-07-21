@@ -93,20 +93,26 @@ function time_journal_query_add_time_by_alert($link, $userId, $date)
 {
     return db_query(
         $link,
-        'SELECT 1 FROM ADD_TIME WHERE STARTDATE = ? AND USERID = ? AND BYALERT = 1 LIMIT 1',
-        'si',
-        array($date, (int)$userId)
+        'SELECT 1 FROM ADD_TIME
+         WHERE START_DT >= ? AND START_DT < ADDDATE(?, INTERVAL 1 DAY)
+           AND USERID = ? AND BYALERT = 1 LIMIT 1',
+        'ssi',
+        array($date, $date, (int)$userId)
     );
 }
 
-function time_journal_query_approved_legacy_add_time($link, $userId, $startDate, $stopDate)
+function time_journal_query_approved_add_time($link, $userId, $startDateTime, $stopDateTime)
 {
     return db_query(
         $link,
-        'SELECT STARTTIME, STOPTIME FROM ADD_TIME
-         WHERE STARTDATE >= ? AND STARTDATE <= ? AND USERID = ? AND APPROVED = 1',
+        'SELECT START_DT, STOP_DT FROM ADD_TIME
+         WHERE START_DT < ? AND STOP_DT > ?
+           AND USERID = ? AND APPROVED = 1 AND PAUSE_MODE = 0
+           AND START_DT <> \'0000-00-00 00:00:00\'
+           AND STOP_DT <> \'0000-00-00 00:00:00\'
+           AND STOP_DT > START_DT',
         'ssi',
-        array($startDate, $stopDate, (int)$userId)
+        array($stopDateTime, $startDateTime, (int)$userId)
     );
 }
 
@@ -137,16 +143,19 @@ function time_journal_query_delays_for_range($link, $userId, $startDate, $stopDa
 {
     return db_query(
         $link,
-        'SELECT DISTINCT id, date, supervisorID, explaneDesk, acceptorID, penaltyID, penaltyReply, status
-         FROM Delays WHERE date >= ? AND date <= ? AND userID = ? ORDER BY date DESC',
+        'SELECT DISTINCT a.id, a.date, a.supervisorID, a.explaneDesk, a.acceptorID,
+                         a.penaltyID, a.penaltyReply, a.status,
+                         (SELECT MIN(v.in_dt)
+                          FROM visiting v
+                          WHERE v.user_id = a.userID
+                            AND v.in_dt >= a.date
+                            AND v.in_dt < ADDDATE(a.date, INTERVAL 1 DAY)) AS in_dt
+         FROM Delays a
+         WHERE a.date >= ? AND a.date <= ? AND a.userID = ?
+         ORDER BY a.date DESC',
         'ssi',
         array($startDate, $stopDate, (int)$userId)
     );
-}
-
-function time_journal_query_legacy_visit_for_day($link, $userId, $date)
-{
-    return db_query($link, 'SELECT in_time FROM visiting WHERE user_id = ? AND date = ?', 'is', array((int)$userId, $date));
 }
 
 function time_journal_query_delay_journal($link, $userId, $currentDate, $depthDays)
@@ -212,16 +221,41 @@ function time_journal_query_add_work_journal($link, $userId, $pauseMode, $curren
     );
 }
 
-function time_journal_query_legacy_add_work_range($link, $userId, $startDate, $stopDate)
+function time_journal_query_open_pause($link, $userId)
 {
     return db_query(
         $link,
-        'SELECT DISTINCT ID, STARTDATE, SUIR, STARTTIME, STOPTIME, REASON, DESCRIPTION,
-                         SUPERVISORDESC, APPROVED, PAUSE_MODE
+        'SELECT ID FROM ADD_TIME
+         WHERE USERID = ? AND PAUSE_MODE = 1
+           AND START_DT <> \'0000-00-00 00:00:00\'
+           AND (STOP_DT IS NULL OR STOP_DT = \'0000-00-00 00:00:00\')
+         ORDER BY START_DT DESC LIMIT 1',
+        'i',
+        array((int)$userId)
+    );
+}
+
+function time_journal_finish_pause($link, $pauseId, $userId, $stopDateTime)
+{
+    return db_execute(
+        $link,
+        'UPDATE ADD_TIME SET STOP_DT = ? WHERE ID = ? AND USERID = ? AND PAUSE_MODE = 1',
+        'sii',
+        array($stopDateTime, (int)$pauseId, (int)$userId)
+    );
+}
+
+function time_journal_query_latest_completed_pause($link, $userId, $date)
+{
+    return db_query(
+        $link,
+        'SELECT ID, SUIR, START_DT, STOP_DT, DESCRIPTION
          FROM ADD_TIME
-         WHERE STARTDATE >= ? AND STARTDATE <= ? AND USERID = ?
-         ORDER BY STARTDATE DESC, STARTTIME DESC',
-        'ssi',
-        array($startDate, $stopDate, (int)$userId)
+         WHERE USERID = ? AND PAUSE_MODE = 1
+           AND START_DT >= ? AND START_DT < ADDDATE(?, INTERVAL 1 DAY)
+           AND STOP_DT > START_DT
+         ORDER BY START_DT DESC LIMIT 1',
+        'iss',
+        array((int)$userId, $date, $date)
     );
 }

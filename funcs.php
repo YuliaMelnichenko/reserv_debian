@@ -13,6 +13,7 @@ require_once __DIR__ . '/inc/work_duration.php';
 require_once __DIR__ . '/inc/delay.php';
 require_once __DIR__ . '/inc/date_range.php';
 require_once __DIR__ . '/inc/time_journal_repository.php';
+require_once __DIR__ . '/inc/ajax_response.php';
 
 function get_current_datetime_in_timezone(){
   $valid = 0;
@@ -1175,7 +1176,9 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
 
   $def_in_time = strtotime( $user_defaultStartTime ) + $user_allowedDelay * 60;
 
-  $query1 = time_journal_query_approved_legacy_add_time($link, $userID, $startDate, $stopDate);
+  $periodStart = $startDate . ' 00:00:00';
+  $periodStop = date('Y-m-d 00:00:00', strtotime($stopDate . ' +1 day'));
+  $query1 = time_journal_query_approved_add_time($link, $userID, $periodStart, $periodStop);
 
   $merr=mysqli_error($link);
   if ( !$query1 ) {
@@ -1183,8 +1186,11 @@ function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTi
   }
   else{
     while ( $row1 = mysqli_fetch_array($query1, MYSQLI_ASSOC) ){
-      $step_add_time_duration = strtotime($row1["STOPTIME"]) - strtotime($row1["STARTTIME"]); 
-      $add_time_work_dayduration += $step_add_time_duration;
+      $clippedRange = clip_datetime_range($row1['START_DT'], $row1['STOP_DT'], $periodStart, $periodStop);
+
+      if ($clippedRange !== null) {
+        $add_time_work_dayduration += $clippedRange['duration'];
+      }
     }
   }
 
@@ -1514,8 +1520,6 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
     return array();
   }
 
-  $found = 0;
-
   $retArray = Array();
 
   while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) )
@@ -1529,45 +1533,30 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
     $penaltyID = $row0["penaltyID"];
     $penaltyReply = $row0["penaltyReply"];
     $status = $row0["status"];
-    
-    $query1 = time_journal_query_legacy_visit_for_day($link, $userID, $delayDate);
+    $in_time = $row0['in_dt'];
 
-    $found = 0;
-
-    if ( $query1 ) 
+    if ($in_time !== null && $in_time !== '0000-00-00 00:00:00')
     {
-      $in_time = 0;
-
-      if ( $row1 = mysqli_fetch_array($query1,MYSQLI_ASSOC) )
-      {  
-        $in_time = $row1["in_time"];
-        $found = 1;
-      }
-
       $delayArr = get_delay_value($in_time, $defauiltInTime, $allowedDelay);
       $delayVal = $delayArr[1];
       unset( $rets );
       $rets = Array();   
-      
-      if ( $found == 1 )
-      {
 
-        $rets[0] = $ID;
-        $rets[1] = $supervisorID;
-        $rets[2] = $agreed;
-        $rets[3] = $explaneDesk;
-        $rets[4] = $penaltyID;
-        $rets[5] = $penaltyReply;
-        $rets[6] = $status;
-        $rets[7] = $delayVal;
-        $rets[8] = $in_time;
-        $rets[9] = $defauiltInTime;
-        $rets[10] = $allowedDelay;
-        $rets[11] = $delayDate;
-        $rets[12] = $acceptorID;
-       
-        $retArray[] = $rets;
-      }
+      $rets[0] = $ID;
+      $rets[1] = $supervisorID;
+      $rets[2] = $agreed;
+      $rets[3] = $explaneDesk;
+      $rets[4] = $penaltyID;
+      $rets[5] = $penaltyReply;
+      $rets[6] = $status;
+      $rets[7] = $delayVal;
+      $rets[8] = $in_time;
+      $rets[9] = $defauiltInTime;
+      $rets[10] = $allowedDelay;
+      $rets[11] = $delayDate;
+      $rets[12] = $acceptorID;
+
+      $retArray[] = $rets;
     }
   }
   return $retArray;
@@ -1768,7 +1757,6 @@ function get_all_add_work_info_by_user( $userID, $pauseMode = 0 )
     $result[6] = 0;
     $result[7] = $row["PAUSE_MODE"];
     $result[8] = $row["ID"];  
-    // $result[9] = $row["STARTDATE"];  
     $result[10]= $row["SUPERVISORDESC"];  
     $result[11] = $row["REASONDESCRIPTION"];
 
@@ -1777,44 +1765,6 @@ function get_all_add_work_info_by_user( $userID, $pauseMode = 0 )
       $result[6] = strtotime( $result[1] ) - strtotime( $result[0] ); 
     }
      
-    $results[] = $result;
-  }
-
-  return $results;
-}
-
-function get_add_work_info_by_user_and_day_range( $userID_, $startDate, $stopDate )
-{
-  include __DIR__ . "/php_tori/connect.php";  
-  mysqli_set_charset($link, "utf8"); 
-
-  $query0 = time_journal_query_legacy_add_work_range($link, $userID_, $startDate, $stopDate);
-  $merr=mysqli_error($link);
-  if ( !$query0 ) 
-  {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
-    return array();
-  }
-
-  $results = Array();
-
-  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) )
-  {
-    $result = Array();
-  
-    $result[0] = $row0["STARTTIME"];
-    $result[1] = $row0["STOPTIME"];
-    $result[2] = $row0["REASON"];
-    $result[3] = $row0["DESCRIPTION"];
-    $result[4] = $row0["APPROVED"];
-    $result[5] = $row0["SUIR"];
-    $result[6] = 0;
-    $result[7] = $row0["PAUSE_MODE"];  
-    $result[8] = $row0["ID"];  
-    // $result[9] = $row0["STARTDATE"];
-    $result[10]= $row0["SUPERVISORDESC"];  
-    if ( strtotime( $result[1] ) > strtotime( $result[0] ) ){ $result[6] = strtotime( $result[1] ) - strtotime( $result[0] ); }
-
     $results[] = $result;
   }
 

@@ -4,6 +4,7 @@ require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/output.php';
 require_once __DIR__ . '/errors.php';
 require_once __DIR__ . '/session.php';
+require_once __DIR__ . '/ajax_response.php';
 
 function access_session_is_valid()
 {
@@ -13,10 +14,7 @@ function access_session_is_valid()
 
 function deny_ajax_access($statusCode, $message)
 {
-    http_response_code($statusCode);
-    header('Content-Type: text/plain; charset=utf-8');
-    header('Cache-Control: no-store');
-    echo $message;
+    ajax_text_response($message, $statusCode);
     exit;
 }
 
