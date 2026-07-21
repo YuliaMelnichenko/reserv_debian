@@ -49,21 +49,6 @@ function time_journal_add_work_datetime_expressions($link)
     );
 }
 
-function time_journal_query_delay_statuses($link, $userId, $currentDate, $depthDays)
-{
-    return db_query(
-        $link,
-        "SELECT a.status
-         FROM Delays a
-         JOIN visiting b ON a.date = CAST(b.in_dt AS DATE) AND a.userID = b.user_id
-         WHERE a.userID = ?
-           AND b.remoteWorkState = 0
-           AND a.date > ADDDATE(?, INTERVAL ? DAY)",
-        'isi',
-        array((int)$userId, $currentDate, (int)$depthDays)
-    );
-}
-
 function time_journal_query_pause_intervals($link, $userId, $quarterStartDate, $quarterStopExclusive, $startExpr, $stopExpr)
 {
     return db_query(
@@ -79,23 +64,6 @@ function time_journal_query_pause_intervals($link, $userId, $quarterStartDate, $
            AND $stopExpr > $startExpr",
         'iss',
         array((int)$userId, $quarterStartDate, $quarterStopExclusive)
-    );
-}
-
-function time_journal_query_add_time_statuses($link, $userId, $currentDate, $depthDays, $startExpr, $stopExpr)
-{
-    return db_query(
-        $link,
-        "SELECT APPROVED
-         FROM ADD_TIME a
-         WHERE a.PAUSE_MODE = 0
-           AND a.USERID = ?
-           AND $stopExpr > ADDDATE(?, INTERVAL ? DAY)
-           AND $stopExpr <> '0000-00-00 00:00:00'
-           AND $startExpr <> '0000-00-00 00:00:00'
-           AND $stopExpr > $startExpr",
-        'isi',
-        array((int)$userId, $currentDate, (int)$depthDays)
     );
 }
 
@@ -199,23 +167,6 @@ function time_journal_query_delays_for_range($link, $userId, $startDate, $stopDa
          ORDER BY a.date DESC',
         'ssi',
         array($startDate, $stopDate, (int)$userId)
-    );
-}
-
-function time_journal_query_delay_journal($link, $userId, $currentDate, $depthDays)
-{
-    return db_query(
-        $link,
-        "SELECT DISTINCT a.id, a.date, b.in_dt, a.supervisorID, a.explaneDesk, a.acceptorID,
-                         a.penaltyID, a.penaltyReply, a.status, b.timeZoneSec
-         FROM Delays a
-         JOIN visiting b ON a.date = CAST(b.in_dt AS DATE) AND a.userID = b.user_id
-         WHERE a.userID = ?
-           AND a.date > ADDDATE(?, INTERVAL ? DAY)
-           AND b.remoteWorkState = 0
-         ORDER BY date DESC",
-        'isi',
-        array((int)$userId, $currentDate, (int)$depthDays)
     );
 }
 

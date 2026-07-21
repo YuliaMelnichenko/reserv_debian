@@ -550,49 +550,6 @@ function am_i_superuser( $userID ) {
   return 0;
 }
 
-function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNotificationCount )
-{
-  include __DIR__ . "/php_tori/connect.php";
-
-  $notificationCount = 0;
-  $currentDayNotificationCount = 0;
-  $currentDate = date('Y-m-d');
-  list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(false);
-  $startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME', $link);
-  $stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME', $link);
-
-  $query = time_journal_query_pause_intervals(
-    $link,
-    $user_id,
-    $quarterStartDate,
-    $quarterStopExclusive,
-    $startExpr,
-    $stopExpr
-  );
-
-  $merr=mysqli_error($link);
-
-  if ( !$query ) 
-  {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
-    return 0;
-  }
-  else
-  {
-    while ( $row1 = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
-      $startDate = $row1["START_DT_EFFECTIVE"];
-
-      if ( date('Y-m-d', strtotime($startDate)) == $currentDate )
-      {       
-        $currentDayNotificationCount ++;  
-      }
-      $notificationCount ++;
-    }
-  }
-  return 1;
-}
-
 function get_notification_count( $user_id ){
   include __DIR__ . "/php_tori/connect.php";
 

@@ -39,6 +39,21 @@ return function () {
         'The existing pause summary navigation must remain available'
     );
 
+    $pauseCountController = file_get_contents(__DIR__ . '/../ajax/get_pause_notif_count.php');
+    test_assert_true(
+        strpos($pauseCountController, 'inc/notification_summary.php') !== false,
+        'The pause notification counter must load the shared summary service'
+    );
+    test_assert_true(
+        strpos($pauseCountController, '$notifCountStr = "";') !== false,
+        'The pause notification counter must initialize its empty state'
+    );
+    test_assert_same(
+        0,
+        preg_match('/\b(?:SELECT|db_query|get_pause_notif_counts)\b/i', $pauseCountController),
+        'The pause notification counter must not perform SQL or use the legacy helper'
+    );
+
     $pages = array(
         __DIR__ . '/../delay_approvement.php',
         __DIR__ . '/../pause_view.php',
@@ -104,6 +119,10 @@ return function () {
     test_assert_true(
         strpos($service, 'function get_add_time_notification_summary') !== false,
         'The shared service must provide the remote-work notification summary'
+    );
+    test_assert_true(
+        strpos($service, 'function get_pause_notification_count') !== false,
+        'The shared service must provide the personal pause notification counter'
     );
     test_assert_same(0, preg_match('/SELECT\s+\*/i', $service), 'Summary queries must select explicit fields');
 };

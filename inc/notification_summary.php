@@ -137,6 +137,44 @@ function get_pause_notification_summary($link, $supervisorID, $currentDateTime)
     );
 }
 
+function get_pause_notification_count($link, $userID, $currentDateTime)
+{
+    list($quarterStartDate, , $quarterStopExclusive) = get_current_quarter_date_range(
+        false,
+        $currentDateTime
+    );
+    $currentDate = substr((string)$currentDateTime, 0, 10);
+    $dateTimeExpressions = time_journal_add_work_datetime_expressions($link);
+    $entryResult = time_journal_query_pause_intervals(
+        $link,
+        (int)$userID,
+        $quarterStartDate,
+        $quarterStopExclusive,
+        $dateTimeExpressions['start'],
+        $dateTimeExpressions['stop']
+    );
+
+    if (!$entryResult) {
+        return false;
+    }
+
+    $totalCount = 0;
+    $currentDayCount = 0;
+
+    while ($row = mysqli_fetch_assoc($entryResult)) {
+        $totalCount++;
+
+        if (substr((string)$row['START_DT_EFFECTIVE'], 0, 10) === $currentDate) {
+            $currentDayCount++;
+        }
+    }
+
+    return array(
+        'total_count' => $totalCount,
+        'current_day_count' => $currentDayCount,
+    );
+}
+
 function get_add_time_notification_summary($link, $supervisorID, $currentDateTime)
 {
     $depthResult = db_query($link, "
