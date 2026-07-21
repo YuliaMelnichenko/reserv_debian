@@ -26,6 +26,7 @@ $testFiles = array(
     __DIR__ . '/database_conventions_test.php',
     __DIR__ . '/delay_test.php',
     __DIR__ . '/entrance_adjustment_test.php',
+    __DIR__ . '/gym_schedule_test.php',
     __DIR__ . '/legacy_schema_audit_test.php',
     __DIR__ . '/overtime_test.php',
     __DIR__ . '/report_renderer_test.php',

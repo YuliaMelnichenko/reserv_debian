@@ -145,6 +145,39 @@ function get_add_time_duration_by_times_ex($addTimeInfo)
     return $duration;
 }
 
+function get_completed_visit_statistics(
+    $inDateTime,
+    $outDateTime,
+    $eatStartDateTime,
+    $eatStopDateTime,
+    $defaultStartTime,
+    $allowedDelayMinutes
+) {
+    $fullDuration = get_defined_time_range_duration($inDateTime, $outDateTime);
+
+    if ($fullDuration <= 0) {
+        return null;
+    }
+
+    $inTimestamp = strtotime($inDateTime);
+    $date = date('Y-m-d', $inTimestamp);
+    $defaultStartTimestamp = strtotime($date . ' ' . $defaultStartTime);
+    $allowedStartTimestamp = $defaultStartTimestamp !== false
+        ? $defaultStartTimestamp + ((int)$allowedDelayMinutes * 60)
+        : false;
+    $lunchDuration = get_defined_time_range_duration($eatStartDateTime, $eatStopDateTime);
+
+    return array(
+        'date' => $date,
+        'full_duration' => $fullDuration,
+        'lunch_duration' => $lunchDuration,
+        'pure_duration' => max(0, $fullDuration - $lunchDuration),
+        'delay_duration' => $allowedStartTimestamp !== false
+            ? max(0, $inTimestamp - $allowedStartTimestamp)
+            : 0,
+    );
+}
+
 function get_durations(
     $inTime,
     $outTime,

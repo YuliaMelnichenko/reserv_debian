@@ -69,6 +69,32 @@ return function () {
     test_assert_same(7200, get_add_time_duration_by_times_ex($addTimeInfo), 'Active offsite work must be added');
     test_assert_same(1800, get_pause_time_duration_by_times($addTimeInfo), 'Only valid active pauses must be subtracted');
 
+    $visitStat = get_completed_visit_statistics(
+        '2026-07-20 09:45:00',
+        '2026-07-20 18:00:00',
+        '2026-07-20 13:00:00',
+        '2026-07-20 14:00:00',
+        '09:00:00',
+        30
+    );
+    test_assert_same('2026-07-20', $visitStat['date'], 'Completed visit statistics must preserve the visit date');
+    test_assert_same(29700, $visitStat['full_duration'], 'Completed visit statistics must use DATETIME bounds');
+    test_assert_same(3600, $visitStat['lunch_duration'], 'Completed visit statistics must include lunch');
+    test_assert_same(26100, $visitStat['pure_duration'], 'Completed visit statistics must subtract lunch');
+    test_assert_same(900, $visitStat['delay_duration'], 'Allowed delay must be calculated on the visit date');
+    test_assert_same(
+        null,
+        get_completed_visit_statistics(
+            '2026-07-20 09:00:00',
+            '0000-00-00 00:00:00',
+            '0000-00-00 00:00:00',
+            '0000-00-00 00:00:00',
+            '09:00:00',
+            30
+        ),
+        'A damaged completed visit must not affect statistics'
+    );
+
     $durations = get_durations(
         '2026-07-20 09:00:00',
         '2026-07-20 18:00:00',
