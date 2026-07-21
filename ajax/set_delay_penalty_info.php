@@ -20,8 +20,9 @@ include_once __DIR__ . "/../php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
 
-if (!mysqli_begin_transaction($link)) {
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+$transaction = db_transaction_start($link);
+if (!$transaction) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
@@ -33,8 +34,8 @@ $delayResult = db_query(
 );
 
 if (!$delayResult || !($delayRow = mysqli_fetch_assoc($delayResult))) {
-  mysqli_rollback($link);
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
@@ -54,7 +55,7 @@ if ( $ACCEPTMODE == -1 )
 
     if (!$lastPenaltyResult)
     {
-      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+      ajax_database_error($link, __FILE__ . ':' . __LINE__);
       $errorThere = 1;
     }
     else
@@ -65,7 +66,7 @@ if ( $ACCEPTMODE == -1 )
 
       if ( !$query )
       {
-        echo database_error_message($link, __FILE__ . ':' . __LINE__);
+        ajax_database_error($link, __FILE__ . ':' . __LINE__);
         $errorThere = 1;
       }
     }
@@ -75,7 +76,7 @@ if ( $ACCEPTMODE == -1 )
     $query = db_execute($link, 'UPDATE Penalty SET date = ?, supervisorID = ?, reason = ? WHERE ID = ? AND userID = ?', 'sisii', array($PENALTYDATE, $acceptorID, $DESC, $PENALTYID, $getUserID));
     if ( !$query )
     {
-      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+      ajax_database_error($link, __FILE__ . ':' . __LINE__);
       $errorThere = 1;
     }
     $newPenID = $PENALTYID;
@@ -88,7 +89,7 @@ else
     $query = db_execute($link, 'DELETE FROM Penalty WHERE ID = ? AND userID = ?', 'ii', array($PENALTYID, $getUserID));
     if ( !$query ) 
     {
-      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+      ajax_database_error($link, __FILE__ . ':' . __LINE__);
       $errorThere = 1;
     }
     $newPenID = -1;
@@ -99,20 +100,19 @@ if ( $errorThere == 0 )
   $query = db_execute($link, 'UPDATE Delays SET acceptorID = ?, penaltyReply = ?, status = ?, penaltyID = ? WHERE ID = ? AND userID = ?', 'isiiii', array($acceptorID, $DESC, $ACCEPTMODE, $newPenID, $ID, $getUserID));
   if ( !$query )
   {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     $errorThere = 1;
   }
 }
 
 if ($errorThere == 0)
 {
-  if (!mysqli_commit($link)) {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
-    mysqli_rollback($link);
+  if (!$transaction->commit()) {
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
   }
 }
 else
 {
-  mysqli_rollback($link);
+  $transaction->rollback();
 }
 ?>

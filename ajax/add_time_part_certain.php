@@ -38,7 +38,7 @@ mysqli_set_charset($link, "utf8");
 $supervisor_query = db_query($link, 'SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 AND USERID = ? LIMIT 1', 'i', array($userID));
 
 if (!$supervisor_query) {
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
@@ -51,8 +51,9 @@ if (!$row || (int)$row['SUPERVISORID'] <= 0) {
 
 $sv_ID = (int)$row["SUPERVISORID"];
 
-if (!mysqli_begin_transaction($link)) {
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+$transaction = db_transaction_start($link);
+if (!$transaction) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
                                             
@@ -65,8 +66,8 @@ $query = db_execute(
 $merr=mysqli_error($link);
 
 if (!$query){
-  mysqli_rollback($link);
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
 }
 else{
   if ( isset($_SESSION['ss_ch_delay_ID']) ){
@@ -81,17 +82,16 @@ else{
     $merr1 = mysqli_error($link);
 
     if (!$query1){
-      mysqli_rollback($link);
-      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+      $transaction->rollback();
+      ajax_database_error($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
     unset($_SESSION['ss_ch_delay_ID']);
   }
 
-  if (!mysqli_commit($link)) {
-    mysqli_rollback($link);
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  if (!$transaction->commit()) {
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 

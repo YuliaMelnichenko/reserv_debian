@@ -22,8 +22,9 @@ require_ajax_accounting_error_supervisor($errorID, 3);
 
 include __DIR__ . '/../php_tori/connect.php';
 
-if (!mysqli_begin_transaction($link)) {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+$transaction = db_transaction_start($link);
+if (!$transaction) {
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
 }
 
@@ -35,20 +36,20 @@ $result = db_query(
 );
 
 if (!$result) {
-    mysqli_rollback($link);
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    $transaction->rollback();
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
 }
 
 $row = mysqli_fetch_assoc($result);
 
 if (!$row) {
-    mysqli_rollback($link);
+    $transaction->rollback();
     deny_ajax_access(404, 'Запись ошибки учета не найдена.');
 }
 
 if ((int)$row['STATUS'] === 4 && $status !== 4) {
-    mysqli_rollback($link);
+    $transaction->rollback();
     deny_ajax_access(409, 'Удаленную запись нельзя изменить.');
 }
 
@@ -62,14 +63,13 @@ $updated = db_execute(
 );
 
 if (!$updated) {
-    mysqli_rollback($link);
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    $transaction->rollback();
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
 }
 
-if (!mysqli_commit($link)) {
-    mysqli_rollback($link);
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+if (!$transaction->commit()) {
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
 }
 

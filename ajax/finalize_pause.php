@@ -26,7 +26,8 @@ if (!$pause) {
 $pauseID = (int)$pause['ID'];
 $currentDateTime = get_current_datetime_in_timezone_str(1, 0);
 
-if (!mysqli_begin_transaction($link)) {
+$transaction = db_transaction_start($link);
+if (!$transaction) {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
@@ -34,7 +35,7 @@ if (!mysqli_begin_transaction($link)) {
 $query = db_execute($link, 'UPDATE visiting SET take_pause = 0 WHERE id = ? AND user_id = ?', 'ii', array($visitingID, $userID));
 
 if (!$query) {
-  mysqli_rollback($link);
+  $transaction->rollback();
   ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
@@ -42,13 +43,12 @@ if (!$query) {
 $query = time_journal_finish_pause($link, $pauseID, $userID, $currentDateTime);
 
 if (!$query) {
-  mysqli_rollback($link);
+  $transaction->rollback();
   ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
-if (!mysqli_commit($link)) {
-  mysqli_rollback($link);
+if (!$transaction->commit()) {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }

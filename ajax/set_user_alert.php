@@ -30,16 +30,17 @@ if (request_post_has('userID') && request_post_has('messageMode'))
 
   $messageModeStr = $messageModeStr.get_user_name_by_id( $superUserID );
 
-  if (!mysqli_begin_transaction($link)) {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  $transaction = db_transaction_start($link);
+  if (!$transaction) {
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 
   $query = db_query($link, 'SELECT ID FROM ALERTS ORDER BY ID DESC LIMIT 1 FOR UPDATE');
 
   if (!$query) {
-    mysqli_rollback($link);
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    $transaction->rollback();
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 
@@ -54,14 +55,13 @@ if (request_post_has('userID') && request_post_has('messageMode'))
   );
 
   if (!$query) {
-    mysqli_rollback($link);
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    $transaction->rollback();
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 
-  if (!mysqli_commit($link)) {
-    mysqli_rollback($link);
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  if (!$transaction->commit()) {
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 

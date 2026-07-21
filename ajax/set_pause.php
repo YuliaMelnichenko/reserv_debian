@@ -27,7 +27,7 @@ $supervisorQuery = db_query(
 );
 
 if (!$supervisorQuery) {
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
@@ -44,7 +44,7 @@ $query = db_execute($link, 'UPDATE visiting SET take_pause = 1 WHERE id = ? AND 
 $merr=mysqli_error($link);
 
 if (!$query){
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
 }
 else{
   mysqli_set_charset($link, "utf8");
@@ -54,7 +54,7 @@ $query = db_execute($link, "INSERT INTO ADD_TIME (ADDDATE, SUIR, USERID, START_D
   $merr=mysqli_error($link);
   if (!$query)
   {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
   }
   else
   {    

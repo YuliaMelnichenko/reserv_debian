@@ -21,6 +21,8 @@ $testFiles = array(
     __DIR__ . '/ajax_endpoint_conventions_test.php',
     __DIR__ . '/calendar_test.php',
     __DIR__ . '/date_range_test.php',
+    __DIR__ . '/database_transaction_test.php',
+    __DIR__ . '/database_conventions_test.php',
     __DIR__ . '/delay_test.php',
     __DIR__ . '/legacy_schema_audit_test.php',
     __DIR__ . '/overtime_test.php',

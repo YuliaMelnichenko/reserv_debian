@@ -53,7 +53,7 @@ if ($add_time_part_base <= 0) {
 $supervisor_query = db_query($link, "SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 AND USERID = ? LIMIT 1", 'i', array($userID_));
 
 if (!$supervisor_query) {
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
@@ -104,8 +104,9 @@ if (count($newDaysRange) == 0) {
   exit;
 }
 
-if (!mysqli_begin_transaction($link)) {
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+$transaction = db_transaction_start($link);
+if (!$transaction) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
@@ -130,22 +131,21 @@ foreach ($newDaysRange as $rDay) {
     (?, ?, ?, ?, ?, ?, ?, '', 0, 0, ?)", 'siissisi', array($currentDate, $sv_ID, $userID_, $start, $stop, $add_time_part_base, $add_time_part_desk, $byAlert));
 
   if (!$query) {
-    $err = database_error_message($link, __FILE__ . ':' . __LINE__);
+    $err = ajax_database_error_message($link, __FILE__ . ':' . __LINE__);
     break;
   }
 }
 
 if ($err == "") {
-  if (!mysqli_commit($link)) {
-    mysqli_rollback($link);
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  if (!$transaction->commit()) {
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 
   echo "1";
 }
 else {
-  mysqli_rollback($link);
+  $transaction->rollback();
   echo $err;
 }
 ?>

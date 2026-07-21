@@ -68,7 +68,7 @@ function sync_time_registration_state_from_db($link, $userID, $startDTStr, $stop
   ", 'isssssi', array((int)$userID, $startDTStr, $stopDTStr, $startDTStr, $startDTStr, $dateTimeStr, (int)$maxOpenShiftSeconds));
 
   if (!$query) {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 
@@ -110,7 +110,7 @@ function get_current_visit_row($link, $userID, $visitID, $startDTStr, $stopDTStr
   ", 'ii', array($visitID, (int)$userID));
 
   if (!$query) {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 
@@ -209,16 +209,17 @@ if ($nextState == 1) {
     $_SESSION['ss_visiting_ID'] = 0;
     $ss_visiting_ID = 0;
 
-    if (!mysqli_begin_transaction($link)) {
-      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    $transaction = db_transaction_start($link);
+    if (!$transaction) {
+      ajax_database_error($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
     $idQuery = db_query($link, 'SELECT ID FROM visiting ORDER BY ID DESC LIMIT 1 FOR UPDATE');
 
     if (!$idQuery) {
-      $errorMessage = database_error_message($link, __FILE__ . ':' . __LINE__);
-      mysqli_rollback($link);
+      $errorMessage = ajax_database_error_message($link, __FILE__ . ':' . __LINE__);
+      $transaction->rollback();
       echo $errorMessage;
       exit;
     }
@@ -248,8 +249,8 @@ if ($nextState == 1) {
     ", 'isssssi', array($id, $startDTStr, $stopDTStr, $startDTStr, $startDTStr, $dateTimeStr, $maxOpenShiftSeconds));
 
     if (!$openCheck) {
-      $errorMessage = database_error_message($link, __FILE__ . ':' . __LINE__);
-      mysqli_rollback($link);
+      $errorMessage = ajax_database_error_message($link, __FILE__ . ':' . __LINE__);
+      $transaction->rollback();
       echo $errorMessage;
       exit;
     }
@@ -257,9 +258,8 @@ if ($nextState == 1) {
     if (mysqli_num_rows($openCheck) > 0) {
       $openRow = mysqli_fetch_array($openCheck, MYSQLI_ASSOC);
 
-      if (!mysqli_commit($link)) {
-        $errorMessage = database_error_message($link, __FILE__ . ':' . __LINE__);
-        mysqli_rollback($link);
+      if (!$transaction->commit()) {
+        $errorMessage = ajax_database_error_message($link, __FILE__ . ':' . __LINE__);
         echo $errorMessage;
         exit;
       }
@@ -306,15 +306,14 @@ if ($nextState == 1) {
     ", 'iisi', array($newID, $id, $dateTimeStr, $id));
 
     if (!$res) {
-      $errorMessage = database_error_message($link, __FILE__ . ':' . __LINE__);
-      mysqli_rollback($link);
+      $errorMessage = ajax_database_error_message($link, __FILE__ . ':' . __LINE__);
+      $transaction->rollback();
       echo $errorMessage;
       exit;
     }
 
-    if (!mysqli_commit($link)) {
-      $errorMessage = database_error_message($link, __FILE__ . ':' . __LINE__);
-      mysqli_rollback($link);
+    if (!$transaction->commit()) {
+      $errorMessage = ajax_database_error_message($link, __FILE__ . ':' . __LINE__);
       echo $errorMessage;
       exit;
     }
@@ -347,7 +346,7 @@ if ($nextState == 1) {
     ", 'sii', array($dateTimeStr, $id, $ss_visiting_ID));
 
     if ($affectedRows === false) {
-      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+      ajax_database_error($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -384,7 +383,7 @@ if ($nextState == 1) {
     ", 'sii', array($dateTimeStr, $id, $ss_visiting_ID));
 
     if ($affectedRows === false) {
-      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+      ajax_database_error($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -433,7 +432,7 @@ if ($nextState == 1) {
     ", 'sii', array($dateTimeStr, $id, $visitID));
 
     if ($visitingAffectedRows === false) {
-      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+      ajax_database_error($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -445,7 +444,7 @@ if ($nextState == 1) {
     ", 'i', array($id));
 
     if (!$res2) {
-      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+      ajax_database_error($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -499,7 +498,7 @@ if ($nextState != 1) {
     ", 'ii', array($id, $ss_visiting_ID));
 
     if ($affectedRows === false) {
-      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+      ajax_database_error($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -527,7 +526,7 @@ if ($nextState != 1) {
     ", 'ii', array($id, $ss_visiting_ID));
 
     if ($affectedRows === false) {
-      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+      ajax_database_error($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -552,7 +551,7 @@ if ($nextState != 1) {
     ", 'ii', array($id, $ss_visiting_ID));
 
     if ($affectedRows === false) {
-      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+      ajax_database_error($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -586,7 +585,7 @@ if ($nextState != 1) {
     ", 'ii', array($id, $ss_visiting_ID));
 
     if ($affectedRows === false) {
-      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+      ajax_database_error($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 

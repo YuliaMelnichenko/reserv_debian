@@ -30,7 +30,7 @@ $res = db_execute($link, "DELETE FROM gym_schedule WHERE USERID = ? AND DATE_TRA
 $merr = mysqli_error($link);
 
 if ( !$res ) {
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
 } 
 
 $query = db_query(
@@ -40,7 +40,7 @@ $query = db_query(
     array($desc, $stop)
 );
 if (!$query) {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
 }
 $res = mysqli_num_rows($query);
@@ -64,7 +64,7 @@ else {
             array((int)$ta_id)
         );
         if (!$query2) {
-            echo database_error_message($link, __FILE__ . ':' . __LINE__);
+            ajax_database_error($link, __FILE__ . ':' . __LINE__);
             exit;
         }
         $row2 = mysqli_fetch_assoc($query2);
@@ -88,7 +88,7 @@ mysqli_set_charset($link, "utf8");
 
 $search = db_query($link, "SELECT * FROM gym_schedule WHERE USERID = ?", 'i', array($userID));
 if (!$search) {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
 }
 $res = mysqli_num_rows($search);
@@ -135,7 +135,7 @@ mysqli_set_charset($link, "utf8");
 
 $query3 = db_query($link, "SELECT *, GROUP_CONCAT(DATE_FORMAT(DATE_TRAIN, '%d %m') ORDER BY DATE_TRAIN ASC SEPARATOR ' ') AS DATE_TIME, GROUP_CONCAT(CONCAT(TIME_FORMAT(START_TIME, '%H:%i'), '-', TIME_FORMAT(STOP_TIME, '%H:%i')) ORDER BY DATE_TRAIN ASC SEPARATOR ' ') AS SCHEDULE FROM gym_schedule WHERE DATE_TRAIN >= DATE_FORMAT(NOW(), '%Y-%m-%d') GROUP BY USERID ORDER BY DATE_TRAIN ASC");
 if (!$query3) {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
 }
 
@@ -162,7 +162,7 @@ else {
             array((int)$user_id)
         );
         if (!$query4) {
-            echo database_error_message($link, __FILE__ . ':' . __LINE__);
+            ajax_database_error($link, __FILE__ . ':' . __LINE__);
             exit;
         }
         $row4 = mysqli_fetch_assoc($query4);
