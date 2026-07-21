@@ -13,7 +13,48 @@ function time_pause_result($status, $message = null)
     return $result;
 }
 
+function start_time_pause($link, $userID, $visitingID, $supervisorID, $currentDate, $currentDateTime, $description)
+{
+    if ((int)$supervisorID <= 0) {
+        return time_pause_result('error', 'Не выбран руководитель для согласования');
+    }
+
+    return start_time_pause_for_group(
+        $link,
+        $userID,
+        $visitingID,
+        (int)$supervisorID,
+        '3',
+        $currentDate,
+        $currentDateTime,
+        $description
+    );
+}
+
 function start_sport_time_pause($link, $userID, $visitingID, $currentDate, $currentDateTime, $description)
+{
+    return start_time_pause_for_group(
+        $link,
+        $userID,
+        $visitingID,
+        null,
+        '100',
+        $currentDate,
+        $currentDateTime,
+        $description
+    );
+}
+
+function start_time_pause_for_group(
+    $link,
+    $userID,
+    $visitingID,
+    $supervisorID,
+    $groupType,
+    $currentDate,
+    $currentDateTime,
+    $description
+)
 {
     if ((int)$userID <= 0 || (int)$visitingID <= 0) {
         return time_pause_result('error', 'Не найдена активная запись рабочего дня');
@@ -50,6 +91,46 @@ function start_sport_time_pause($link, $userID, $visitingID, $currentDate, $curr
         $transaction->rollback();
         return time_pause_result('error', 'Приостановка учета времени сейчас недоступна');
     }
+
+    if ($supervisorID === null) {
+        $supervisorResult = db_query($link, "
+            SELECT SUPERVISORID
+            FROM GROUPS
+            WHERE USERID = ?
+              AND TRIM(TYPE) = ?
+            ORDER BY SUPERVISORID
+            LIMIT 1
+        ", 'is', array((int)$userID, (string)$groupType));
+    }
+    else {
+        $supervisorResult = db_query($link, "
+            SELECT SUPERVISORID
+            FROM GROUPS
+            WHERE USERID = ?
+              AND SUPERVISORID = ?
+              AND TRIM(TYPE) = ?
+            LIMIT 1
+        ", 'iis', array((int)$userID, (int)$supervisorID, (string)$groupType));
+    }
+
+    if (!$supervisorResult) {
+        $transaction->rollback();
+        return false;
+    }
+
+    $supervisor = mysqli_fetch_assoc($supervisorResult);
+
+    if (!$supervisor || (int)$supervisor['SUPERVISORID'] <= 0) {
+        $transaction->rollback();
+
+        if ($supervisorID !== null) {
+            return time_pause_result('forbidden', 'FORBIDDEN_SUPERVISOR');
+        }
+
+        return time_pause_result('error', 'Выбранный руководитель недоступен для согласования');
+    }
+
+    $resolvedSupervisorID = (int)$supervisor['SUPERVISORID'];
 
     $openPauseResult = db_query($link, "
         SELECT ID
@@ -88,27 +169,6 @@ function start_sport_time_pause($link, $userID, $visitingID, $currentDate, $curr
         return time_pause_result('success');
     }
 
-    $supervisorResult = db_query($link, "
-        SELECT SUPERVISORID
-        FROM GROUPS
-        WHERE USERID = ?
-          AND TRIM(TYPE) = '100'
-        ORDER BY SUPERVISORID
-        LIMIT 1
-    ", 'i', array((int)$userID));
-
-    if (!$supervisorResult) {
-        $transaction->rollback();
-        return false;
-    }
-
-    $supervisor = mysqli_fetch_assoc($supervisorResult);
-
-    if (!$supervisor || (int)$supervisor['SUPERVISORID'] <= 0) {
-        $transaction->rollback();
-        return time_pause_result('error', 'Не найден руководитель для согласования');
-    }
-
     $visitUpdated = db_execute($link, "
         UPDATE visiting
         SET take_pause = 1
@@ -129,7 +189,7 @@ function start_sport_time_pause($link, $userID, $visitingID, $currentDate, $curr
         VALUES (?, ?, ?, ?, '0000-00-00 00:00:00', -1, ?, '', 0, 1, 0)
     ", 'siiss', array(
         $currentDate,
-        (int)$supervisor['SUPERVISORID'],
+        $resolvedSupervisorID,
         (int)$userID,
         $currentDateTime,
         (string)$description,

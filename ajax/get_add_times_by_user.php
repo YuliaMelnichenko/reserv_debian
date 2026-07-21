@@ -6,6 +6,7 @@ ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/add_time_journal.php";
 
 $_SESSION['add_time_page_mode'] = 2;
 
@@ -25,7 +26,19 @@ if ($userID <= 0) {
 require_ajax_self_or_superuser($userID);
 $_SESSION['add_time_page_user_id'] = $userID;
 
-$userName = get_user_name_by_id($userID);
+$journal = get_add_time_journal_context($link, $userID, get_current_datetime_in_timezone_str(1, 0));
+
+if ($journal === false) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+if ($journal === null) {
+  deny_ajax_access(404, 'USER_NOT_FOUND');
+}
+
+$userName = $journal['user_name'];
+$addTimeInfo = $journal['entries'];
 
 echo "<table id=\"add_time_approvement_table\" border=0>";
   echo "<tr>";
@@ -61,24 +74,20 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
       $color1 = "#ddffff";
       $color3 = "#ffffff";
 
-      $addTimeInfo = get_all_add_work_info_by_user( $userID );
-
       for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
       {
         $addInf = $addTimeInfo[$idx];
 
-        $ta_id = (int)$addInf[8];
-        $ta_start_dt = $addInf[0];
-        $ta_stop_dt = $addInf[1];
-        $ta_duration = $addInf[6];
+        $ta_id = $addInf['id'];
+        $ta_start_dt = $addInf['start_datetime'];
+        $ta_stop_dt = $addInf['stop_datetime'];
+        $ta_duration = $addInf['duration'];
 
-        $ta_reason_description = $addInf[11];
-        $ta_description = $addInf[3];
-        $ta_SUdescription = $addInf[10];
-        $ta_approved = $addInf[4];
-        $ta_superuser = $addInf[5];
-
-        $superUserName = get_superuser_name_by_id( $ta_superuser );
+        $ta_reason_description = $addInf['reason_description'];
+        $ta_description = $addInf['employee_comment'];
+        $ta_SUdescription = $addInf['decision_comment'];
+        $ta_approved = $addInf['status'];
+        $superUserName = $addInf['supervisor_name'];
 
         if ( $ta_approved == 0 )
         {

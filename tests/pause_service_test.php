@@ -13,15 +13,24 @@ return function () {
         time_pause_result('error', 'Ошибка'),
         'A rejected pause transition must preserve its message'
     );
+    test_assert_same(
+        array('status' => 'forbidden', 'message' => 'FORBIDDEN_SUPERVISOR'),
+        time_pause_result('forbidden', 'FORBIDDEN_SUPERVISOR'),
+        'A forged supervisor must preserve the forbidden response contract'
+    );
 
     $invalidStart = start_sport_time_pause(null, 0, 0, '2026-07-21', '2026-07-21 10:00:00', '');
     test_assert_same('error', $invalidStart['status'], 'A sport pause requires an active workday');
+
+    $invalidRegularStart = start_time_pause(null, 1, 1, 0, '2026-07-21', '2026-07-21 10:00:00', '');
+    test_assert_same('error', $invalidRegularStart['status'], 'A regular pause requires a valid supervisor');
 
     $invalidFinish = finish_time_pause(null, 0, 0, 0, '2026-07-21 10:00:00');
     test_assert_same('error', $invalidFinish['status'], 'Finishing a pause requires valid record identifiers');
 
     $controllers = array(
         __DIR__ . '/../ajax/set_pause_sport.php',
+        __DIR__ . '/../ajax/set_pause.php',
         __DIR__ . '/../ajax/resume_from_pause.php',
         __DIR__ . '/../ajax/finalize_pause.php',
     );
