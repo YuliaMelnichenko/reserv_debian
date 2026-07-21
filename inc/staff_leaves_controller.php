@@ -6,8 +6,7 @@ function staffLeavesJsonResponse($payload)
         ob_end_clean();
     }
 
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    ajax_json_response($payload);
 }
 
 function getStaffLeavesArchiveRequest($query)
@@ -144,8 +143,7 @@ function handleStaffLeavesRequest($link, $server, $query, $post)
             while (ob_get_level()) {
                 ob_end_clean();
             }
-            header('Content-Type: text/plain; charset=utf-8');
-            echo application_error_message('Staff leave XLSX export', $e->getMessage());
+            ajax_text_response(application_error_message('Staff leave XLSX export', $e->getMessage()), 500);
         }
         else {
             staffLeavesJsonResponse(array('status' => 'error', 'message' => $e->getMessage()));

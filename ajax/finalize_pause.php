@@ -2,40 +2,56 @@
 require_once __DIR__ . '/../inc/session.php';
 require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+ajax_text_headers();
 
-$userID = $_SESSION['ss_id']; 
-$currentDate = date('Y-m-d');
-$currentTime = date("H:i:s");
-$pauseID = (int) ($_POST['pauseID'] ?? 0);
-require_ajax_add_time_access($pauseID);
+$userID = (int)$_SESSION['ss_id'];
+$visitingID = (int)($_SESSION['ss_visiting_ID'] ?? 0);
 
+include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-$query = db_execute(
-  $link,
-  'UPDATE visiting SET take_pause = 0 WHERE date = ? AND user_id = ?',
-  'si',
-  array($currentDate, $userID)
-);
-$merr = mysqli_error($link);
-if (!$query)
-{
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
-}
-else
-{
-$query = db_execute($link, 'UPDATE ADD_TIME SET STOPTIME = ? WHERE id = ?', 'si', array($currentTime, $pauseID));
+$pauseQuery = time_journal_query_open_pause($link, $userID);
 
-  if (!$query)
-  {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
-  }
-  else
-  { 
-    echo "1"; 
-  }
-}  
+if (!$pauseQuery) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+$pause = mysqli_fetch_assoc($pauseQuery);
+
+if (!$pause) {
+  deny_ajax_access(404, 'OPEN_PAUSE_NOT_FOUND');
+}
+
+$pauseID = (int)$pause['ID'];
+$currentDateTime = get_current_datetime_in_timezone_str(1, 0);
+
+if (!mysqli_begin_transaction($link)) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+$query = db_execute($link, 'UPDATE visiting SET take_pause = 0 WHERE id = ? AND user_id = ?', 'ii', array($visitingID, $userID));
+
+if (!$query) {
+  mysqli_rollback($link);
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+$query = time_journal_finish_pause($link, $pauseID, $userID, $currentDateTime);
+
+if (!$query) {
+  mysqli_rollback($link);
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+if (!mysqli_commit($link)) {
+  mysqli_rollback($link);
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+ajax_text_response('1');
 ?>

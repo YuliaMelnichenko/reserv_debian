@@ -2,9 +2,7 @@
 require_once __DIR__ . '/../inc/session.php';
 require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+ajax_text_headers();
 
 $userID = (int)$_SESSION['ss_id'];
 $currentDate = date('Y-m-d');
@@ -14,12 +12,7 @@ include_once __DIR__ . "/../php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
 
-$query = db_query(
-  $link,
-  'SELECT ID, SUIR, STARTTIME, STOPTIME, DESCRIPTION FROM ADD_TIME WHERE STARTDATE = ? AND USERID = ? AND PAUSE_MODE = 1 ORDER BY STARTDATE DESC, STARTTIME DESC LIMIT 1',
-  'si',
-  array($currentDate, $userID)
-);
+$query = time_journal_query_latest_completed_pause($link, $userID, $currentDate);
 
 $merr = mysqli_error($link);
 
@@ -40,11 +33,13 @@ else
     {
       $id = (int)$row["ID"];
       $suid = (int)$row["SUIR"];
-      $startTime = $row["STARTTIME"];
-      $stopTime = $row["STOPTIME"];
+      $startDateTime = $row["START_DT"];
+      $stopDateTime = $row["STOP_DT"];
+      $startTime = datetime_to_time_str($startDateTime);
+      $stopTime = datetime_to_time_str($stopDateTime);
       $desk = $row["DESCRIPTION"];
       $SUName = get_superuser_name_by_id( $suid );
-      $duration = strtotime( $stopTime ) - strtotime( $startTime );
+      $duration = get_defined_time_range_duration($startDateTime, $stopDateTime);
       $durationStr = format_time_d_hhmmss_pure( $duration );
 
             echo "<table id=\"resultContentTable\" border=\"1\">";

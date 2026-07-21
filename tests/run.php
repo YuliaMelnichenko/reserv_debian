@@ -17,9 +17,11 @@ function test_assert_same($expected, $actual, $message)
 }
 
 $testFiles = array(
+    __DIR__ . '/ajax_response_test.php',
     __DIR__ . '/calendar_test.php',
     __DIR__ . '/date_range_test.php',
     __DIR__ . '/delay_test.php',
+    __DIR__ . '/legacy_schema_audit_test.php',
     __DIR__ . '/overtime_test.php',
     __DIR__ . '/report_renderer_test.php',
     __DIR__ . '/staff_leaves_test.php',

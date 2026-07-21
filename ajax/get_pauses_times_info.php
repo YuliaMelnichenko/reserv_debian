@@ -22,7 +22,16 @@ if ($userID <= 0) {
 
 require_ajax_self_or_superuser($userID);
 
-$addRets = get_add_work_info_by_user_and_day_range( $userID, $startDate, $stopDate );
+$rangeStart = normalize_date_value($startDate);
+$rangeStop = normalize_date_value($stopDate);
+
+if ($rangeStart === null || $rangeStop === null || $rangeStop < $rangeStart) {
+  deny_ajax_access(400, 'INVALID_DATE_RANGE');
+}
+
+$rangeStart .= ' 00:00:00';
+$rangeStop = date('Y-m-d 00:00:00', strtotime($rangeStop . ' +1 day'));
+$addRets = get_add_work_info_by_user_and_day_ex($userID, $rangeStart, $rangeStop, 0);
 
 echo "<table class=\"hor_bor\" border=0>";
   echo "<tr>";
@@ -50,8 +59,8 @@ echo "<table class=\"hor_bor\" border=1>";
 
 foreach( $addRets as $addRet )
 {
-  $startTime = $addRet[0];
-  $stopTime = $addRet[1];
+  $startTime = datetime_to_time_str($addRet[0]);
+  $stopTime = datetime_to_time_str($addRet[1]);
   $reason = $addRet[2];
   $description = $addRet[3];
   $approved = $addRet[4];
