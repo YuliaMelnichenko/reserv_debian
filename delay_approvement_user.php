@@ -3,6 +3,7 @@ ob_start();
 require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 include_once __DIR__ . "/funcs.php";
+require_once __DIR__ . "/inc/delay_journal.php";
 save_last_location( "delay_approvement.php" );
 $mid = (string) ($_GET['mid'] ?? '');
 
@@ -78,16 +79,22 @@ echo "<table class=\"notification-page-table\">";
       echo "<h5 class=\"dark\"><br>/уведомления по опозданиям<br><br></h5>";
     echo "</div>";
 
-$user_defaultStartTime = "10:00:00";
-$user_allowedDelay = 30;
-
-get_user_defStartTime_and_allowedDelay( $userID, $user_defaultStartTime, $user_allowedDelay );
-$userName = get_user_name_by_id($userID);
 $backUrl = "delay_approvement.php";
+$currentDate = get_current_datetime_in_timezone()[2];
+$journal = get_delay_journal_context($link, $userID, $currentDate);
 
-$delayTimes = Array();
+if ($journal === false) {
+  echo "<h5>" . html_escape(database_error_message($link, __FILE__ . ':' . __LINE__)) . "</h5>";
+  exit;
+}
 
-$delayTimes = get_all_delay_info_by_user( $userID, $user_defaultStartTime, $user_allowedDelay );
+if ($journal === null) {
+  header('Location: delay_approvement.php');
+  exit;
+}
+
+$userName = $journal['user_name'];
+$delayTimes = $journal['entries'];
 
       if ( count( $delayTimes ) == 0 ){
         echo "<table id=\"add_time_approvement_table\" class=\"notification-detail-header-table\">";
@@ -143,20 +150,17 @@ echo "<table id=\"delay_approvement_table\" class=\"notification-detail-header-t
       $color3 = "#ffffff";
 
       foreach( $delayTimes as $delayTime ){
-        $retDelay_id = (int)$delayTime[0];
-        $retDelay_superuserID = $delayTime[1];
-        $retDelay_agreed = $delayTime[2];
-        $retDelay_description = $delayTime[3];
-        $retDelay_penalty_id = $delayTime[4];
-        $retDelay_acceptor_description = $delayTime[5];
-        $retDelay_approved = $delayTime[6];
-        $retDelay_duration = $delayTime[7];
-        $retDelay_start_time = $delayTime[8];
-        $retDelay_start_date = $delayTime[11];
-        $retDelay_acceptorID = $delayTime[12];
-
-        $superUserName = get_superuser_name_by_id( $retDelay_superuserID );  
-        $acceptorName = get_superuser_name_by_id( $retDelay_acceptorID );  
+        $retDelay_id = $delayTime['id'];
+        $retDelay_agreed = $delayTime['agreed'];
+        $retDelay_description = $delayTime['employee_comment'];
+        $retDelay_penalty_id = $delayTime['penalty_id'];
+        $retDelay_acceptor_description = $delayTime['decision_comment'];
+        $retDelay_approved = $delayTime['status'];
+        $retDelay_duration = $delayTime['duration'];
+        $retDelay_start_time = $delayTime['arrival'];
+        $retDelay_start_date = $delayTime['date'];
+        $superUserName = $delayTime['supervisor_name'];
+        $acceptorName = $delayTime['acceptor_name'];
 
         $statusClass = "";
         $agreedClass = "";

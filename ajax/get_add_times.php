@@ -4,14 +4,29 @@ require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
 ajax_text_headers();
 
-$content = "<h5 class=\"big\">Работа вне офиса. Внесение сведений</h5><br>";
+include_once __DIR__ . "/../funcs.php";
+include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/add_time_journal.php";
 
-$userIDtoShow = -1;
+$userID = (int)$_SESSION['ss_id'];
+$journal = get_add_time_journal_context(
+  $link,
+  $userID,
+  get_current_datetime_in_timezone_str(1, 0),
+  false
+);
 
-if ( isset( $_SESSION['ss_id'] ) )
-{
-  $userIDtoShow = $_SESSION['ss_id'];
+if ($journal === false) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
 }
+
+if ($journal === null) {
+  deny_ajax_access(404, 'USER_NOT_FOUND');
+}
+
+$addTimeInfo = $journal['entries'];
+$content = "<h5 class=\"big\">Работа вне офиса. Внесение сведений</h5><br>";
 
 $content .= "<br><table border=0 width=1080>";
 $content .= "<tr>";
@@ -26,11 +41,6 @@ $content .= "</td>";
 
 $content .= "</tr>";
 $content .= "</table><br>";
-
-include_once __DIR__ . "/../funcs.php";
-
-$userID = (int)$_SESSION['ss_id'];
-$addTimeInfo = get_all_add_work_info_by_user($userID, 0);
 
 $content .= "<table id=\"addTimesTable\" border=1 bordercolor=\"#888888\">";
 $content .= "<tr bgcolor=\"#DDDDDD\">";
@@ -53,26 +63,20 @@ $useBkColor = 0;
   {
     $addInf = $addTimeInfo[$idx];
 
-    $id = (int)$addInf[8];
-    $startDT = $addInf[0];
-    $stopDT = $addInf[1];
+    $id = $addInf['id'];
+    $startDT = $addInf['start_datetime'];
+    $stopDT = $addInf['stop_datetime'];
 
     $startDT = substr($startDT, 0, 16);
     $stopDT = substr($stopDT, 0, 16);
 
-    $reasonStr = $addInf[11];
-    $description = $addInf[3];
-    $approved = $addInf[4];
-    $SUID = $addInf[5];
-    $pauseMode = $addInf[7];
-
-    if ( $pauseMode == 1 ){ continue; }
-    if ( $approved == 99 OR $approved == 100 OR $approved == 101 ){ continue; }
-
-    $duration = (int)$addInf[6];
+    $reasonStr = $addInf['reason_description'];
+    $description = $addInf['employee_comment'];
+    $approved = $addInf['status'];
+    $duration = $addInf['duration'];
     $durationStr = $duration > 0 ? format_time_( $duration ) : "";
 
-    $superUserName = get_name_by_userid( $SUID );
+    $superUserName = $addInf['supervisor_name'];
 
     $disabled = "";
     $titleDel = "удалить запись";
