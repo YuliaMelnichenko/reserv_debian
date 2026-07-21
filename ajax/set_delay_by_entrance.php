@@ -4,9 +4,9 @@ require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
 ajax_text_headers();
 
-if ( isset( $_POST['userID'] ) )
+if (request_post_has('userID'))
 {
-  $userId = (int) $_POST['userID'];
+  $userId = request_post_int('userID');
 }
 else
 {

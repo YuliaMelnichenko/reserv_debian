@@ -4,7 +4,7 @@ require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
 ajax_text_headers();
 
-$ID = (int) ($_POST['alertID'] ?? 0);
+$ID = request_post_int('alertID');
 $userID = (int) $_SESSION['ss_id'];
 
 include_once __DIR__ . "/../php_tori/connect.php";

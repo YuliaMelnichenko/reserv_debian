@@ -9,7 +9,7 @@ if (!isset($_SESSION['ss_id'])) {
   exit;
 }
 
-if (!isset($_POST['next'])) {
+if (!request_post_has('next')) {
   echo "Ошибка: не передано направление изменения состояния";
   exit;
 }
@@ -20,7 +20,7 @@ require_once __DIR__ . "/../inc/workday_state.php";
 
 mysqli_set_charset($link, "utf8");
 
-$nextState = (int)$_POST['next'];
+$nextState = request_post_int('next');
 
 $dtResult = get_current_datetime_in_timezone();
 $dateTimeStr = $dtResult[1];

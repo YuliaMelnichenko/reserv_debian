@@ -6,8 +6,8 @@ require_ajax_auth();
 ajax_text_headers();
 
 $userID = (int)$_SESSION['ss_id'];
-$errorID = (int)($_POST['error_id'] ?? 0);
-$comment = trim((string)($_POST['comment'] ?? ''));
+$errorID = request_post_int('error_id');
+$comment = request_post_trimmed_string('comment');
 
 if ($errorID <= 0) {
     deny_ajax_access(400, 'Некорректная запись ошибки учета.');

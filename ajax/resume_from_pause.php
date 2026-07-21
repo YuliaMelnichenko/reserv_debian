@@ -7,7 +7,7 @@ ajax_text_headers();
 $userID = $_SESSION['ss_id']; 
 $ss_visiting_ID = $_SESSION['ss_visiting_ID'];
 
-$pauseID = (int) ($_POST['pauseID'] ?? 0);
+$pauseID = request_post_int('pauseID');
 require_ajax_add_time_access($pauseID);
 
 include_once __DIR__ . "/../funcs.php";

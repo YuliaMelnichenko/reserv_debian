@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Завершение удалёнки
-        if (isset($_POST['action']) && $_POST['action'] === 'finish') {
+        if (request_post_string('action') === 'finish') {
             // Найдём открытую запись (stop_dt IS NULL) для этого пользователя за сегодня
             $findSql = "SELECT id FROM remote_work WHERE user_id = ? AND DATE(start_dt) = CURDATE() AND stop_dt IS NULL ORDER BY id DESC LIMIT 1";
             $findStmt = mysqli_prepare($link, $findSql);
@@ -62,8 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Создание новой записи (начало удалёнки)
-        if (isset($_POST['supervisor_id'])) {
-            $supervisor_id = intval($_POST['supervisor_id']);
+        if (request_post_has('supervisor_id')) {
+            $supervisor_id = request_post_int('supervisor_id');
 
             if ($supervisor_id <= 0) {
                 ajax_json_response(["status" => "error", "message" => "Некорректный supervisor_id"]);

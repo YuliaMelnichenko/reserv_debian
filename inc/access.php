@@ -5,6 +5,7 @@ require_once __DIR__ . '/output.php';
 require_once __DIR__ . '/errors.php';
 require_once __DIR__ . '/session.php';
 require_once __DIR__ . '/ajax_response.php';
+require_once __DIR__ . '/request.php';
 
 function access_session_is_valid()
 {

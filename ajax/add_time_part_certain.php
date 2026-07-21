@@ -11,10 +11,10 @@ $userID = (int)$_SESSION['ss_id'];
 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
-$start_time = (string) ($_POST['add_time_part_start_dt'] ?? '');
-$stop_time = (string) ($_POST['add_time_part_stop_dt'] ?? '');
-$base = (int)($_POST['add_time_part_base'] ?? 0);
-$desk = trim((string)($_POST['add_time_part_desk'] ?? ''));
+$start_time = request_post_string('add_time_part_start_dt');
+$stop_time = request_post_string('add_time_part_stop_dt');
+$base = request_post_int('add_time_part_base');
+$desk = request_post_trimmed_string('add_time_part_desk');
 
 $range = get_valid_datetime_range($start_time, $stop_time);
 
@@ -31,12 +31,7 @@ if ($base <= 0) {
 $start_time = $range['start'];
 $stop_time = $range['stop'];
 
-if ( isset( $_POST['byAlert'] ) AND $_POST['byAlert'] == 1 ){
-  $byAlert = 1;
-}
-else{
-  $byAlert = 0;
-}
+$byAlert = request_post_int('byAlert') === 1 ? 1 : 0;
   
 mysqli_set_charset($link, "utf8");
 

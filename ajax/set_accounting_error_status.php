@@ -6,9 +6,9 @@ require_ajax_auth();
 ajax_text_headers();
 
 $supervisorID = (int)($_SESSION['ss_id'] ?? 0);
-$errorID = (int)($_POST['error_id'] ?? 0);
-$status = (int)($_POST['status'] ?? 0);
-$comment = trim((string)($_POST['comment'] ?? ''));
+$errorID = request_post_int('error_id');
+$status = request_post_int('status');
+$comment = request_post_trimmed_string('comment');
 
 if (!in_array($status, array(2, 3, 4), true)) {
     deny_ajax_access(400, 'Некорректный статус решения.');

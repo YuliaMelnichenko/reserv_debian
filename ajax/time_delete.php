@@ -4,7 +4,7 @@ require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
 ajax_text_headers();
 
-$delID = (int) ($_POST['delID'] ?? 0);
+$delID = request_post_int('delID');
 require_ajax_add_time_access($delID);
 
 include_once __DIR__ . "/../php_tori/connect.php";

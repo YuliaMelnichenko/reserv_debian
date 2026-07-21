@@ -9,14 +9,14 @@ if (!isset($_SESSION['ss_id'])) {
   exit;
 }
 
-if (!isset($_POST['visit_id']) || !isset($_POST['add_stop_time'])) {
+if (!request_post_has('visit_id') || !request_post_has('add_stop_time')) {
   echo "Ошибка: не переданы данные для изменения времени";
   exit;
 }
 
 $userID = (int)$_SESSION['ss_id'];
-$visitID = (int)$_POST['visit_id'];
-$newOutTimeRaw = $_POST['add_stop_time'];
+$visitID = request_post_int('visit_id');
+$newOutTimeRaw = request_post_string('add_stop_time');
 
 if ($visitID <= 0) {
   echo "Ошибка: некорректная запись посещения";
