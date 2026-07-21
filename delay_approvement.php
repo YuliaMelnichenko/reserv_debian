@@ -3,6 +3,7 @@ ob_start();
 require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 include_once __DIR__ . "/funcs.php";
+require_once __DIR__ . "/inc/notification_summary.php";
 save_last_location( "delay_approvement.php" );
 require_page_superuser();
 ?>
@@ -31,6 +32,13 @@ echo "<div class=\"notification-page-layout\">";
 include_once __DIR__ . "/php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
+$currentDate = get_current_datetime_in_timezone()[2];
+$summary = get_delay_notification_summary($link, $userID_, $currentDate);
+
+if ($summary === false) {
+  echo html_escape(database_error_message($link, __FILE__ . ':' . __LINE__));
+  exit;
+}
 
 echo "<input id=\"recIDTempVal\" type=\"hidden\" value=\"\">";
 echo "<input id=\"acceptTempVal\" type=\"hidden\" value=\"\">";
@@ -65,30 +73,15 @@ echo "</tr>";
 $color = "#ddffff";
 $img = "go1.png";
 
-mysqli_set_charset($link, "utf8");
-$query = db_query(
-  $link,
-  'SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = ? AND TYPE = ? ORDER BY USERID',
-  'ii',
-  array($userID_, 3)
-);
-if (!$query)
+foreach ($summary['entries'] as $entry)
 {
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
-}
-else
-{
-  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-  {
-    $userID = (int)$row["USERID"];
-    $userName = get_user_name_by_id($userID);
-
-    $notificationCount = 0;
-    $acceptedNotificationCount = 0;
-    $refusedNotificationCount = 0;
-    $deletedNotificationCount = 0;
-    $newNotificationCount = 0;
-    get_delay_notif_counts( $userID, $notificationCount, $acceptedNotificationCount, $refusedNotificationCount, $deletedNotificationCount, $newNotificationCount );
+    $userID = $entry['user_id'];
+    $userName = $entry['user_name'];
+    $notificationCount = $entry['total_count'];
+    $acceptedNotificationCount = $entry['accepted_count'];
+    $refusedNotificationCount = $entry['refused_count'];
+    $deletedNotificationCount = $entry['deleted_count'];
+    $newNotificationCount = $entry['new_count'];
 
     $muid = getMaskedUID( 32, $userID );
     $userUrl = "delay_approvement_user.php?mid=$muid";
@@ -121,7 +114,6 @@ else
       $color = "#ddffff";
       $img = "go1.png";
     }
-  }
 }
 
 echo "</table>";
