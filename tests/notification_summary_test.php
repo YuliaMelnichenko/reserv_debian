@@ -42,6 +42,7 @@ return function () {
     $pages = array(
         __DIR__ . '/../delay_approvement.php',
         __DIR__ . '/../pause_view.php',
+        __DIR__ . '/../time_approvement.php',
     );
 
     foreach ($pages as $pagePath) {
@@ -52,7 +53,7 @@ return function () {
         );
         test_assert_same(
             0,
-            preg_match('/\b(?:SELECT|db_query|get_delay_notif_counts|get_pause_notif_counts|get_user_name_by_id)\b/i', $page),
+            preg_match('/\b(?:SELECT|db_query|get_delay_notif_counts|get_pause_notif_counts|get_add_time_notif_counts|get_user_name_by_id)\b/i', $page),
             'Full notification pages must not perform SQL or per-user lookups in ' . basename($pagePath)
         );
         test_assert_true(
@@ -73,6 +74,12 @@ return function () {
         'The full pause page must preserve masked detail links'
     );
 
+    $addTimePage = file_get_contents($pages[2]);
+    test_assert_true(
+        strpos($addTimePage, 'time_approvement_user.php?mid=') !== false,
+        'The full remote-work page must preserve masked detail links'
+    );
+
     $service = file_get_contents(__DIR__ . '/../inc/notification_summary.php');
     test_assert_true(
         strpos($service, "paramName = 'delay_journal_deep_day'") !== false,
@@ -88,7 +95,15 @@ return function () {
     );
     test_assert_true(
         strpos($service, 'AND $stopExpression > $startExpression') !== false,
-        'Pause notification counts must reject zero and inverted intervals'
+        'Time notification counts must reject zero and inverted intervals'
+    );
+    test_assert_true(
+        strpos($service, "paramName = 'add_time_journal_deep_day'") !== false,
+        'The remote-work summary must use the add-time journal depth setting'
+    );
+    test_assert_true(
+        strpos($service, 'function get_add_time_notification_summary') !== false,
+        'The shared service must provide the remote-work notification summary'
     );
     test_assert_same(0, preg_match('/SELECT\s+\*/i', $service), 'Summary queries must select explicit fields');
 };

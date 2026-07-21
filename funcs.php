@@ -550,58 +550,6 @@ function am_i_superuser( $userID ) {
   return 0;
 }
 
-function get_delay_notif_counts( $user_id, &$notificationCount, &$acceptedNotificationCount, &$refusedNotificationCount, &$deletedNotificationCount, &$newNotificationCount )
-{
-  include __DIR__ . "/php_tori/connect.php";
-
-  $notificationCount = 0;
-  $newNotificationCount = 0;
-  $acceptedNotificationCount = 0;
-  $refusedNotificationCount = 0;
-  $deletedNotificationCount = 0;
-
-  $currentDateArr = get_current_datetime_in_timezone();
-  $currentDate = $currentDateArr[2];
-  $paramArr = get_dbsetup_param( 'delay_journal_deep_day' );
-  $paramInt = (-1)*$paramArr[1];
-  
-  mysqli_set_charset($link, "utf8");
-
-  $query = time_journal_query_delay_statuses($link, $user_id, $currentDate, $paramInt);
-
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
-    return 0;
-  }
-  else
-  {
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
-      $approved = $row["status"];
-      if ( $approved == 0 )
-      {
-        $newNotificationCount ++;  
-      }
-      else if ( $approved == 99 OR $approved == 100 OR $approved == 101 )
-      {
-        $deletedNotificationCount ++;  
-      }
-      else if ( $approved == -1 )
-      {
-        $refusedNotificationCount ++;  
-      }
-      else if ( $approved == 1 )
-      {
-        $acceptedNotificationCount ++;  
-      }
-      $notificationCount ++;
-    }
-  }
-  return 1;
-}
-
 function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNotificationCount )
 {
   include __DIR__ . "/php_tori/connect.php";
@@ -638,58 +586,6 @@ function get_pause_notif_counts( $user_id, &$notificationCount, &$currentDayNoti
       if ( date('Y-m-d', strtotime($startDate)) == $currentDate )
       {       
         $currentDayNotificationCount ++;  
-      }
-      $notificationCount ++;
-    }
-  }
-  return 1;
-}
-
-function get_add_time_notif_counts( $user_id, &$notificationCount, &$acceptedNotificationCount, &$refusedNotificationCount, &$deletedNotificationCount, &$newNotificationCount ){
-  include __DIR__ . "/php_tori/connect.php";
-  
-  $notificationCount = 0;
-  $newNotificationCount = 0;
-  $acceptedNotificationCount = 0;
-  $refusedNotificationCount = 0;
-  $deletedNotificationCount = 0;
-
-  $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
-  $paramArr = get_dbsetup_param( 'add_time_journal_deep_day' );
-  $paramInt = (-1)*$paramArr[1];
-  $startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME', $link);
-  $stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME', $link);
-
-  $query = time_journal_query_add_time_statuses(
-    $link,
-    $user_id,
-    $currentDate,
-    $paramInt,
-    $startExpr,
-    $stopExpr
-  );
-
-  $merr = mysqli_error($link);
-
-  if ( !$query ) {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
-    return 0;
-  }
-  else {
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ) {
-      $approved = $row["APPROVED"];
-
-      if ( $approved == 0 ) {
-        $newNotificationCount ++;  
-      }
-      else if ( $approved == 99 OR $approved == 100 OR $approved == 101 ) {
-        $deletedNotificationCount ++;  
-      }
-      else if ( $approved == -1 ) {
-        $refusedNotificationCount ++;  
-      }
-      else if ( $approved == 1 ) {
-        $acceptedNotificationCount ++;
       }
       $notificationCount ++;
     }
@@ -1525,73 +1421,6 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
   return $retArray;
 } 
 
-function get_all_delay_info_by_user( $userID, $defauiltInTime, $allowedDelay )
-{
-
-  include __DIR__ . "/php_tori/connect.php";  
-  mysqli_set_charset($link, "utf8");
-
-  $currentDateArr = get_current_datetime_in_timezone();
-  $currentDate = $currentDateArr[2];
-
-  $paramArr = get_dbsetup_param( 'delay_journal_deep_day' );
-  $paramInt = (-1)*$paramArr[1];
-  
-  $query = time_journal_query_delay_journal($link, $userID, $currentDate, $paramInt);
-
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
-    return array();
-  }                     
-
-  $retArray = Array();
-
-  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-  {  
-    $ID = $row["id"];
-    $delayDate = $row["date"];
-    $visitingIn_DT = $row["in_dt"];
-    $supervisorID = $row["supervisorID"];
-    $explaneDesk = strip_tags($row["explaneDesk"]);
-    $acceptorID = $row["acceptorID"];
-    $penaltyID = $row["penaltyID"];
-    $penaltyReply = $row["penaltyReply"];
-    $status = $row["status"];  
-    $visitingTimeZoneSec = $row["timeZoneSec"];
-
-    if ( $query ) 
-    {
-      $delayArr = get_delay_value( $visitingIn_DT, $defauiltInTime, $allowedDelay );
-      $isThereDelay = $delayArr[0];
-      $delayValue = $delayArr[1];
-
-      $rets = Array();   
-     
-      if ( $isThereDelay == 1 )
-      {  
-        $rets[0] = $ID;
-        $rets[1] = $supervisorID;
-        $rets[2] = -1;
-        $rets[3] = $explaneDesk;
-        $rets[4] = $penaltyID;
-        $rets[5] = $penaltyReply;
-        $rets[6] = $status;
-        $rets[7] = $delayValue;
-        $rets[8] = $visitingIn_DT;
-        $rets[9] = $defauiltInTime;
-        $rets[10] = $allowedDelay;
-        $rets[11] = $delayDate;
-        $rets[12] = $acceptorID;
-
-        $retArray[] = $rets;
-      }      
-    }
-  }
-  return $retArray;
-}
-
 function get_reasons()
 {
   include __DIR__ . "/php_tori/connect.php";  
@@ -1670,63 +1499,6 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
     $result[10]= $row["SUPERVISORDESC"];  
     $result[11] = $row["REASONDESCRIPTION"];
     $result[6] = get_defined_time_range_duration($result[0], $result[1]);
-     
-    $results[] = $result;
-  }
-
-  return $results;
-}
-
-function get_all_add_work_info_by_user( $userID, $pauseMode = 0 )
-{
-  $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
-  $paramArr = get_dbsetup_param( 'add_time_journal_deep_day' );
-  $paramInt = (-1)*$paramArr[1];
-  
-  include __DIR__ . "/php_tori/connect.php";  
-  mysqli_set_charset($link, "utf8");
-  $startExpr = add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME', $link);
-  $stopExpr = add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME', $link);
-  $results = Array();
-
-  $query = time_journal_query_add_work_journal(
-    $link,
-    $userID,
-    $pauseMode,
-    $currentDate,
-    $paramInt,
-    $startExpr,
-    $stopExpr
-  );
-
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
-    return $results;
-  }                     
-
-  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-  {
-    $result = Array();
-    
-    $result[0] = $row["START_DT_EFFECTIVE"];
-    $result[1] = $row["STOP_DT_EFFECTIVE"];
-
-    $result[2] = $row["REASON"];
-    $result[3] = $row["DESCRIPTION"];
-    $result[4] = $row["APPROVED"];
-    $result[5] = $row["SUIR"];
-    $result[6] = 0;
-    $result[7] = $row["PAUSE_MODE"];
-    $result[8] = $row["ID"];  
-    $result[10]= $row["SUPERVISORDESC"];  
-    $result[11] = $row["REASONDESCRIPTION"];
-
-    if ( strtotime( $result[1] ) > strtotime( $result[0] ) )
-    { 
-      $result[6] = strtotime( $result[1] ) - strtotime( $result[0] ); 
-    }
      
     $results[] = $result;
   }
