@@ -9,7 +9,7 @@ include_once __DIR__ . "/../php_tori/connect.php";
 
 $_SESSION['delay_page_mode'] = 2;
 
-$userID = isset($_POST['user']) ? (int) $_POST['user'] : 0;
+$userID = request_post_int('user');
 
 if ( $userID == -1 )
 { 

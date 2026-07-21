@@ -17,14 +17,7 @@ $timeStr = $retArr[3];
 $datetimeShort = substr( $datetime, 0, 16 );
 
 
-if ( isset( $_POST['by_alert'] ) AND $_POST['by_alert'] == 1 )
-{
-  $byAlert = 1;
-}
-else
-{
-  $byAlert = 0;
-}
+$byAlert = request_post_int('by_alert') === 1 ? 1 : 0;
 
 
 $content = "<table class=\"add-time-part-form\">";

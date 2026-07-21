@@ -10,18 +10,15 @@ $currentDate = date('Y-m-d');
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-$startDate = (string) ($_POST['startDate'] ?? '');
-$stopDate = (string) ($_POST['stopDate'] ?? '');
-$userID = (int) ($_POST['userID'] ?? 0);
+$rangeStart = request_post_date('startDate');
+$rangeStop = request_post_date('stopDate');
+$userID = request_post_int('userID');
 
 if ($userID <= 0) {
   deny_ajax_access(400, 'INVALID_USER');
 }
 
 require_ajax_self_or_superuser($userID);
-
-$rangeStart = normalize_date_value($startDate);
-$rangeStop = normalize_date_value($stopDate);
 
 if ($rangeStart === null || $rangeStop === null || $rangeStop < $rangeStart) {
   deny_ajax_access(400, 'INVALID_DATE_RANGE');

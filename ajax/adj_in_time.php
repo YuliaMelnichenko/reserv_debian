@@ -7,7 +7,7 @@ ajax_text_headers();
 if (request_post_has('userID') && request_post_has('inTime'))
 {
   $userID = request_post_int('userID');
-  $newInTime = request_post_trimmed_string('inTime');
+  $newInTime = request_post_time('inTime');
 
   if ($userID <= 0) {
     deny_ajax_access(400, 'INVALID_USER');
@@ -15,13 +15,9 @@ if (request_post_has('userID') && request_post_has('inTime'))
 
   require_ajax_supervisor_for_user($userID, 3);
 
-  if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/', $newInTime)) {
+  if ($newInTime === null) {
     echo "-13";
     exit;
-  }
-
-  if (strlen($newInTime) == 5) {
-    $newInTime .= ':00';
   }
   $currentDate = date('Y-m-d');
   

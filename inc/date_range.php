@@ -43,6 +43,29 @@ function normalize_date_value($value)
     return $date->format('Y-m-d');
 }
 
+function normalize_time_value($value)
+{
+    if (!is_string($value)) {
+        return null;
+    }
+
+    $value = trim($value);
+
+    foreach (array('H:i:s', 'H:i') as $format) {
+        $time = DateTimeImmutable::createFromFormat('!' . $format, $value);
+        $errors = DateTimeImmutable::getLastErrors();
+
+        if (
+            $time !== false
+            && ($errors === false || ($errors['warning_count'] === 0 && $errors['error_count'] === 0))
+        ) {
+            return $time->format('H:i:s');
+        }
+    }
+
+    return null;
+}
+
 function get_valid_datetime_range($startDateTime, $stopDateTime)
 {
     $start = normalize_datetime_value($startDateTime);

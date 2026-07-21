@@ -9,15 +9,19 @@ $userID_ = $_SESSION['ss_id'];
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-$startDate = (string) ($_POST['startDate'] ?? '');
-$stopDate = (string) ($_POST['stopDate'] ?? '');
-$userID = (int) ($_POST['userID'] ?? 0);
+$startDate = request_post_date('startDate');
+$stopDate = request_post_date('stopDate');
+$userID = request_post_int('userID');
 
 if ($userID <= 0) {
   deny_ajax_access(400, 'INVALID_USER');
 }
 
 require_ajax_self_or_superuser($userID);
+
+if ($startDate === null || $stopDate === null || $stopDate < $startDate) {
+  deny_ajax_access(400, 'INVALID_DATE_RANGE');
+}
 
 $user_defaultStartTime = 0;
 $user_allowedDelay = 0;

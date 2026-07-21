@@ -3,6 +3,11 @@
 require_once __DIR__ . '/../inc/date_range.php';
 
 return function () {
+    test_assert_same('09:05:00', normalize_time_value('09:05'), 'Minute time must normalize with seconds');
+    test_assert_same('23:59:58', normalize_time_value('23:59:58'), 'Second time must be preserved');
+    test_assert_same(null, normalize_time_value('24:00'), 'Out-of-range time must be rejected');
+    test_assert_same(null, normalize_time_value('next hour'), 'Relative time expressions must be rejected');
+
     test_assert_same(
         '2026-06-29 11:00:00',
         normalize_datetime_value('2026-06-29T11:00'),

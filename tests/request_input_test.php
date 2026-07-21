@@ -8,6 +8,9 @@ return function () {
         'negative' => '-1',
         'text' => '  value  ',
         'empty' => '',
+        'date' => '2026-07-21',
+        'time' => '08:30',
+        'datetime' => '2026-07-21T08:30',
         'array' => array('unexpected'),
         'null' => null,
     );
@@ -21,6 +24,9 @@ return function () {
     test_assert_same('fallback', request_string_value($input, 'null', 'fallback'), 'Null input must use the fallback');
     test_assert_same(false, request_has_scalar_value($input, 'array'), 'Array input must not count as a scalar value');
     test_assert_same(false, request_has_scalar_value($input, 'missing'), 'Missing input must not count as present');
+    test_assert_same('2026-07-21', request_date_value($input, 'date'), 'Date input must be normalized');
+    test_assert_same('08:30:00', request_time_value($input, 'time'), 'Time input must be normalized');
+    test_assert_same('2026-07-21 08:30:00', request_datetime_value($input, 'datetime'), 'Datetime input must be normalized');
 
     $originalPost = $_POST;
     $_POST = $input;
@@ -29,38 +35,18 @@ return function () {
     test_assert_same(false, request_post_has('array'), 'POST presence helper must reject arrays');
     $_POST = $originalPost;
 
-    $migratedEndpoints = array(
-        'adj_in_time.php',
-        'add_time_part_certain.php',
-        'add_time_part_range.php',
-        'delete_user_visitiong_info_by_currentDay.php',
-        'del_time_part.php',
-        'remote_work.php',
-        'resume_from_pause.php',
-        'set_accounting_error_comment.php',
-        'set_accounting_error_status.php',
-        'set_add_times_info.php',
-        'set_add_times_state.php',
-        'set_alert_viewed.php',
-        'set_change_out_time.php',
-        'set_change_stop_eat.php',
-        'set_delay_by_entrance.php',
-        'set_delay_explanation.php',
-        'set_delay_penalty_info.php',
-        'set_delay_state.php',
-        'set_pause.php',
-        'set_pause_sport.php',
-        'set_user_alert.php',
-        'switch_day_state.php',
-        'time_delete.php',
-    );
+    $ajaxFiles = new DirectoryIterator(__DIR__ . '/../ajax');
 
-    foreach ($migratedEndpoints as $endpoint) {
-        $source = file_get_contents(__DIR__ . '/../ajax/' . $endpoint);
+    foreach ($ajaxFiles as $endpoint) {
+        if (!$endpoint->isFile() || strtolower($endpoint->getExtension()) !== 'php') {
+            continue;
+        }
+
+        $source = file_get_contents($endpoint->getPathname());
         test_assert_same(
             false,
             strpos($source, '$_POST['),
-            'Migrated endpoint must use request helpers: ' . $endpoint
+            'AJAX endpoint must use request helpers: ' . $endpoint->getFilename()
         );
     }
 };

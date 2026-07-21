@@ -5,9 +5,9 @@ require_csrf_for_unsafe_request(true);
 
 ajax_text_headers();
 
-if ( isset($_POST['login']) )
+if (request_post_has('login'))
 {
-  $login = trim((string) $_POST['login']);
+  $login = request_post_trimmed_string('login');
 
   $duration = time() + 3600 * 24 * 31;
 

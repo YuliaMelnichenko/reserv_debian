@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../inc/session.php';
 require_once __DIR__ . '/../inc/ajax_response.php';
+require_once __DIR__ . '/../inc/request.php';
 ajax_text_headers();
                 
 include __DIR__ . "/../php_tori/connect.php";
@@ -8,8 +9,8 @@ include_once __DIR__ . "/../funcs.php";
 require_once __DIR__ . "/../inc/access.php";
 require_csrf_for_unsafe_request(true);
 
-$__login = trim((string) ($_POST['login'] ?? ''));
-$__passwd = md5(md5(trim((string) ($_POST['passwd'] ?? ''))));
+$__login = request_post_trimmed_string('login');
+$__passwd = md5(md5(request_post_trimmed_string('passwd')));
 
 mysqli_set_charset($link, "utf8");
 

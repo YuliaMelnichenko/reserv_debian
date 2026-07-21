@@ -16,20 +16,14 @@ if (!request_post_has('visit_id') || !request_post_has('add_stop_eat_time')) {
 
 $userID = (int)$_SESSION['ss_id'];
 $visitID = request_post_int('visit_id');
-$newStopEatTimeRaw = request_post_string('add_stop_eat_time');
+$newStopEatTime = request_post_datetime('add_stop_eat_time');
 
 if ($visitID <= 0) {
   echo "Ошибка: некорректная запись посещения";
   exit;
 }
 
-$newStopEatTime = str_replace('T', ' ', $newStopEatTimeRaw);
-
-if (strlen($newStopEatTime) == 16) {
-  $newStopEatTime .= ":00";
-}
-
-if (strtotime($newStopEatTime) === false) {
+if ($newStopEatTime === null) {
   echo "Ошибка: некорректная дата прихода с обеда";
   exit;
 }
