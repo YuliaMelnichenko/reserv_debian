@@ -12,8 +12,8 @@ mysqli_set_charset($link, "utf8");
 $userID = $_SESSION['ss_id'];
 $ss_visiting_ID = $_SESSION['ss_visiting_ID'];
  
-$superUserID = (int) ($_POST['superuserID'] ?? -1);
-$description = (string) ($_POST['desk'] ?? '');
+$superUserID = request_post_int('superuserID', -1);
+$description = request_post_string('desk');
 
 if ($superUserID <= 0) {
   deny_ajax_access(400, 'INVALID_SUPERVISOR');

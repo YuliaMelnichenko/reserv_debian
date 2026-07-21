@@ -15,8 +15,8 @@ $ss_delay_duration_db = format_time_d_hhmmss_pure($ss_delay_duration);
 $currentDateArr = get_current_datetime_in_timezone();
 $currentDate = $currentDateArr[2];
 
-$superuserID = (int) ($_POST['delayExplanationSU'] ?? -1);
-$delayExplanation = trim(strip_tags((string) ($_POST['delayExplanation'] ?? '')));
+$superuserID = request_post_int('delayExplanationSU', -1);
+$delayExplanation = trim(strip_tags(request_post_string('delayExplanation')));
 
 if ($superuserID !== -1) {
   if ($superuserID <= 0) {
@@ -42,10 +42,10 @@ if ($superuserID !== -1) {
 
 $mode = 0;
 
-if ( isset( $_POST['mode'] ) AND $_POST['mode'] == 1 )
+if (request_post_int('mode') === 1)
 {
-  $mode = (int) $_POST['mode'];
-  $delayID = (int) ($_POST['delayID'] ?? 0);
+  $mode = 1;
+  $delayID = request_post_int('delayID');
 }
 
 if (!mysqli_begin_transaction($link)) {

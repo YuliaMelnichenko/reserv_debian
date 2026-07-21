@@ -12,20 +12,15 @@ if (!isset($_SESSION['ss_id'])) {
 $userID_ = (int)$_SESSION['ss_id'];
 $currentDate = date('Y-m-d');
 
-$add_time_part_start_date = isset($_POST['add_time_part_start_date']) ? $_POST['add_time_part_start_date'] : "";
-$add_time_part_stop_date = isset($_POST['add_time_part_stop_date']) ? $_POST['add_time_part_stop_date'] : "";
-$add_time_part_start_time = isset($_POST['add_time_part_start_time']) ? $_POST['add_time_part_start_time'] : "";
-$add_time_part_stop_time = isset($_POST['add_time_part_stop_time']) ? $_POST['add_time_part_stop_time'] : "";
-$add_time_part_base = isset($_POST['add_time_part_base']) ? (int)$_POST['add_time_part_base'] : 0;
-$add_time_part_desk = isset($_POST['add_time_part_desk']) ? trim((string)$_POST['add_time_part_desk']) : "";
-$exclude_weekend_holidays = isset($_POST['exclude_weekend_holidays']) ? (int)$_POST['exclude_weekend_holidays'] : 0;
+$add_time_part_start_date = request_post_string('add_time_part_start_date');
+$add_time_part_stop_date = request_post_string('add_time_part_stop_date');
+$add_time_part_start_time = request_post_string('add_time_part_start_time');
+$add_time_part_stop_time = request_post_string('add_time_part_stop_time');
+$add_time_part_base = request_post_int('add_time_part_base');
+$add_time_part_desk = request_post_trimmed_string('add_time_part_desk');
+$exclude_weekend_holidays = request_post_int('exclude_weekend_holidays');
 
-if (isset($_POST['byAlert']) && $_POST['byAlert'] == 1) {
-  $byAlert = 1;
-}
-else {
-  $byAlert = 0;
-}
+$byAlert = request_post_int('byAlert') === 1 ? 1 : 0;
 
 if ($add_time_part_start_date == "" || $add_time_part_stop_date == "") {
   echo "Укажите дату начала и дату окончания диапазона";

@@ -12,7 +12,7 @@ mysqli_set_charset($link, "utf8");
 $userID = $_SESSION['ss_id'];
 $ss_visiting_ID = $_SESSION['ss_visiting_ID'];
 
-$description = (string) ($_POST['desk'] ?? '');
+$description = request_post_string('desk');
 
 $dtResult = get_current_datetime_in_timezone();
 

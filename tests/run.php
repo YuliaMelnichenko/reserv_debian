@@ -25,6 +25,7 @@ $testFiles = array(
     __DIR__ . '/legacy_schema_audit_test.php',
     __DIR__ . '/overtime_test.php',
     __DIR__ . '/report_renderer_test.php',
+    __DIR__ . '/request_input_test.php',
     __DIR__ . '/staff_leaves_test.php',
     __DIR__ . '/time_format_test.php',
     __DIR__ . '/work_duration_test.php',

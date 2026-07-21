@@ -4,7 +4,7 @@ require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
 ajax_text_headers();
 
-$itemId = (int) ($_POST['itemId'] ?? 0);
+$itemId = request_post_int('itemId');
 require_ajax_add_time_access($itemId);
 
 include_once __DIR__ . "/../php_tori/connect.php";

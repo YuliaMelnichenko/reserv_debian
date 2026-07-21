@@ -4,8 +4,8 @@ require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
 ajax_text_headers();
 
-$ID = (int) ($_POST['addID'] ?? 0);
-$mode = (int) ($_POST['mode'] ?? 0);
+$ID = request_post_int('addID');
+$mode = request_post_int('mode');
 
 if (!in_array($mode, array(100, 200), true)) {
   deny_ajax_access(400, 'INVALID_MODE');

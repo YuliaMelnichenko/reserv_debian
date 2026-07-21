@@ -4,10 +4,10 @@ require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
 ajax_text_headers();
 
-if ( isset($_POST['userID']) AND isset($_POST['messageMode']) )
+if (request_post_has('userID') && request_post_has('messageMode'))
 {
-  $userID = (int)($_POST['userID']);
-  $messageMode = (int)($_POST['messageMode']);
+  $userID = request_post_int('userID');
+  $messageMode = request_post_int('messageMode');
   $superUserID = $_SESSION['ss_id']; 
 
   if ($userID <= 0) {

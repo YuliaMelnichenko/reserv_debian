@@ -4,9 +4,9 @@ require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
 ajax_text_headers();
 
-$ID = (int) ($_POST['addID'] ?? 0);
-$DESC = (string) ($_POST['suDesc'] ?? '');
-$ACCEPTMODE = (int) ($_POST['accept'] ?? 0);
+$ID = request_post_int('addID');
+$DESC = request_post_string('suDesc');
+$ACCEPTMODE = request_post_int('accept');
 $userID = (int) $_SESSION['ss_id'];
 
 if (!in_array($ACCEPTMODE, array(-1, 1), true)) {
