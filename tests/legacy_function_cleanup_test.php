@@ -9,6 +9,8 @@ return function () {
         'get_all_delay_info_by_user',
         'get_all_add_work_info_by_user',
         'get_name_by_userid',
+        'get_notification_count',
+        'get_delay_notification_count',
     );
 
     foreach ($removedFunctions as $functionName) {
@@ -25,6 +27,8 @@ return function () {
         'time_journal_query_add_time_statuses',
         'time_journal_query_delay_journal',
         'time_journal_finish_pause',
+        'time_journal_query_pending_add_time',
+        'time_journal_query_pending_delays',
     );
 
     foreach ($removedRepositoryFunctions as $functionName) {

@@ -67,40 +67,6 @@ function time_journal_query_pause_intervals($link, $userId, $quarterStartDate, $
     );
 }
 
-function time_journal_query_pending_add_time($link, $supervisorId, $currentDate, $depthDays)
-{
-    return db_query(
-        $link,
-        "SELECT * FROM ADD_TIME
-         WHERE approved = 0
-           AND pause_mode = 0
-           AND STOP_DT > ADDDATE(?, INTERVAL ? DAY)
-           AND userid IN (
-             SELECT USERID FROM GROUPS WHERE SUPERVISORID = ? AND type = 0
-           )",
-        'sii',
-        array($currentDate, (int)$depthDays, (int)$supervisorId)
-    );
-}
-
-function time_journal_query_pending_delays($link, $supervisorId, $currentDate)
-{
-    return db_query(
-        $link,
-        "SELECT *
-         FROM Delays a
-         JOIN visiting b ON a.date = CAST(b.in_dt AS DATE) AND a.userID = b.user_id
-         WHERE a.date > ADDDATE(?, INTERVAL -180 DAY)
-           AND a.status = 0
-           AND b.remoteWorkState = 0
-           AND a.userid IN (
-             SELECT c.userid FROM GROUPS c WHERE c.supervisorid = ? AND type = 3
-           )",
-        'si',
-        array($currentDate, (int)$supervisorId)
-    );
-}
-
 function time_journal_query_add_time_by_alert($link, $userId, $date)
 {
     return db_query(
