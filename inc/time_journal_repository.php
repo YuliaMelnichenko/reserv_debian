@@ -5,6 +5,50 @@ function time_journal_query_legacy_add_time_columns($link)
     return db_query($link, "SHOW COLUMNS FROM ADD_TIME WHERE Field IN ('STARTDATE', 'STARTTIME', 'STOPTIME')");
 }
 
+function add_time_legacy_datetime_columns_exist($link)
+{
+    static $exists = null;
+
+    if ($exists !== null) {
+        return $exists;
+    }
+
+    $exists = false;
+    $result = time_journal_query_legacy_add_time_columns($link);
+
+    if ($result && mysqli_num_rows($result) === 3) {
+        $exists = true;
+    }
+
+    return $exists;
+}
+
+function add_time_datetime_sql($dateTimeColumn, $dateColumn = null, $timeColumn = null, $link = null)
+{
+    if ($link === null || $dateColumn === null || $timeColumn === null || !add_time_legacy_datetime_columns_exist($link)) {
+        return "CASE
+          WHEN $dateTimeColumn IS NOT NULL AND $dateTimeColumn <> '0000-00-00 00:00:00' THEN $dateTimeColumn
+          ELSE '0000-00-00 00:00:00'
+        END";
+    }
+
+    return "CASE
+      WHEN $dateTimeColumn IS NOT NULL AND $dateTimeColumn <> '0000-00-00 00:00:00' THEN $dateTimeColumn
+      WHEN $dateColumn IS NOT NULL AND $dateColumn <> '0000-00-00'
+        AND $timeColumn IS NOT NULL AND $timeColumn <> '' AND $timeColumn <> '00:00:00'
+        THEN IF(LOCATE('-', $timeColumn) > 0, $timeColumn, CONCAT($dateColumn, ' ', $timeColumn))
+      ELSE '0000-00-00 00:00:00'
+    END";
+}
+
+function time_journal_add_work_datetime_expressions($link)
+{
+    return array(
+        'start' => add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME', $link),
+        'stop' => add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME', $link),
+    );
+}
+
 function time_journal_query_delay_statuses($link, $userId, $currentDate, $depthDays)
 {
     return db_query(
@@ -206,9 +250,11 @@ function time_journal_query_add_work_journal($link, $userId, $pauseMode, $curren
                          $startExpr AS START_DT_EFFECTIVE,
                          $stopExpr AS STOP_DT_EFFECTIVE,
                          a.SUIR, a.REASON, b.DESCRIPTION AS REASONDESCRIPTION, a.DESCRIPTION,
-                         a.SUPERVISORDESC, a.APPROVED, a.PAUSE_MODE
+                         a.SUPERVISORDESC, a.APPROVED, a.PAUSE_MODE,
+                         CONCAT_WS(' ', supervisor.SURNAME, supervisor.FIRSTNAME, supervisor.LASTNAME) AS SUPERVISOR_NAME
          FROM ADD_TIME a
          JOIN REASONS b ON a.REASON = b.ID
+         LEFT JOIN employees supervisor ON supervisor.ID = a.SUIR
          WHERE a.USERID = ?
            AND a.PAUSE_MODE = ?
            AND $startExpr <> '0000-00-00 00:00:00'

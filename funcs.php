@@ -532,42 +532,6 @@ function GetHourNormByMonth( $date, $rate ){
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function add_time_legacy_datetime_columns_exist($link)
-{
-  static $exists = null;
-
-  if ($exists !== null) {
-    return $exists;
-  }
-
-  $exists = false;
-  $result = time_journal_query_legacy_add_time_columns($link);
-
-  if ($result && mysqli_num_rows($result) == 3) {
-    $exists = true;
-  }
-
-  return $exists;
-}
-
-function add_time_datetime_sql($dateTimeColumn, $dateColumn = null, $timeColumn = null, $link = null)
-{
-  if ($link === null || $dateColumn === null || $timeColumn === null || !add_time_legacy_datetime_columns_exist($link)) {
-    return "CASE
-      WHEN $dateTimeColumn IS NOT NULL AND $dateTimeColumn <> '0000-00-00 00:00:00' THEN $dateTimeColumn
-      ELSE '0000-00-00 00:00:00'
-    END";
-  }
-
-  return "CASE
-    WHEN $dateTimeColumn IS NOT NULL AND $dateTimeColumn <> '0000-00-00 00:00:00' THEN $dateTimeColumn
-    WHEN $dateColumn IS NOT NULL AND $dateColumn <> '0000-00-00'
-      AND $timeColumn IS NOT NULL AND $timeColumn <> '' AND $timeColumn <> '00:00:00'
-      THEN IF(LOCATE('-', $timeColumn) > 0, $timeColumn, CONCAT($dateColumn, ' ', $timeColumn))
-    ELSE '0000-00-00 00:00:00'
-  END";
-}
-
 function am_i_superuser( $userID ) {
   include __DIR__ . "/php_tori/connect.php";
 
