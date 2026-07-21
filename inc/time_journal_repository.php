@@ -267,6 +267,39 @@ function time_journal_query_add_work_journal($link, $userId, $pauseMode, $curren
     );
 }
 
+function time_journal_query_pause_journal(
+    $link,
+    $userId,
+    $quarterStartDate,
+    $quarterStopExclusive,
+    $startExpr,
+    $stopExpr
+)
+{
+    return db_query(
+        $link,
+        "SELECT
+           a.ID,
+           $startExpr AS START_DT_EFFECTIVE,
+           $stopExpr AS STOP_DT_EFFECTIVE,
+           a.DESCRIPTION,
+           a.SUIR,
+           CONCAT_WS(' ', supervisor.SURNAME, supervisor.FIRSTNAME, supervisor.LASTNAME) AS SUPERVISOR_NAME
+         FROM ADD_TIME a
+         LEFT JOIN employees supervisor ON supervisor.ID = a.SUIR
+         WHERE a.USERID = ?
+           AND a.PAUSE_MODE = 1
+           AND $startExpr <> '0000-00-00 00:00:00'
+           AND $stopExpr <> '0000-00-00 00:00:00'
+           AND $stopExpr > $startExpr
+           AND $startExpr >= ?
+           AND $startExpr < ?
+         ORDER BY START_DT_EFFECTIVE DESC, a.ID DESC",
+        'iss',
+        array((int)$userId, $quarterStartDate, $quarterStopExclusive)
+    );
+}
+
 function time_journal_query_open_pause($link, $userId)
 {
     return db_query(

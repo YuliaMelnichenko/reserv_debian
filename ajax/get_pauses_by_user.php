@@ -6,6 +6,7 @@ ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/pause_journal.php";
 
 $_SESSION['pause_page_mode'] = 2;
 
@@ -25,7 +26,19 @@ if ($userID <= 0) {
 require_ajax_self_or_superuser($userID);
 $_SESSION['add_time_page_user_id'] = $userID;
 
-$userName = get_user_name_by_id($userID);
+$journal = get_pause_journal_context($link, $userID, get_current_datetime_in_timezone_str(1, 0));
+
+if ($journal === false) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+if ($journal === null) {
+  deny_ajax_access(404, 'USER_NOT_FOUND');
+}
+
+$userName = $journal['user_name'];
+$addTimes = $journal['entries'];
 
 echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
   echo "<tr>";
@@ -56,43 +69,17 @@ echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
       $colorMode = 1;
       $color1 = "#ddffff";
       $color3 = "#ffffff";
-      list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(false);
-
-      $tempAddTimes = get_all_add_work_info_by_user( $userID, 1 );
-
-      $addTimes = Array();
-
-      foreach( $tempAddTimes as $tempAddTime )
-      {
-        if ( $tempAddTime[7] == 1 ) 
-        {
-          if (!is_time_defined($tempAddTime[0]) || !is_time_defined($tempAddTime[1])) {
-            continue;
-          }
-
-          if (strtotime($tempAddTime[1]) <= strtotime($tempAddTime[0])) {
-            continue;
-          }
-
-          if ($tempAddTime[0] < $quarterStartDate || $tempAddTime[0] >= $quarterStopExclusive) {
-            continue;
-          }
-
-          $addTimes[] = $tempAddTime;
-        }
-      }
 
       foreach( $addTimes as $addTime )
       {
-        $ta_start_date = date("Y-m-d", strtotime($addTime[0]));
-        $ta_start_time = $addTime[0];
-        $ta_stop_time = $addTime[1];
-        $ta_duration = $addTime[6];
-        $ta_description = $addTime[3];
-        $ta_superuser = $addTime[5];
+        $ta_start_date = $addTime['date'];
+        $ta_start_time = $addTime['start_datetime'];
+        $ta_stop_time = $addTime['stop_datetime'];
+        $ta_duration = $addTime['duration'];
+        $ta_description = $addTime['employee_comment'];
+        $superUserName = $addTime['supervisor_name'];
 
         $time_duration = format_time_d_hhmmss_pure( $ta_duration );
-        $superUserName = get_superuser_name_by_id( $ta_superuser );
 
         if ( $colorMode == 0 )
         {
