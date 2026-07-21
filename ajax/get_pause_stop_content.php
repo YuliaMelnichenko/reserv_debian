@@ -27,7 +27,7 @@ $query = db_query(
 $merr=mysqli_error($link);
 if (!$query)
 {
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
 }
 else
 {

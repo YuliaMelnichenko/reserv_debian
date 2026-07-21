@@ -19,8 +19,9 @@ if ($comment === '' || strlen($comment) > 4000) {
 
 include __DIR__ . '/../php_tori/connect.php';
 
-if (!mysqli_begin_transaction($link)) {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+$transaction = db_transaction_start($link);
+if (!$transaction) {
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
 }
 
@@ -32,22 +33,22 @@ $result = db_query(
 );
 
 if (!$result) {
-    mysqli_rollback($link);
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    $transaction->rollback();
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
 }
 
 $row = mysqli_fetch_assoc($result);
 
 if (!$row) {
-    mysqli_rollback($link);
+    $transaction->rollback();
     deny_ajax_access(404, 'Запись ошибки учета не найдена.');
 }
 
 $status = (int)$row['STATUS'];
 
 if (in_array($status, array(2, 4), true)) {
-    mysqli_rollback($link);
+    $transaction->rollback();
     deny_ajax_access(409, 'Комментарий нельзя изменить после принятия или удаления записи.');
 }
 
@@ -61,14 +62,13 @@ $updated = db_execute(
 );
 
 if (!$updated) {
-    mysqli_rollback($link);
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    $transaction->rollback();
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
 }
 
-if (!mysqli_commit($link)) {
-    mysqli_rollback($link);
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+if (!$transaction->commit()) {
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
 }
 

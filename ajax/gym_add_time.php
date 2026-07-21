@@ -22,16 +22,17 @@ if (
   deny_ajax_access(400, 'INVALID_SCHEDULE');
 }
 
-if (!mysqli_begin_transaction($link)) {
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+$transaction = db_transaction_start($link);
+if (!$transaction) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
 $idQuery = db_query($link, 'SELECT ID FROM gym_schedule ORDER BY ID DESC LIMIT 1 FOR UPDATE');
 
 if (!$idQuery) {
-  mysqli_rollback($link);
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
@@ -46,15 +47,14 @@ $duplicateQuery = db_query(
 );
 
 if (!$duplicateQuery) {
-  mysqli_rollback($link);
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
 if (mysqli_num_rows($duplicateQuery) > 0) {
-  if (!mysqli_commit($link)) {
-    mysqli_rollback($link);
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  if (!$transaction->commit()) {
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 
@@ -70,8 +70,8 @@ $slotQuery = db_query(
 );
 
 if (!$slotQuery) {
-  mysqli_rollback($link);
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
@@ -82,7 +82,7 @@ while ($slotRow = mysqli_fetch_assoc($slotQuery)) {
 }
 
 if (count($slotUsers) >= 4) {
-  mysqli_rollback($link);
+  $transaction->rollback();
   echo "1";
   exit;
 }
@@ -95,14 +95,13 @@ $query = db_execute(
 );
 
 if (!$query) {
-  mysqli_rollback($link);
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
-if (!mysqli_commit($link)) {
-  mysqli_rollback($link);
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+if (!$transaction->commit()) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 

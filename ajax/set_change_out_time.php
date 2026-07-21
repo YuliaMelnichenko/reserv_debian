@@ -42,7 +42,7 @@ $query = db_query($link, "
 ", 'ii', array($visitID, $userID));
 
 if (!$query) {
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
@@ -78,7 +78,7 @@ $res = db_execute($link, "
 ", 'sii', array($newOutTime, $visitID, $userID));
 
 if (!$res) {
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 

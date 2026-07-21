@@ -31,7 +31,7 @@ if ($superuserID !== -1) {
   );
 
   if (!$supervisorQuery) {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 
@@ -48,16 +48,17 @@ if (request_post_int('mode') === 1)
   $delayID = request_post_int('delayID');
 }
 
-if (!mysqli_begin_transaction($link)) {
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+$transaction = db_transaction_start($link);
+if (!$transaction) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
 $idQuery = db_query($link, 'SELECT ID FROM Delays ORDER BY ID DESC LIMIT 1 FOR UPDATE');
 
 if (!$idQuery) {
-  mysqli_rollback($link);
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
@@ -83,8 +84,8 @@ else
 }
 
 if (!$query0) {
-  mysqli_rollback($link);
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
@@ -103,8 +104,8 @@ if (!$delay)
 
   if (!$query)
   {
-    mysqli_rollback($link);
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    $transaction->rollback();
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 
@@ -128,8 +129,8 @@ else
 
     if (!$query)
     {
-      mysqli_rollback($link);
-      echo database_error_message($link, __FILE__ . ':' . __LINE__);
+      $transaction->rollback();
+      ajax_database_error($link, __FILE__ . ':' . __LINE__);
       exit;
     }
 
@@ -141,9 +142,8 @@ else
   }
 }
 
-if (!mysqli_commit($link)) {
-  mysqli_rollback($link);
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+if (!$transaction->commit()) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 

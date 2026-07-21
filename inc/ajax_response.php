@@ -61,5 +61,15 @@ function ajax_json_application_error($context, $details = '')
 
 function ajax_database_error($link, $context)
 {
-    ajax_text_response(database_error_message($link, $context), 500);
+    echo ajax_database_error_message($link, $context);
+}
+
+function ajax_database_error_message($link, $context)
+{
+    if (!headers_sent()) {
+        http_response_code(500);
+    }
+
+    ajax_text_headers();
+    return database_error_message($link, $context);
 }

@@ -107,7 +107,7 @@ $query = db_query($link, "SELECT * FROM ALERTS WHERE DATE = ? AND USERID = ? AND
 
 $merr=mysqli_error($link);
 if ( !$query ){
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
 }
 else{
   while ( $row = mysqli_fetch_assoc($query) ){
