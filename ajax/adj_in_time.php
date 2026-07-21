@@ -4,179 +4,101 @@ require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
 ajax_text_headers();
 
-if (request_post_has('userID') && request_post_has('inTime'))
-{
-  $userID = request_post_int('userID');
-  $newInTime = request_post_time('inTime');
+$userID = request_post_int('userID');
+$newInTime = request_post_time('inTime');
 
-  if ($userID <= 0) {
-    deny_ajax_access(400, 'INVALID_USER');
-  }
-
-  require_ajax_supervisor_for_user($userID, 3);
-
-  if ($newInTime === null) {
-    echo "-13";
-    exit;
-  }
-  $currentDate = date('Y-m-d');
-  
-  $newStartTime = $newInTime; 
-  $newEatStartTime = "";
-  $newEatStopTime = "";
-
-  include_once __DIR__ . "/../funcs.php";
-  include_once __DIR__ . "/../php_tori/connect.php";
-
-  $query = db_query($link, "SELECT in_time, out_time, eat_start, eat_stop, state FROM visiting WHERE date = ? AND user_id = ?", 'si', array($currentDate, $userID));
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
-    $days_errors[] = "MYSQL : $merr";
-  }
-  else
-  {
-    if ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
-      $inTime = $row["in_time"];
-      $outTime = $row["out_time"];
-      $eatStart = $row["eat_start"];
-      $eatStop = $row["eat_stop"];
-      $state = $row["state"];
-
-      if ( $state == 0 )
-      {
-        $dayDuration = strtotime( $outTime ) - strtotime( $inTime ) - ( strtotime( $eatStop ) - strtotime( $eatStart ) );
-        $offsetToDelete = strtotime( $newInTime ) - strtotime( "10:00:00" );
-
-        if ( strtotime( $newInTime ) > strtotime( $outTime ) )
-        {
-          echo "-10";
-          exit;
-        }
-        else
-        {
-          if ( strtotime( $newInTime ) > strtotime( $eatStart ) )
-          {
-            $offset = strtotime( $newInTime ) - strtotime( $eatStart ) + 1;
-            
-            $offset = format_time_d_hhmmss_pure( $offset );   
-             
-            $newEatStartTime = inc_time_by_time( $eatStart, $offset );
-            $newEatStopTime = inc_time_by_time( $eatStop, $offset );
-            
-            if ( strtotime( $newEatStopTime ) > strtotime( $outTime ) )
-            { 
-              $newOutTime = inc_time_by_time( $newEatStopTime, "00:00:01" );
-            }
-          }
-          else
-          {
-            $newEatStartTime = $eatStart;
-            $newEatStopTime = $eatStop;
-            $newOutTime = $outTime;             
-          }
-          $query = db_execute($link, "UPDATE visiting SET in_time = ?, out_time = ?, eat_start = ?, eat_stop = ?, adj = 1 WHERE date = ? AND user_id = ?", 'sssssi', array($newStartTime, $newOutTime, $newEatStartTime, $newEatStopTime, $currentDate, $userID));
-          $merr=mysqli_error($link);
-          if ( !$query ) 
-          {
-            $days_errors[] = "MYSQL : $merr";
-          }
-          echo "1";
-          exit;
-        }
-      }
-      else if ( $state == 4 )
-      {
-        if ( strtotime( $newInTime ) > strtotime( $eatStart ) )
-        {
-          echo "-11";
-          exit;
-        }
-        else
-        {
-          if ( strtotime( $newInTime ) > strtotime( $eatStart ) )
-          {
-            $offset = strtotime( $newInTime ) - strtotime( $eatStart ) + 1;
-            
-            format_time_d_hhmmss_pure( $offset );   
-             
-            $newEatStartTime = inc_time_by_time( $eatStart, $offset );
-            $newEatStopTime = inc_time_by_time( $eatStop, $offset );
-            $newOutTime = $outTime;
-          }
-          else
-          {
-            $newEatStartTime = $eatStart;
-            $newEatStopTime = $eatStop;
-            $newOutTime = $outTime;             
-          }
-          
-          $query = db_execute($link, "UPDATE visiting SET in_time = ?, out_time = ?, eat_start = ?, eat_stop = ?, adj = 1 WHERE date = ? AND user_id = ?", 'sssssi', array($newStartTime, $newOutTime, $newEatStartTime, $newEatStopTime, $currentDate, $userID));
-          $merr=mysqli_error($link);
-          if ( !$query ) 
-          {
-            $days_errors[] = "MYSQL : $merr";
-          }
-          echo "2";
-          exit;
-        }
-      }
-      else if ( $state == 3 )
-      {
-        $dayDuration = strtotime( $inTime ) - strtotime( $eatStart );
-        $offsetToDelete = strtotime( $newInTime ) - strtotime( "10:00:00" );
-        if ( $dayDuration < $offsetToDelete )
-        {
-          echo "-12";
-          exit;
-        }
-        else
-        {
-          if ( strtotime( $newInTime ) > strtotime( $eatStart ) )
-          {
-            $offset = strtotime( $newInTime ) - strtotime( $eatStart ) + 1;
-            
-            format_time_d_hhmmss_pure( $offset );   
-             
-            $newEatStartTime = inc_time_by_time( $eatStart, $offset );
-            $newEatStopTime = $eatStop;
-            $newOutTime = $outTime;
-          }
-          else
-          {
-            $newEatStartTime = $eatStart;
-            $newEatStopTime = $eatStop;
-            $newOutTime = $outTime;             
-          }
-          
-          $query = db_execute($link, "UPDATE visiting SET in_time = ?, out_time = ?, eat_start = ?, eat_stop = ?, adj = 1 WHERE date = ? AND user_id = ?", 'sssssi', array($newStartTime, $newOutTime, $newEatStartTime, $newEatStopTime, $currentDate, $userID));
-          $merr=mysqli_error($link);
-          if ( !$query ) 
-          {
-            $days_errors[] = "MYSQL : $merr";
-          }
-          echo "2";
-          exit;
-        }
-      }
-      else if ( $state == 2 )
-      {
-        $newEatStartTime = $eatStart;
-        $newEatStopTime = $eatStop;
-        $newOutTime = $outTime;             
-        
-        $query = db_execute($link, "UPDATE visiting SET in_time = ?, out_time = ?, eat_start = ?, eat_stop = ?, adj = 1 WHERE date = ? AND user_id = ?", 'sssssi', array($newStartTime, $newOutTime, $newEatStartTime, $newEatStopTime, $currentDate, $userID));
-        $merr=mysqli_error($link);
-        if ( !$query ) 
-        {
-          $days_errors[] = "MYSQL : $merr";
-        }
-        echo "3";
-        exit;
-      }
-    } 
-  }  
+if ($userID <= 0) {
+  deny_ajax_access(400, 'INVALID_USER');
 }
-echo "0";
+
+if ($newInTime === null) {
+  echo "-13";
+  exit;
+}
+
+require_ajax_supervisor_for_user($userID, 3);
+
+include_once __DIR__ . "/../funcs.php";
+include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/entrance_adjustment.php";
+
+$currentDateTime = get_current_datetime_in_timezone()[1];
+$dateRange = datetimestr_to_day_start_stop_DT_ex_str(
+  $currentDateTime,
+  isset($_SESSION['ss_dayTransitionTime']) ? $_SESSION['ss_dayTransitionTime'] : '00:00:00'
+);
+$startDTStr = $dateRange[0];
+$stopDTStr = $dateRange[1];
+
+$transaction = db_transaction_start($link);
+
+if (!$transaction) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+$query = db_query($link, "
+  SELECT ID, in_dt, out_dt, eat_start_dt, eat_stop_dt, state
+  FROM visiting
+  WHERE user_id = ?
+    AND in_dt >= ?
+    AND in_dt <= ?
+  ORDER BY in_dt DESC, ID DESC
+  LIMIT 1
+  FOR UPDATE
+", 'iss', array($userID, $startDTStr, $stopDTStr));
+
+if (!$query) {
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+$visitRow = mysqli_fetch_assoc($query);
+
+if (!$visitRow) {
+  $transaction->rollback();
+  echo "0";
+  exit;
+}
+
+$adjustment = build_entrance_adjustment($visitRow, $newInTime);
+$resultCode = (int)$adjustment['code'];
+
+if ($resultCode <= 0) {
+  $transaction->rollback();
+  echo (string)$resultCode;
+  exit;
+}
+
+$updated = db_execute($link, "
+  UPDATE visiting
+  SET in_dt = ?,
+      out_dt = ?,
+      eat_start_dt = ?,
+      eat_stop_dt = ?,
+      adj = 1
+  WHERE ID = ?
+    AND user_id = ?
+", 'ssssii', array(
+  $adjustment['in_dt'],
+  $adjustment['out_dt'],
+  $adjustment['eat_start_dt'],
+  $adjustment['eat_stop_dt'],
+  (int)$visitRow['ID'],
+  $userID
+));
+
+if (!$updated) {
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+if (!$transaction->commit()) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+echo (string)$resultCode;
 ?>

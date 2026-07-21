@@ -976,45 +976,50 @@ function min_date( $daysRange )
 function get_users_current_day_in_time_by_superuser( $SUID )
 {
   $users = get_users_by_superusers_and_type( $SUID, 3 );
+  $allowedUsers = array_fill_keys(array_map('intval', $users), true);
+  $rets = array();
+  $seenUsers = array();
 
-  $rets = Array();
-
-  $currentDate = Date("Y-m-d");
+  $currentDateTime = get_current_datetime_in_timezone()[1];
+  $dateRange = datetimestr_to_day_start_stop_DT_ex_str($currentDateTime, '00:00:00');
 
   include __DIR__ . "/php_tori/connect.php";
 
-  $query = db_query($link, "SELECT v.user_id, v.in_time, v.adj FROM visiting v inner join employees e on v.user_id = e.id where date = ? order by e.SURNAME", 's', array($currentDate));
+  $query = db_query($link, "
+    SELECT v.user_id, v.in_dt, v.adj
+    FROM visiting v
+    INNER JOIN employees e ON v.user_id = e.id
+    WHERE v.in_dt >= ?
+      AND v.in_dt <= ?
+    ORDER BY e.SURNAME, v.in_dt DESC, v.ID DESC
+  ", 'ss', array($dateRange[0], $dateRange[1]));
 
-  $merr=mysqli_error($link);
-  if ( !$query ) 
+  if (!$query)
   {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
+    return $rets;
   }
-  else
+
+  while ($row = mysqli_fetch_array($query, MYSQLI_ASSOC))
   {
-    while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {
-      $regUserID = $row["user_id"];
-      $regUserInTime = $row["in_time"];
-      $regAdj = $row["adj"];
+    $regUserID = (int)$row["user_id"];
 
-      foreach( $users as $user )
-      {
-        if ( $user == $regUserID )
-        {
-          $tempArray = Array();
-          $tempArray[0] = $regUserID;
-          $tempArray[1] = $regUserInTime;
-          $tempArray[2] = $regAdj;
-          $rets[] = $tempArray;
-          break;  
-        }               
-      }         
+    if (!isset($allowedUsers[$regUserID]) || isset($seenUsers[$regUserID])) {
+      continue;
     }
-  }  
 
-  return $rets;           
+    $seenUsers[$regUserID] = true;
+
+    $tempArray = array();
+    $tempArray[0] = $regUserID;
+    $tempArray[1] = datetime_to_time_str($row["in_dt"]);
+    $tempArray[2] = (int)$row["adj"];
+    $rets[] = $tempArray;
+  }
+
+  return $rets;
 }
+
 
 function get_penalties( $userDays, $userID )
 {

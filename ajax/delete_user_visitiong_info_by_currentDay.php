@@ -7,8 +7,6 @@ ajax_text_headers();
 if (request_post_has('userID'))
 {
   $userID = request_post_int('userID');
-  $currentDate = date('Y-m-d');
-
   if ($userID <= 0) {
     deny_ajax_access(400, 'INVALID_USER');
   }
@@ -18,22 +16,23 @@ if (request_post_has('userID'))
   include_once __DIR__ . "/../funcs.php";
   include_once __DIR__ . "/../php_tori/connect.php";
 
+  $currentDateTime = get_current_datetime_in_timezone()[1];
+  $dateRange = datetimestr_to_day_start_stop_DT_ex_str($currentDateTime, '00:00:00');
+
   $query = db_execute(
     $link,
-    'DELETE FROM visiting WHERE date = ? AND user_id = ?',
-    'si',
-    array($currentDate, $userID)
+    'DELETE FROM visiting WHERE user_id = ? AND in_dt >= ? AND in_dt <= ?',
+    'iss',
+    array($userID, $dateRange[0], $dateRange[1])
   );
-  $merr = mysqli_error($link);
-  if ( !$query ) 
-  {
-    $days_errors[] = "MYSQL : $merr";
-  }
-  else
-  {
-    echo "1";
-    exit; 
+
+  if (!$query) {
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
+    exit;
   }  
+
+  echo "1";
+  exit;
 }
 echo "0";
 ?>
