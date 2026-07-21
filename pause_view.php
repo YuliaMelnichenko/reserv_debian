@@ -3,6 +3,7 @@ ob_start();
 require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 include_once __DIR__ . "/funcs.php";
+require_once __DIR__ . "/inc/notification_summary.php";
 save_last_location( "pause_view.php" );
 require_page_superuser();
 ?>
@@ -31,6 +32,12 @@ echo "<div class=\"notification-page-layout\">";
 include_once __DIR__ . "/php_tori/connect.php";
 
 mysqli_set_charset($link, "utf8");
+$summary = get_pause_notification_summary($link, $userID_, get_current_datetime_in_timezone_str(1, 0));
+
+if ($summary === false) {
+  echo html_escape(database_error_message($link, __FILE__ . ':' . __LINE__));
+  exit;
+}
 
 echo "<table class=\"notification-page-table\">";
   echo "<tr>";
@@ -56,32 +63,17 @@ echo "<table class=\"notification-page-table\">";
     $color = "#ddffff";
     $img = "go1.png";
 
-    mysqli_set_charset($link, "utf8");
-
-    $query = db_query(
-      $link,
-      'SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = ? AND TYPE = ? ORDER BY USERID',
-      'ii',
-      array($userID_, 4)
-    );
-    if (!$query)
+    foreach ($summary['entries'] as $entry)
     {
-      echo database_error_message($link, __FILE__ . ':' . __LINE__);
-    }
-    else
-    {
-      while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-      {  
-        $userID = (int)$row["USERID"];
-        $userName = get_user_name_by_id($userID);
+        $userID = $entry['user_id'];
+        $userName = $entry['user_name'];
 
         $mid = getMaskedUID( 32, $userID );
         $userUrl = "pause_view_user.php?mid=$mid";
         $uhref = "location.href='$userUrl'";
 
-        $notificationCount = 0;
-        $currentDayNotificationCount = 0;
-        get_pause_notif_counts( $userID, $notificationCount, $currentDayNotificationCount );
+        $notificationCount = $entry['total_count'];
+        $currentDayNotificationCount = $entry['current_day_count'];
 
         $rowClass = $color == "#ddffff" ? "notification-row-alt" : "notification-row";
 
@@ -104,7 +96,6 @@ echo "<table class=\"notification-page-table\">";
           $color = "#ddffff";
           $img = "go1.png";
         }  
-      }
     }
 
     echo "</table>";

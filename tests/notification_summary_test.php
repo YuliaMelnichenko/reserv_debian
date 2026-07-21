@@ -39,6 +39,40 @@ return function () {
         'The existing pause summary navigation must remain available'
     );
 
+    $pages = array(
+        __DIR__ . '/../delay_approvement.php',
+        __DIR__ . '/../pause_view.php',
+    );
+
+    foreach ($pages as $pagePath) {
+        $page = file_get_contents($pagePath);
+        test_assert_true(
+            strpos($page, 'inc/notification_summary.php') !== false,
+            'Full notification pages must load the shared summary service in ' . basename($pagePath)
+        );
+        test_assert_same(
+            0,
+            preg_match('/\b(?:SELECT|db_query|get_delay_notif_counts|get_pause_notif_counts|get_user_name_by_id)\b/i', $page),
+            'Full notification pages must not perform SQL or per-user lookups in ' . basename($pagePath)
+        );
+        test_assert_true(
+            strpos($page, 'journal-view-button') !== false,
+            'The existing full-page navigation controls must remain available in ' . basename($pagePath)
+        );
+    }
+
+    $delayPage = file_get_contents($pages[0]);
+    test_assert_true(
+        strpos($delayPage, 'delay_approvement_user.php?mid=') !== false,
+        'The full delay page must preserve masked detail links'
+    );
+
+    $pausePage = file_get_contents($pages[1]);
+    test_assert_true(
+        strpos($pausePage, 'pause_view_user.php?mid=') !== false,
+        'The full pause page must preserve masked detail links'
+    );
+
     $service = file_get_contents(__DIR__ . '/../inc/notification_summary.php');
     test_assert_true(
         strpos($service, "paramName = 'delay_journal_deep_day'") !== false,
