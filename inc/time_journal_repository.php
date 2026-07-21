@@ -265,16 +265,6 @@ function time_journal_query_open_pause($link, $userId)
     );
 }
 
-function time_journal_finish_pause($link, $pauseId, $userId, $stopDateTime)
-{
-    return db_execute(
-        $link,
-        'UPDATE ADD_TIME SET STOP_DT = ? WHERE ID = ? AND USERID = ? AND PAUSE_MODE = 1',
-        'sii',
-        array($stopDateTime, (int)$pauseId, (int)$userId)
-    );
-}
-
 function time_journal_query_latest_completed_pause($link, $userId, $date)
 {
     return db_query(
