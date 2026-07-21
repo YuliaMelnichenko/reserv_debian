@@ -136,3 +136,69 @@ function get_pause_notification_summary($link, $supervisorID, $currentDateTime)
         'entries' => $entries,
     );
 }
+
+function get_add_time_notification_summary($link, $supervisorID, $currentDateTime)
+{
+    $depthResult = db_query($link, "
+        SELECT valueInt
+        FROM DBSETUP
+        WHERE paramName = 'add_time_journal_deep_day'
+        LIMIT 1
+    ");
+
+    if (!$depthResult) {
+        return false;
+    }
+
+    $depthRow = mysqli_fetch_assoc($depthResult);
+    $depthDays = $depthRow ? abs((int)$depthRow['valueInt']) : 180;
+    $dateTimeExpressions = time_journal_add_work_datetime_expressions($link);
+    $startExpression = $dateTimeExpressions['start'];
+    $stopExpression = $dateTimeExpressions['stop'];
+    $summaryResult = db_query($link, "
+        SELECT
+          employee.ID AS USERID,
+          CONCAT_WS(' ', employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME) AS USER_NAME,
+          COUNT(DISTINCT add_time.ID) AS TOTAL_COUNT,
+          COUNT(DISTINCT CASE WHEN add_time.APPROVED = 1 THEN add_time.ID END) AS ACCEPTED_COUNT,
+          COUNT(DISTINCT CASE WHEN add_time.APPROVED = -1 THEN add_time.ID END) AS REFUSED_COUNT,
+          COUNT(DISTINCT CASE WHEN add_time.APPROVED IN (99, 100, 101) THEN add_time.ID END) AS DELETED_COUNT,
+          COUNT(DISTINCT CASE WHEN add_time.APPROVED = 0 THEN add_time.ID END) AS NEW_COUNT
+        FROM GROUPS membership
+        INNER JOIN employees employee ON employee.ID = membership.USERID
+        LEFT JOIN ADD_TIME add_time
+          ON add_time.USERID = employee.ID
+         AND add_time.PAUSE_MODE = 0
+         AND $stopExpression > ADDDATE(?, INTERVAL ? DAY)
+         AND $startExpression <> '0000-00-00 00:00:00'
+         AND $stopExpression <> '0000-00-00 00:00:00'
+         AND $stopExpression > $startExpression
+        WHERE membership.SUPERVISORID = ?
+          AND TRIM(membership.TYPE) = ?
+        GROUP BY employee.ID, employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME
+        ORDER BY employee.ID
+    ", 'siis', array($currentDateTime, -$depthDays, (int)$supervisorID, '0'));
+
+    if (!$summaryResult) {
+        return false;
+    }
+
+    $entries = array();
+
+    while ($row = mysqli_fetch_assoc($summaryResult)) {
+        $entries[] = array(
+            'user_id' => (int)$row['USERID'],
+            'user_name' => trim((string)$row['USER_NAME']),
+            'total_count' => (int)$row['TOTAL_COUNT'],
+            'accepted_count' => (int)$row['ACCEPTED_COUNT'],
+            'refused_count' => (int)$row['REFUSED_COUNT'],
+            'deleted_count' => (int)$row['DELETED_COUNT'],
+            'new_count' => (int)$row['NEW_COUNT'],
+        );
+    }
+
+    return array(
+        'depth_days' => $depthDays,
+        'entries' => $entries,
+    );
+}

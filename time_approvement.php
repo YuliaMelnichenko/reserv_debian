@@ -3,6 +3,7 @@ ob_start();
 require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 include_once __DIR__ . "/funcs.php";
+require_once __DIR__ . "/inc/notification_summary.php";
 save_last_location( "time_approvement.php" );
 require_page_superuser();
 ?>
@@ -43,7 +44,13 @@ echo "<div class=\"notification-page-layout\">";
 
 include __DIR__ . "/php_tori/connect.php";
 
-  mysqli_set_charset($link, "utf8");
+mysqli_set_charset($link, "utf8");
+$summary = get_add_time_notification_summary($link, $SUID, get_current_datetime_in_timezone_str(1, 0));
+
+if ($summary === false) {
+  echo html_escape(database_error_message($link, __FILE__ . ':' . __LINE__));
+  exit;
+}
 
   echo "<table class=\"notification-page-table\">";
     echo "<tr>";
@@ -72,30 +79,15 @@ echo "</tr>";
 $color = "#ddffff";
 $img = "go1.png";
 
-mysqli_set_charset($link, "utf8");
-$query = db_query(
-  $link,
-  'SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = ? AND TYPE = ? ORDER BY USERID',
-  'ii',
-  array($SUID, 0)
-);
-if (!$query)
+foreach ($summary['entries'] as $entry)
 {
-  echo database_error_message($link, __FILE__ . ':' . __LINE__);
-}
-else
-{
-  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-  {  
-    $userID = (int)$row["USERID"];
-    $userName = get_user_name_by_id($userID);
-
-    $notificationCount = 0;
-    $acceptedNotificationCount = 0;
-    $refusedNotificationCount = 0;
-    $deletedNotificationCount = 0;
-    $newNotificationCount = 0;
-    get_add_time_notif_counts( $userID, $notificationCount, $acceptedNotificationCount, $refusedNotificationCount, $deletedNotificationCount, $newNotificationCount );
+    $userID = $entry['user_id'];
+    $userName = $entry['user_name'];
+    $notificationCount = $entry['total_count'];
+    $acceptedNotificationCount = $entry['accepted_count'];
+    $refusedNotificationCount = $entry['refused_count'];
+    $deletedNotificationCount = $entry['deleted_count'];
+    $newNotificationCount = $entry['new_count'];
 
     $mid = getMaskedUID( 32, $userID );
     $userUrl = "time_approvement_user.php?mid=$mid";
@@ -128,7 +120,6 @@ else
       $color = "#ddffff";
       $img = "go1.png";
     }  
-  }
 }
 
 echo "</table>";
