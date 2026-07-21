@@ -32,4 +32,23 @@ return function () {
         'The delay journal must load acceptor names in its data query'
     );
     test_assert_same(0, preg_match('/SELECT\s+\*/i', $service), 'Delay journal queries must select explicit fields');
+
+    $detailPage = file_get_contents(__DIR__ . '/../delay_approvement_user.php');
+    test_assert_true(
+        strpos($detailPage, 'inc/delay_journal.php') !== false,
+        'The full delay detail page must use the shared data service'
+    );
+    test_assert_same(
+        0,
+        preg_match('/\b(?:get_all_delay_info_by_user|get_superuser_name_by_id|get_user_name_by_id|get_user_defStartTime_and_allowedDelay)\s*\(/', $detailPage),
+        'The full delay detail page must not perform legacy or per-row lookups'
+    );
+    test_assert_true(
+        strpos($detailPage, 'notification-table-scroll notification-table-scroll-full') !== false,
+        'The existing delay detail layout must remain available'
+    );
+    test_assert_true(
+        strpos($detailPage, 'accept_delay_for_user(') !== false && strpos($detailPage, 'refuse_delay_for_user(') !== false,
+        'The existing delay decision controls must remain available'
+    );
 };

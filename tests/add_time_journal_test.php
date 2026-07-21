@@ -68,4 +68,23 @@ return function () {
         strpos($service, '$includeDeleted') !== false,
         'The shared data service must support hiding deleted employee entries'
     );
+
+    $preview = file_get_contents(__DIR__ . '/../ajax/get_add_times.php');
+    test_assert_true(
+        strpos($preview, 'inc/add_time_journal.php') !== false,
+        'The remote work preview must use the shared data service'
+    );
+    test_assert_same(
+        0,
+        preg_match('/\b(?:SELECT|get_all_add_work_info_by_user|get_name_by_userid|get_superuser_name_by_id)\b/i', $preview),
+        'The remote work preview must not perform SQL, legacy, or per-row lookups'
+    );
+    test_assert_true(
+        strpos($preview, 'id=\"addTimesTable\"') !== false,
+        'The existing remote work preview table must remain available'
+    );
+    test_assert_true(
+        strpos($preview, 'add_addition_time();') !== false && strpos($preview, 'part_time_del(') !== false,
+        'The existing remote work preview controls must remain available'
+    );
 };
