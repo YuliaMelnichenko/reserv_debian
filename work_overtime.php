@@ -10,7 +10,7 @@ include __DIR__ . "/php_tori/connect.php";
 
 // === AJAX: список сотрудников с количеством переработок >= hours (текущий квартал) ===
 if (isset($_GET['action']) && $_GET['action'] === 'load') {
-    header('Content-Type: application/json; charset=utf-8');
+    ajax_json_headers();
 
     try {
         $hours = normalizeOvertimeThreshold($_GET['hours'] ?? null);
@@ -143,16 +143,16 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
             ];
         }
 
-        echo json_encode(['status' => 'success', 'data' => $rows, 'quarter_start' => $qstart, 'quarter_end' => $qend]);
+        ajax_json_response(['status' => 'success', 'data' => $rows, 'quarter_start' => $qstart, 'quarter_end' => $qend]);
     } catch (Throwable $e) {
-        echo application_json_error('Overtime list at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
+        ajax_json_application_error('Overtime list at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
     exit;
 }
 
 // === AJAX: детали по сотруднику — записи (дата + часы) с переработкой >= hours (текущий квартал) ===
 if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id'])) {
-    header('Content-Type: application/json; charset=utf-8');
+    ajax_json_headers();
 
     try {
         $empId = intval($_GET['id']);
@@ -281,14 +281,14 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
             ];
         }
 
-        echo json_encode([
+        ajax_json_response([
             'status' => 'success',
             'data' => $rows,
             'quarter_start' => $qstart,
             'quarter_end' => $qend
         ]);
     } catch (Throwable $e) {
-        echo application_json_error('Overtime details at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
+        ajax_json_application_error('Overtime details at ' . __FILE__ . ':' . __LINE__, $e->getMessage());
     }
     exit;
 }
