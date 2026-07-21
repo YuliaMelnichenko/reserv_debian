@@ -3,8 +3,7 @@ require_once __DIR__ . '/../inc/session.php';
 require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
 
-header('Content-Type: text/plain; charset=utf-8');
-header('Cache-Control: no-store, no-cache, must-revalidate');
+ajax_text_headers();
 
 $userID = (int)$_SESSION['ss_id'];
 $errorID = (int)($_POST['error_id'] ?? 0);

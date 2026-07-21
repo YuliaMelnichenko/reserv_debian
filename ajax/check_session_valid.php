@@ -1,8 +1,7 @@
 <?php
 require_once __DIR__ . '/../inc/session.php';
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+require_once __DIR__ . '/../inc/ajax_response.php';
+ajax_text_headers();
 
 if (
   !isset($_SESSION['ss_sessid']) ||

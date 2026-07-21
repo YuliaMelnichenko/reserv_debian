@@ -16,9 +16,7 @@ if ($report_type < 1 || $report_type > 7) {
   exit;
 }
 
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
 

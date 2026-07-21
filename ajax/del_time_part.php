@@ -2,9 +2,7 @@
 
 require_once __DIR__ . '/../inc/access.php';
 require_ajax_auth();
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+ajax_text_headers();
 
 $itemId = (int) ($_POST['itemId'] ?? 0);
 require_ajax_add_time_access($itemId);

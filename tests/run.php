@@ -18,6 +18,7 @@ function test_assert_same($expected, $actual, $message)
 
 $testFiles = array(
     __DIR__ . '/ajax_response_test.php',
+    __DIR__ . '/ajax_endpoint_conventions_test.php',
     __DIR__ . '/calendar_test.php',
     __DIR__ . '/date_range_test.php',
     __DIR__ . '/delay_test.php',
