@@ -470,30 +470,6 @@ function get_group_user_info_by_svID_for_report_ex( $svID ){
   return $usersInfo;
 }  
 
-function get_name_by_userid( $user_id )
-{
-  include __DIR__ . "/php_tori/connect.php";
-  $query = db_query($link, "SELECT FIRSTNAME, LASTNAME, SURNAME FROM employees WHERE ID = ?", 'i', array((int)$user_id));
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
-    echo database_error_message($link, __FILE__ . ':' . __LINE__);
-  }
-  else
-  {
-    $vn=mysqli_num_rows($query);
-    if ( $vn == 1 )
-    {  
-      $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
-      return $row["SURNAME"]." ".$row["FIRSTNAME"]." ".$row["LASTNAME"];
-    }
-    else
-    {
-      return "Unknown. Error 3";
-    }
-  } 
-}  
-
 function journal_status_label($text, $class = "middleBold_r")
 {
   return "<h5 class=\"" . html_escape($class) . "\">" . html_escape($text) . "</h5>";
