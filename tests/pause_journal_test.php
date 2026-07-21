@@ -41,4 +41,34 @@ return function () {
         strpos($repository, 'LEFT JOIN employees supervisor') !== false,
         'The pause query must load supervisor names without per-row queries'
     );
+
+    $detailPage = file_get_contents(__DIR__ . '/../pause_view_user.php');
+    test_assert_true(
+        strpos($detailPage, 'inc/pause_journal.php') !== false,
+        'The full pause detail page must use the shared data service'
+    );
+    test_assert_same(
+        0,
+        preg_match('/\b(?:get_all_add_work_info_by_user|get_superuser_name_by_id|get_user_name_by_id)\s*\(/', $detailPage),
+        'The full pause detail page must not perform legacy or per-row lookups'
+    );
+    test_assert_true(
+        strpos($detailPage, 'notification-table-scroll notification-table-scroll-medium') !== false,
+        'The existing pause detail layout must remain available'
+    );
+
+    $employeeTable = file_get_contents(__DIR__ . '/../ajax/get_pause_times_table.php');
+    test_assert_true(
+        strpos($employeeTable, 'inc/pause_journal.php') !== false,
+        'The employee pause table must use the shared data service'
+    );
+    test_assert_same(
+        0,
+        preg_match('/\b(?:SELECT|db_query|get_superuser_name_by_id|STARTDATE|STARTTIME|STOPTIME)\b/i', $employeeTable),
+        'The employee pause table must not perform SQL, per-row, or legacy lookups'
+    );
+    test_assert_true(
+        strpos($employeeTable, 'Текущий квартал:') !== false,
+        'The existing current-quarter heading must remain available'
+    );
 };

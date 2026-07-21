@@ -3,6 +3,7 @@ ob_start();
 require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 include_once __DIR__ . "/funcs.php";
+require_once __DIR__ . "/inc/pause_journal.php";
 save_last_location( "pause_view.php" );
 $mid = (string) ($_GET['mid'] ?? '');
 
@@ -72,12 +73,23 @@ echo "<table class=\"notification-page-table\">";
           echo "<h5 class=\"dark\"><br>/уведомления по приостановкам учета времени<br><br></h5>";
         echo "</div>";
 
-      $userName = get_user_name_by_id($userID);
       $backUrl = "pause_view.php";
+      $journal = get_pause_journal_context($link, $userID, get_current_datetime_in_timezone_str(1, 0));
 
-      $addTimeInfo = get_all_add_work_info_by_user( $userID, 1 );
+      if ($journal === false) {
+        echo "<h5>" . html_escape(database_error_message($link, __FILE__ . ':' . __LINE__)) . "</h5>";
+        exit;
+      }
 
-      if ( count( $addTimeInfo ) == 0 )
+      if ($journal === null) {
+        header('Location: pause_view.php');
+        exit;
+      }
+
+      $userName = $journal['user_name'];
+      $addTimes = $journal['entries'];
+
+      if ( count( $addTimes ) == 0 )
       {
 
 echo "<table id=\"pause_approvement_table\" class=\"notification-detail-header-table\">";
@@ -126,29 +138,16 @@ echo "<table id=\"pause_approvement_table\" class=\"notification-detail-header-t
       $color1 = "#ddffff";
       $color3 = "#ffffff";
 
-      $tempAddTimes = get_all_add_work_info_by_user( $userID, 1 );
-
-      $addTimes = Array();
-
-      foreach( $tempAddTimes as $tempAddTime )
-      {
-        if ( $tempAddTime[7] == 1 ) 
-        {
-          $addTimes[] = $tempAddTime;
-        }
-      }
-
       foreach( $addTimes as $addTime )
       {
 
-        $ta_start_dt = $addTime[0];
-        $ta_stop_dt = $addTime[1];
-        $ta_duration = $addTime[6];
-        $ta_description = $addTime[3];
-        $ta_superuser = $addTime[5];
+        $ta_start_dt = $addTime['start_datetime'];
+        $ta_stop_dt = $addTime['stop_datetime'];
+        $ta_duration = $addTime['duration'];
+        $ta_description = $addTime['employee_comment'];
+        $superUserName = $addTime['supervisor_name'];
 
         $time_duration = format_time_d_hhmmss_pure( $ta_duration );
-        $superUserName = get_superuser_name_by_id( $ta_superuser );
 
         if ( $colorMode == 0 )
         {

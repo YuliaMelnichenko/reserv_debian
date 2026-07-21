@@ -23,7 +23,7 @@ function get_pause_journal_context($link, $userID, $currentDateTime)
         return null;
     }
 
-    list($quarterStartDate, , $quarterStopExclusive) = get_current_quarter_date_range(false, $currentDateTime);
+    list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(false, $currentDateTime);
     $dateTimeExpressions = time_journal_add_work_datetime_expressions($link);
     $entryResult = time_journal_query_pause_journal(
         $link,
@@ -65,6 +65,7 @@ function get_pause_journal_context($link, $userID, $currentDateTime)
     return array(
         'user_name' => trim($user['SURNAME'] . ' ' . $user['FIRSTNAME'] . ' ' . $user['LASTNAME']),
         'quarter_start_date' => $quarterStartDate,
+        'quarter_stop_date' => $quarterStopDate,
         'quarter_stop_exclusive' => $quarterStopExclusive,
         'entries' => $entries,
     );

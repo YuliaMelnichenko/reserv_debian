@@ -49,4 +49,23 @@ return function () {
         strpos($detailPage, 'notification-table-scroll notification-table-scroll-full') !== false,
         'The existing remote work detail layout must remain available'
     );
+
+    $employeeTable = file_get_contents(__DIR__ . '/../ajax/get_add_times_table.php');
+    test_assert_true(
+        strpos($employeeTable, 'inc/add_time_journal.php') !== false,
+        'The employee remote work table must use the shared data service'
+    );
+    test_assert_same(
+        0,
+        preg_match('/\b(?:SELECT|get_all_add_work_info_by_user|get_superuser_name_by_id|get_user_name_by_id)\b/i', $employeeTable),
+        'The employee remote work table must not perform SQL, legacy, or per-row lookups'
+    );
+    test_assert_true(
+        strpos($employeeTable, 'journal-action-button journal-action-button-add') !== false,
+        'The existing employee remote work controls must remain available'
+    );
+    test_assert_true(
+        strpos($service, '$includeDeleted') !== false,
+        'The shared data service must support hiding deleted employee entries'
+    );
 };

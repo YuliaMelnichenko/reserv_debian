@@ -6,7 +6,6 @@ return function () {
         new RecursiveDirectoryIterator($projectRoot, FilesystemIterator::SKIP_DOTS)
     );
     $allowedLegacyAddTimeFiles = array(
-        'ajax/get_pause_times_table.php',
         'funcs.php',
         'inc/time_journal_repository.php',
     );
