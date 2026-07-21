@@ -10,6 +10,7 @@ if (!isset($_SESSION['ss_id']) || !isset($_SESSION['ss_visiting_ID'])) {
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/workday_registration.php";
 
 $userID = (int)$_SESSION['ss_id'];
 $visitingID = (int)$_SESSION['ss_visiting_ID'];
@@ -35,46 +36,21 @@ $stopDTStr = $dateArr[1];
 $maxOpenShiftHours = 3;
 $maxOpenShiftSeconds = $maxOpenShiftHours * 60 * 60;
 
-$query = db_query($link, "
-  SELECT ID, in_dt, eat_start_dt, eat_stop_dt, state
-  FROM visiting
-  WHERE ID = ?
-    AND user_id = ?
-    AND (
-      (
-        in_dt >= ?
-        AND in_dt < ?
-      )
-      OR
-      (
-        state != 0
-        AND in_dt < ?
-        AND TIMESTAMPDIFF(SECOND, ?, ?) <= ?
-      )
-    )
-  LIMIT 1
-", 'iisssssi', array(
-  $visitingID,
+$row = get_current_visit_row(
+  $link,
   $userID,
+  $visitingID,
   $startDTStr,
   $stopDTStr,
-  $startDTStr,
-  $startDTStr,
   $currentDateTime,
   $maxOpenShiftSeconds
-));
+);
 
-if (!$query) {
-  exit('');
-}
-
-if (mysqli_num_rows($query) == 0) {
+if ($row === null) {
   $_SESSION['ss_state'] = 1;
   $_SESSION['ss_visiting_ID'] = 0;
   exit('');
 }
-
-$row = mysqli_fetch_assoc($query);
 
 $eatStart = $row['eat_start_dt'];
 $eatStop = $row['eat_stop_dt'];
