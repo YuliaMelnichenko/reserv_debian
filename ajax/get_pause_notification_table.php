@@ -6,8 +6,15 @@ ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/notification_summary.php";
 
-$userID_ = $_SESSION['ss_id']; 
+$userID_ = (int)$_SESSION['ss_id'];
+$summary = get_pause_notification_summary($link, $userID_, get_current_datetime_in_timezone_str(1, 0));
+
+if ($summary === false) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
 
 echo "<h5 class=\"big\">Уведомления по приостановкам учета времени</h5>";
 echo "<table id=\"pause_approvement_table_users\" class=\"add_time notification-summary-table\">";
@@ -21,27 +28,12 @@ echo "</tr>";
 $color = "#ddffff";
 $img = "go1.png";
 
-mysqli_set_charset($link, "utf8");
-$query = db_query(
-  $link,
-  'SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = ? AND TYPE = ? ORDER BY USERID',
-  'ii',
-  array((int)$userID_, 4)
-);
-if (!$query)
+foreach ($summary['entries'] as $entry)
 {
-  ajax_database_error($link, __FILE__ . ':' . __LINE__);
-}
-else
-{
-  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-  {  
-    $userID = (int)$row["USERID"];
-    $userName = get_user_name_by_id($userID);
-
-    $notificationCount = 0;
-    $currentDayNotificationCount = 0;
-    get_pause_notif_counts( $userID, $notificationCount, $currentDayNotificationCount );
+    $userID = $entry['user_id'];
+    $userName = $entry['user_name'];
+    $notificationCount = $entry['total_count'];
+    $currentDayNotificationCount = $entry['current_day_count'];
 
     $rowClass = $color == "#ddffff" ? "notification-row-alt" : "notification-row";
 
@@ -64,7 +56,6 @@ else
       $color = "#ddffff";
       $img = "go1.png";
     }  
-  }
 }
 
 echo "</table>";

@@ -3,7 +3,7 @@
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/delay.php';
 
-function get_delay_journal_context($link, $userID, $currentDate)
+function get_delay_journal_context($link, $userID, $currentDate, $includeDeleted = true)
 {
     $userResult = db_query($link, "
         SELECT SURNAME, FIRSTNAME, LASTNAME, defaultStartTime, AllowedDelayMinutes
@@ -73,6 +73,12 @@ function get_delay_journal_context($link, $userID, $currentDate)
     $entries = array();
 
     while ($row = mysqli_fetch_assoc($delayResult)) {
+        $status = (int)$row['status'];
+
+        if (!$includeDeleted && in_array($status, array(99, 100, 101), true)) {
+            continue;
+        }
+
         $delay = get_delay_value($row['in_dt'], $defaultStartTime, $allowedDelay);
 
         if ($delay[0] !== 1) {
@@ -91,7 +97,7 @@ function get_delay_journal_context($link, $userID, $currentDate)
             'acceptor_name' => trim((string)$row['acceptor_name']),
             'penalty_id' => (int)$row['penaltyID'],
             'decision_comment' => (string)$row['penaltyReply'],
-            'status' => (int)$row['status'],
+            'status' => $status,
             'agreed' => -1,
         );
     }

@@ -51,4 +51,23 @@ return function () {
         strpos($detailPage, 'accept_delay_for_user(') !== false && strpos($detailPage, 'refuse_delay_for_user(') !== false,
         'The existing delay decision controls must remain available'
     );
+
+    $employeeTable = file_get_contents(__DIR__ . '/../ajax/get_delay_table.php');
+    test_assert_true(
+        strpos($employeeTable, 'inc/delay_journal.php') !== false,
+        'The employee delay table must use the shared data service'
+    );
+    test_assert_same(
+        0,
+        preg_match('/\b(?:SELECT|get_all_delay_info_by_user|get_superuser_name_by_id|get_user_name_by_id)\b/i', $employeeTable),
+        'The employee delay table must not perform SQL, legacy, or per-row lookups'
+    );
+    test_assert_true(
+        strpos($employeeTable, 'journal-action-button journal-action-button-delay') !== false,
+        'The existing employee delay action must remain available'
+    );
+    test_assert_true(
+        strpos($service, '$includeDeleted') !== false,
+        'The delay service must support hiding deleted employee entries'
+    );
 };

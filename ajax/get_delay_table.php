@@ -6,10 +6,24 @@ ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/delay_journal.php";
 
 $userID_ = (int)$_SESSION['ss_id'];
-$user_defaultStartTime = $_SESSION['ss_defaultStartTime'];
-$user_allowedDelay = (int)$_SESSION['ss_allowedDelay'];
+$currentDate = get_current_datetime_in_timezone()[2];
+$journal = get_delay_journal_context($link, $userID_, $currentDate, false);
+
+if ($journal === false) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+if ($journal === null) {
+  deny_ajax_access(404, 'USER_NOT_FOUND');
+}
+
+$user_defaultStartTime = $journal['default_start_time'];
+$user_allowedDelay = $journal['allowed_delay'];
+$delays = $journal['entries'];
 
 echo "<div class=\"notification-table-scroll notification-table-scroll-full\">";
 
@@ -32,23 +46,20 @@ $colorMode = 1;
 $color1 = "#ddffff";
 $color3 = "#ffffff";
 
-$delays = get_all_delay_info_by_user( $userID_, $user_defaultStartTime, $user_allowedDelay );
-
 foreach( $delays as $delay )
 {
-  $delID = (int)$delay[0];
-  $delDate = $delay[11];
-  $delInTime = $delay[8];
-  $delDefInTime = $delay[9];
-  $delAllowedDelay = $delay[10];
+  $delID = $delay['id'];
+  $delDate = $delay['date'];
+  $delInTime = $delay['arrival'];
+  $delDefInTime = $user_defaultStartTime;
+  $delAllowedDelay = $user_allowedDelay;
   $delDefInTimeWithDelay = $datetime = date("H:i:s", strtotime($delDefInTime."+ $delAllowedDelay minute"));
   $delInTime = substr( $delInTime, 11, 8 );
-  $delDuration = $delay[7];
-  $delComment = $delay[3];
-  $delStatus = $delay[6];
-  $delSUser = $delay[1];
-  $delAcceptorReply = $delay[5];
-  $delAcceptorID = $delay[12];
+  $delDuration = $delay['duration'];
+  $delComment = $delay['employee_comment'];
+  $delStatus = $delay['status'];
+  $delSUser = $delay['supervisor_id'];
+  $delAcceptorReply = $delay['decision_comment'];
 
   $delDurationStr = format_time_d_hhmmss_pure($delDuration);
 
@@ -78,10 +89,10 @@ foreach( $delays as $delay )
   }
   else
   {
-    $superUserName = get_superuser_name_by_id( $delSUser );
+    $superUserName = $delay['supervisor_name'];
   }
 
-  $acceptorName = get_superuser_name_by_id( $delAcceptorID );
+  $acceptorName = $delay['acceptor_name'];
 
   if ( $delStatus == 0 )
   {
