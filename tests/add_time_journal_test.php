@@ -34,4 +34,19 @@ return function () {
         'The remote work query must load supervisor names without per-row queries'
     );
     test_assert_same(0, preg_match('/SELECT\s+\*/i', $service), 'Remote work journal queries must select explicit fields');
+
+    $detailPage = file_get_contents(__DIR__ . '/../time_approvement_user.php');
+    test_assert_true(
+        strpos($detailPage, 'inc/add_time_journal.php') !== false,
+        'The full remote work detail page must use the shared data service'
+    );
+    test_assert_same(
+        0,
+        preg_match('/\b(?:get_all_add_work_info_by_user|get_superuser_name_by_id|get_user_name_by_id)\s*\(/', $detailPage),
+        'The full remote work detail page must not perform legacy or per-row lookups'
+    );
+    test_assert_true(
+        strpos($detailPage, 'notification-table-scroll notification-table-scroll-full') !== false,
+        'The existing remote work detail layout must remain available'
+    );
 };

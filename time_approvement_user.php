@@ -3,6 +3,7 @@ ob_start();
 require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 include_once __DIR__ . "/funcs.php";
+require_once __DIR__ . "/inc/add_time_journal.php";
 save_last_location( "time_approvement.php" );
 $mid = (string) ($_GET['mid'] ?? '');
 
@@ -72,10 +73,21 @@ mysqli_set_charset($link, "utf8");
           echo "<h5 class=\"dark\"><br>/уведомления по работе вне офиса<br><br></h5>";
       echo "</div>";
 
-      $userName = get_user_name_by_id($userID);
       $backUrl = "time_approvement.php";
+      $journal = get_add_time_journal_context($link, $userID, get_current_datetime_in_timezone_str(1, 0));
 
-      $addTimeInfo = get_all_add_work_info_by_user( $userID, 0 );
+      if ($journal === false) {
+        echo "<h5>" . html_escape(database_error_message($link, __FILE__ . ':' . __LINE__)) . "</h5>";
+        exit;
+      }
+
+      if ($journal === null) {
+        header('Location: time_approvement.php');
+        exit;
+      }
+
+      $userName = $journal['user_name'];
+      $addTimeInfo = $journal['entries'];
 
       if ( count( $addTimeInfo ) == 0 ){
         echo "<table id=\"add_time_approvement_table\" class=\"notification-detail-header-table\">";
@@ -131,18 +143,16 @@ echo "<table id=\"add_time_approvement_table\" class=\"notification-detail-heade
       for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ ){
         $addInf = $addTimeInfo[$idx];
 
-        $ta_id = (int)$addInf[8];
-        $ta_start_dt = $addInf[0];
-        $ta_stop_dt = $addInf[1];
-        $ta_duration = $addInf[6];
+        $ta_id = $addInf['id'];
+        $ta_start_dt = $addInf['start_datetime'];
+        $ta_stop_dt = $addInf['stop_datetime'];
+        $ta_duration = $addInf['duration'];
 
-        $ta_reason_description = $addInf[11];
-        $ta_description = $addInf[3];
-        $ta_SUdescription = $addInf[10];
-        $ta_approved = $addInf[4];
-        $ta_superuser = $addInf[5];
-        
-        $superUserName = get_superuser_name_by_id( $ta_superuser );
+        $ta_reason_description = $addInf['reason_description'];
+        $ta_description = $addInf['employee_comment'];
+        $ta_SUdescription = $addInf['decision_comment'];
+        $ta_approved = $addInf['status'];
+        $superUserName = $addInf['supervisor_name'];
 
         if ( $ta_approved == 0 ){
           $approvedStr = journal_status_label("на рассмотрении");

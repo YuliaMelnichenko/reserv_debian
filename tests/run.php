@@ -32,6 +32,7 @@ $testFiles = array(
     __DIR__ . '/legacy_schema_audit_test.php',
     __DIR__ . '/overtime_test.php',
     __DIR__ . '/pause_service_test.php',
+    __DIR__ . '/pause_journal_test.php',
     __DIR__ . '/report_renderer_test.php',
     __DIR__ . '/remote_work_test.php',
     __DIR__ . '/request_input_test.php',
