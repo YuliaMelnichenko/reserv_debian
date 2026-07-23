@@ -22,6 +22,7 @@ $testFiles = array(
     __DIR__ . '/ajax_endpoint_conventions_test.php',
     __DIR__ . '/add_time_journal_test.php',
     __DIR__ . '/calendar_test.php',
+    __DIR__ . '/controller_service_boundaries_test.php',
     __DIR__ . '/date_range_test.php',
     __DIR__ . '/database_transaction_test.php',
     __DIR__ . '/database_conventions_test.php',

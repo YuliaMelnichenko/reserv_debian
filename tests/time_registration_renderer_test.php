@@ -26,9 +26,14 @@ return function () {
     );
 
     $controller = file_get_contents(__DIR__ . '/../ajax/get_time_registration_div.php');
+    $panel = file_get_contents(__DIR__ . '/../inc/time_registration_panel.php');
     test_assert_true(
-        strpos($controller, 'inc/time_registration_renderer.php') !== false,
-        'The time registration controller must load the shared renderer'
+        strpos($controller, 'inc/time_registration_panel.php') !== false,
+        'The time registration controller must load the extracted panel'
+    );
+    test_assert_true(
+        strpos($panel, 'time_registration_renderer.php') !== false,
+        'The extracted panel must load the shared renderer'
     );
     test_assert_same(
         0,
