@@ -118,13 +118,13 @@ $query = db_query($link, "
     return;
   }
 
-  if (mysqli_num_rows($query) == 0) {
+  if (db_num_rows($query) == 0) {
     $_SESSION['ss_state'] = 1;
     $_SESSION['ss_visiting_ID'] = 0;
     return;
   }
 
-  $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
+  $row = db_fetch_one($query);
 
   $_SESSION['ss_state'] = (int)$row["state"];
   $_SESSION['ss_visiting_ID'] = (int)$row["ID"];
@@ -301,7 +301,7 @@ function get_users_current_day_in_time_by_superuser( $SUID )
     return $rets;
   }
 
-  while ($row = mysqli_fetch_array($query, MYSQLI_ASSOC))
+  while ($row = db_fetch_one($query))
   {
     $regUserID = (int)$row["user_id"];
 
@@ -330,12 +330,12 @@ function is_there_add_time_by_alert( $Date, $userID ){
   include __DIR__ . "/php_tori/connect.php";
 
   $query = time_journal_query_add_time_by_alert($link, $userID, $Date);
-  $merr=mysqli_error($link);
+  $merr = db_error($link);
   if ( !$query ) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else{
-    $vn=mysqli_num_rows($query);
+    $vn = db_num_rows($query);
     if ( $vn == 1 ){
       return 1;
     }
@@ -352,12 +352,12 @@ function is_there_additional_alerts( $userID ){
 
   $query = db_query($link, "SELECT 1 FROM ALERTS where DATE = ? and USERID = ? and VIEWED = '0' LIMIT 1", 'si', array($currentDate, (int)$userID));
 
-  $merr=mysqli_error($link);
+  $merr = db_error($link);
   if ( !$query ) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
   }
   else{
-    while ( $row1 = mysqli_fetch_array($query, MYSQLI_ASSOC) ){  
+    while ( $row1 = db_fetch_one($query) ){
       return 1;
     }
   }
@@ -368,7 +368,7 @@ function is_there_additional_alerts( $userID ){
 
 function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime, $allowedDelay ){
   include __DIR__ . "/php_tori/connect.php";
-  mysqli_set_charset($link, "utf8"); 
+  db_set_charset($link, "utf8");
 
   $rets = Array();
 
@@ -379,7 +379,7 @@ function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime
     return $rets;
   }
 
-  while ( $row0 = mysqli_fetch_assoc($query0) ){
+  while ( $row0 = db_fetch_one($query0) ){
     $ID = $row0["id"];
 
     $supervisorID = $row0["supervisorID"];
@@ -398,7 +398,7 @@ function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime
  
     $in_time = 0;
 
-    if ( $row1 = mysqli_fetch_assoc($query1) ){
+    if ( $row1 = db_fetch_one($query1) ){
       $in_time = $row1["in_dt"];
     }
 
@@ -431,10 +431,10 @@ function get_delay_info_by_user_and_day( $userID_, $currentDate, $defauiltInTime
 function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $defauiltInTime, $allowedDelay )
 {
   include __DIR__ . "/php_tori/connect.php";  
-  mysqli_set_charset($link, "utf8");
+  db_set_charset($link, "utf8");
 
   $query0 = time_journal_query_delays_for_range($link, $userID, $startDate, $stopDate);
-  $merr=mysqli_error($link);
+  $merr = db_error($link);
   if ( !$query0 ) 
   {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -443,7 +443,7 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
 
   $retArray = Array();
 
-  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) )
+  while ( $row0 = db_fetch_one($query0) )
   {  
     $ID = $row0["id"];
     $delayDate = $row0["date"];
@@ -486,11 +486,11 @@ function get_delay_info_by_user_and_day_range( $userID, $startDate, $stopDate, $
 function get_reasons()
 {
   include __DIR__ . "/php_tori/connect.php";  
-  mysqli_set_charset($link, "utf8"); 
+  db_set_charset($link, "utf8");
 
   $query0 = time_journal_query_reasons($link);
 
-  $merr=mysqli_error($link);
+  $merr = db_error($link);
   if ( !$query0 ) 
   {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -499,7 +499,7 @@ function get_reasons()
 
   $results = Array();
  
-  while ( $row0 = mysqli_fetch_array($query0, MYSQLI_ASSOC) )
+  while ( $row0 = db_fetch_one($query0) )
   {
     $result = Array();
       
@@ -516,11 +516,11 @@ function get_reasons()
 function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr, $restrictDTRangeToCurrentDay )
 {
   include __DIR__ . "/php_tori/connect.php";  
-  mysqli_set_charset($link, "utf8"); 
+  db_set_charset($link, "utf8");
 
   $query = time_journal_query_add_work_for_period($link, $userID, $startDTStr, $stopDTStr);
 
-  $merr=mysqli_error($link);
+  $merr = db_error($link);
   if ( !$query ) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
     return array();
@@ -528,7 +528,7 @@ function get_add_work_info_by_user_and_day_ex( $userID, $startDTStr, $stopDTStr,
 
   $results = Array();
  
-  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) ){
+  while ( $row = db_fetch_one($query) ){
     $result = Array();
       
     $START_DT_VAL = $row["START_DT"];

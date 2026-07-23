@@ -14,7 +14,7 @@ $currentDate = $dtResult[2];
 $currentDateTime = $dtResult[1];
 
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 $query = db_query(
   $link,
@@ -24,21 +24,21 @@ $query = db_query(
 );
 
 
-$merr=mysqli_error($link);
+$merr = db_error($link);
 if (!$query)
 {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);
 }
 else
 {
-  $vn=mysqli_num_rows($query);
+  $vn = db_num_rows($query);
   if ( $vn == 0 )
   {
     echo "0";
   }
   else
   {
-    if ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
+    if ( $row = db_fetch_one($query) )
     {
       $id = (int)$row["ID"];
       $suid = (int)$row["SUIR"];

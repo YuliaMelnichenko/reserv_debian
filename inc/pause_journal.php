@@ -17,7 +17,7 @@ function get_pause_journal_context($link, $userID, $currentDateTime)
         return false;
     }
 
-    $user = mysqli_fetch_assoc($userResult);
+    $user = db_fetch_one($userResult);
 
     if (!$user) {
         return null;
@@ -40,7 +40,7 @@ function get_pause_journal_context($link, $userID, $currentDateTime)
 
     $entries = array();
 
-    while ($row = mysqli_fetch_assoc($entryResult)) {
+    while ($row = db_fetch_one($entryResult)) {
         $startDateTime = (string)$row['START_DT_EFFECTIVE'];
         $stopDateTime = (string)$row['STOP_DT_EFFECTIVE'];
         $startTimestamp = strtotime($startDateTime);

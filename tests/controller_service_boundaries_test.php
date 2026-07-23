@@ -42,6 +42,27 @@ return function () {
         );
     }
 
+    $pageViews = array(
+        'index.php' => 'views/index_page.php',
+        'staff_leaves.php' => 'views/staff_leaves_page.php',
+        'my_report.php' => 'views/my_report_page.php',
+        'work_overtime.php' => 'views/work_overtime_page.php',
+        'report.php' => 'views/report_page.php',
+    );
+
+    foreach ($pageViews as $pagePath => $viewPath) {
+        $source = file_get_contents($projectRoot . '/' . $pagePath);
+
+        test_assert_true(
+            strpos($source, $viewPath) !== false,
+            $pagePath . ' must load its extracted view'
+        );
+        test_assert_true(
+            substr_count($source, PHP_EOL) < 50,
+            $pagePath . ' must remain a thin page controller'
+        );
+    }
+
     $databaseConsumers = array(
         'index.php',
         'work_overtime.php',

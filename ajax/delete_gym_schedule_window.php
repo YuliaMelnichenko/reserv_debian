@@ -9,7 +9,7 @@ include_once __DIR__ . "/../funcs.php";
 
 $userID = (int)$_SESSION['ss_id'];
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 $query = db_query(
     $link,
@@ -24,7 +24,7 @@ $content = "<div id=\"delete_schedule\">";
   $content .= "</div>";
   $content .= "<div id=\"schedule_box\">";
 
-while($row = mysqli_fetch_assoc($query)){
+while($row = db_fetch_one($query)){
     $userId = (int)$row["USERID"];
     $date_train = $row['DATE_TRAIN'];
     $start_time = $row["START_TIME"];

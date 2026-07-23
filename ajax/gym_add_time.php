@@ -36,7 +36,7 @@ if (!$idQuery) {
   exit;
 }
 
-$lastSchedule = mysqli_fetch_assoc($idQuery);
+$lastSchedule = db_fetch_one($idQuery);
 $newID = $lastSchedule ? (int)$lastSchedule['ID'] + 1 : 1;
 
 $duplicateQuery = db_query(
@@ -52,7 +52,7 @@ if (!$duplicateQuery) {
   exit;
 }
 
-if (mysqli_num_rows($duplicateQuery) > 0) {
+if (db_has_rows($duplicateQuery)) {
   if (!$transaction->commit()) {
     ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
@@ -77,7 +77,7 @@ if (!$slotQuery) {
 
 $slotUsers = array();
 
-while ($slotRow = mysqli_fetch_assoc($slotQuery)) {
+while ($slotRow = db_fetch_one($slotQuery)) {
   $slotUsers[(int)$slotRow['USERID']] = true;
 }
 

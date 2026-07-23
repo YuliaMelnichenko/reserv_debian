@@ -54,7 +54,7 @@ if (!$query) {
   exit;
 }
 
-$visitRow = mysqli_fetch_assoc($query);
+$visitRow = db_fetch_one($query);
 
 if (!$visitRow) {
   $transaction->rollback();

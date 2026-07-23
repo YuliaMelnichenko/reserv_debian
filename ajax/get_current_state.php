@@ -12,7 +12,7 @@ if (!isset($_SESSION['ss_id'])) {
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 $userID = (int)$_SESSION['ss_id'];
 
@@ -56,7 +56,7 @@ if (!$query) {
   exit;
 }
 
-if (mysqli_num_rows($query) == 0) {
+if (db_num_rows($query) == 0) {
   $_SESSION['ss_state'] = 1;
   $_SESSION['ss_visiting_ID'] = 0;
 
@@ -64,7 +64,7 @@ if (mysqli_num_rows($query) == 0) {
   exit;
 }
 
-$row = mysqli_fetch_array($query, MYSQLI_ASSOC);
+$row = db_fetch_one($query);
 
 $state = (int)$row["state"];
 

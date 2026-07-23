@@ -16,7 +16,7 @@ function get_delay_journal_context($link, $userID, $currentDate, $includeDeleted
         return false;
     }
 
-    $user = mysqli_fetch_assoc($userResult);
+    $user = db_fetch_one($userResult);
 
     if (!$user) {
         return null;
@@ -33,7 +33,7 @@ function get_delay_journal_context($link, $userID, $currentDate, $includeDeleted
         return false;
     }
 
-    $depthRow = mysqli_fetch_assoc($depthResult);
+    $depthRow = db_fetch_one($depthResult);
     $depthDays = $depthRow ? abs((int)$depthRow['valueInt']) : 180;
     $defaultStartTime = (string)$user['defaultStartTime'];
     $allowedDelay = (int)$user['AllowedDelayMinutes'];
@@ -72,7 +72,7 @@ function get_delay_journal_context($link, $userID, $currentDate, $includeDeleted
 
     $entries = array();
 
-    while ($row = mysqli_fetch_assoc($delayResult)) {
+    while ($row = db_fetch_one($delayResult)) {
         $status = (int)$row['status'];
 
         if (!$includeDeleted && in_array($status, array(99, 100, 101), true)) {

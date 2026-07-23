@@ -18,7 +18,7 @@ require_ajax_delay_supervisor($ID, 3);
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 $transaction = db_transaction_start($link);
 if (!$transaction) {
@@ -33,7 +33,7 @@ $delayResult = db_query(
   array($ID)
 );
 
-if (!$delayResult || !($delayRow = mysqli_fetch_assoc($delayResult))) {
+if (!$delayResult || !($delayRow = db_fetch_one($delayResult))) {
   $transaction->rollback();
   ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
@@ -60,7 +60,7 @@ if ( $ACCEPTMODE == -1 )
     }
     else
     {
-      $lastPenalty = mysqli_fetch_assoc($lastPenaltyResult);
+      $lastPenalty = db_fetch_one($lastPenaltyResult);
       $newPenID = $lastPenalty ? (int) $lastPenalty['ID'] + 1 : 1;
       $query = db_execute($link, 'INSERT INTO Penalty VALUES (?, ?, ?, ?, ?)', 'siiis', array($PENALTYDATE, $newPenID, $getUserID, $acceptorID, $DESC));
 

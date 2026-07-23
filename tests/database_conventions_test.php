@@ -39,11 +39,20 @@ return function () {
 
     foreach ($iterator as $file) {
         $source = file_get_contents($file->getPathname());
+        $relativePath = str_replace('\\', '/', substr($file->getPathname(), strlen($root) + 1));
 
         test_assert_same(
             0,
             preg_match('/\bSELECT\s+\*/i', $source),
             'Production queries must use explicit field lists in ' . $file->getPathname()
         );
+
+        if (!in_array($relativePath, array('inc/database.php', 'php_tori/connect.php'), true)) {
+            test_assert_same(
+                0,
+                preg_match('/\bmysqli_[a-z_]+\s*\(/i', $source),
+                'Direct mysqli calls must stay in database infrastructure: ' . $relativePath
+            );
+        }
     }
 };

@@ -31,7 +31,7 @@ echo "<div align=\"left\">";
 
 include_once __DIR__ . "/php_tori/connect.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 echo "<table border=1>";
   echo "<tr>";

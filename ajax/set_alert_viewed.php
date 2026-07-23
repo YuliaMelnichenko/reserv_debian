@@ -16,7 +16,7 @@ $query = db_execute(
   array($ID, $userID)
 );
 
-$merr=mysqli_error($link);
+$merr = db_error($link);
 if ( !$query ) 
 {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);

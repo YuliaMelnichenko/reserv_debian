@@ -9,6 +9,11 @@ return function () {
     $workCalendar = file_get_contents(__DIR__ . '/../inc/work_calendar.php');
     $reportStatistics = file_get_contents(__DIR__ . '/../inc/report_statistics.php');
     $reportPresentation = file_get_contents(__DIR__ . '/../inc/report_presentation.php');
+    $reportDailyStatistics = file_get_contents(__DIR__ . '/../inc/report_daily_statistics.php');
+    $reportPeriodStatistics = file_get_contents(__DIR__ . '/../inc/report_period_statistics.php');
+    $reportPresentationHelpers = file_get_contents(__DIR__ . '/../inc/report_presentation_helpers.php');
+    $reportDayPresentation = file_get_contents(__DIR__ . '/../inc/report_day_presentation.php');
+    $reportSummaryPresentation = file_get_contents(__DIR__ . '/../inc/report_summary_presentation.php');
 
     test_assert_true(
         strpos($funcs, "inc/employee_directory.php") !== false,
@@ -71,35 +76,70 @@ return function () {
         test_assert_same(1, preg_match($definitionPattern, $workCalendar), 'Calendar helper must stay in its module: ' . $functionName);
     }
 
-    $statisticsFunctions = array(
+    $dailyStatisticsFunctions = array(
         'get_penalties',
         'get_current_day_duration_sec',
         'get_stat_by_range',
+    );
+    $periodStatisticsFunctions = array(
         'get_stat_set_by_range_full_ex',
     );
 
-    $presentationFunctions = array(
+    $presentationHelperFunctions = array(
         'represent_is_time_defined',
         'get_range_by_times_pair',
         'colored_result',
         'colored_result_partial',
+    );
+    $dayPresentationFunctions = array(
         'get_cell_content_by_stat',
+    );
+    $summaryPresentationFunctions = array(
         'redmine_represent',
         'get_results_cell_content_by_stat',
     );
 
-    foreach ($statisticsFunctions as $functionName) {
+    foreach ($dailyStatisticsFunctions as $functionName) {
         $definitionPattern = '/function\s+' . preg_quote($functionName, '/') . '\s*\(/';
         test_assert_same(0, preg_match($definitionPattern, $funcs), 'Report statistic must stay out of funcs.php: ' . $functionName);
         test_assert_same(0, preg_match($definitionPattern, $funcsRep), 'Report statistic must stay out of funcs_rep.php: ' . $functionName);
-        test_assert_same(1, preg_match($definitionPattern, $reportStatistics), 'Report statistic must stay in its module: ' . $functionName);
+        test_assert_same(1, preg_match($definitionPattern, $reportDailyStatistics), 'Daily report statistic must stay in its module: ' . $functionName);
     }
 
-    foreach ($presentationFunctions as $functionName) {
+    foreach ($periodStatisticsFunctions as $functionName) {
+        $definitionPattern = '/function\s+' . preg_quote($functionName, '/') . '\s*\(/';
+        test_assert_same(0, preg_match($definitionPattern, $funcs), 'Report statistic must stay out of funcs.php: ' . $functionName);
+        test_assert_same(1, preg_match($definitionPattern, $reportPeriodStatistics), 'Period report statistic must stay in its module: ' . $functionName);
+    }
+
+    foreach ($presentationHelperFunctions as $functionName) {
         $definitionPattern = '/function\s+' . preg_quote($functionName, '/') . '\s*\(/';
         test_assert_same(0, preg_match($definitionPattern, $funcs), 'Report presenter must stay out of funcs.php: ' . $functionName);
-        test_assert_same(1, preg_match($definitionPattern, $reportPresentation), 'Report presenter must stay in its module: ' . $functionName);
+        test_assert_same(1, preg_match($definitionPattern, $reportPresentationHelpers), 'Report presentation helper must stay in its module: ' . $functionName);
     }
+
+    foreach ($dayPresentationFunctions as $functionName) {
+        $definitionPattern = '/function\s+' . preg_quote($functionName, '/') . '\s*\(/';
+        test_assert_same(1, preg_match($definitionPattern, $reportDayPresentation), 'Day presenter must stay in its module: ' . $functionName);
+    }
+
+    foreach ($summaryPresentationFunctions as $functionName) {
+        $definitionPattern = '/function\s+' . preg_quote($functionName, '/') . '\s*\(/';
+        test_assert_same(0, preg_match($definitionPattern, $funcs), 'Report presenter must stay out of funcs.php: ' . $functionName);
+        test_assert_same(1, preg_match($definitionPattern, $reportSummaryPresentation), 'Summary presenter must stay in its module: ' . $functionName);
+    }
+
+    test_assert_true(
+        strpos($reportStatistics, 'report_daily_statistics.php') !== false
+        && strpos($reportStatistics, 'report_period_statistics.php') !== false,
+        'Report statistics loader must load both extracted modules'
+    );
+    test_assert_true(
+        strpos($reportPresentation, 'report_presentation_helpers.php') !== false
+        && strpos($reportPresentation, 'report_day_presentation.php') !== false
+        && strpos($reportPresentation, 'report_summary_presentation.php') !== false,
+        'Report presentation loader must load all extracted modules'
+    );
 
     test_assert_true(
         strpos($funcsRep, "inc/report_renderer.php") !== false,

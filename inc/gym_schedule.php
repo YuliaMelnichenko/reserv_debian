@@ -35,7 +35,7 @@ function get_active_gym_visitors($link)
 
     $visitors = array();
 
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = db_fetch_one($result)) {
         $visitors[] = array(
             'user_id' => (int)$row['USERID'],
             'full_name' => trim($row['surname'] . ' ' . $row['firstname'] . ' ' . $row['lastname']),
@@ -59,7 +59,7 @@ function user_has_gym_schedule($link, $userID)
         return null;
     }
 
-    return mysqli_num_rows($result) > 0;
+    return db_has_rows($result);
 }
 
 function format_gym_schedule_date($dateValue)
@@ -119,7 +119,7 @@ function get_upcoming_gym_schedule($link)
 
     $schedule = array();
 
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = db_fetch_one($result)) {
         $dateValues = is_string($row['DATE_VALUES']) && $row['DATE_VALUES'] !== ''
             ? explode('|', $row['DATE_VALUES'])
             : array();

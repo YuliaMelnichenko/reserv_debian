@@ -24,7 +24,7 @@ else
   $query = db_execute($link, 'UPDATE ADD_TIME SET APPROVED = APPROVED - 100 WHERE ID = ?', 'i', array($ID));
 }
 
-$merr=mysqli_error($link);
+$merr = db_error($link);
 if ( !$query ) 
 {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);

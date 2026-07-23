@@ -21,7 +21,7 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
         'delay_journal_deep_day' => 180,
     );
 
-    while ($row = mysqli_fetch_assoc($depthResult)) {
+    while ($row = db_fetch_one($depthResult)) {
         $paramName = (string)$row['paramName'];
 
         if (array_key_exists($paramName, $depthDays)) {
@@ -88,7 +88,7 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
         return false;
     }
 
-    $counts = mysqli_fetch_assoc($countResult);
+    $counts = db_fetch_one($countResult);
 
     if (!$counts) {
         return false;
@@ -113,7 +113,7 @@ function get_delay_notification_summary($link, $supervisorID, $currentDate)
         return false;
     }
 
-    $depthRow = mysqli_fetch_assoc($depthResult);
+    $depthRow = db_fetch_one($depthResult);
     $depthDays = $depthRow ? abs((int)$depthRow['valueInt']) : 180;
     $summaryResult = db_query($link, "
         SELECT
@@ -149,7 +149,7 @@ function get_delay_notification_summary($link, $supervisorID, $currentDate)
 
     $entries = array();
 
-    while ($row = mysqli_fetch_assoc($summaryResult)) {
+    while ($row = db_fetch_one($summaryResult)) {
         $entries[] = array(
             'user_id' => (int)$row['USERID'],
             'user_name' => trim((string)$row['USER_NAME']),
@@ -216,7 +216,7 @@ function get_pause_notification_summary($link, $supervisorID, $currentDateTime)
 
     $entries = array();
 
-    while ($row = mysqli_fetch_assoc($summaryResult)) {
+    while ($row = db_fetch_one($summaryResult)) {
         $entries[] = array(
             'user_id' => (int)$row['USERID'],
             'user_name' => trim((string)$row['USER_NAME']),
@@ -257,7 +257,7 @@ function get_pause_notification_count($link, $userID, $currentDateTime)
     $totalCount = 0;
     $currentDayCount = 0;
 
-    while ($row = mysqli_fetch_assoc($entryResult)) {
+    while ($row = db_fetch_one($entryResult)) {
         $totalCount++;
 
         if (substr((string)$row['START_DT_EFFECTIVE'], 0, 10) === $currentDate) {
@@ -284,7 +284,7 @@ function get_add_time_notification_summary($link, $supervisorID, $currentDateTim
         return false;
     }
 
-    $depthRow = mysqli_fetch_assoc($depthResult);
+    $depthRow = db_fetch_one($depthResult);
     $depthDays = $depthRow ? abs((int)$depthRow['valueInt']) : 180;
     $dateTimeExpressions = time_journal_add_work_datetime_expressions($link);
     $startExpression = $dateTimeExpressions['start'];
@@ -319,7 +319,7 @@ function get_add_time_notification_summary($link, $supervisorID, $currentDateTim
 
     $entries = array();
 
-    while ($row = mysqli_fetch_assoc($summaryResult)) {
+    while ($row = db_fetch_one($summaryResult)) {
         $entries[] = array(
             'user_id' => (int)$row['USERID'],
             'user_name' => trim((string)$row['USER_NAME']),

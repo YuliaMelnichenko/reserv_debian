@@ -18,7 +18,7 @@ function get_sv_name_by_userid($user_id)
         return '';
     }
 
-    $row0 = mysqli_fetch_assoc($query0);
+    $row0 = db_fetch_one($query0);
 
     if (!$row0) {
         return '';
@@ -36,7 +36,7 @@ function get_sv_name_by_userid($user_id)
         return '';
     }
 
-    $row = mysqli_fetch_assoc($query);
+    $row = db_fetch_one($query);
 
     if (!$row) {
         return 'Unknown. Error 2';
@@ -50,7 +50,7 @@ function get_group_user_info_by_svID_for_report_ex($svID)
     include __DIR__ . '/../php_tori/connect.php';
 
     $userIDs = array();
-    mysqli_set_charset($link, 'utf8');
+    db_set_charset($link, 'utf8');
     $dirID = isset($_SESSION['ss_id']) ? (int)$_SESSION['ss_id'] : 0;
 
     if ($dirID !== 0) {
@@ -89,11 +89,11 @@ function get_group_user_info_by_svID_for_report_ex($svID)
         if (!$query0) {
             echo database_error_message($link, __FILE__ . ':' . __LINE__);
         }
-        else if (mysqli_num_rows($query0) === 0) {
+        else if (db_num_rows($query0) === 0) {
             $userIDs[] = $svID;
         }
         else {
-            while ($row = mysqli_fetch_assoc($query0)) {
+            while ($row = db_fetch_one($query0)) {
                 $userIDs[] = isset($row['USERID']) ? $row['USERID'] : $row['id'];
             }
         }
@@ -129,7 +129,7 @@ function get_group_user_info_by_svID_for_report_ex($svID)
             continue;
         }
 
-        $row = mysqli_fetch_assoc($query);
+        $row = db_fetch_one($query);
 
         if (!$row) {
             continue;
@@ -171,7 +171,7 @@ function am_i_superuser($userID)
         return 0;
     }
 
-    return mysqli_num_rows($query) > 0 ? 1 : 0;
+    return db_has_rows($query) ? 1 : 0;
 }
 
 function get_user_rate($userID)
@@ -185,14 +185,14 @@ function get_user_rate($userID)
         return 40;
     }
 
-    $row = mysqli_fetch_assoc($query);
+    $row = db_fetch_one($query);
     return $row ? $row['RATE'] : 40;
 }
 
 function get_superuser_names_by_user_id($userID)
 {
     include __DIR__ . '/../php_tori/connect.php';
-    mysqli_set_charset($link, 'utf8');
+    db_set_charset($link, 'utf8');
 
     $query = db_query($link, "
         SELECT DISTINCT ID, FIRSTNAME, LASTNAME, SURNAME
@@ -207,7 +207,7 @@ function get_superuser_names_by_user_id($userID)
 
     $result = array();
 
-    while ($row = mysqli_fetch_assoc($query)) {
+    while ($row = db_fetch_one($query)) {
         $result[] = array(
             $row['SURNAME'] . ' ' . $row['FIRSTNAME'] . ' ' . $row['LASTNAME'],
             $row['ID'],
@@ -225,7 +225,7 @@ function get_superuser_name_by_id($userID)
 function get_user_name_by_id($userID)
 {
     include __DIR__ . '/../php_tori/connect.php';
-    mysqli_set_charset($link, 'utf8');
+    db_set_charset($link, 'utf8');
 
     $query = db_query(
         $link,
@@ -239,7 +239,7 @@ function get_user_name_by_id($userID)
         return '';
     }
 
-    $row = mysqli_fetch_assoc($query);
+    $row = db_fetch_one($query);
 
     if (!$row) {
         return '';
@@ -251,7 +251,7 @@ function get_user_name_by_id($userID)
 function get_pause_agree_able_superusers_by_userID($userID)
 {
     include __DIR__ . '/../php_tori/connect.php';
-    mysqli_set_charset($link, 'utf8');
+    db_set_charset($link, 'utf8');
 
     $query = db_query(
         $link,
@@ -267,7 +267,7 @@ function get_pause_agree_able_superusers_by_userID($userID)
 
     $result = array();
 
-    while ($row = mysqli_fetch_assoc($query)) {
+    while ($row = db_fetch_one($query)) {
         $supervisorID = $row['SUPERVISORID'];
         $result[] = array($supervisorID, get_superuser_name_by_id($supervisorID));
     }
@@ -278,7 +278,7 @@ function get_pause_agree_able_superusers_by_userID($userID)
 function get_users_by_superusers_and_type($supervisorID, $type)
 {
     include __DIR__ . '/../php_tori/connect.php';
-    mysqli_set_charset($link, 'utf8');
+    db_set_charset($link, 'utf8');
 
     $query = db_query($link, "
         SELECT g.USERID
@@ -296,7 +296,7 @@ function get_users_by_superusers_and_type($supervisorID, $type)
 
     $result = array();
 
-    while ($row = mysqli_fetch_assoc($query)) {
+    while ($row = db_fetch_one($query)) {
         $result[] = $row['USERID'];
     }
 
@@ -319,7 +319,7 @@ function get_user_defStartTime_and_allowedDelay($userID, &$user_defaultStartTime
         return 0;
     }
 
-    $row = mysqli_fetch_assoc($query);
+    $row = db_fetch_one($query);
 
     if (!$row) {
         return 0;
@@ -360,7 +360,7 @@ function get_and_update_start_time_status($userID)
         );
     }
 
-    $row = mysqli_fetch_assoc($query);
+    $row = db_fetch_one($query);
 
     if ($row) {
         $defaultStartTime = $row['defaultStartTime'];

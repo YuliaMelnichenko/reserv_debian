@@ -124,7 +124,7 @@ function access_open_database()
         }
     }
 
-    $link = mysqli_connect(
+    $link = db_connect(
         $env['DB_HOST'],
         $env['DB_USER'],
         $env['DB_PASS'],
@@ -136,7 +136,7 @@ function access_open_database()
         return false;
     }
 
-    mysqli_set_charset($link, 'utf8');
+    db_set_charset($link, 'utf8');
     return $link;
 }
 
@@ -152,21 +152,14 @@ function access_current_user_is_superuser(){
     }
 
     $userID = (int) $_SESSION['ss_id'];
-    $stmt = mysqli_prepare(
+    $result = db_query(
         $link,
-        'SELECT 1 FROM GROUPS WHERE SUPERVISORID = ? AND TYPE <> -1 LIMIT 1'
+        'SELECT 1 FROM GROUPS WHERE SUPERVISORID = ? AND TYPE <> -1 LIMIT 1',
+        'i',
+        array($userID)
     );
-
-    if (!$stmt) {
-        return false;
-    }
-
-    mysqli_stmt_bind_param($stmt, 'i', $userID);
-    mysqli_stmt_execute($stmt);
-    mysqli_stmt_store_result($stmt);
-    $allowed = mysqli_stmt_num_rows($stmt) > 0;
-    mysqli_stmt_close($stmt);
-    mysqli_close($link);
+    $allowed = db_has_rows($result);
+    db_close($link);
 
     return $allowed;
 }
@@ -209,8 +202,8 @@ function require_ajax_add_time_access($recordID)
         'i',
         array((int) $recordID)
     );
-    $row = $result ? mysqli_fetch_assoc($result) : false;
-    mysqli_close($link);
+    $row = db_fetch_one($result);
+    db_close($link);
 
     if (!$row) {
         deny_ajax_access(404, 'NOT_FOUND');
@@ -316,8 +309,8 @@ function access_current_user_supervises_user($targetUserID, $groupType)
         'iis',
         array((int) $_SESSION['ss_id'], $targetUserID, $groupType)
     );
-    $allowed = $result && mysqli_fetch_assoc($result);
-    mysqli_close($link);
+    $allowed = db_fetch_one($result);
+    db_close($link);
 
     return (bool) $allowed;
 }
@@ -371,8 +364,8 @@ function require_ajax_accounting_error_supervisor($errorID, $groupType)
         'iii',
         array($errorID, (int)$_SESSION['ss_id'], $groupType)
     );
-    $allowed = $result && mysqli_fetch_assoc($result);
-    mysqli_close($link);
+    $allowed = db_fetch_one($result);
+    db_close($link);
 
     if (!$allowed) {
         deny_ajax_access(403, 'FORBIDDEN');
@@ -418,12 +411,12 @@ function require_ajax_add_time_supervisor($recordID, $groupType = 0)
     );
 
     if (!$result) {
-        mysqli_close($link);
+        db_close($link);
         deny_ajax_access(500, 'DATABASE_ERROR');
     }
 
-    $row = mysqli_fetch_assoc($result);
-    mysqli_close($link);
+    $row = db_fetch_one($result);
+    db_close($link);
 
     if (!$row) {
         deny_ajax_access(404, 'NOT_FOUND');
@@ -455,12 +448,12 @@ function require_ajax_delay_supervisor($recordID, $groupType = 3)
     );
 
     if (!$result) {
-        mysqli_close($link);
+        db_close($link);
         deny_ajax_access(500, 'DATABASE_ERROR');
     }
 
-    $row = mysqli_fetch_assoc($result);
-    mysqli_close($link);
+    $row = db_fetch_one($result);
+    db_close($link);
 
     if (!$row) {
         deny_ajax_access(404, 'NOT_FOUND');

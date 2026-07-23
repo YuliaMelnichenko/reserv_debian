@@ -24,7 +24,7 @@ if (request_post_has('mode')) {
 include __DIR__ . "/../php_tori/connect.php";
 include_once __DIR__ . "/../funcs.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 if ( $mode == 0 ){
   $query0 = db_query($link, "SELECT id, status, supervisorID, explaneDesk FROM Delays WHERE date = ? AND userID = ?", 'si', array($currentDate, $userID_));
@@ -45,7 +45,7 @@ $supervisorID = -1;
 $explaneDesk = "";
 $disableStr = "";
 
-while ( $row0 = mysqli_fetch_assoc($query0) ){
+while ( $row0 = db_fetch_one($query0) ){
   $status = $row0["status"];
   $supervisorID = $row0["supervisorID"];
   $explaneDesk = strip_tags($row0["explaneDesk"]);

@@ -10,7 +10,7 @@ include __DIR__ . "/../php_tori/connect.php";
 include_once __DIR__ . "/../funcs.php";
 require_once __DIR__ . "/../inc/gym_schedule.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 if (!delete_past_gym_schedule($link, $userID)) {
     ajax_database_error($link, __FILE__ . ':' . __LINE__);

@@ -20,11 +20,11 @@ function GetHourNormByMonth($date, $rate)
         return 0;
     }
 
-    if (mysqli_num_rows($query) > 1) {
+    if (db_num_rows($query) > 1) {
         return 'Error 378. Dublicate factory calendar dates';
     }
 
-    $row = mysqli_fetch_assoc($query);
+    $row = db_fetch_one($query);
 
     if (!$row) {
         return 0;
@@ -64,7 +64,7 @@ function get_workdays_holidays_bay_range($startDate, $stopDate)
     $dates = array();
     $types = array();
 
-    while ($row = mysqli_fetch_assoc($query)) {
+    while ($row = db_fetch_one($query)) {
         $dates[] = $row['DATE'];
         $types[] = $row['TYPE'];
     }
@@ -86,7 +86,7 @@ function get_holidays()
     $holidays = array();
     $index = 1;
 
-    while ($row = mysqli_fetch_assoc($query)) {
+    while ($row = db_fetch_one($query)) {
         $holidays[$index] = $row['DATE'];
         $index++;
     }
@@ -108,7 +108,7 @@ function get_work_day()
     $workDays = array();
     $index = 1;
 
-    while ($row = mysqli_fetch_assoc($query)) {
+    while ($row = db_fetch_one($query)) {
         $workDays[$index] = $row['DATE'];
         $index++;
     }
@@ -271,7 +271,7 @@ function apply_staff_leaves_to_days_norm($link, $userID, $startDate, $stopDate, 
         return $days_norm;
     }
 
-    while ($row = mysqli_fetch_assoc($query)) {
+    while ($row = db_fetch_one($query)) {
         $leaveStart = max($row['start_date'], $startDate);
         $leaveStop = min($row['stop_date'], $stopDate);
 
@@ -304,7 +304,7 @@ function get_staff_leave_events_by_days($link, $userID, $startDate, $stopDate, $
         return $leaveEvents;
     }
 
-    while ($row = mysqli_fetch_assoc($query)) {
+    while ($row = db_fetch_one($query)) {
         $leaveStart = max($row['start_date'], $startDate);
         $leaveStop = min($row['stop_date'], $stopDate);
 
@@ -337,7 +337,7 @@ function get_work_dayoff_types_by_range($link, $startDate, $stopDate)
 
     $result = array();
 
-    while ($row = mysqli_fetch_assoc($query)) {
+    while ($row = db_fetch_one($query)) {
         $result[$row['date']] = (int)$row['type'];
     }
 

@@ -16,7 +16,7 @@ function add_time_legacy_datetime_columns_exist($link)
     $exists = false;
     $result = time_journal_query_legacy_add_time_columns($link);
 
-    if ($result && mysqli_num_rows($result) === 3) {
+    if ($result && db_num_rows($result) === 3) {
         $exists = true;
     }
 

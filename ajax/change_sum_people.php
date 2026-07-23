@@ -26,7 +26,7 @@ if (!$query) {
   exit;
 }
 
-$row = mysqli_fetch_assoc($query);
+$row = db_fetch_one($query);
 $count = (int)$row['people_count'];
 
 if ($count >= 4) {

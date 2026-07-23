@@ -10,11 +10,11 @@ $currentDate = date('Y-m-d');
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 $query = time_journal_query_latest_completed_pause($link, $userID, $currentDate);
 
-$merr = mysqli_error($link);
+$merr = db_error($link);
 
 if (!$query)
 {
@@ -22,14 +22,14 @@ if (!$query)
 }
 else
 {
-  $vn=mysqli_num_rows($query);
+  $vn = db_num_rows($query);
   if ( $vn == 0 )
   {
     echo "0";
   }
   else
   {
-    if ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
+    if ( $row = db_fetch_one($query) )
     {
       $id = (int)$row["ID"];
       $suid = (int)$row["SUIR"];

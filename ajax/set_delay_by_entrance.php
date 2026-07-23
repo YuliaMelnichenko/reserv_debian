@@ -38,7 +38,7 @@ if (!$idQuery) {
   exit;
 }
 
-$lastDelay = mysqli_fetch_assoc($idQuery);
+$lastDelay = db_fetch_one($idQuery);
 $newID = $lastDelay ? (int)$lastDelay['ID'] + 1 : 1;
 
 $query = db_query(
@@ -54,7 +54,7 @@ if (!$query) {
   exit;
 }
 
-$delayExists = mysqli_num_rows($query) > 0;
+$delayExists = db_has_rows($query);
 
 if (!$delayExists)
 {

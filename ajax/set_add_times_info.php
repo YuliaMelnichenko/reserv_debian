@@ -17,7 +17,7 @@ require_ajax_add_time_supervisor($ID, 0);
 
 include_once __DIR__ . "/../php_tori/connect.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 $query = db_execute(
   $link,
   'UPDATE ADD_TIME SET SUIR = ?, SUPERVISORDESC = ?, APPROVED = ? WHERE ID = ?',
@@ -25,7 +25,7 @@ $query = db_execute(
   array($userID, $DESC, $ACCEPTMODE, $ID)
 );
 
-$merr=mysqli_error($link);
+$merr = db_error($link);
 if ( !$query ) 
 {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);

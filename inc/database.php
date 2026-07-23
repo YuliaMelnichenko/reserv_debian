@@ -182,3 +182,23 @@ function db_has_rows($result)
 {
     return db_num_rows($result) > 0;
 }
+
+function db_connect($host, $user, $password, $database, $port = 3306)
+{
+    return mysqli_connect($host, $user, $password, $database, (int)$port);
+}
+
+function db_connect_error()
+{
+    return mysqli_connect_error();
+}
+
+function db_close($link)
+{
+    return mysqli_close($link);
+}
+
+function db_affected_rows($link)
+{
+    return mysqli_affected_rows($link);
+}
