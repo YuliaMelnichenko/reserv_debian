@@ -283,7 +283,12 @@ auth();
     $_date = date('Y-m-d');
 
     mysqli_set_charset($link, "utf8");
-    $query0 = db_query($link, "SELECT * FROM employees WHERE id = ?", 'i', array($user_id));
+    $query0 = db_query(
+      $link,
+      "SELECT STATE, SURNAME, FIRSTNAME, LASTNAME FROM employees WHERE id = ?",
+      'i',
+      array($user_id)
+    );
     $vn0 = mysqli_num_rows($query0);
 
     echo "<table cellpadding=\"10\" cellspacing=\"0\" border=1>";
@@ -309,7 +314,12 @@ auth();
 
       mysqli_set_charset($link, "utf8");
     
-      $query01 = db_query($link, "SELECT * FROM departments WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = ?)", 'i', array($user_id));
+      $query01 = db_query(
+        $link,
+        "SELECT NAME, ROOM FROM departments WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = ?)",
+        'i',
+        array($user_id)
+      );
 
       $row01 = mysqli_fetch_assoc($query01);
 

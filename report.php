@@ -41,7 +41,7 @@ $cont_key = 0;
 include_once __DIR__ . "/php_tori/connect.php";
 
   
-  $query = db_query($link, "SELECT * FROM work_dayoff order by date asc");
+  $query = db_query($link, "SELECT date, type FROM work_dayoff ORDER BY date ASC");
   $merr=mysqli_error($link);
   if ( !$query ) {
     echo database_error_message($link, __FILE__ . ':' . __LINE__);
@@ -79,7 +79,7 @@ include_once __DIR__ . "/php_tori/connect.php";
   {
     mysqli_set_charset($link, "utf8");
 
-    $query2 = db_query($link, "SELECT * FROM employees");
+    $query2 = db_query($link, "SELECT ID, SURNAME, FIRSTNAME, LASTNAME FROM employees");
     $merr = mysqli_error($link);
 
     if ( !$query2 ) {
@@ -103,7 +103,12 @@ include_once __DIR__ . "/php_tori/connect.php";
 
     mysqli_set_charset($link, "utf8");
 
-    $query2 = db_query($link, "SELECT * FROM employees where ID = ?", 'i', array($temp_id));
+    $query2 = db_query(
+      $link,
+      "SELECT ID, SURNAME, FIRSTNAME, LASTNAME FROM employees WHERE ID = ?",
+      'i',
+      array($temp_id)
+    );
     $merr=mysqli_error($link);
     if ( !$query2 ) {
       echo database_error_message($link, __FILE__ . ':' . __LINE__);

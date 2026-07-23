@@ -70,7 +70,7 @@ $maxOpenShiftHours = 3;
 $maxOpenShiftSeconds = $maxOpenShiftHours * 60 * 60;
 
 $query = db_query($link, "
-  SELECT *
+  SELECT ID, in_dt, eat_start_dt, eat_stop_dt, out_dt, state
   FROM visiting
   WHERE user_id = ?
     AND (
