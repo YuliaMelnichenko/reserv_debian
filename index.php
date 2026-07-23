@@ -5,6 +5,7 @@ ob_start();
 require_once __DIR__ . '/inc/session.php';
 include_once __DIR__ . "/start.php";
 include_once __DIR__ . "/funcs.php";
+require_once __DIR__ . '/inc/index_page_service.php';
 auth();
 ?>
 
@@ -540,18 +541,18 @@ if (
     $empty_dt = "0000-00-00 00:00:00";
     $bg_style = "";
 
-    mysqli_set_charset($link, "utf8");
+    db_set_charset($link, "utf8");
     $query0 = db_query(
       $link,
       "SELECT state, surname, firstname, lastname FROM employees WHERE id = ?",
       'i',
       array($user_id)
     );
-    $row0 = mysqli_fetch_assoc($query0); 
-    $vn0=mysqli_num_rows($query0);
+    $row0 = db_fetch_one($query0);
+    $vn0 = db_num_rows($query0);
 
     $query = db_query($link, "SELECT eat_start_dt, eat_stop_dt FROM visiting WHERE user_id = ? AND DATE(in_dt) = CURDATE()", 'i', array($user_id));
-    $row = mysqli_fetch_assoc($query);
+    $row = db_fetch_one($query);
 
     $bg_style = "#ddeeff";
 
@@ -575,7 +576,7 @@ if (
             
       $sv_name = get_sv_name_by_userid( $user_id );
 
-      mysqli_set_charset($link, "utf8");
+      db_set_charset($link, "utf8");
     
       $query01 = db_query(
         $link,
@@ -584,7 +585,7 @@ if (
         array($user_id)
       );
 
-      $row01 = mysqli_fetch_assoc($query01);
+      $row01 = db_fetch_one($query01);
 
       $depName = $row01["NAME"];
 
@@ -713,306 +714,15 @@ if (
     echo "<td bgcolor=\"#ffffff\" valign=\"top\" align=\"left\" width = 10>";
     echo "</td>";
 
-    mysqli_set_charset($link, "utf8");
-    $bosses_arr = [];
-
-    $bosses_sql = "SELECT id, firstname, surname, lastname, DATE_FORMAT(birthday, '%m-%d') AS bday FROM employees WHERE id IN (400, 500, 501)";
-
-    $bosses_q = db_query($link, $bosses_sql);
-
-    if ($bosses_q) {
-      while ($b = mysqli_fetch_assoc($bosses_q)) {
-        if (isset($b['bday']) && $b['bday'] === date('m-d')) {
-          $full_name = trim($b['surname'] . " " . $b['firstname'] . " " . $b['lastname']);
-          $img = "<img class=\"presence-inline-icon\" title=\"C днем рождения!\" src=\"img/birthday.png\">";
-          $bosses_arr[] = [
-            $full_name,
-            "",
-            "",
-            $img,
-            "",
-            "",
-            "",
-            "",
-            "",
-            $b['id'],
-            $b['bday'],
-            ""
-          ];
-        }
-      }
-    }
-
-    $query6 = db_query($link, "SELECT id, firstname, surname, lastname, phone, personal_phone, corporate_phone, DATE_FORMAT(birthday, '%m-%d'), email FROM employees WHERE relevance = 1 AND id NOT IN (400, 500, 501) ORDER BY surname");
-
     echo "<td bgcolor=\"$bg_style\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
     echo "<h5 class=\"dark0\"><br>/присутствие сотрудников<br><br></h5>";
     echo "<div id=\"employee_activity\">";
 
-    $employee_arr = array();
-
-    while ($row6 = mysqli_fetch_assoc($query6)) {
-      $id_empl = $row6["id"];
-      $surname = $row6["surname"];
-      $firstname = $row6["firstname"];
-      $lastname = $row6["lastname"];
-      $phone_number = $row6["phone"];
-      $personal_phone = $row6["personal_phone"];
-      $corporate_phone = $row6["corporate_phone"];
-      $birthday = $row6["DATE_FORMAT(birthday, '%m-%d')"];
-      $full_name = $surname." ".$firstname." ".$lastname;
-      $email_empl = $row6["email"];
-
-      $time = "0000-00-00 00:00:00";
-
-      mysqli_set_charset($link, "utf8");
-      $query5 = db_query(
-        $link,
-        'SELECT in_dt, eat_start_dt, eat_stop_dt, out_dt FROM visiting WHERE DATE(in_dt) = CURDATE() AND user_id = ? ORDER BY in_dt DESC, ID DESC LIMIT 1',
-        'i',
-        array($id_empl)
-      );
-
-      if (!$query5) {
-        echo database_error_message($link, __FILE__ . ':' . __LINE__);
-        exit;
-      }
-
-      $row5 = mysqli_fetch_assoc($query5);
-
-      $query7 = db_query(
-        $link,
-        "SELECT START_DT, STOP_DT FROM ADD_TIME WHERE DATE(START_DT) = CURDATE() AND USERID = ? AND (STOP_DT IS NULL OR STOP_DT = '0000-00-00 00:00:00') ORDER BY START_DT DESC, ID DESC LIMIT 1",
-        'i',
-        array($id_empl)
-      );
-
-      if (!$query7) {
-        echo database_error_message($link, __FILE__ . ':' . __LINE__);
-        exit;
-      }
-
-      $row7 = mysqli_fetch_assoc($query7);
-
-      $remote_sql = "SELECT id, start_dt, stop_dt FROM remote_work WHERE user_id = ? AND DATE(start_dt) = CURDATE() ORDER BY id DESC LIMIT 1";
-
-      $remote_stmt = mysqli_prepare($link, $remote_sql);
-      mysqli_stmt_bind_param($remote_stmt,  "i", $id_empl);
-      mysqli_stmt_execute($remote_stmt);
-      $remote_res = mysqli_stmt_get_result($remote_stmt);
-      $remote_row = mysqli_fetch_assoc($remote_res);
-      $isRemoteNow = ($remote_row && is_null($remote_row['stop_dt']));
-
-      $hasVisit = is_array($row5);
-      $in_dt = $hasVisit ? (string)$row5["in_dt"] : "";
-      $eat_start_dt = $hasVisit ? (string)$row5["eat_start_dt"] : "";
-      $eat_stop_dt = $hasVisit ? (string)$row5["eat_stop_dt"] : "";
-      $out_dt = $hasVisit ? (string)$row5["out_dt"] : "";
-      $hasOpenAddTime = is_array($row7);
-
-      $time_in = ($in_dt !== "" && $in_dt !== $time) ? date("H:i", strtotime($in_dt)) : "";
-      $time_out = ($out_dt !== "" && $out_dt !== $time) ? date("H:i", strtotime($out_dt)) : "";
-
-      $isLunchPause = $hasVisit
-        && $eat_start_dt !== ""
-        && $eat_start_dt !== $time
-        && ($eat_stop_dt === "" || $eat_stop_dt === $time);
-      $hasGoneHome = $hasVisit
-        && $in_dt !== ""
-        && $in_dt !== $time
-        && $out_dt !== ""
-        && $out_dt !== $time;
-
-      if ($isLunchPause || $hasOpenAddTime) {
-        $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Обед/приостановка времени\" src=\"img/pause_time.png\">";
-        $presenceSortOrder = 1;
-      } elseif ($isRemoteNow) {
-        $img = "<img class=\"work-status presence-inline-icon\" data-emp=\"$id_empl\" title=\"Работает удаленно\" src=\"img/remoteWorkIcon2.png\">";
-        $presenceSortOrder = 1;
-      } elseif (!$hasVisit) {
-        $img = "<img class=\"work-status presence-inline-icon\" data-emp=\"$id_empl\" title=\"На работу не приходил\" src=\"img/home.png\">";
-        $presenceSortOrder = 0;
-      } elseif ($hasGoneHome) {
-        $img = "<img class=\"work-status\" data-emp=\"$id_empl\" title=\"Ушел домой\" src=\"img/go_home.png\">";
-        $presenceSortOrder = 2;
-      } else {
-        $img = "<img class=\"work-status presence-inline-icon\" data-emp=\"$id_empl\" title=\"На рабочем месте\" src=\"img/in_work2.png\">";
-        $presenceSortOrder = 1;
-      }
-
-      $employee_arr[] = array($full_name, $time_in, $time_out, $img, $in_dt, $out_dt, $phone_number, $personal_phone, $corporate_phone, $id_empl, $birthday, $email_empl, $presenceSortOrder);
-    }
-
-    $employee_arr = array_filter($employee_arr, function($item) {
-      return !in_array($item[9], [400, 500, 501]);
-    });
-
-    function sort_employee ($a, $b) {
-      $presenceComparison = (int)$a[12] <=> (int)$b[12];
-
-      if ($presenceComparison !== 0) {
-        return $presenceComparison;
-      }
-
-      return mb_strtolower($a[0], 'UTF-8') <=> mb_strtolower($b[0], 'UTF-8');
-    }
-
-    usort($employee_arr, "sort_employee");
-
-    $employee_arr = array_merge($bosses_arr, $employee_arr); 
-
-    function get_phone_info($id_empl, $phone, $personal_phone, $corporate_phone, $email_empl) {
-      $tooltipId = 'u' . (int) $id_empl . '-contacts';
-      $contacts = [];
-      $contacts[] = "Телефон внутренний: " . htmlspecialchars($phone);
-
-      switch (true) {
-        case (!empty($corporate_phone) && !empty($personal_phone) && !empty($email_empl)):
-          $contacts[] = "Мобильный: " . htmlspecialchars($personal_phone);
-          $contacts[] = "Служебный мобильный: " . htmlspecialchars($corporate_phone);
-          $contacts[] = "Эл. почта: " . htmlspecialchars($email_empl);
-          break;
-
-        case (!empty($corporate_phone)):
-          $contacts[] = "Служебный мобильный: " . htmlspecialchars($corporate_phone);
-          $contacts[] = "Эл. почта: " . htmlspecialchars($email_empl);
-          break;
-        
-        case (!empty($personal_phone)): 
-          $contacts[] = "Мобильный: " . htmlspecialchars($personal_phone);
-          $contacts[] = "Эл. почта: " . htmlspecialchars($email_empl);
-
-          break;
-
-        case (!empty($email_empl)):
-          $contacts[] = "Эл. почта: " . htmlspecialchars($email_empl);
-          break;
-      }
-
-      if (!empty($contacts)) {
-        echo '<div class="phone_tooltip" data-phone-tooltip-target="' . $tooltipId . '">';
-        echo implode('<br>', $contacts);
-        echo '</div>';
-      }
-    }
+    $employee_arr = index_fetch_presence_rows($link);
 
     $today = date('Y-m-d');
-
-    function getHolidayDates ($link, $form_date = null) {
-      if ($form_date === null) {
-        $form_date = date('Y-m-d');
-      }
-
-      $holidays = [];
-
-      $query = "SELECT date FROM work_dayoff WHERE type = 0 AND date >= ?";
-      $stmt = mysqli_prepare($link, $query);
-      mysqli_stmt_bind_param($stmt, 's', $form_date);
-      mysqli_stmt_execute($stmt);
-      $result = mysqli_stmt_get_result($stmt);
-
-      while ($row = mysqli_fetch_assoc($result)) {
-        $holidays[] = $row['date'];
-      }
-
-      foreach ($holidays as $hd) {
-        echo "<!-- holiday: $hd -->";
-      }
-      return $holidays;
-    }
-
     $holidayDates = getHolidayDates($link, $today);
-
-    function getWorkingDaysUntil($today, $start_date, $holidays = []) {
-      $start = new DateTime($today);
-      $end = new DateTime($start_date);
-
-      if ($start >= $end) {
-        return 0;
-      }
-
-      $interval = new DateInterval('P1D');
-      $period = new DatePeriod($start, $interval, $end);
-
-      $workingDays = 0;
-
-      foreach ($period as $date) {
-        $dayOfWeek = $date->format('N'); // 6=суббота, 7=воскресенье
-        $dateStr = $date->format('Y-m-d');
-
-        $isWeekend = $dayOfWeek >= 6;
-        $isHoliday = in_array($dateStr, $holidays);
-
-        echo "<!-- Check $dateStr: weekend = " . ($isWeekend ? "yes" : "no") . ", holiday = " . ($isHoliday ? "yes" : "no") . "-->";
-
-        if (!$isWeekend && !$isHoliday) {
-          $workingDays++;
-        }
-      }
-      return $workingDays;
-    }
-
-    function getDayWord ($number) {
-      $number = (int)$number;
-      $lastDate = $number % 10;
-      $lastTwo = $number % 100;
-
-      if ($lastTwo >= 11 && $lastTwo <= 14) {
-        return 'дней';
-      }
-
-      if ($lastDate === 1) return 'день';
-      if ($lastDate >= 2 && $lastDate <= 4) return 'дня';
-      
-      return 'дней';
-    }
-
-    function getDaysLeft($end_date, $today) {
-      $todayDate = new DateTime($today);
-      $endDate = new DateTime($end_date);
-
-      $diff = $todayDate->diff($endDate)->days;
-
-      return $diff + 1;
-    }
-
-    $eventsToday = [];
-
-    $query9 = "
-    SELECT user_id, event, start_date, stop_date
-    FROM staff_leaves
-    WHERE (
-          (event = 'Больничный' AND ? BETWEEN start_date AND stop_date)
-          OR
-          (event = 'Отпуск' AND (? BETWEEN start_date AND stop_date OR start_date >= ?))
-          OR
-          (event = 'Командировка' AND (? BETWEEN start_date AND stop_date OR start_date >= ?))
-          )";
-    $result9 = db_query($link, $query9, 'sssss', array($today, $today, $today, $today, $today));
-    while ($row9 = mysqli_fetch_assoc($result9)) {
-      $uid = $row9['user_id'];
-      $event = $row9['event'];
-      $start = $row9['start_date'];
-      $stop = $row9['stop_date'];
-
-      if (!isset($eventsToday[$uid])) $eventsToday[$uid] = [];
-
-      $alreadyExists = false;
-      foreach ($eventsToday[$uid] as $e) {
-        if ($e['event'] === $event && $e['start_date'] === $start && $e['stop_date'] === $stop) {
-          $alreadyExists = true;
-          break;
-        }
-      }
-
-      if (!$alreadyExists) {
-        $eventsToday[$uid][] = [
-          'event' => $event,
-          'start_date' => $start,
-          'stop_date' => $stop
-        ];
-      }
-    }
+    $eventsToday = index_fetch_staff_events($link, $today);
 
     $vacationIcons = [
       3 => 'vacation3.png',
