@@ -541,7 +541,12 @@ if (
     $bg_style = "";
 
     mysqli_set_charset($link, "utf8");
-    $query0 = db_query($link, "SELECT * FROM employees WHERE id = ?", 'i', array($user_id));
+    $query0 = db_query(
+      $link,
+      "SELECT state, surname, firstname, lastname FROM employees WHERE id = ?",
+      'i',
+      array($user_id)
+    );
     $row0 = mysqli_fetch_assoc($query0); 
     $vn0=mysqli_num_rows($query0);
 
@@ -572,7 +577,12 @@ if (
 
       mysqli_set_charset($link, "utf8");
     
-      $query01 = db_query($link, "SELECT * FROM departments WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = ?) LIMIT 1", 'i', array($user_id));
+      $query01 = db_query(
+        $link,
+        "SELECT NAME, ROOM FROM departments WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = ?) LIMIT 1",
+        'i',
+        array($user_id)
+      );
 
       $row01 = mysqli_fetch_assoc($query01);
 

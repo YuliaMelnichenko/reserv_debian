@@ -4,8 +4,11 @@ require_once __DIR__ . '/../funcs.php';
 
 return function () {
     $funcs = file_get_contents(__DIR__ . '/../funcs.php');
+    $funcsRep = file_get_contents(__DIR__ . '/../funcs_rep.php');
     $employeeDirectory = file_get_contents(__DIR__ . '/../inc/employee_directory.php');
     $workCalendar = file_get_contents(__DIR__ . '/../inc/work_calendar.php');
+    $reportStatistics = file_get_contents(__DIR__ . '/../inc/report_statistics.php');
+    $reportPresentation = file_get_contents(__DIR__ . '/../inc/report_presentation.php');
 
     test_assert_true(
         strpos($funcs, "inc/employee_directory.php") !== false,
@@ -14,6 +17,14 @@ return function () {
     test_assert_true(
         strpos($funcs, "inc/work_calendar.php") !== false,
         'funcs.php must load the work calendar module'
+    );
+    test_assert_true(
+        strpos($funcs, "inc/report_statistics.php") !== false,
+        'funcs.php must load the report statistics module'
+    );
+    test_assert_true(
+        strpos($funcs, "inc/report_presentation.php") !== false,
+        'funcs.php must load the report presentation module'
     );
 
     $employeeFunctions = array(
@@ -59,6 +70,41 @@ return function () {
         test_assert_same(0, preg_match($definitionPattern, $funcs), 'Calendar helper must stay out of funcs.php: ' . $functionName);
         test_assert_same(1, preg_match($definitionPattern, $workCalendar), 'Calendar helper must stay in its module: ' . $functionName);
     }
+
+    $statisticsFunctions = array(
+        'get_penalties',
+        'get_current_day_duration_sec',
+        'get_stat_by_range',
+        'get_stat_set_by_range_full_ex',
+    );
+
+    $presentationFunctions = array(
+        'represent_is_time_defined',
+        'get_range_by_times_pair',
+        'colored_result',
+        'colored_result_partial',
+        'get_cell_content_by_stat',
+        'redmine_represent',
+        'get_results_cell_content_by_stat',
+    );
+
+    foreach ($statisticsFunctions as $functionName) {
+        $definitionPattern = '/function\s+' . preg_quote($functionName, '/') . '\s*\(/';
+        test_assert_same(0, preg_match($definitionPattern, $funcs), 'Report statistic must stay out of funcs.php: ' . $functionName);
+        test_assert_same(0, preg_match($definitionPattern, $funcsRep), 'Report statistic must stay out of funcs_rep.php: ' . $functionName);
+        test_assert_same(1, preg_match($definitionPattern, $reportStatistics), 'Report statistic must stay in its module: ' . $functionName);
+    }
+
+    foreach ($presentationFunctions as $functionName) {
+        $definitionPattern = '/function\s+' . preg_quote($functionName, '/') . '\s*\(/';
+        test_assert_same(0, preg_match($definitionPattern, $funcs), 'Report presenter must stay out of funcs.php: ' . $functionName);
+        test_assert_same(1, preg_match($definitionPattern, $reportPresentation), 'Report presenter must stay in its module: ' . $functionName);
+    }
+
+    test_assert_true(
+        strpos($funcsRep, "inc/report_renderer.php") !== false,
+        'funcs_rep.php must remain a compatibility loader for the report renderer'
+    );
 
     test_assert_same(
         array(1 => '2026-07-01', 2 => '2026-07-02', 3 => '2026-07-03'),

@@ -103,7 +103,12 @@ include __DIR__ . "/../php_tori/connect.php";
 $currentDate = date('Y-m-d');           
 
 mysqli_set_charset($link, "utf8");
-$query = db_query($link, "SELECT * FROM ALERTS WHERE DATE = ? AND USERID = ? AND VIEWED = 0", 'si', array($currentDate, $userID_));
+$query = db_query(
+  $link,
+  "SELECT ID, DATE, COMMENT FROM ALERTS WHERE DATE = ? AND USERID = ? AND VIEWED = 0",
+  'si',
+  array($currentDate, $userID_)
+);
 
 $merr=mysqli_error($link);
 if ( !$query ){

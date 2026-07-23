@@ -71,7 +71,7 @@ return function () {
 
     $functionsSource = file_get_contents(__DIR__ . '/../funcs.php');
     $functionStart = strpos($functionsSource, 'function get_users_current_day_in_time_by_superuser');
-    $functionStop = strpos($functionsSource, 'function get_penalties', $functionStart);
+    $functionStop = strpos($functionsSource, 'function is_there_add_time_by_alert', $functionStart);
     $listFunction = substr($functionsSource, $functionStart, $functionStop - $functionStart);
 
     test_assert_same(

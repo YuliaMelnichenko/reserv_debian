@@ -11,7 +11,12 @@ $userID = (int)$_SESSION['ss_id'];
 
 mysqli_set_charset($link, "utf8");
 
-$query = db_query($link, "SELECT * FROM gym_schedule WHERE USERID = ? ORDER BY DATE_TRAIN", 'i', array($userID));
+$query = db_query(
+    $link,
+    "SELECT USERID, DATE_TRAIN, START_TIME, STOP_TIME FROM gym_schedule WHERE USERID = ? ORDER BY DATE_TRAIN",
+    'i',
+    array($userID)
+);
 
 $content = "<div id=\"delete_schedule\">";
   $content .= "<div class=\"schedule_text\">";

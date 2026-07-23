@@ -211,7 +211,9 @@ function fetchStaffLeavesArchiveRows($link, $employeeId, $event, $filterStartDat
     $types = '';
     $params = array();
     $whereSql = buildStaffLeavesArchiveQuery($employeeId, $event, $filterStartDate, $filterStopDate, $types, $params);
-    $sql = 'SELECT * FROM staff_leaves ' . $whereSql . ' ORDER BY fio ASC, start_date DESC, stop_date DESC';
+    $sql = 'SELECT id, user_id, fio, start_date, stop_date, event FROM staff_leaves '
+        . $whereSql
+        . ' ORDER BY fio ASC, start_date DESC, stop_date DESC';
 
     if ((int)$limit > 0) {
         $sql .= ' LIMIT ' . (int)$limit;
@@ -245,7 +247,12 @@ function fetchStaffLeavesArchiveRows($link, $employeeId, $event, $filterStartDat
 
 function fetchActiveStaffLeaves($link, $event)
 {
-    $stmt = mysqli_prepare($link, 'SELECT * FROM staff_leaves WHERE event = ? AND stop_date >= CURDATE() ORDER BY fio ASC, start_date ASC, stop_date ASC');
+    $stmt = mysqli_prepare(
+        $link,
+        'SELECT id, user_id, fio, start_date, stop_date, event '
+            . 'FROM staff_leaves WHERE event = ? AND stop_date >= CURDATE() '
+            . 'ORDER BY fio ASC, start_date ASC, stop_date ASC'
+    );
     if (!$stmt) {
         throw new RuntimeException(mysqli_error($link));
     }

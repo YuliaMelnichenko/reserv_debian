@@ -22,4 +22,28 @@ return function () {
             'AJAX database errors must use the shared response helper in ' . $fileName
         );
     }
+
+    $root = realpath(__DIR__ . '/..');
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveCallbackFilterIterator(
+            new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS),
+            function ($current) {
+                if ($current->isDir()) {
+                    return !in_array($current->getFilename(), array('.git', 'lib', 'tests'), true);
+                }
+
+                return strtolower($current->getExtension()) === 'php';
+            }
+        )
+    );
+
+    foreach ($iterator as $file) {
+        $source = file_get_contents($file->getPathname());
+
+        test_assert_same(
+            0,
+            preg_match('/\bSELECT\s+\*/i', $source),
+            'Production queries must use explicit field lists in ' . $file->getPathname()
+        );
+    }
 };
