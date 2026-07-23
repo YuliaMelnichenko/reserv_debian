@@ -2,6 +2,7 @@
 ob_start();
 require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
+require_once __DIR__ . '/inc/employee_registration.php';
 require_page_director();
 ?>
 
@@ -23,119 +24,11 @@ $err = array();
 include_once __DIR__ . "/php_tori/connect.php";
 
 if (isset( $_POST['r_button']) ) {
-  $login = trim((string) ($_POST['r_login'] ?? ''));
-  $plainPassword = (string) ($_POST['r_passwd'] ?? '');
-  $passwordRepeat = (string) ($_POST['r_passwd_rep'] ?? '');
-  $surname = (string) ($_POST['r_surname'] ?? '');
-  $first_name = (string) ($_POST['r_first_name'] ?? '');
-  $second_name = (string) ($_POST['r_second_name'] ?? '');
+  $err = register_employee($link, $_POST);
 
-  if(strlen($login) < 3 or strlen($login) > 30)
-  {
-    $err[] = "Логин должен быть не меньше 3-х символов и не больше 30";
-  }
-
-  if ( count($err) == 0 )
-  {
-    if($plainPassword !== $passwordRepeat)
-    {
-      $err[] = "Пароль и его повтор не совпадают";
-    }
-  }
-
-  if ( count($err) == 0 )
-  {
-    if(!preg_match("/^[a-zA-Z0-9]+$/", $login))
-    {
-      $err[] = "Логин может состоять только из букв английского алфавита и цифр";
-    }
-  }
-
-  if ( count($err) == 0 )
-  {
-    if(strlen($plainPassword) < 3 or strlen($plainPassword) > 30)
-    {
-      $err[] = "Пароль должен быть не меньше 3-х символов и не больше 30";
-    }
-  }
-
-  if ( count($err) == 0 )
-  {
-    if(!preg_match("/^[a-zA-Z0-9]+$/", $plainPassword))
-    {
-      $err[] = "Пароль может состоять только из букв английского алфавита и цифр";
-    }
-  }
-
-  if ( count($err) == 0 )
-  {
-    if( strlen($surname) < 1 or strlen($surname) > 50 )
-    {
-      $err[] = "Поле ФАМИЛИЯ должно быть не пустым и не больше 50 символов";
-    }
-  }
-
-  if ( count($err) == 0 )
-  {
-    if( strlen($first_name) < 1 or strlen($first_name) > 50 )
-    {
-      $err[] = "Поле ИМЯ должно быть не пустым и не больше 50 символов";
-    }
-  }
-
-  if ( count($err) == 0 )
-  {
-    if( strlen($second_name) < 1 or strlen($second_name) > 50 )
-    {
-      $err[] = "Поле ОТЧЕСТВО должно быть не пустым и не больше 50 символов";
-    }
-  }
-
-  if(count($err) == 0)
-  {
-    if (!mysqli_begin_transaction($link)) {
-      $err[] = database_error_message($link, __FILE__ . ':' . __LINE__);
-    }
-    else {
-      $lastEmployeeResult = db_query($link, 'SELECT id FROM employees ORDER BY id DESC LIMIT 1 FOR UPDATE');
-
-      if (!$lastEmployeeResult) {
-        mysqli_rollback($link);
-        $err[] = database_error_message($link, __FILE__ . ':' . __LINE__);
-      }
-      else {
-        $lastEmployee = mysqli_fetch_assoc($lastEmployeeResult);
-        $newuserid = $lastEmployee ? (int) $lastEmployee['id'] + 1 : 1;
-
-        $duplicateResult = db_query($link, 'SELECT 1 FROM employees WHERE login = ? LIMIT 1', 's', array($login));
-
-        if (!$duplicateResult) {
-          mysqli_rollback($link);
-          $err[] = database_error_message($link, __FILE__ . ':' . __LINE__);
-        }
-        else if (mysqli_fetch_assoc($duplicateResult)) {
-          mysqli_rollback($link);
-          $err[] = "Пользователь с таким логином уже существует";
-        }
-        else {
-          $passwd = md5(md5(trim($plainPassword)));
-          $res = db_execute($link, 'INSERT INTO employees VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', 'isssssssi', array($newuserid, $login, $passwd, $first_name, $second_name, $surname, '', '', -1));
-
-          if (!$res) {
-            mysqli_rollback($link);
-            $err[] = database_error_message($link, __FILE__ . ':' . __LINE__);
-          }
-          else if (!mysqli_commit($link)) {
-            mysqli_rollback($link);
-            $err[] = database_error_message($link, __FILE__ . ':' . __LINE__);
-          }
-          else {
-            header("Location: index.php");
-            exit();
-          }
-        }
-      }
-    }
+  if (!$err) {
+    header("Location: index.php");
+    exit();
   }
 
   if (count($err) > 0) {

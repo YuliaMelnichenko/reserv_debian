@@ -66,7 +66,7 @@ function sync_time_registration_state_from_db($link, $userID, $startDTStr, $stop
         exit;
     }
 
-    if (mysqli_num_rows($query) === 0) {
+    if (!db_has_rows($query)) {
         reset_time_registration_session();
 
         return array(
@@ -75,7 +75,7 @@ function sync_time_registration_state_from_db($link, $userID, $startDTStr, $stop
         );
     }
 
-    $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
+    $row = db_fetch_one($query);
 
     $_SESSION['ss_state'] = (int)$row['state'];
     $_SESSION['ss_visiting_ID'] = (int)$row['ID'];
@@ -105,11 +105,11 @@ function get_current_visit_row($link, $userID, $visitID, $startDTStr, $stopDTStr
         exit;
     }
 
-    if (mysqli_num_rows($query) === 0) {
+    if (!db_has_rows($query)) {
         return null;
     }
 
-    $visitRow = mysqli_fetch_array($query, MYSQLI_ASSOC);
+    $visitRow = db_fetch_one($query);
 
     if (!is_workday_visit_current($visitRow, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds)) {
         return null;
