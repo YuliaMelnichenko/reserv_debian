@@ -6,7 +6,7 @@ function change_time ($user) {
   include __DIR__ . "/../php_tori/connect.php";
   include_once __DIR__ . "/../funcs.php";
 
-  mysqli_set_charset($link, "utf8");
+  db_set_charset($link, "utf8");
 
   $currentTime = date("H:i:s");
   $currentDayNumber = GetWeekDayD(date("Y-m-d"));
@@ -26,11 +26,11 @@ function change_time ($user) {
     array((int)$user)
   );
 
-  if (!$visitQuery || mysqli_num_rows($visitQuery) == 0) {
+  if (!$visitQuery || !db_has_rows($visitQuery)) {
     return $content;
   }
 
-  $row = mysqli_fetch_assoc($visitQuery);
+  $row = db_fetch_one($visitQuery);
   $visitID = (int)$row["ID"];
   $out_value = isset($row["out_dt"])
     ? $row["out_dt"]
@@ -332,4 +332,3 @@ function delay_part( $time, $valid, $timeRestributionDescWidth, $timeRestributio
   }
   return $content;
 }
-

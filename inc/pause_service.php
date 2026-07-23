@@ -80,7 +80,7 @@ function start_time_pause_for_group(
         return false;
     }
 
-    $visit = mysqli_fetch_assoc($visitResult);
+    $visit = db_fetch_one($visitResult);
 
     if (!$visit) {
         $transaction->rollback();
@@ -118,7 +118,7 @@ function start_time_pause_for_group(
         return false;
     }
 
-    $supervisor = mysqli_fetch_assoc($supervisorResult);
+    $supervisor = db_fetch_one($supervisorResult);
 
     if (!$supervisor || (int)$supervisor['SUPERVISORID'] <= 0) {
         $transaction->rollback();
@@ -149,7 +149,7 @@ function start_time_pause_for_group(
         return false;
     }
 
-    if (mysqli_num_rows($openPauseResult) > 0) {
+    if (db_has_rows($openPauseResult)) {
         $visitUpdated = db_execute($link, "
             UPDATE visiting
             SET take_pause = 1
@@ -233,7 +233,7 @@ function finish_time_pause($link, $userID, $visitingID, $pauseID, $currentDateTi
         return false;
     }
 
-    if (!mysqli_fetch_assoc($visitResult)) {
+    if (!db_fetch_one($visitResult)) {
         $transaction->rollback();
         return time_pause_result('error', 'Не найдена активная запись рабочего дня');
     }
@@ -253,7 +253,7 @@ function finish_time_pause($link, $userID, $visitingID, $pauseID, $currentDateTi
         return false;
     }
 
-    $pause = mysqli_fetch_assoc($pauseResult);
+    $pause = db_fetch_one($pauseResult);
 
     if (!$pause) {
         $transaction->rollback();

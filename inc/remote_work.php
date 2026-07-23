@@ -37,7 +37,7 @@ function finish_remote_work($link, $userID)
         return false;
     }
 
-    $row = mysqli_fetch_assoc($result);
+    $row = db_fetch_one($result);
 
     if (!$row) {
         $transaction->rollback();
@@ -96,7 +96,7 @@ function start_remote_work($link, $userID, $supervisorID)
         return false;
     }
 
-    if (mysqli_num_rows($supervisorResult) === 0) {
+    if (!db_has_rows($supervisorResult)) {
         $transaction->rollback();
         return remote_work_result('forbidden', 'Выбранный руководитель недоступен');
     }
@@ -116,7 +116,7 @@ function start_remote_work($link, $userID, $supervisorID)
         return false;
     }
 
-    if (mysqli_num_rows($openResult) > 0) {
+    if (db_has_rows($openResult)) {
         $transaction->rollback();
         return remote_work_result('error', 'Вы уже начали удалённую работу сегодня');
     }
@@ -155,13 +155,7 @@ function get_remote_work_supervisors($link, $userID)
         return false;
     }
 
-    $supervisors = array();
-
-    while ($row = mysqli_fetch_assoc($result)) {
-        $supervisors[] = $row;
-    }
-
-    return $supervisors;
+    return db_fetch_all($result);
 }
 
 function get_open_remote_work($link, $userID)
@@ -184,7 +178,7 @@ function get_open_remote_work($link, $userID)
         return false;
     }
 
-    $row = mysqli_fetch_assoc($result);
+    $row = db_fetch_one($result);
 
     return $row ?: null;
 }

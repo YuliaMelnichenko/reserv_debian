@@ -107,34 +107,28 @@ if (isset($_GET['action']) && $_GET['action'] === 'load') {
             ORDER BY overtime_days DESC, fio ASC
         ";
 
-        $stmt = mysqli_prepare($link, $sql);
-
-        if (!$stmt) {
-            throw new Exception('Ошибка подготовки запроса: ' . mysqli_error($link));
-        }
-
-        if (mysqli_stmt_param_count($stmt) !== 18) {
-            throw new Exception('Количество плейсхолдеров не совпадает: ' . mysqli_stmt_param_count($stmt));
-        }
-
-        mysqli_stmt_bind_param($stmt, 
-                                'dssssssssssssssssd',
-                                    $hours, // 1
-                                    $qstart, $qend, // 2-3 visiting (union)
-                                        $qend, $qstart, $qstart, $qend, // 4-7 add_time (union)
-                                        $qstart, $qend, // 8-9 visiting (join)
-                                        $qend, $qstart, $qstart, $qend, // 10-13 add_time positive (join)
-                                        $qend, $qstart, $qstart, $qend, // 14-17 add_time pause REASON=-1 (join)
-                                        $hours          // 18 threshold
+        $res = db_query(
+            $link,
+            $sql,
+            'dssssssssssssssssd',
+            array(
+                $hours,
+                $qstart, $qend,
+                $qend, $qstart, $qstart, $qend,
+                $qstart, $qend,
+                $qend, $qstart, $qstart, $qend,
+                $qend, $qstart, $qstart, $qend,
+                $hours,
+            )
         );
-        
-        mysqli_stmt_execute($stmt);
 
-        $res = mysqli_stmt_get_result($stmt);
+        if (!$res) {
+            throw new Exception('Ошибка выполнения запроса: ' . db_error($link));
+        }
 
         $rows = [];
 
-        while ($row = mysqli_fetch_assoc($res)) {
+        foreach (db_fetch_all($res) as $row) {
             $rows[] = [
                 'id' => intval($row['emp_id']),
                 'fio' => $row['fio'],
@@ -250,28 +244,26 @@ if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id']
             ) >= ?
             ORDER BY d.work_date DESC
         ";
-        $stmt = mysqli_prepare($link, $sql);
-        if (!$stmt) throw new Exception('Ошибка подготовки запроса ' . mysqli_error($link));
-
-        if (mysqli_stmt_param_count($stmt) !== 22) {
-            throw new Exception('Количество плейсхолдеров не совпадает: ' . mysqli_stmt_param_count($stmt));
-        }
-
-        mysqli_stmt_bind_param($stmt, 
-                                'ississssississssissssd',
-                                    $empId, $qstart, $qend, // visiting (union)
-                                        $empId, $qend, $qstart, $qstart, $qend, // add_time positive (union)
-                                        $empId, $qstart, $qend, // visiting (join)
-                                        $empId, $qend, $qstart, $qstart, $qend, // add_time positive (join)
-                                        $empId, $qend, $qstart, $qstart, $qend, // add_time pause REASON=-1 (join)
-                                        $hours                  // threshold
+        $res = db_query(
+            $link,
+            $sql,
+            'ississssississssissssd',
+            array(
+                $empId, $qstart, $qend,
+                $empId, $qend, $qstart, $qstart, $qend,
+                $empId, $qstart, $qend,
+                $empId, $qend, $qstart, $qstart, $qend,
+                $empId, $qend, $qstart, $qstart, $qend,
+                $hours,
+            )
         );
 
-        mysqli_stmt_execute($stmt);
-        $res = mysqli_stmt_get_result($stmt);
+        if (!$res) {
+            throw new Exception('Ошибка выполнения запроса: ' . db_error($link));
+        }
 
         $rows = [];
-        while ($row = mysqli_fetch_assoc($res)) {
+        foreach (db_fetch_all($res) as $row) {
             $rows[] = [
                 'date' => $row['work_date'],
                 'hours_total' => formatHours($row['total_hours']),

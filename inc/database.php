@@ -136,3 +136,49 @@ function db_execute_affected_rows($link, $sql, $types = '', $params = array())
 
     return $affectedRows;
 }
+
+function db_set_charset($link, $charset = 'utf8')
+{
+    return mysqli_set_charset($link, $charset);
+}
+
+function db_error($link)
+{
+    return mysqli_error($link);
+}
+
+function db_fetch_one($result)
+{
+    if (!$result) {
+        return null;
+    }
+
+    $row = mysqli_fetch_assoc($result);
+
+    return $row ?: null;
+}
+
+function db_fetch_all($result)
+{
+    $rows = array();
+
+    if (!$result) {
+        return $rows;
+    }
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        $rows[] = $row;
+    }
+
+    return $rows;
+}
+
+function db_num_rows($result)
+{
+    return $result ? mysqli_num_rows($result) : 0;
+}
+
+function db_has_rows($result)
+{
+    return db_num_rows($result) > 0;
+}
