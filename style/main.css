@@ -2569,6 +2569,7 @@ a.nounder {
 .nav-redmine-button {
   height: 40px;
   font-size: 80%;
+  margin-bottom: 10px;
 }
 
 .nav-menu-button-main {
@@ -4338,14 +4339,6 @@ h5.activ_time {
   height: 20px;
 }
 
-.journal-back-button {
-  width: 73px;
-  height: 25px;
-  padding: 5px;
-  background-color: #f8d888;
-  border: 1px solid #888888;
-}
-
 .journal-icon-button {
   width: 14px;
   height: 14px;
@@ -4373,7 +4366,7 @@ h5.activ_time {
 .journal-back-button {
   width: 90px;
   height: 24px;
-  margin-bottom: 8px;
+  margin: 8px;
   border: 1px solid #888888;
   background-color: #f8d888;
   font-size: 90%;
