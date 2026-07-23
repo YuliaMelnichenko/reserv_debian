@@ -59,7 +59,7 @@ if (!$supervisor_query) {
 
 $sv_ID = 0;
 
-if ($row = mysqli_fetch_array($supervisor_query, MYSQLI_ASSOC)) {
+if ($row = db_fetch_one($supervisor_query)) {
   $sv_ID = (int)$row["SUPERVISORID"];
 }
 

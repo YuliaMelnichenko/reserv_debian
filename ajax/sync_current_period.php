@@ -8,7 +8,7 @@ ajax_json_headers();
 include_once __DIR__ . '/../funcs.php';
 include __DIR__ . '/../php_tori/connect.php';
 
-mysqli_set_charset($link, 'utf8');
+db_set_charset($link, 'utf8');
 
 $userID = (int)$_SESSION['ss_id'];
 $oldStartDTStr = isset($_SESSION['ss_startDTStr']) ? (string)$_SESSION['ss_startDTStr'] : '';

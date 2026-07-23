@@ -9,7 +9,7 @@ $userID = $_SESSION['ss_id'] ?? null;
 include_once __DIR__ . "/../funcs.php";
 include __DIR__ . "/../php_tori/connect.php";
 require_once __DIR__ . "/../inc/remote_work.php";
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ajax_json_headers();
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = finish_remote_work($link, $userID);
 
         if ($result === false) {
-            ajax_json_application_error('Remote work finish at ' . __FILE__ . ':' . __LINE__, mysqli_error($link));
+            ajax_json_application_error('Remote work finish at ' . __FILE__ . ':' . __LINE__, db_error($link));
             exit;
         }
 
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = start_remote_work($link, $userID, request_post_int('supervisor_id'));
 
         if ($result === false) {
-            ajax_json_application_error('Remote work creation at ' . __FILE__ . ':' . __LINE__, mysqli_error($link));
+            ajax_json_application_error('Remote work creation at ' . __FILE__ . ':' . __LINE__, db_error($link));
             exit;
         }
 
@@ -60,7 +60,7 @@ $supervisors = $userID > 0 ? get_remote_work_supervisors($link, $userID) : false
 $openRow = $userID > 0 ? get_open_remote_work($link, $userID) : false;
 
 if ($supervisors === false || $openRow === false) {
-    $details = $userID > 0 ? mysqli_error($link) : 'No userID in session';
+    $details = $userID > 0 ? db_error($link) : 'No userID in session';
     $message = application_error_message('Remote work form at ' . __FILE__ . ':' . __LINE__, $details);
     echo "<div style='padding: 10px; color:#900;'>" . html_escape($message) . "</div>";
     exit;

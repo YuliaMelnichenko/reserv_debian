@@ -282,14 +282,14 @@ auth();
     $user_allowedDelay = $_SESSION['ss_allowedDelay'];
     $_date = date('Y-m-d');
 
-    mysqli_set_charset($link, "utf8");
+    db_set_charset($link, "utf8");
     $query0 = db_query(
       $link,
       "SELECT STATE, SURNAME, FIRSTNAME, LASTNAME FROM employees WHERE id = ?",
       'i',
       array($user_id)
     );
-    $vn0 = mysqli_num_rows($query0);
+    $vn0 = db_num_rows($query0);
 
     echo "<table cellpadding=\"10\" cellspacing=\"0\" border=1>";
     echo "<tr>";
@@ -306,13 +306,13 @@ auth();
     //-----------------------------------------------------------------------------------------------------------------
     
     if ( $vn0 == 1 ){
-      $row0 = mysqli_fetch_assoc($query0);
+      $row0 = db_fetch_one($query0);
 
       $empl_state = $row0["STATE"];
 
       $sv_name = get_sv_name_by_userid( $user_id );
 
-      mysqli_set_charset($link, "utf8");
+      db_set_charset($link, "utf8");
     
       $query01 = db_query(
         $link,
@@ -321,7 +321,7 @@ auth();
         array($user_id)
       );
 
-      $row01 = mysqli_fetch_assoc($query01);
+      $row01 = db_fetch_one($query01);
 
       $depName = $row01["NAME"];
 

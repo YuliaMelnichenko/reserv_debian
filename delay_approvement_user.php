@@ -57,7 +57,7 @@ echo "<div class=\"notification-page-layout\">";
 
 include_once __DIR__ . "/php_tori/connect.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 echo "<input id=\"recIDTempVal\" type=\"hidden\" value=\"\">";
 echo "<input id=\"acceptTempVal\" type=\"hidden\" value=\"\">";

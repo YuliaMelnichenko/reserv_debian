@@ -16,7 +16,7 @@ if ($date_train === null || $start_time === null || $stop_time === null) {
 
 include __DIR__ . "/../php_tori/connect.php";
 
-mysqli_set_charset($link, "utf8"); 
+db_set_charset($link, "utf8");
 
 $res = db_execute(
   $link,
@@ -24,7 +24,7 @@ $res = db_execute(
   'isss',
   array($userID, $date_train, $start_time, $stop_time)
 );
-$merr = mysqli_error($link);
+$merr = db_error($link);
 
 if ( !$res ) {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);

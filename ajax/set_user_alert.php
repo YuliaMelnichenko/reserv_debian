@@ -44,7 +44,7 @@ if (request_post_has('userID') && request_post_has('messageMode'))
     exit;
   }
 
-  $lastAlert = mysqli_fetch_assoc($query);
+  $lastAlert = db_fetch_one($query);
   $newID = $lastAlert ? (int)$lastAlert['ID'] + 1 : 1;
 
   $query = db_execute(

@@ -8,7 +8,7 @@ include __DIR__ . "/../php_tori/connect.php";
 include_once __DIR__ . "/../funcs.php";
 require_once __DIR__ . "/../inc/pause_service.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 $userID = (int)($_SESSION['ss_id'] ?? 0);
 $visitingID = (int)($_SESSION['ss_visiting_ID'] ?? 0);

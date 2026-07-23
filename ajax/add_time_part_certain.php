@@ -33,7 +33,7 @@ $stop_time = $range['stop'];
 
 $byAlert = request_post_int('byAlert') === 1 ? 1 : 0;
   
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 $supervisor_query = db_query($link, 'SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 AND USERID = ? LIMIT 1', 'i', array($userID));
 
@@ -42,7 +42,7 @@ if (!$supervisor_query) {
   exit;
 }
 
-$row = mysqli_fetch_array($supervisor_query, MYSQLI_ASSOC);
+$row = db_fetch_one($supervisor_query);
 
 if (!$row || (int)$row['SUPERVISORID'] <= 0) {
   echo "Не найден руководитель для согласования";
@@ -63,7 +63,7 @@ $query = db_execute(
   'siissisi',
   array($currentDate, $sv_ID, $userID, $start_time, $stop_time, $base, $desk, $byAlert)
 );
-$merr=mysqli_error($link);
+$merr = db_error($link);
 
 if (!$query){
   $transaction->rollback();
@@ -71,7 +71,7 @@ if (!$query){
 }
 else{
   if ( isset($_SESSION['ss_ch_delay_ID']) ){
-    mysqli_set_charset($link, "utf8"); 
+    db_set_charset($link, "utf8");
 
     $addTimeDescID = (int)$_SESSION['ss_ch_delay_ID'];
 
@@ -79,7 +79,7 @@ else{
 
   $query1 = db_execute($link, 'UPDATE Delays SET explaneDesk = ? WHERE id = ?', 'si', array($descDel, $addTimeDescID));
 
-    $merr1 = mysqli_error($link);
+    $merr1 = db_error($link);
 
     if (!$query1){
       $transaction->rollback();

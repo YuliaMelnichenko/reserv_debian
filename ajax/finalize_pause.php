@@ -18,7 +18,7 @@ if (!$pauseQuery) {
   exit;
 }
 
-$pause = mysqli_fetch_assoc($pauseQuery);
+$pause = db_fetch_one($pauseQuery);
 
 if (!$pause) {
   deny_ajax_access(404, 'OPEN_PAUSE_NOT_FOUND');

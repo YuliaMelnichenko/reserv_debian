@@ -24,7 +24,7 @@ else
   $query = db_execute($link, 'UPDATE Delays SET status = status - 100 WHERE ID = ?', 'i', array($ID));
 }
 
-$merr=mysqli_error($link);
+$merr = db_error($link);
 if ( !$query ) 
 {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);

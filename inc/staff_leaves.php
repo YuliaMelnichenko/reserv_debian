@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/date_range.php';
+require_once __DIR__ . '/database.php';
 
 function getEmployees($link)
 {
@@ -11,7 +12,7 @@ function getEmployees($link)
         return $employees;
     }
 
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = db_fetch_one($result)) {
         $employees[$row['id']] = $row['surname'] . ' ' . $row['firstname'];
     }
 
@@ -146,18 +147,14 @@ function getArchiveEmployeeTitle($link, $employeeId)
         return 'Все сотрудники';
     }
 
-    $stmt = mysqli_prepare($link, 'SELECT surname, firstname FROM employees WHERE id = ? LIMIT 1');
+    $result = db_query(
+        $link,
+        'SELECT surname, firstname FROM employees WHERE id = ? LIMIT 1',
+        'i',
+        array((int)$employeeId)
+    );
 
-    if (!$stmt) {
-        return 'Выбранный сотрудник';
-    }
-
-    $employeeId = (int)$employeeId;
-    mysqli_stmt_bind_param($stmt, 'i', $employeeId);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-
-    if ($row = mysqli_fetch_assoc($result)) {
+    if ($row = db_fetch_one($result)) {
         return $row['surname'] . ' ' . $row['firstname'];
     }
 
@@ -219,26 +216,13 @@ function fetchStaffLeavesArchiveRows($link, $employeeId, $event, $filterStartDat
         $sql .= ' LIMIT ' . (int)$limit;
     }
 
-    $stmt = mysqli_prepare($link, $sql);
-    if (!$stmt) {
-        throw new RuntimeException(mysqli_error($link));
-    }
-
-    if (count($params) > 0) {
-        mysqli_stmt_bind_param($stmt, $types, ...$params);
-    }
-
-    if (!mysqli_stmt_execute($stmt)) {
-        throw new RuntimeException(mysqli_stmt_error($stmt));
-    }
-
-    $result = mysqli_stmt_get_result($stmt);
+    $result = db_query($link, $sql, $types, $params);
     if (!$result) {
-        throw new RuntimeException(mysqli_error($link));
+        throw new RuntimeException(db_error($link));
     }
 
     $rows = array();
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = db_fetch_one($result)) {
         $rows[] = mapStaffLeaveRow($row);
     }
 
@@ -247,22 +231,22 @@ function fetchStaffLeavesArchiveRows($link, $employeeId, $event, $filterStartDat
 
 function fetchActiveStaffLeaves($link, $event)
 {
-    $stmt = mysqli_prepare(
+    $result = db_query(
         $link,
         'SELECT id, user_id, fio, start_date, stop_date, event '
             . 'FROM staff_leaves WHERE event = ? AND stop_date >= CURDATE() '
-            . 'ORDER BY fio ASC, start_date ASC, stop_date ASC'
+            . 'ORDER BY fio ASC, start_date ASC, stop_date ASC',
+        's',
+        array($event)
     );
-    if (!$stmt) {
-        throw new RuntimeException(mysqli_error($link));
+
+    if (!$result) {
+        throw new RuntimeException(db_error($link));
     }
 
-    mysqli_stmt_bind_param($stmt, 's', $event);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
     $rows = array();
 
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = db_fetch_one($result)) {
         $rows[] = mapStaffLeaveRow($row);
     }
 
@@ -271,17 +255,18 @@ function fetchActiveStaffLeaves($link, $event)
 
 function fetchStaffLeaveById($link, $id)
 {
-    $stmt = mysqli_prepare($link, 'SELECT id, start_date, stop_date, fio, event FROM staff_leaves WHERE id = ?');
-    if (!$stmt) {
-        throw new RuntimeException(mysqli_error($link));
+    $result = db_query(
+        $link,
+        'SELECT id, start_date, stop_date, fio, event FROM staff_leaves WHERE id = ?',
+        'i',
+        array((int)$id)
+    );
+
+    if (!$result) {
+        throw new RuntimeException(db_error($link));
     }
 
-    $id = (int)$id;
-    mysqli_stmt_bind_param($stmt, 'i', $id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-
-    return mysqli_fetch_assoc($result) ?: null;
+    return db_fetch_one($result);
 }
 
 function createStaffLeave($link, $userId, $startDate, $stopDate, $event)
@@ -294,29 +279,26 @@ function createStaffLeave($link, $userId, $startDate, $stopDate, $event)
         throw new InvalidArgumentException('Сотрудник не выбран');
     }
 
-    $stmt = mysqli_prepare($link, 'SELECT surname, firstname FROM employees WHERE id = ? LIMIT 1');
-    if (!$stmt) {
-        throw new RuntimeException(mysqli_error($link));
-    }
-
-    mysqli_stmt_bind_param($stmt, 'i', $userId);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    $employee = mysqli_fetch_assoc($result);
+    $result = db_query(
+        $link,
+        'SELECT surname, firstname FROM employees WHERE id = ? LIMIT 1',
+        'i',
+        array($userId)
+    );
+    $employee = db_fetch_one($result);
 
     if (!$employee) {
         throw new InvalidArgumentException('Сотрудник не найден');
     }
 
     $fio = trim($employee['surname'] . ' ' . $employee['firstname']);
-    $stmt = mysqli_prepare($link, 'INSERT INTO staff_leaves (user_id, fio, start_date, stop_date, event) VALUES (?, ?, ?, ?, ?)');
-    if (!$stmt) {
-        throw new RuntimeException(mysqli_error($link));
-    }
-
-    mysqli_stmt_bind_param($stmt, 'issss', $userId, $fio, $start, $stop, $event);
-    if (!mysqli_stmt_execute($stmt)) {
-        throw new RuntimeException(mysqli_stmt_error($stmt));
+    if (!db_execute(
+        $link,
+        'INSERT INTO staff_leaves (user_id, fio, start_date, stop_date, event) VALUES (?, ?, ?, ?, ?)',
+        'issss',
+        array($userId, $fio, $start, $stop, $event)
+    )) {
+        throw new RuntimeException(db_error($link));
     }
 }
 
@@ -330,14 +312,13 @@ function updateStaffLeave($link, $id, $startDate, $stopDate, $event)
         throw new InvalidArgumentException('Некорректный ID записи');
     }
 
-    $stmt = mysqli_prepare($link, 'UPDATE staff_leaves SET start_date = ?, stop_date = ?, event = ? WHERE id = ?');
-    if (!$stmt) {
-        throw new RuntimeException(mysqli_error($link));
-    }
-
-    mysqli_stmt_bind_param($stmt, 'sssi', $start, $stop, $event, $id);
-    if (!mysqli_stmt_execute($stmt)) {
-        throw new RuntimeException(mysqli_stmt_error($stmt));
+    if (!db_execute(
+        $link,
+        'UPDATE staff_leaves SET start_date = ?, stop_date = ?, event = ? WHERE id = ?',
+        'sssi',
+        array($start, $stop, $event, $id)
+    )) {
+        throw new RuntimeException(db_error($link));
     }
 }
 
@@ -348,13 +329,7 @@ function deleteStaffLeave($link, $id)
         throw new InvalidArgumentException('Некорректный ID записи');
     }
 
-    $stmt = mysqli_prepare($link, 'DELETE FROM staff_leaves WHERE id = ?');
-    if (!$stmt) {
-        throw new RuntimeException(mysqli_error($link));
-    }
-
-    mysqli_stmt_bind_param($stmt, 'i', $id);
-    if (!mysqli_stmt_execute($stmt)) {
-        throw new RuntimeException(mysqli_stmt_error($stmt));
+    if (!db_execute($link, 'DELETE FROM staff_leaves WHERE id = ?', 'i', array($id))) {
+        throw new RuntimeException(db_error($link));
     }
 }

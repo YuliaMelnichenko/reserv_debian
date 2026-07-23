@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/database.php';
+
 error_reporting(E_ALL);
 ini_set('display_errors', '0');
 ini_set('display_startup_errors', '0');
@@ -22,7 +24,7 @@ function database_error_message($link, $context)
     $details = 'Unknown database error';
 
     if ($link instanceof mysqli) {
-        $details = mysqli_error($link);
+        $details = db_error($link);
     }
 
     return application_error_message('Database error at ' . $context, $details);

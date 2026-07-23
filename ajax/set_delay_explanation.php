@@ -35,7 +35,7 @@ if ($superuserID !== -1) {
     exit;
   }
 
-  if (mysqli_num_rows($supervisorQuery) === 0) {
+  if (!db_has_rows($supervisorQuery)) {
     deny_ajax_access(403, 'FORBIDDEN_SUPERVISOR');
   }
 }
@@ -62,7 +62,7 @@ if (!$idQuery) {
   exit;
 }
 
-$lastDelay = mysqli_fetch_assoc($idQuery);
+$lastDelay = db_fetch_one($idQuery);
 
 if ($mode == 0)
 {
@@ -89,7 +89,7 @@ if (!$query0) {
   exit;
 }
 
-$delay = mysqli_fetch_assoc($query0);
+$delay = db_fetch_one($query0);
 
 if (!$delay)
 {

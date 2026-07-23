@@ -42,7 +42,7 @@ function get_accounting_errors_period_label()
 
 function accounting_errors_remove_dates_from_result($result, $column, &$dates)
 {
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = db_fetch_one($result)) {
         if (!empty($row[$column])) {
             unset($dates[$row[$column]]);
         }
@@ -75,7 +75,7 @@ function sync_accounting_errors_for_user($link, $userID, $depthDays = 0)
         return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
     }
 
-    while ($row = mysqli_fetch_assoc($calendarResult)) {
+    while ($row = db_fetch_one($calendarResult)) {
         $workdayOverrides[$row['date']] = (int)$row['type'];
     }
 
@@ -153,7 +153,7 @@ function sync_accounting_errors_for_user($link, $userID, $depthDays = 0)
         return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
     }
 
-    while ($leave = mysqli_fetch_assoc($leavesResult)) {
+    while ($leave = db_fetch_one($leavesResult)) {
         $leaveStart = max($startDate, $leave['start_date']);
         $leaveStop = min($stopDate, $leave['stop_date']);
         $leaveDay = new DateTimeImmutable($leaveStart);
@@ -165,7 +165,9 @@ function sync_accounting_errors_for_user($link, $userID, $depthDays = 0)
         }
     }
 
-    if (!mysqli_begin_transaction($link)) {
+    $transaction = db_transaction_start($link);
+
+    if (!$transaction) {
         return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
     }
 
@@ -177,13 +179,13 @@ function sync_accounting_errors_for_user($link, $userID, $depthDays = 0)
     );
 
     if (!$existingResult) {
-        mysqli_rollback($link);
+        $transaction->rollback();
         return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
     }
 
     $existingDates = array();
 
-    while ($existing = mysqli_fetch_assoc($existingResult)) {
+    while ($existing = db_fetch_one($existingResult)) {
         $errorID = (int)$existing['ID'];
         $errorDate = $existing['ERROR_DATE'];
         $status = (int)$existing['STATUS'];
@@ -198,7 +200,7 @@ function sync_accounting_errors_for_user($link, $userID, $depthDays = 0)
             );
 
             if (!$deleted) {
-                mysqli_rollback($link);
+                $transaction->rollback();
                 return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
             }
 
@@ -213,7 +215,7 @@ function sync_accounting_errors_for_user($link, $userID, $depthDays = 0)
             continue;
         }
 
-        $inserted = db_execute(
+        $inserted = db_execute_affected_rows(
             $link,
             'INSERT INTO accounting_errors (USERID, ERROR_DATE, STATUS, CREATED_DT)
              SELECT ?, ?, 0, NOW()
@@ -225,16 +227,15 @@ function sync_accounting_errors_for_user($link, $userID, $depthDays = 0)
             array($userID, $errorDate, $userID, $errorDate)
         );
 
-        if (!$inserted) {
-            mysqli_rollback($link);
+        if ($inserted === false) {
+            $transaction->rollback();
             return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
         }
 
-        $insertedCount += max(0, mysqli_affected_rows($link));
+        $insertedCount += max(0, $inserted);
     }
 
-    if (!mysqli_commit($link)) {
-        mysqli_rollback($link);
+    if (!$transaction->commit()) {
         return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
     }
 
@@ -261,7 +262,7 @@ function get_accounting_errors_count($link, $userID)
         return 0;
     }
 
-    $row = mysqli_fetch_assoc($result);
+    $row = db_fetch_one($result);
     return (int)$row['CNT'];
 }
 
@@ -284,7 +285,7 @@ function get_accounting_errors_notification_count($link, $supervisorID)
         return 0;
     }
 
-    $row = mysqli_fetch_assoc($result);
+    $row = db_fetch_one($result);
     return (int)$row['CNT'];
 }
 
@@ -314,7 +315,7 @@ function get_accounting_errors_counts_by_user($link, $userID, &$totalCount, &$ac
         return false;
     }
 
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = db_fetch_one($result)) {
         $status = (int)$row['STATUS'];
         $count = (int)$row['CNT'];
         $totalCount += $count;
@@ -349,7 +350,7 @@ function get_accounting_errors_supervised_user_ids($link, $supervisorID)
 
     $userIDs = array();
 
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = db_fetch_one($result)) {
         $userIDs[] = (int)$row['USERID'];
     }
 

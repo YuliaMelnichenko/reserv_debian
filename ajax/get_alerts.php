@@ -102,7 +102,7 @@ include __DIR__ . "/../php_tori/connect.php";
 
 $currentDate = date('Y-m-d');           
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 $query = db_query(
   $link,
   "SELECT ID, DATE, COMMENT FROM ALERTS WHERE DATE = ? AND USERID = ? AND VIEWED = 0",
@@ -110,12 +110,12 @@ $query = db_query(
   array($currentDate, $userID_)
 );
 
-$merr=mysqli_error($link);
+$merr = db_error($link);
 if ( !$query ){
   ajax_database_error($link, __FILE__ . ':' . __LINE__);
 }
 else{
-  while ( $row = mysqli_fetch_assoc($query) ){
+  while ( $row = db_fetch_one($query) ){
     $date = $row["DATE"];
     $id = (int)$row["ID"];
     $comments = $row["COMMENT"];

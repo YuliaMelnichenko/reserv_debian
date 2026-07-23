@@ -15,7 +15,7 @@ require_once __DIR__ . "/../inc/workday_registration.php";
 $userID = (int)$_SESSION['ss_id'];
 $visitingID = (int)$_SESSION['ss_visiting_ID'];
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 if ($visitingID <= 0) {
   exit('');

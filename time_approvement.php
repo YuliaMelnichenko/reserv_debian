@@ -44,7 +44,7 @@ echo "<div class=\"notification-page-layout\">";
 
 include __DIR__ . "/php_tori/connect.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 $summary = get_add_time_notification_summary($link, $SUID, get_current_datetime_in_timezone_str(1, 0));
 
 if ($summary === false) {

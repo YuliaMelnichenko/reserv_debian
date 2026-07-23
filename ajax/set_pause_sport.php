@@ -12,7 +12,7 @@ include __DIR__ . "/../php_tori/connect.php";
 include_once __DIR__ . "/../funcs.php";
 require_once __DIR__ . "/../inc/pause_service.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 $dateTime = get_current_datetime_in_timezone();
 $result = start_sport_time_pause(

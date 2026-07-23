@@ -31,7 +31,7 @@ echo "<div class=\"notification-page-layout\">";
 
 include_once __DIR__ . "/php_tori/connect.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 $summary = get_pause_notification_summary($link, $userID_, get_current_datetime_in_timezone_str(1, 0));
 
 if ($summary === false) {

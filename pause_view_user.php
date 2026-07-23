@@ -59,7 +59,7 @@ echo "<div class=\"notification-page-layout\">";
 
 include_once __DIR__ . "/php_tori/connect.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 echo "<table class=\"notification-page-table\">";
   echo "<tr>";

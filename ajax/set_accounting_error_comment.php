@@ -38,7 +38,7 @@ if (!$result) {
     exit;
 }
 
-$row = mysqli_fetch_assoc($result);
+$row = db_fetch_one($result);
 
 if (!$row) {
     $transaction->rollback();

@@ -12,7 +12,7 @@ require_csrf_for_unsafe_request(true);
 $__login = request_post_trimmed_string('login');
 $__passwd = md5(md5(request_post_trimmed_string('passwd')));
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 $query = db_query(
   $link,
@@ -20,7 +20,7 @@ $query = db_query(
   'ss',
   array($__login, $__passwd)
 );
-$merr = mysqli_error($link);
+$merr = db_error($link);
 
 if ( !$query ) 
 {
@@ -28,11 +28,11 @@ if ( !$query )
 }
 else
 {
-  $vn = mysqli_num_rows($query);
+  $vn = db_num_rows($query);
 
   if ( $vn == 1 )
   { 
-    $row = mysqli_fetch_assoc($query);
+    $row = db_fetch_one($query);
     session_regenerate_id(true);
     $_SESSION['ss_id'] = $row["id"];
     $_SESSION['ss_rate'] = $row["rate"];

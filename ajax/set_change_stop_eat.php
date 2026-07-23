@@ -31,7 +31,7 @@ if ($newStopEatTime === null) {
 include_once __DIR__ . "/../php_tori/connect.php";
 include_once __DIR__ . "/../funcs.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 $query = db_query($link, "
   SELECT ID, in_dt, eat_start_dt, eat_stop_dt
@@ -46,12 +46,12 @@ if (!$query) {
   exit;
 }
 
-if (mysqli_num_rows($query) == 0) {
+if (db_num_rows($query) == 0) {
   echo "Ошибка: запись посещения не найдена";
   exit;
 }
 
-$row = mysqli_fetch_array($query, MYSQLI_ASSOC);
+$row = db_fetch_one($query);
 $eatStartDT = $row["eat_start_dt"];
 $eatStopDT = $row["eat_stop_dt"];
 

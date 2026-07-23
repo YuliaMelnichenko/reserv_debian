@@ -10,7 +10,7 @@ require_ajax_add_time_access($itemId);
 include_once __DIR__ . "/../php_tori/connect.php";
 
 $query = db_execute($link, 'DELETE FROM ADD_TIME WHERE ID = ?', 'i', array($itemId));
-$merr = mysqli_error($link);
+$merr = db_error($link);
 
 if (!$query)
 {

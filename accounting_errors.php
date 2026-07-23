@@ -78,7 +78,7 @@ echo "<table class=\"accounting-errors-page-table\">";
                 $color = "#ddffff";
                 $rowCount = 0;
 
-                while ($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
+                while ($row = db_fetch_one($query)) {
                     $rowCount++;
 
                     $errorID = (int)$row["ID"];

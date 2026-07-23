@@ -16,7 +16,7 @@ function get_add_time_journal_context($link, $userID, $currentDateTime, $include
         return false;
     }
 
-    $user = mysqli_fetch_assoc($userResult);
+    $user = db_fetch_one($userResult);
 
     if (!$user) {
         return null;
@@ -33,7 +33,7 @@ function get_add_time_journal_context($link, $userID, $currentDateTime, $include
         return false;
     }
 
-    $depthRow = mysqli_fetch_assoc($depthResult);
+    $depthRow = db_fetch_one($depthResult);
     $depthDays = $depthRow ? abs((int)$depthRow['valueInt']) : 180;
     $dateTimeExpressions = time_journal_add_work_datetime_expressions($link);
     $entryResult = time_journal_query_add_work_journal(
@@ -52,7 +52,7 @@ function get_add_time_journal_context($link, $userID, $currentDateTime, $include
 
     $entries = array();
 
-    while ($row = mysqli_fetch_assoc($entryResult)) {
+    while ($row = db_fetch_one($entryResult)) {
         $status = (int)$row['APPROVED'];
 
         if (!$includeDeleted && in_array($status, array(99, 100, 101), true)) {
