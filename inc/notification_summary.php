@@ -286,7 +286,7 @@ function get_add_time_notification_summary($link, $supervisorID, $currentDateTim
 
     $depthRow = db_fetch_one($depthResult);
     $depthDays = $depthRow ? abs((int)$depthRow['valueInt']) : 180;
-    $dateTimeExpressions = time_journal_add_work_datetime_expressions($link);
+    $dateTimeExpressions = time_journal_add_work_datetime_expressions($link, 'add_time');
     $startExpression = $dateTimeExpressions['start'];
     $stopExpression = $dateTimeExpressions['stop'];
     $summaryResult = db_query($link, "
