@@ -41,11 +41,25 @@ function add_time_datetime_sql($dateTimeColumn, $dateColumn = null, $timeColumn 
     END";
 }
 
-function time_journal_add_work_datetime_expressions($link)
+function time_journal_add_work_datetime_expressions($link, $tableAlias = 'a')
 {
+    if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $tableAlias)) {
+        throw new InvalidArgumentException('Invalid ADD_TIME table alias');
+    }
+
     return array(
-        'start' => add_time_datetime_sql('a.START_DT', 'a.STARTDATE', 'a.STARTTIME', $link),
-        'stop' => add_time_datetime_sql('a.STOP_DT', 'a.STARTDATE', 'a.STOPTIME', $link),
+        'start' => add_time_datetime_sql(
+            $tableAlias . '.START_DT',
+            $tableAlias . '.STARTDATE',
+            $tableAlias . '.STARTTIME',
+            $link
+        ),
+        'stop' => add_time_datetime_sql(
+            $tableAlias . '.STOP_DT',
+            $tableAlias . '.STARTDATE',
+            $tableAlias . '.STOPTIME',
+            $link
+        ),
     );
 }
 

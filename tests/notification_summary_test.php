@@ -157,6 +157,15 @@ return function () {
         strpos($service, 'function get_add_time_notification_summary') !== false,
         'The shared service must provide the remote-work notification summary'
     );
+    $addTimeSummaryStart = strpos($service, 'function get_add_time_notification_summary');
+    $addTimeSummarySource = substr($service, $addTimeSummaryStart);
+    test_assert_true(
+        strpos(
+            $addTimeSummarySource,
+            "time_journal_add_work_datetime_expressions(\$link, 'add_time')"
+        ) !== false,
+        'The remote-work summary expressions must use the ADD_TIME join alias'
+    );
     test_assert_true(
         strpos($service, 'function get_pause_notification_count') !== false,
         'The shared service must provide the personal pause notification counter'

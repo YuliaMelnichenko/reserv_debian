@@ -79,6 +79,12 @@ return function () {
         'The shared data service must support hiding deleted employee entries'
     );
 
+    $goBackController = file_get_contents(__DIR__ . '/../ajax/go_back_add_time_page_mode.php');
+    test_assert_true(
+        strpos($goBackController, "isset(\$_SESSION['add_time_page_mode'])") !== false,
+        'Remote-work navigation must initialize a missing page mode without warnings'
+    );
+
     $preview = file_get_contents(__DIR__ . '/../ajax/get_add_times.php');
     test_assert_true(
         strpos($preview, 'inc/add_time_journal.php') !== false,
