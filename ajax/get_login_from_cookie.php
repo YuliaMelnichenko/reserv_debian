@@ -1,8 +1,9 @@
 <?php
 require_once __DIR__ . '/../inc/ajax_response.php';
+require_once __DIR__ . '/../inc/request.php';
 ajax_text_headers();
 
-$userName = trim((string) ($_COOKIE['T_O_R_I_USERNAME'] ?? ''));
+$userName = trim(request_cookie_string('T_O_R_I_USERNAME'));
 
 if ( $userName != "" )
 {

@@ -1,20 +1,6 @@
 <?php
 
-function test_assert_true($condition, $message)
-{
-    if (!$condition) {
-        throw new RuntimeException($message);
-    }
-}
-
-function test_assert_same($expected, $actual, $message)
-{
-    if ($expected !== $actual) {
-        throw new RuntimeException(
-            $message . '; expected ' . var_export($expected, true) . ', got ' . var_export($actual, true)
-        );
-    }
-}
+require_once __DIR__ . '/test_helpers.php';
 
 $testFiles = array(
     __DIR__ . '/time_registration_renderer_test.php',
@@ -30,6 +16,7 @@ $testFiles = array(
     __DIR__ . '/delay_journal_test.php',
     __DIR__ . '/entrance_adjustment_test.php',
     __DIR__ . '/gym_schedule_test.php',
+    __DIR__ . '/index_presence_test.php',
     __DIR__ . '/legacy_schema_audit_test.php',
     __DIR__ . '/legacy_function_cleanup_test.php',
     __DIR__ . '/module_extraction_test.php',
@@ -37,6 +24,7 @@ $testFiles = array(
     __DIR__ . '/overtime_test.php',
     __DIR__ . '/pause_service_test.php',
     __DIR__ . '/pause_journal_test.php',
+    __DIR__ . '/php85_compatibility_test.php',
     __DIR__ . '/report_renderer_test.php',
     __DIR__ . '/remote_work_test.php',
     __DIR__ . '/request_input_test.php',

@@ -5,7 +5,7 @@ require_once __DIR__ . '/inc/access.php';
 include_once __DIR__ . "/funcs.php";
 require_once __DIR__ . "/inc/add_time_journal.php";
 save_last_location( "time_approvement.php" );
-$mid = (string) ($_GET['mid'] ?? '');
+$mid = request_get_trimmed_string('mid');
 
 if ($mid === '') {
   header('Location: time_approvement.php');

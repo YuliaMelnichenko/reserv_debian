@@ -3,6 +3,7 @@ ob_start();
 require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 require_once __DIR__ . '/inc/employee_registration.php';
+require_once __DIR__ . '/inc/request.php';
 require_page_director();
 ?>
 
@@ -23,8 +24,16 @@ $err = array();
 	
 include_once __DIR__ . "/php_tori/connect.php";
 
-if (isset( $_POST['r_button']) ) {
-  $err = register_employee($link, $_POST);
+if (request_post_has('r_button')) {
+  $registrationInput = array(
+    'r_login' => request_post_trimmed_string('r_login'),
+    'r_passwd' => request_post_string('r_passwd'),
+    'r_passwd_rep' => request_post_string('r_passwd_rep'),
+    'r_surname' => request_post_trimmed_string('r_surname'),
+    'r_first_name' => request_post_trimmed_string('r_first_name'),
+    'r_second_name' => request_post_trimmed_string('r_second_name'),
+  );
+  $err = register_employee($link, $registrationInput);
 
   if (!$err) {
     header("Location: index.php");
@@ -38,7 +47,6 @@ if (isset( $_POST['r_button']) ) {
       echo "- ".html_escape($error)."\n";
     }
     echo "<br><br>";
-    unset( $_POST['r_login']);
   }
 }
 

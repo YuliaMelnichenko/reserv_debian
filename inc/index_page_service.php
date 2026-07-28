@@ -67,6 +67,94 @@ function index_presence_status($employeeId, $visit, $openAddTime, $remoteWork)
     );
 }
 
+function index_map_rows_by_employee($rows, $employeeKey = 'user_id')
+{
+    $mappedRows = array();
+
+    foreach ($rows as $row) {
+        if (!isset($row[$employeeKey])) {
+            continue;
+        }
+
+        $mappedRows[(int)$row[$employeeKey]] = $row;
+    }
+
+    return $mappedRows;
+}
+
+function index_fetch_presence_state_maps($link)
+{
+    $visitResult = db_query($link, "
+        SELECT v.user_id, v.in_dt, v.eat_start_dt, v.eat_stop_dt, v.out_dt
+        FROM visiting v
+        INNER JOIN employees e ON e.id = v.user_id
+        WHERE e.relevance = 1
+          AND e.id NOT IN (400, 500, 501)
+          AND v.in_dt >= CURDATE()
+          AND v.in_dt < CURDATE() + INTERVAL 1 DAY
+          AND NOT EXISTS (
+            SELECT 1
+            FROM visiting newer
+            WHERE newer.user_id = v.user_id
+              AND newer.in_dt >= CURDATE()
+              AND newer.in_dt < CURDATE() + INTERVAL 1 DAY
+              AND (
+                newer.in_dt > v.in_dt
+                OR (newer.in_dt = v.in_dt AND newer.ID > v.ID)
+              )
+          )
+    ");
+    $addTimeResult = db_query($link, "
+        SELECT a.USERID AS user_id, a.START_DT, a.STOP_DT
+        FROM ADD_TIME a
+        INNER JOIN employees e ON e.id = a.USERID
+        WHERE e.relevance = 1
+          AND e.id NOT IN (400, 500, 501)
+          AND a.START_DT >= CURDATE()
+          AND a.START_DT < CURDATE() + INTERVAL 1 DAY
+          AND (a.STOP_DT IS NULL OR a.STOP_DT = '0000-00-00 00:00:00')
+          AND NOT EXISTS (
+            SELECT 1
+            FROM ADD_TIME newer
+            WHERE newer.USERID = a.USERID
+              AND newer.START_DT >= CURDATE()
+              AND newer.START_DT < CURDATE() + INTERVAL 1 DAY
+              AND (newer.STOP_DT IS NULL OR newer.STOP_DT = '0000-00-00 00:00:00')
+              AND (
+                newer.START_DT > a.START_DT
+                OR (newer.START_DT = a.START_DT AND newer.ID > a.ID)
+              )
+          )
+    ");
+    $remoteResult = db_query($link, "
+        SELECT rw.user_id, rw.id, rw.start_dt, rw.stop_dt
+        FROM remote_work rw
+        INNER JOIN employees e ON e.id = rw.user_id
+        WHERE e.relevance = 1
+          AND e.id NOT IN (400, 500, 501)
+          AND rw.start_dt >= CURDATE()
+          AND rw.start_dt < CURDATE() + INTERVAL 1 DAY
+          AND NOT EXISTS (
+            SELECT 1
+            FROM remote_work newer
+            WHERE newer.user_id = rw.user_id
+              AND newer.start_dt >= CURDATE()
+              AND newer.start_dt < CURDATE() + INTERVAL 1 DAY
+              AND newer.id > rw.id
+          )
+    ");
+
+    if (!$visitResult || !$addTimeResult || !$remoteResult) {
+        throw new RuntimeException(database_error_message($link, __FILE__ . ':' . __LINE__));
+    }
+
+    return array(
+        'visits' => index_map_rows_by_employee(db_fetch_all($visitResult)),
+        'add_times' => index_map_rows_by_employee(db_fetch_all($addTimeResult)),
+        'remote_work' => index_map_rows_by_employee(db_fetch_all($remoteResult)),
+    );
+}
+
 function index_fetch_presence_rows($link)
 {
     db_set_charset($link, 'utf8');
@@ -120,51 +208,15 @@ function index_fetch_presence_rows($link)
         throw new RuntimeException(database_error_message($link, __FILE__ . ':' . __LINE__));
     }
 
+    $presenceState = index_fetch_presence_state_maps($link);
     $employees = array();
     $emptyDateTime = '0000-00-00 00:00:00';
 
     foreach (db_fetch_all($employeeResult) as $employee) {
         $employeeId = (int)$employee['id'];
-        $visitResult = db_query(
-            $link,
-            'SELECT in_dt, eat_start_dt, eat_stop_dt, out_dt
-             FROM visiting
-             WHERE DATE(in_dt) = CURDATE() AND user_id = ?
-             ORDER BY in_dt DESC, ID DESC
-             LIMIT 1',
-            'i',
-            array($employeeId)
-        );
-        $addTimeResult = db_query(
-            $link,
-            "SELECT START_DT, STOP_DT
-             FROM ADD_TIME
-             WHERE DATE(START_DT) = CURDATE()
-               AND USERID = ?
-               AND (STOP_DT IS NULL OR STOP_DT = '0000-00-00 00:00:00')
-             ORDER BY START_DT DESC, ID DESC
-             LIMIT 1",
-            'i',
-            array($employeeId)
-        );
-        $remoteResult = db_query(
-            $link,
-            'SELECT id, start_dt, stop_dt
-             FROM remote_work
-             WHERE user_id = ? AND DATE(start_dt) = CURDATE()
-             ORDER BY id DESC
-             LIMIT 1',
-            'i',
-            array($employeeId)
-        );
-
-        if (!$visitResult || !$addTimeResult || !$remoteResult) {
-            throw new RuntimeException(database_error_message($link, __FILE__ . ':' . __LINE__));
-        }
-
-        $visit = db_fetch_one($visitResult);
-        $addTime = db_fetch_one($addTimeResult);
-        $remoteWork = db_fetch_one($remoteResult);
+        $visit = $presenceState['visits'][$employeeId] ?? null;
+        $addTime = $presenceState['add_times'][$employeeId] ?? null;
+        $remoteWork = $presenceState['remote_work'][$employeeId] ?? null;
         list($statusIcon, $sortOrder) = index_presence_status(
             $employeeId,
             $visit,
