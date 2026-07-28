@@ -90,11 +90,20 @@ else{
     unset($_SESSION['ss_ch_delay_ID']);
   }
 
+  $workDate = substr($start_time, 0, 10);
+
+  if (!clear_unsubmitted_accounting_errors_for_dates($link, $userID, array($workDate))) {
+    $transaction->rollback();
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
+    exit;
+  }
+
   if (!$transaction->commit()) {
     ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 
+  $_SESSION['accounting_errors_sync_date'] = date('Y-m-d');
   echo "1";
 }
 ?>

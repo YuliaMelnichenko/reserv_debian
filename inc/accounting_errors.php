@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/date_range.php';
+
 function get_accounting_error_status_name($status)
 {
     $names = array(
@@ -47,6 +49,34 @@ function accounting_errors_remove_dates_from_result($result, $column, &$dates)
             unset($dates[$row[$column]]);
         }
     }
+}
+
+function clear_unsubmitted_accounting_errors_for_dates($link, $userID, $dates)
+{
+    $normalizedDates = array();
+
+    foreach ($dates as $date) {
+        $normalizedDate = normalize_date_value($date);
+
+        if ($normalizedDate !== null) {
+            $normalizedDates[$normalizedDate] = true;
+        }
+    }
+
+    foreach (array_keys($normalizedDates) as $date) {
+        $deleted = db_execute(
+            $link,
+            'DELETE FROM accounting_errors WHERE USERID = ? AND ERROR_DATE = ? AND STATUS = 0',
+            'is',
+            array((int)$userID, $date)
+        );
+
+        if (!$deleted) {
+            return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
+        }
+    }
+
+    return true;
 }
 
 function sync_accounting_errors_for_user($link, $userID, $depthDays = 0)

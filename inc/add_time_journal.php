@@ -47,6 +47,24 @@ function get_add_time_journal_context($link, $userID, $currentDateTime, $include
     );
 
     if (!$entryResult) {
+        $legacyQueryError = db_error($link);
+        error_log(
+            '[TORI] Add-time journal compatibility query failed; retrying modern columns: '
+            . $legacyQueryError
+        );
+        $entryResult = time_journal_query_add_work_journal(
+            $link,
+            (int)$userID,
+            0,
+            $currentDateTime,
+            -$depthDays,
+            'a.START_DT',
+            'a.STOP_DT'
+        );
+    }
+
+    if (!$entryResult) {
+        error_log('[TORI] Add-time journal query failed: ' . db_error($link));
         return false;
     }
 

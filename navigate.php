@@ -105,7 +105,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
   }
 
   if ($needToShow == 1 && $accountingErrorsCount > 0) {
-    echo "<tr><td><button class=\"nav-menu-button nav-menu-button-section\" onclick=\"location.href='accounting_errors.php'\"><h5 class=\"bigger\">Ошибки учета ($accountingErrorsCount)</h5></button></td></tr>";
+    echo "<tr><td><button id=\"accountingErrorsBtn\" class=\"nav-menu-button nav-menu-button-section\" onclick=\"location.href='accounting_errors.php'\"><h5 class=\"bigger\">Ошибки учета ($accountingErrorsCount)</h5></button></td></tr>";
   }
 
   if ( am_i_superuser( $_SESSION['ss_id'] ) == 1 ){

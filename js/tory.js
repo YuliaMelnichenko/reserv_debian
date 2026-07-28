@@ -410,7 +410,6 @@ function add_addition_time_by_alert( userID, date, startTime, messStr ){
     function RetSWT1(dat1) {
       document.getElementById('delay_explanation_add_time_part').innerHTML = dat1;
       document.getElementById('delay_explanation_add_time_part').style.display='block';
-      document.getElementById('add_time_part_date').value = date;
       document.getElementById('add_time_part_start_time').value = startTime;
       document.getElementById('add_time_part_stop_time').value = "18:00";
       document.getElementById('add_time_part_start_date').value = date;
@@ -841,6 +840,37 @@ function add_addition_time(){
   }
 }
 
+function refresh_accounting_errors_after_offsite_work(){
+  $.post('ajax/get_accounting_errors_count.php', {}, function(data) {
+    var count = Number.parseInt(data, 10);
+
+    if (!Number.isFinite(count)) {
+      return;
+    }
+
+    var button = document.getElementById('accountingErrorsBtn');
+
+    if (count <= 0) {
+      if (button && button.closest('tr')) {
+        button.closest('tr').remove();
+      }
+
+      document.querySelectorAll('.accounting-error-attention').forEach(function(icon) {
+        icon.remove();
+      });
+      return;
+    }
+
+    if (button) {
+      var label = button.querySelector('h5');
+
+      if (label) {
+        label.textContent = 'Ошибки учета (' + count + ')';
+      }
+    }
+  });
+}
+
 function cancel_part_time_add(){
   if ( document.getElementById('delay_explanation_add_time_part') ){ document.getElementById('delay_explanation_add_time_part').style.display='none'; }
   $.post('ajax/get_add_times.php', {},RetSWT1);
@@ -866,7 +896,13 @@ function close_add_sport_time(){
   if ( document.getElementById('delay_explanation_sport_time') ){ document.getElementById('delay_explanation_sport_time').style.display='none'; }
 }
 
+var offsiteWorkRequestPending = false;
+
 function part_time_add( byAlert ){
+  if (offsiteWorkRequestPending) {
+    return;
+  }
+
   if ( document.getElementById('add_time_certain') && document.getElementById('add_time_range') ){
     if ( document.getElementById('add_time_certain').checked ){
       if ( document.getElementById('add_time_part_start_dateTime') && document.getElementById('add_time_part_stop_dateTime') &&  document.getElementById('add_time_part_base') && document.getElementById('add_time_part_desc') ){
@@ -886,10 +922,18 @@ function part_time_add( byAlert ){
         var add_time_part_base = document.getElementById('add_time_part_base').value;
         var add_time_part_desk = document.getElementById('add_time_part_desc').value;
 
+        offsiteWorkRequestPending = true;
         $.post('ajax/add_time_part_certain.php', {add_time_part_start_dt: add_time_part_start_dt, add_time_part_stop_dt: add_time_part_stop_dt,
-                add_time_part_base: add_time_part_base, add_time_part_desk: add_time_part_desk, byAlert: byAlert }, RetSWT10);
+                add_time_part_base: add_time_part_base, add_time_part_desk: add_time_part_desk, byAlert: byAlert }, RetSWT10)
+          .fail(function() {
+            alert('Ошибка сервера');
+          })
+          .always(function() {
+            offsiteWorkRequestPending = false;
+          });
         function RetSWT10(dat10) {
           if ( dat10 == 1 ){
+            refresh_accounting_errors_after_offsite_work();
             if ( byAlert == 1 ){
               update_alerts_page();
             }
@@ -956,6 +1000,7 @@ function part_time_add( byAlert ){
           return;
         }
 
+        offsiteWorkRequestPending = true;
         $.post(
           'ajax/add_time_part_range.php',
           {
@@ -969,10 +1014,17 @@ function part_time_add( byAlert ){
             byAlert: byAlert
           },
           RetSWT20
-        );
+        )
+          .fail(function() {
+            alert('Ошибка сервера');
+          })
+          .always(function() {
+            offsiteWorkRequestPending = false;
+          });
 
         function RetSWT20(dat20) {
           if ( dat20 == 1 ){
+            refresh_accounting_errors_after_offsite_work();
             if ( byAlert == 1 ){
               update_alerts_page();
             }
