@@ -41,9 +41,7 @@ function csrf_ensure_token()
     }
 
     $token = $_SESSION['csrf_token'];
-    $cookieToken = isset($_COOKIE['TORI_CSRF_TOKEN'])
-        ? (string) $_COOKIE['TORI_CSRF_TOKEN']
-        : '';
+    $cookieToken = request_cookie_string('TORI_CSRF_TOKEN');
 
     if ($cookieToken === '' || !hash_equals($token, $cookieToken)) {
         csrf_set_cookie($token);
@@ -76,7 +74,7 @@ function require_csrf_for_unsafe_request($ajaxRequest = false)
     $expectedToken = csrf_ensure_token();
     $providedToken = isset($_SERVER['HTTP_X_CSRF_TOKEN'])
         ? (string) $_SERVER['HTTP_X_CSRF_TOKEN']
-        : (isset($_POST['_csrf']) ? (string) $_POST['_csrf'] : '');
+        : request_post_string('_csrf');
 
     if ($providedToken !== '' && hash_equals($expectedToken, $providedToken)) {
         return;

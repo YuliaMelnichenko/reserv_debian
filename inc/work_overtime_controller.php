@@ -1,18 +1,22 @@
 <?php
 
+require_once __DIR__ . '/request.php';
+
 function handle_work_overtime_request($link)
 {
+    $action = request_get_string('action');
+
     // === AJAX: список сотрудников с количеством переработок >= hours (текущий квартал) ===
-    if (isset($_GET['action']) && $_GET['action'] === 'load') {
+    if ($action === 'load') {
         ajax_json_headers();
 
         try {
-            $hours = normalizeOvertimeThreshold($_GET['hours'] ?? null);
-            $period = $_GET['period'] ?? 'quarter';
+            $hours = normalizeOvertimeThreshold(request_get_string('hours'));
+            $period = request_get_string('period', 'quarter');
             list($qstart, $qend) = getOvertimePeriodBounds(
                 $period,
-                $_GET['start'] ?? '',
-                $_GET['end'] ?? ''
+                request_get_string('start'),
+                request_get_string('end')
             );
 
             list($numbersSql, $addWorkDateSql, $addRangeSql, $addDurationSql) = overtimeAddTimeSqlParts();
@@ -139,19 +143,19 @@ function handle_work_overtime_request($link)
     }
 
     // === AJAX: детали по сотруднику — записи (дата + часы) с переработкой >= hours (текущий квартал) ===
-    if (isset($_GET['action']) && $_GET['action'] === 'details' && isset($_GET['id'])) {
+    if ($action === 'details' && request_get_has('id')) {
         ajax_json_headers();
 
         try {
-            $empId = intval($_GET['id']);
+            $empId = request_get_int('id');
             if ($empId <= 0) throw new Exception('Некорректный ID сотрудника');
 
-            $hours = normalizeOvertimeThreshold($_GET['hours'] ?? null);
-            $period = $_GET['period'] ?? 'quarter';
+            $hours = normalizeOvertimeThreshold(request_get_string('hours'));
+            $period = request_get_string('period', 'quarter');
             list($qstart, $qend) = getOvertimePeriodBounds(
                 $period,
-                $_GET['start'] ?? '',
-                $_GET['end'] ?? ''
+                request_get_string('start'),
+                request_get_string('end')
             );
 
             list($numbersSql, $addWorkDateSql, $addRangeSql, $addDurationSql) = overtimeAddTimeSqlParts();

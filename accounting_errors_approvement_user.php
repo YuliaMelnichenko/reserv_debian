@@ -24,14 +24,15 @@ include_once __DIR__ . "/funcs.php";
 save_last_location("accounting_errors_approvement.php");
 include __DIR__ . "/php_tori/connect.php";
 
-if (!isset($_GET["mid"])) {
+$mid = request_get_trimmed_string('mid');
+
+if ($mid === '') {
   echo "<h5 class=\"big\">Ошибка: не передан сотрудник.</h5>";
   echo "</body>";
   echo "</html>";
   exit;
 }
 
-$mid = (string)$_GET["mid"];
 $resArr = extractUidFromMaskedUID($mid);
 
 if ($resArr[0] != 1) {

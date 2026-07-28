@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/request.php';
+
 function staffLeavesJsonResponse($payload)
 {
     while (ob_get_level() > 1) {
@@ -11,9 +13,9 @@ function staffLeavesJsonResponse($payload)
 
 function getStaffLeavesArchiveRequest($query)
 {
-    $employeeId = (int)($query['employee_id'] ?? 0);
-    $event = trim((string)($query['event'] ?? ''));
-    $periodType = (int)($query['period_type'] ?? 0);
+    $employeeId = request_int_value($query, 'employee_id');
+    $event = request_trimmed_string_value($query, 'event');
+    $periodType = request_int_value($query, 'period_type');
 
     if ($event !== '') {
         $event = normalizeStaffLeaveEvent($event);
@@ -21,8 +23,8 @@ function getStaffLeavesArchiveRequest($query)
 
     list($filterStartDate, $filterStopDate) = getArchivePeriodDates(
         $periodType,
-        $query['start_date'] ?? '',
-        $query['stop_date'] ?? ''
+        request_string_value($query, 'start_date'),
+        request_string_value($query, 'stop_date')
     );
 
     return array(
@@ -36,11 +38,11 @@ function getStaffLeavesArchiveRequest($query)
 
 function handleStaffLeavesRequest($link, $server, $query, $post)
 {
-    $action = (string)($query['action'] ?? '');
+    $action = request_string_value($query, 'action');
 
     try {
         if ($action === 'get') {
-            $id = (int)($query['id'] ?? 0);
+            $id = request_int_value($query, 'id');
             if ($id <= 0) {
                 throw new InvalidArgumentException('Некорректный ID записи');
             }
@@ -53,7 +55,7 @@ function handleStaffLeavesRequest($link, $server, $query, $post)
         }
 
         if ($action === 'load') {
-            $event = normalizeStaffLeaveEvent($query['type'] ?? 'Отпуск');
+            $event = normalizeStaffLeaveEvent(request_string_value($query, 'type', 'Отпуск'));
             staffLeavesJsonResponse(fetchActiveStaffLeaves($link, $event));
             return true;
         }
@@ -93,24 +95,24 @@ function handleStaffLeavesRequest($link, $server, $query, $post)
                 return true;
             }
 
-            $exportTime = trim((string)($query['export_time'] ?? date('d.m.Y H:i:s')));
+            $exportTime = request_trimmed_string_value($query, 'export_time', date('d.m.Y H:i:s'));
             sendStaffLeavesArchiveXlsx($rows, $periodTitle, $employeeTitle, $eventTitle, $exportTime);
             return true;
         }
 
-        if (($server['REQUEST_METHOD'] ?? '') !== 'POST') {
+        if (request_string_value($server, 'REQUEST_METHOD') !== 'POST') {
             return false;
         }
 
-        $postAction = (string)($post['action'] ?? '');
+        $postAction = request_string_value($post, 'action');
 
         if ($postAction === 'add') {
             createStaffLeave(
                 $link,
-                $post['employee_id'] ?? 0,
-                $post['start_date'] ?? '',
-                $post['stop_date'] ?? '',
-                $post['event'] ?? ''
+                request_int_value($post, 'employee_id'),
+                request_string_value($post, 'start_date'),
+                request_string_value($post, 'stop_date'),
+                request_string_value($post, 'event')
             );
             staffLeavesJsonResponse(array('status' => 'success'));
             return true;
@@ -119,17 +121,17 @@ function handleStaffLeavesRequest($link, $server, $query, $post)
         if ($postAction === 'update') {
             updateStaffLeave(
                 $link,
-                $post['record_id'] ?? 0,
-                $post['start_date'] ?? '',
-                $post['stop_date'] ?? '',
-                $post['event'] ?? ''
+                request_int_value($post, 'record_id'),
+                request_string_value($post, 'start_date'),
+                request_string_value($post, 'stop_date'),
+                request_string_value($post, 'event')
             );
             staffLeavesJsonResponse(array('status' => 'success'));
             return true;
         }
 
         if ($postAction === 'delete') {
-            deleteStaffLeave($link, $post['record_id'] ?? 0);
+            deleteStaffLeave($link, request_int_value($post, 'record_id'));
             staffLeavesJsonResponse(array('status' => 'success'));
             return true;
         }

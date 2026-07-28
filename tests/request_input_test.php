@@ -6,6 +6,7 @@ return function () {
     $input = array(
         'integer' => '42',
         'negative' => '-1',
+        'invalid_integer' => '42hours',
         'text' => '  value  ',
         'empty' => '',
         'date' => '2026-07-21',
@@ -17,6 +18,7 @@ return function () {
 
     test_assert_same(42, request_int_value($input, 'integer'), 'Integer input must be normalized');
     test_assert_same(-1, request_int_value($input, 'negative'), 'Negative integer input must be preserved');
+    test_assert_same(7, request_int_value($input, 'invalid_integer', 7), 'Mixed integer input must be rejected');
     test_assert_same('  value  ', request_string_value($input, 'text'), 'String input must preserve whitespace');
     test_assert_same('value', request_trimmed_string_value($input, 'text'), 'Trimmed string input must remove outer whitespace');
     test_assert_same('', request_string_value($input, 'empty', 'fallback'), 'An empty string must not become a fallback');
@@ -34,6 +36,18 @@ return function () {
     test_assert_same('value', request_post_trimmed_string('text'), 'POST string helper must trim values');
     test_assert_same(false, request_post_has('array'), 'POST presence helper must reject arrays');
     $_POST = $originalPost;
+
+    $originalGet = $_GET;
+    $_GET = array('integer' => '42', 'array' => array('unexpected'));
+    test_assert_same(42, request_get_int('integer'), 'GET integer helper must normalize values');
+    test_assert_same(false, request_get_has('array'), 'GET presence helper must reject arrays');
+    $_GET = $originalGet;
+
+    $originalCookie = $_COOKIE;
+    $_COOKIE = array('name' => 'employee', 'array' => array('unexpected'));
+    test_assert_same('employee', request_cookie_string('name'), 'Cookie string helper must normalize scalar values');
+    test_assert_same('', request_cookie_string('array'), 'Cookie string helper must reject arrays');
+    $_COOKIE = $originalCookie;
 
     $ajaxFiles = new DirectoryIterator(__DIR__ . '/../ajax');
 

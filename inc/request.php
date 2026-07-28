@@ -21,7 +21,19 @@ function request_scalar_value($source, $key, $default = null)
 
 function request_int_value($source, $key, $default = 0)
 {
-    return (int)request_scalar_value($source, $key, $default);
+    $value = request_scalar_value($source, $key, null);
+
+    if (is_int($value)) {
+        return $value;
+    }
+
+    if (!is_string($value) || !preg_match('/^-?\d+$/', $value)) {
+        return (int)$default;
+    }
+
+    $validated = filter_var($value, FILTER_VALIDATE_INT);
+
+    return $validated === false ? (int)$default : $validated;
 }
 
 function request_string_value($source, $key, $default = '')
@@ -82,4 +94,29 @@ function request_post_time($key)
 function request_post_datetime($key)
 {
     return request_datetime_value($_POST, $key);
+}
+
+function request_get_has($key)
+{
+    return request_has_scalar_value($_GET, $key);
+}
+
+function request_get_int($key, $default = 0)
+{
+    return request_int_value($_GET, $key, $default);
+}
+
+function request_get_string($key, $default = '')
+{
+    return request_string_value($_GET, $key, $default);
+}
+
+function request_get_trimmed_string($key, $default = '')
+{
+    return request_trimmed_string_value($_GET, $key, $default);
+}
+
+function request_cookie_string($key, $default = '')
+{
+    return request_string_value($_COOKIE, $key, $default);
 }
