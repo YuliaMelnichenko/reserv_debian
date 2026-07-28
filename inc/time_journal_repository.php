@@ -150,9 +150,14 @@ function time_journal_query_add_work_for_period($link, $userId, $startDateTime, 
                          a.APPROVED, a.PAUSE_MODE
          FROM ADD_TIME a
          JOIN REASONS b ON a.REASON = b.ID
-         WHERE a.START_DT <= ?
-           AND a.STOP_DT >= ?
+         WHERE a.START_DT < ?
+           AND a.STOP_DT > ?
            AND a.USERID = ?
+           AND a.START_DT IS NOT NULL
+           AND a.STOP_DT IS NOT NULL
+           AND a.START_DT <> '0000-00-00 00:00:00'
+           AND a.STOP_DT <> '0000-00-00 00:00:00'
+           AND a.STOP_DT > a.START_DT
          ORDER BY a.START_DT",
         'ssi',
         array($stopDateTime, $startDateTime, (int)$userId)

@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../inc/session.php';
 require_once __DIR__ . '/../inc/access.php';
+require_once __DIR__ . '/../inc/offsite_work.php';
 require_ajax_auth();
 ajax_text_headers();
 
@@ -68,14 +69,31 @@ if ($sv_ID <= 0) {
   exit;
 }
 
-$daysRange = get_days_range_inclusive($add_time_part_start_date, $add_time_part_stop_date);
-$newDaysRange = array();
+try {
+  $dailyIntervals = build_offsite_work_daily_intervals(
+    $add_time_part_start_date,
+    $add_time_part_stop_date,
+    $add_time_part_start_time,
+    $add_time_part_stop_time
+  );
+}
+catch (InvalidArgumentException $error) {
+  echo $error->getMessage();
+  exit;
+}
+catch (RuntimeException $error) {
+  error_log('[TORI] Offsite work range rejected: ' . $error->getMessage());
+  echo "Не удалось сформировать точный диапазон дат. Записи не добавлены";
+  exit;
+}
+$allowedDates = array();
 $includeAllDays = ((int)$add_time_part_base == 5);
 
 if ($exclude_weekend_holidays == 1 && !$includeAllDays) {
   $weekendsHolidays = get_workdays_holidays_bay_range($add_time_part_start_date, $add_time_part_stop_date);
 
-  foreach ($daysRange as $rangeDay) {
+  foreach ($dailyIntervals as $interval) {
+    $rangeDay = $interval['date'];
     $found = -1;
 
     for ($idx = 0; $idx < count($weekendsHolidays[0]); $idx++) {
@@ -87,19 +105,18 @@ if ($exclude_weekend_holidays == 1 && !$includeAllDays) {
 
     if ($found == -1) {
       if (isWeekEnd($rangeDay) == 0) {
-        $newDaysRange[] = $rangeDay;
+        $allowedDates[] = $rangeDay;
       }
     }
     else if ($found != 0) {
-      $newDaysRange[] = $rangeDay;
+      $allowedDates[] = $rangeDay;
     }
   }
-}
-else {
-  $newDaysRange = $daysRange;
+
+  $dailyIntervals = filter_offsite_work_intervals_by_dates($dailyIntervals, $allowedDates);
 }
 
-if (count($newDaysRange) == 0) {
+if (count($dailyIntervals) == 0) {
   echo "В выбранном диапазоне нет дней для добавления";
   exit;
 }
@@ -111,37 +128,53 @@ if (!$transaction) {
 }
 
 $err = "";
+$insertedCount = 0;
 
-foreach ($newDaysRange as $rDay) {
-  $start = $rDay . " " . $add_time_part_start_time;
-  $stop = $rDay . " " . $add_time_part_stop_time;
-  $range = get_valid_datetime_range($start, $stop);
-
-  if ($range === null) {
-    $err .= "Некорректный интервал времени для даты $rDay<br>";
-    break;
-  }
-
-  $start = $range['start'];
-  $stop = $range['stop'];
-
-  $query = db_execute($link, "INSERT INTO ADD_TIME
+foreach ($dailyIntervals as $interval) {
+  $query = db_execute_affected_rows($link, "INSERT INTO ADD_TIME
     (ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE, BYALERT)
     VALUES
-    (?, ?, ?, ?, ?, ?, ?, '', 0, 0, ?)", 'siissisi', array($currentDate, $sv_ID, $userID_, $start, $stop, $add_time_part_base, $add_time_part_desk, $byAlert));
+    (?, ?, ?, ?, ?, ?, ?, '', 0, 0, ?)", 'siissisi', array(
+      $currentDate,
+      $sv_ID,
+      $userID_,
+      $interval['start'],
+      $interval['stop'],
+      $add_time_part_base,
+      $add_time_part_desk,
+      $byAlert
+    ));
 
-  if (!$query) {
+  if ($query !== 1) {
     $err = ajax_database_error_message($link, __FILE__ . ':' . __LINE__);
     break;
   }
+
+  $insertedCount++;
 }
 
-if ($err == "") {
+if ($err === "" && $insertedCount !== count($dailyIntervals)) {
+  $err = "Не все даты выбранного диапазона были сохранены";
+}
+
+if (
+  $err === ""
+  && !clear_unsubmitted_accounting_errors_for_dates(
+    $link,
+    $userID_,
+    array_column($dailyIntervals, 'date')
+  )
+) {
+  $err = ajax_database_error_message($link, __FILE__ . ':' . __LINE__);
+}
+
+if ($err == "" && $insertedCount === count($dailyIntervals)) {
   if (!$transaction->commit()) {
     ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
   }
 
+  $_SESSION['accounting_errors_sync_date'] = date('Y-m-d');
   echo "1";
 }
 else {

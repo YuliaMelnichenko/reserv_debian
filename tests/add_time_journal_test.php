@@ -27,11 +27,21 @@ return function () {
         strpos($service, 'time_journal_query_add_work_journal') !== false,
         'The data service must use the shared time journal repository'
     );
+    test_assert_true(
+        strpos($service, "'a.START_DT'") !== false
+            && strpos($service, "'a.STOP_DT'") !== false,
+        'The remote work journal must retry with modern date columns for schema compatibility'
+    );
 
     $repository = file_get_contents(__DIR__ . '/../inc/time_journal_repository.php');
     test_assert_true(
         strpos($repository, 'LEFT JOIN employees supervisor') !== false,
         'The remote work query must load supervisor names without per-row queries'
+    );
+    test_assert_true(
+        strpos($repository, 'a.START_DT < ?') !== false
+            && strpos($repository, 'a.STOP_DT > ?') !== false,
+        'Daily report queries must use strict interval overlap boundaries'
     );
     test_assert_same(0, preg_match('/SELECT\s+\*/i', $service), 'Remote work journal queries must select explicit fields');
 
