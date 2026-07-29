@@ -37,7 +37,7 @@ include_once __DIR__ . "/navigate.php";
 
 echo "</td>";
    
-echo "<td class=\"notification-content-cell notification-content-cell-medium\">";
+echo "<td class=\"notification-content-cell notification-content-cell-medium-sport\">";
 
 echo "<h5 class=\"dark\"><br>/тренажерный зал<br><br></h5>";
 

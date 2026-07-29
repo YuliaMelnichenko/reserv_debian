@@ -27,7 +27,7 @@ $delays = $journal['entries'];
 
 echo "<div class=\"notification-table-scroll notification-table-scroll-full\">";
 
-echo "<table class=\"add_time\" cellpadding=\"0\" cellspacing=\"0\" border=1>";
+echo "<table class=\"add_time notification-table-full\" cellpadding=\"0\" cellspacing=\"0\" border=1>";
 echo "<tr bgcolor=\"#DDDDDD\" bordercolor=\"#888888\">";
 
 echo "<td valign=\"middle\" align=\"center\">"."<h5>Дата</h5>"."</td>";

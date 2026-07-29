@@ -1002,13 +1002,13 @@ h6.small_help_2 {
 }
 
 .notification-table-scroll {
+  margin-bottom: 10px;
   display: inline-block;
-  width: auto;
+  width: 1215px !important;
   max-width: 100%;
   max-height: 560px;
   overflow-y: auto;
   overflow-x: auto;
-  border: 1px solid #888888;
   background: transparent;
 }
 
@@ -1017,15 +1017,21 @@ h6.small_help_2 {
 }
 
 .notification-table-scroll-narrow {
-  max-width: 562px;
+  max-width: 835px;
 }
 
 .notification-table-scroll-medium {
-  max-width: 688px;
+  width: 1200px;
 }
 
 .notification-table-scroll-full {
+  width: 1135px;
   max-width: 100%;
+  margin-right: 10px;
+}
+
+.notification-table-full {
+  width: 1200px !important;
 }
 
 .notification-table-scroll table {
@@ -1060,27 +1066,31 @@ h6.small_help_2 {
 }
 
 .notification-content-cell-wide {
-  width: 835px;
+  width: 845px;
 }
 
 .notification-content-cell-extra-wide {
-  width: 1133px;
+  width: 1150px;
 }
 
 .notification-content-cell-approvement-wide {
-  width: 1158px;
+  width: 1135px;
 }
 
 .notification-content-cell-delay-wide {
-  width: 1272px;
+  width: 1145px;
 }
 
 .notification-content-cell-medium {
-  width: 700px;
+  width: 1190px;
+}
+
+.notification-content-cell-medium-sport {
+  width: 705px;
 }
 
 .notification-content-cell-narrow {
-  width: 562px;
+  width: 845px;
 }
 
 .sport-pause-spacer-cell {
@@ -1800,9 +1810,9 @@ report_window_head_single {
 
 #delay_explanation_add_time {
   position: fixed;
-  width: 1080px;
-  height: 360px;
-  left: 50%;
+  width: 1095px;
+  height: 390px;
+  left: 56%;
   top: 35%;
   margin-left: -545px;
   margin-top: -180px;
@@ -1816,7 +1826,7 @@ report_window_head_single {
 #delay_explanation_add_time_part {
   position: fixed;
   width: 1065px;
-  height: 360px;
+  height: 370px;
   left: 50%;
   top: 35%;
   margin-left: -425px;
@@ -2163,7 +2173,7 @@ table.hor_bor {
 }
 
 table.add_time {
-  margin: 0;
+  width: 835px;
   padding: 20px 50px 50px 20px;
   border:solid #d17125 1px;
   background-color:#eeeeee;
@@ -2587,6 +2597,7 @@ a.nounder {
 }
 
 .nav-notification-button {
+  margin-bottom: 10px;
   height: 60px;
   padding: 5px;
   background-color: #f8d888;
@@ -2594,6 +2605,7 @@ a.nounder {
 }
 
 .nav-notification-button-wide {
+  margin-bottom: 10px;
   padding-right: 20px;
   font-size: 80%;
 }
@@ -3471,7 +3483,7 @@ h5.activ_time {
 
 #btn_add {
   cursor: pointer;
-  margin-right: 15px;
+  margin-right: 7px;
   background: none;
   border: none;
 }
@@ -3503,8 +3515,7 @@ h5.activ_time {
 #leave_table {
   display: none;
   border-collapse: collapse;
-  margin: 15px 3px 0 0;
-  width: 915px;
+  width: 920px;
   border:solid #d17125 1px;
   background-color:#eeeeee;
 }
@@ -3611,7 +3622,8 @@ h5.activ_time {
   min-height: 400px;
   max-height: 650px;
   overflow-y: auto;
-  margin-top: 10px;
+  margin: 10px 8px 0 0;
+  width: 935px;
 }
 
 #hours_input {
@@ -3622,7 +3634,7 @@ h5.activ_time {
 
 #btn_search {
   height: 23px;
-  margin: 0 10px;
+  margin: 0 0 0 16px;
   background-color: #f8d888;
   border: 1px solid #888888;
 }
@@ -3649,7 +3661,7 @@ h5.activ_time {
   max-height: 73vh;
   overflow-y: auto;
   border: 1px solid #ccc;
-  width: 560px;
+  width: 580px;
 }
 
 #remote_work {
@@ -3872,11 +3884,11 @@ h5.activ_time {
 }
 
 .notification-detail-title-delay {
-  width: 1000px;
+  width: 860px;
 }
 
 .notification-detail-back-cell {
-  width: 10px;
+  width: 515px;
   vertical-align: middle;
   text-align: right;
 }
@@ -3895,6 +3907,7 @@ h5.activ_time {
 }
 
 .notification-detail-table {
+  width: 1120px !important;
   border: 1px solid #888888;
   border-collapse: collapse;
 }
@@ -4021,6 +4034,7 @@ h5.activ_time {
 }
 
 .journal-entry-table {
+  width: 1200px !important;
   border: 1px solid #888888;
   border-collapse: collapse;
 }
@@ -4226,7 +4240,7 @@ h5.activ_time {
 }
 
 #archive_filters {
-  width: 900px;
+  width: 920px;
   display: none;
   margin: 8px 0;
   padding: 6px;
@@ -4510,6 +4524,10 @@ h5.activ_time {
 
 #accountingErrorsUserTableScroll {
   width: 930px;
+}
+
+.vac {
+  width: 950px;
 }
 
 #accounting_errors_table,

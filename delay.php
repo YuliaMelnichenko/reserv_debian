@@ -37,7 +37,7 @@ echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"lef
 include_once __DIR__ . "/navigate.php";
 echo "</td>";
 
-$wholeWidth = 1425;
+$wholeWidth = 1210;
 
 echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
 

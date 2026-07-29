@@ -19,9 +19,8 @@ include_once dirname(__DIR__) . "/navigate.php";
 
 echo "</td>";
 
-$wholeWidth = 800;
 
-echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
+echo "<td class=\"vac\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\">";
 
 echo "<h5 class=\"dark\"><br>/Больничные и отпуска сотрудников <br></h5>";
 
@@ -156,7 +155,7 @@ echo "</div>";
         <div id="archiveExcelPreviewTable"></div>
 
         <div id="archiveExcelPreviewActions">
-            <button type="button" onclick="downloadArchiveExcel()">Выгрузить в Excel</button>
+            <button type="button" onclick="downloadArchiveExcel()" style="background-color: #f8d888">Выгрузить в Excel</button>
             <button type="button" onclick="closeArchiveExcelPreview()">Отмена</button>
         </div>
     </div>

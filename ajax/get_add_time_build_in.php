@@ -77,7 +77,7 @@ else
     else if ( $reason == 4 OR $reason == 8 ){ $reasonStr = "Прочее"; }
 
     $superUserName = get_sv_name_by_userid( $userID_ );
-    $addMsg1 = " <img title=\"Решение принял: $superUserName\" src=\"img/superuser.png\">";
+    $addMsg1 = " <img title=\"Решение принял: $superUserName\">";
 
     $statusClass = "";
 
@@ -89,8 +89,8 @@ else
     { 
       $approvedStr = "отклонено";
       $statusClass = "add-time-status-refused";
-      $ta_approved_str_add1 = " <img title=\"решение принял: $superUserName\" src=\"img/superuserBad.png\">";
-      $ta_approved_str_add2 = " <img title=\"комментарий: $suDesc\" src=\"img/delaySUExpl2Bad.png\">";
+      $ta_approved_str_add1 = " <img title=\"решение принял: $superUserName\">";
+      $ta_approved_str_add2 = " <img title=\"комментарий: $suDesc\">";
       $content1 = "<table class=\"slim add-time-status-table\">";
         $content1 .= "<tr>";
           $content1 .= "<td class=\"nopadding_s add-time-status-label-cell\">";
@@ -107,8 +107,8 @@ else
     {
       $approvedStr = "принято";
       $statusClass = "add-time-status-accepted";
-      $ta_approved_str_add1 = " <img title=\"решение принял: $superUserName\" src=\"img/superuserGood.png\">";
-      $ta_approved_str_add2 = " <img title=\"комментарий: $suDesc\" src=\"img/delaySUExpl2Good.png\">";
+      $ta_approved_str_add1 = " <img title=\"решение принял: $superUserName\">";
+      $ta_approved_str_add2 = " <img title=\"комментарий: $suDesc\">";
       $content1 = "<table class=\"slim add-time-status-table\">";
         $content1 .= "<tr>";
           $content1 .= "<td class=\"nopadding_s add-time-status-label-cell\">";
@@ -156,7 +156,7 @@ echo "<h5 class=\"small1\">" . html_escape($description) . "</h5>";
     $reasonStr = "Приостановка учета времени";
 
     $superUserName = get_sv_name_by_userid( $userID_ );
-    $addMsg1 = " <img title=\"Решение принял: $superUserName\" src=\"img/superuser.png\">";
+    $addMsg1 = " <img title=\"Решение принял: $superUserName\">";
 
     $approvedStr = "Утверждению не подлежит";     
 

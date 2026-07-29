@@ -15,7 +15,7 @@ echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"lef
 include_once dirname(__DIR__) . "/navigate.php";
 echo "</td>";
 
-$wholeWidth = 780;
+$wholeWidth = 600;
 echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width= $wholeWidth>";
 echo "<h5 class=\"dark\"><br>/Выгрузка сотрудников по переработкам<br></h5>";
 ?>
