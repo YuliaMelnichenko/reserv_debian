@@ -56,7 +56,21 @@ function get_pause_time_duration_by_times($addTimeInfo)
             && (int)$entry[7] === 1
             && add_time_entry_is_active($entry)
         ) {
-            $duration += get_defined_time_range_duration($entry[0] ?? null, $entry[1] ?? null);
+            $startTime = $entry[0] ?? null;
+            $stopTime = $entry[1] ?? null;
+            $startTimestamp = is_time_defined($startTime) ? strtotime($startTime) : false;
+            $stopTimestamp = is_time_defined($stopTime) ? strtotime($stopTime) : false;
+
+            // A time pause cannot legitimately cross into another calendar day.
+            if (
+                $startTimestamp === false
+                || $stopTimestamp === false
+                || date('Y-m-d', $startTimestamp) !== date('Y-m-d', $stopTimestamp)
+            ) {
+                continue;
+            }
+
+            $duration += get_defined_time_range_duration($startTime, $stopTime);
         }
     }
 

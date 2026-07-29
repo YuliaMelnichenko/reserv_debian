@@ -9,7 +9,10 @@ $userID = (int)$_SESSION['ss_id'];
 include_once __DIR__ . "/../php_tori/connect.php";
 include_once __DIR__ . "/../funcs.php";
 
-$query = time_journal_query_open_pause($link, $userID);
+$currentDate = get_current_datetime_in_timezone()[2];
+$periodStart = $currentDate . ' 00:00:00';
+$periodStop = date('Y-m-d 00:00:00', strtotime($currentDate . ' +1 day'));
+$query = time_journal_query_open_pause($link, $userID, $periodStart, $periodStop);
 
 if (!$query) {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);

@@ -132,6 +132,8 @@ function start_time_pause_for_group(
 
     $resolvedSupervisorID = (int)$supervisor['SUPERVISORID'];
 
+    $pausePeriodStart = $currentDate . ' 00:00:00';
+    $pausePeriodStop = date('Y-m-d 00:00:00', strtotime($currentDate . ' +1 day'));
     $openPauseResult = db_query($link, "
         SELECT ID
         FROM ADD_TIME
@@ -139,10 +141,12 @@ function start_time_pause_for_group(
           AND PAUSE_MODE = 1
           AND START_DT <> '0000-00-00 00:00:00'
           AND (STOP_DT IS NULL OR STOP_DT = '0000-00-00 00:00:00')
+          AND START_DT >= ?
+          AND START_DT < ?
         ORDER BY START_DT DESC, ID DESC
         LIMIT 1
         FOR UPDATE
-    ", 'i', array((int)$userID));
+    ", 'iss', array((int)$userID, $pausePeriodStart, $pausePeriodStop));
 
     if (!$openPauseResult) {
         $transaction->rollback();
@@ -239,7 +243,7 @@ function finish_time_pause($link, $userID, $visitingID, $pauseID, $currentDateTi
     }
 
     $pauseResult = db_query($link, "
-        SELECT ID, STOP_DT
+        SELECT ID, START_DT, STOP_DT
         FROM ADD_TIME
         WHERE ID = ?
           AND USERID = ?
@@ -258,6 +262,14 @@ function finish_time_pause($link, $userID, $visitingID, $pauseID, $currentDateTi
     if (!$pause) {
         $transaction->rollback();
         return time_pause_result('error', 'Не найдена открытая приостановка учета времени');
+    }
+
+    $pauseStartDate = isset($pause['START_DT']) ? substr((string)$pause['START_DT'], 0, 10) : '';
+    $currentDate = substr((string)$currentDateTime, 0, 10);
+
+    if ($pauseStartDate === '' || $pauseStartDate !== $currentDate) {
+        $transaction->rollback();
+        return time_pause_result('error', 'Незавершенную приостановку можно завершить только в день ее начала');
     }
 
     $visitUpdated = db_execute($link, "

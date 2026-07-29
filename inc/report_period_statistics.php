@@ -112,6 +112,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   $dayTypesByDate = get_work_dayoff_types_by_range($link, $startDate, $stopDate);
   $currentDateArr = get_current_datetime_in_timezone();
   $currentDate = $currentDateArr[2];
+  $currentDateTime = $currentDateArr[1];
+  $unfinishedHistoricalDates = array();
 
 
   unset($tempDates);
@@ -147,16 +149,31 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
 
       $in_dt_temp_shift = date("Y-m-d", strtotime($in_dt_temp_shift));
 
+      $currentPeriodDate = shift_dt_by_transition_time(
+        $currentDateTime,
+        $dayTransitionTime_temp,
+        -1
+      );
+      $currentPeriodDate = date("Y-m-d", strtotime($currentPeriodDate));
+      $currentDay = $currentPeriodDate == $in_dt_temp_shift ? 1 : 0;
+      $visitState = (int)$row["state"];
+      $outDateTime = $row["out_dt"];
+      $isCompletedVisit = $visitState === 0
+        && is_time_defined($outDateTime) === 1
+        && strtotime($outDateTime) > $in_dt_temp_val;
+
+      if ($currentDay === 0 && !$isCompletedVisit) {
+        $unfinishedHistoricalDates[$in_dt_temp_shift] = true;
+        continue;
+      }
+
       $tempDates[] = $in_dt_temp_shift;
-      $currentDay = 0;
-      if ( $currentDate == $in_dt_temp_shift )
-        $currentDay = 1;
 
       $temp_days_work_start[] = $in_dt_temp;
       $temp_days_work_stop[] = $row["out_dt"];
       $temp_days_eat_start[] = $row["eat_start_dt"];
       $temp_days_eat_stop[] = $row["eat_stop_dt"];
-      $temp_state = $row["state"];
+      $temp_state = $visitState;
       $temp_days_day_type[] = 10 + $temp_state;
       $temp_days_day_state[] = $temp_state;
       $temp_days_day_currday[] = $currentDay;
@@ -167,6 +184,12 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $temp_days_timeZoneSec[] = $row["timeZoneSec"];
       $temp_days_dayTransitionTime[] = $row["dayTransitionTime"];
 
+    }
+  }
+
+  foreach ($days_dates_set as $dayIndex => $day) {
+    if (isset($unfinishedHistoricalDates[$day])) {
+      $days_add_infos[$dayIndex] = "NDF";
     }
   }
 
@@ -287,6 +310,11 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
     while ( $row = db_fetch_one($query) )
     {
       $date = $row["date"];
+
+      if (isset($unfinishedHistoricalDates[$date])) {
+        continue;
+      }
+
       $tempDates[] = $date;
       $currentDay = 0;
       if ( $currentDate == $date )

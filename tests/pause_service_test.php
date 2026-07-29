@@ -65,6 +65,12 @@ return function () {
             && strpos($repository, 'function time_journal_query_open_pause_details') !== false,
         'The pause overlay must use the same open-pause criteria as the state check'
     );
+    test_assert_true(
+        strpos($pauseStateEndpoint, '$periodStart') !== false
+            && strpos($pauseOverlayEndpoint, '$periodStop') !== false
+            && strpos($repository, 'DATE($stopExpr) = DATE($startExpr)') !== false,
+        'Open pauses and pause reports must be limited to the day where the pause began'
+    );
 
     $scripts = file_get_contents(__DIR__ . '/../js/tory.js');
     test_assert_true(
