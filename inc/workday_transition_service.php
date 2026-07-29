@@ -344,16 +344,6 @@ function process_workday_transition($link, &$session, $nextState)
     );
     $action = $transition['action'];
 
-    error_log(
-        'TORI_SWITCH_SYNC user=' . $userId
-        . ' next=' . (int)$nextState
-        . ' state=' . (int)$syncedState['state']
-        . ' visit=' . (int)$syncedState['visiting_ID']
-        . ' start=' . $period[0]
-        . ' stop=' . $period[1]
-        . ' now=' . $dateTime
-    );
-
     if ($action === WORKDAY_ACTION_ARRIVE) {
         return workday_transition_arrive($link, $session, $context);
     }
