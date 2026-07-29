@@ -178,7 +178,7 @@ echo "<table id=\"pause_approvement_table\" class=\"notification-detail-header-t
 echo "</table>";
 ?>
 
-<script type="text/javascript" src="js/tory.js"></script> 
+<script type="text/javascript" src="js/tory.js?v=20260729-layout"></script>
 
 <?php
 echo "</body>";

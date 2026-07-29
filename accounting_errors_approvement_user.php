@@ -71,11 +71,13 @@ echo "<table class=\"accounting-errors-page-table\">";
         echo "<h5 class=\"dark\"><br>/ошибки учета сотрудника<br><br></h5>";
       echo "</div>";
 
-      echo "<h5 class=\"big\">Сотрудник: $userName</h5>";
-
-      echo "<h5 class=\"big\">Текущий квартал: $accountingErrorsPeriodLabel</h5>";
-
-      echo "<button class=\"button_style journal-back-button\" onclick=\"location.href='$backUrl'\">Назад</button>";
+      echo "<div id=\"accountingErrorsUserToolbar\" class=\"notification-detail-accounting-toolbar\">";
+        echo "<div class=\"notification-detail-accounting-labels\">";
+          echo "<h5 class=\"big\">Сотрудник: $userName</h5>";
+          echo "<h5 class=\"big\">Текущий квартал: $accountingErrorsPeriodLabel</h5>";
+        echo "</div>";
+        echo "<button class=\"button_style journal-back-button\" onclick=\"location.href='$backUrl'\">Назад</button>";
+      echo "</div>";
 
       echo "<div id=\"accountingErrorsUserTableScroll\">";
         echo "<table class=\"add_time\" id=\"accounting_errors_user_table\">";
@@ -255,7 +257,7 @@ echo "</div>";
   </div>
 </div>
 
-<script type="text/javascript" src="js/tory.js"></script>
+<script type="text/javascript" src="js/tory.js?v=20260729-layout"></script>
 <script type="text/javascript" charset="utf-8">
 
 function getAccountingErrorActionName(action) {

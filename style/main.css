@@ -4702,3 +4702,155 @@ h5.activ_time {
 .accounting-errors-action-icon {
   height: 14px;
 }
+
+/* Adaptive table frames shared by journals and supervisor notifications. */
+.notification-content-cell,
+.accounting-errors-content-cell,
+.staff-leaves-content-cell {
+  box-sizing: border-box;
+  padding-right: 10px;
+}
+
+.notification-table-scroll {
+  display: block;
+  width: max-content !important;
+  max-width: 100%;
+  max-height: none;
+  margin: 0 0 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-sizing: border-box;
+}
+
+.notification-table-scroll-wide,
+.notification-table-scroll-narrow,
+.notification-table-scroll-medium,
+.notification-table-scroll-full {
+  width: max-content !important;
+  max-width: 100%;
+  margin-right: 0;
+}
+
+.notification-detail-header-table {
+  border-spacing: 0;
+  box-sizing: border-box;
+}
+
+.notification-detail-header-table > tbody > tr > .nopadding_s {
+  padding: 0 1px !important;
+}
+
+.notification-detail-header-table > tbody > tr > .nopadding_s > .notification-detail-header-table {
+  width: 100%;
+}
+
+.notification-detail-title-medium,
+.notification-detail-title-wide,
+.notification-detail-title-delay {
+  width: auto;
+}
+
+.notification-detail-back-cell,
+.notification-detail-back-wide {
+  width: 100px;
+  padding-right: 0 !important;
+  padding-left: 0 !important;
+  white-space: nowrap;
+}
+
+.journal-back-button {
+  margin: 8px 0;
+}
+
+.notification-detail-accounting-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: 20px;
+}
+
+.notification-detail-accounting-labels {
+  min-width: 0;
+}
+
+#pause_approvement,
+#delay_approvement,
+#add_time_content {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  padding: 0 10px 10px 0;
+  box-sizing: border-box;
+}
+
+#accountingErrorsTableScroll,
+#accountingErrorsApprovementTableScroll,
+#accountingErrorsUserTableScroll {
+  max-height: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-sizing: border-box;
+}
+
+.staff-leaves-nav-cell,
+.staff-leaves-content-cell {
+  vertical-align: top;
+  text-align: left;
+  background: #ddeeff;
+}
+
+.staff-leaves-nav-cell {
+  width: 250px;
+}
+
+#event_buttons,
+#archive_filters,
+.leave_table_wrapper {
+  box-sizing: border-box;
+}
+
+#event_buttons {
+  align-items: center;
+  width: max-content;
+  margin-right: 0;
+}
+
+#add_info_block {
+  flex: 1 0 auto;
+  width: auto;
+}
+
+#btn_add {
+  margin-right: 0;
+}
+
+#archive_filters {
+  margin-right: 0;
+}
+
+.leave_table_wrapper {
+  display: block;
+  min-height: 0;
+  max-height: none;
+  margin: 10px 0 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+/* The lunch and pause overlays use the general journal table style, but their content is compact. */
+.lunch-pause-dialog,
+.pause-status-dialog {
+  width: 470px !important;
+  max-width: calc(100vw - 30px);
+  box-sizing: border-box;
+}
+
+.lunch-pause-dialog .no_padding_real,
+.pause-status-dialog .no_padding_real {
+  width: 100% !important;
+}
+
+.lunch-pause-title {
+  margin-right: 0 !important;
+}

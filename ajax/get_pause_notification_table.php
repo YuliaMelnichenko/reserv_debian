@@ -17,6 +17,7 @@ if ($summary === false) {
 }
 
 echo "<h5 class=\"big\">Уведомления по приостановкам учета времени</h5>";
+echo "<div class=\"notification-table-scroll\">";
 echo "<table id=\"pause_approvement_table_users\" class=\"add_time notification-summary-table\">";
 echo "<tr class=\"notification-table-head\">";
 echo "<td class=\"add_time notification-user-name-cell\"><h5 class=\"big\">Сотрудник</h5></td>";
@@ -59,4 +60,5 @@ foreach ($summary['entries'] as $entry)
 }
 
 echo "</table>";
+echo "</div>";
 ?>

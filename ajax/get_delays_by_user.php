@@ -56,6 +56,7 @@ echo "<table id=\"delay_approvement_table\" border=0>";
   echo "<tr>";
     echo "<td class=\"nopadding\" width=1300 valign=\"middle\" align=\"left\">";
 
+      echo "<div class=\"notification-table-scroll\">";
       echo "<table border=1>";
       echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
 
@@ -170,6 +171,7 @@ echo "<table id=\"delay_approvement_table\" border=0>";
       }
 
       echo "</table>";
+      echo "</div>";
     echo "</td>";
   echo "</tr>";
 echo "</table>";

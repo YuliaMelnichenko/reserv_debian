@@ -1,4 +1,73 @@
 let currentType = 'Отпуск';
+let staffLeavesResizeTimer = null;
+
+function getStaffLeavesScrollbarWidth() {
+    if (typeof get_vertical_scrollbar_width === 'function') {
+        return get_vertical_scrollbar_width();
+    }
+
+    return 17;
+}
+
+function fitStaffLeavesLayout() {
+    const table = document.getElementById('leave_table');
+    const wrapper = document.querySelector('.leave_table_wrapper');
+    const navCell = document.querySelector('.staff-leaves-nav-cell');
+    const contentCell = document.querySelector('.staff-leaves-content-cell');
+    const eventButtons = document.getElementById('event_buttons');
+    const archiveFilters = document.getElementById('archive_filters');
+
+    if (!table || !wrapper || table.offsetWidth === 0) {
+        return;
+    }
+
+    wrapper.style.width = '';
+    wrapper.style.overflowY = 'hidden';
+
+    const wrapperTop = wrapper.getBoundingClientRect().top;
+    let layoutBottom = window.innerHeight;
+
+    if (navCell) {
+        layoutBottom = navCell.getBoundingClientRect().top;
+
+        Array.from(navCell.children).forEach(child => {
+            const childRect = child.getBoundingClientRect();
+
+            if (childRect.height > 0) {
+                layoutBottom = Math.max(layoutBottom, childRect.bottom);
+            }
+        });
+    }
+    const availableHeight = Math.max(180, Math.floor(layoutBottom - wrapperTop - 10));
+    const tableWidth = Math.ceil(table.getBoundingClientRect().width);
+    const tableHeight = Math.ceil(table.getBoundingClientRect().height);
+    const needsVerticalScroll = tableHeight > availableHeight;
+    const panelWidth = Math.min(
+        tableWidth + (needsVerticalScroll ? getStaffLeavesScrollbarWidth() : 0),
+        Math.max(320, Math.floor(window.innerWidth - wrapper.getBoundingClientRect().left - 10))
+    );
+
+    wrapper.style.maxHeight = availableHeight + 'px';
+    wrapper.style.width = panelWidth + 'px';
+    wrapper.style.overflowY = needsVerticalScroll ? 'auto' : 'hidden';
+    wrapper.style.overflowX = tableWidth > panelWidth ? 'auto' : 'hidden';
+
+    if (eventButtons) {
+        eventButtons.style.width = panelWidth + 'px';
+    }
+
+    if (archiveFilters) {
+        archiveFilters.style.width = panelWidth + 'px';
+    }
+
+    if (contentCell) {
+        contentCell.style.width = (panelWidth + 10) + 'px';
+    }
+}
+
+function scheduleStaffLeavesLayout() {
+    window.requestAnimationFrame(fitStaffLeavesLayout);
+}
 
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('btn_vacations').addEventListener('click', () => {
@@ -58,6 +127,11 @@ let currentType = 'Отпуск';
 
         initArchiveFilterEvents();
         loadLeaves(currentType);
+
+        window.addEventListener('resize', () => {
+            window.clearTimeout(staffLeavesResizeTimer);
+            staffLeavesResizeTimer = window.setTimeout(fitStaffLeavesLayout, 80);
+        });
     });
 
     function renderLeaveRowsWithMergedNames(tbody, data, showActions = true) {
@@ -176,6 +250,7 @@ let currentType = 'Отпуск';
 
                     renderLeaveRowsWithMergedNames(tbody, data);
                     table.style.display = 'table';
+                    scheduleStaffLeavesLayout();
                 } catch (err) {
                     console.error('Ошибка JSON: ', err);
                     console.warn('Ответ сервера: ', text);
@@ -281,6 +356,7 @@ function loadArchive() {
             }
 
             table.style.display = 'table';
+            scheduleStaffLeavesLayout();
         }
 
         return;
@@ -332,11 +408,13 @@ function loadArchive() {
             if (!Array.isArray(data) || data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" align="center">Нет записей</td></tr>';
                 table.style.display = 'table';
+                scheduleStaffLeavesLayout();
                 return;
             }
 
             renderLeaveRowsWithMergedNames(tbody, data, false);
             table.style.display = 'table';
+            scheduleStaffLeavesLayout();
         })
         .catch(err => {
             console.error('Ошибка запроса архива:', err);

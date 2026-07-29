@@ -141,6 +141,18 @@ return function () {
         strpos($service, 'COUNT(DISTINCT') !== false,
         'Notification counts must remain stable when group or visit rows are duplicated'
     );
+    $delaySummaryStart = strpos($service, 'function get_delay_notification_summary');
+    $pauseSummaryStart = strpos($service, 'function get_pause_notification_summary');
+    $delaySummarySource = substr(
+        $service,
+        $delaySummaryStart,
+        $pauseSummaryStart - $delaySummaryStart
+    );
+    test_assert_true(
+        strpos($delaySummarySource, 'LEFT JOIN visiting visit') !== false
+            && strpos($delaySummarySource, 'AND EXISTS (') === false,
+        'Delay notification summaries must join visits once instead of running a correlated query per delay'
+    );
     test_assert_true(
         strpos($service, 'get_current_quarter_date_range') !== false,
         'Pause notification counts must be limited to the current quarter'

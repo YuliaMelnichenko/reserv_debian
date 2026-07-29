@@ -56,6 +56,7 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
   echo "<tr>";
     echo "<td class=\"nopadding\" valign=\"middle\" align=\"left\">";
 
+      echo "<div class=\"notification-table-scroll\">";
       echo "<table border=1>";
       echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
 
@@ -201,6 +202,7 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
       }
 
       echo "</table>";
+      echo "</div>";
     echo "</td>";
   echo "</tr>";
 echo "</table>";

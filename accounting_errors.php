@@ -174,7 +174,7 @@ echo "</div>";
   </div>
 </div>
 
-<script type="text/javascript" src="js/tory.js"></script>
+<script type="text/javascript" src="js/tory.js?v=20260729-layout"></script>
 <script type="text/javascript" charset="utf-8">
 
 function openAccountingErrorCommentWindow(errorID, errorDate, comment) {

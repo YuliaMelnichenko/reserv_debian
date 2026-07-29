@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
 <script type="text/javascript" src="js/tory.js?v=20260729-weekend"></script>
-<script type="text/javascript" src="js/index-page.js?v=20260723"></script>
+<script type="text/javascript" src="js/index-page.js?v=20260729-rollback"></script>
 
 <?php
 echo "<html lang=\"en\">";

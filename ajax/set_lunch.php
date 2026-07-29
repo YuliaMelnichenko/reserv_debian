@@ -75,14 +75,14 @@ $durationStr = format_time_d_hhmmss_pure($duration);
 <table bgcolor="#FFFFFF" id="lunchPauseFullScreen">
   <tr>
     <td align="center" valign="middle">
-      <table class="add_time" border="0" bgcolor="#ddeeff">
+      <table class="add_time lunch-pause-dialog" border="0" bgcolor="#ddeeff">
         <tr>
           <td align="center" width="446">
             <div id="lunch_head_block">
               <div class="left_button" style="display: flex; align-items: center; margin-left: 2px">
                 <button id ="lunch_time_back" title="возврат состояния регистрации времени до предыдущего" style="font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;" onclick="rollback_state();"><img src="img/rollbackState.png"></button>
               </div>
-              <h5 class="bigbig1" style="margin-right: 135px"><br>Сотрудник на обеде<br><br></h5>
+              <h5 class="bigbig1 lunch-pause-title"><br>Сотрудник на обеде<br><br></h5>
             </div>
           </td>
         </tr>

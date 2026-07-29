@@ -119,24 +119,21 @@ function get_delay_notification_summary($link, $supervisorID, $currentDate)
         SELECT
           employee.ID AS USERID,
           CONCAT_WS(' ', employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME) AS USER_NAME,
-          COUNT(DISTINCT delay_entry.id) AS TOTAL_COUNT,
-          COUNT(DISTINCT CASE WHEN delay_entry.status = 1 THEN delay_entry.id END) AS ACCEPTED_COUNT,
-          COUNT(DISTINCT CASE WHEN delay_entry.status = -1 THEN delay_entry.id END) AS REFUSED_COUNT,
-          COUNT(DISTINCT CASE WHEN delay_entry.status IN (99, 100, 101) THEN delay_entry.id END) AS DELETED_COUNT,
-          COUNT(DISTINCT CASE WHEN delay_entry.status = 0 THEN delay_entry.id END) AS NEW_COUNT
+          COUNT(DISTINCT CASE WHEN visit.ID IS NOT NULL THEN delay_entry.id END) AS TOTAL_COUNT,
+          COUNT(DISTINCT CASE WHEN visit.ID IS NOT NULL AND delay_entry.status = 1 THEN delay_entry.id END) AS ACCEPTED_COUNT,
+          COUNT(DISTINCT CASE WHEN visit.ID IS NOT NULL AND delay_entry.status = -1 THEN delay_entry.id END) AS REFUSED_COUNT,
+          COUNT(DISTINCT CASE WHEN visit.ID IS NOT NULL AND delay_entry.status IN (99, 100, 101) THEN delay_entry.id END) AS DELETED_COUNT,
+          COUNT(DISTINCT CASE WHEN visit.ID IS NOT NULL AND delay_entry.status = 0 THEN delay_entry.id END) AS NEW_COUNT
         FROM GROUPS membership
         INNER JOIN employees employee ON employee.ID = membership.USERID
         LEFT JOIN Delays delay_entry
           ON delay_entry.userID = employee.ID
          AND delay_entry.date > ADDDATE(?, INTERVAL ? DAY)
-         AND EXISTS (
-           SELECT 1
-           FROM visiting visit
-           WHERE visit.user_id = delay_entry.userID
-             AND visit.in_dt >= delay_entry.date
-             AND visit.in_dt < ADDDATE(delay_entry.date, INTERVAL 1 DAY)
-             AND visit.remoteWorkState = 0
-         )
+        LEFT JOIN visiting visit
+          ON visit.user_id = delay_entry.userID
+         AND visit.in_dt >= delay_entry.date
+         AND visit.in_dt < ADDDATE(delay_entry.date, INTERVAL 1 DAY)
+         AND visit.remoteWorkState = 0
         WHERE membership.SUPERVISORID = ?
           AND TRIM(membership.TYPE) = ?
         GROUP BY employee.ID, employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME

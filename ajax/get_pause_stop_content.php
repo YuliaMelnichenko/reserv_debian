@@ -52,7 +52,7 @@ else
         echo "<tr>";
           echo "<td align= \"center\" valign=\"middle\">";
             ///
-            echo "<table class=\"add_time\" border=\"0\" bgcolor=\"#ddeeff\">";
+            echo "<table class=\"add_time pause-status-dialog\" border=\"0\" bgcolor=\"#ddeeff\">";
               echo "<tr>";
                 echo "<td align=\"left\" width = \"250\">";
 

@@ -56,6 +56,7 @@ echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
   echo "<tr>";
     echo "<td class=\"nopadding\" width=600 valign=\"middle\" align=\"left\">";
 
+      echo "<div class=\"notification-table-scroll\">";
       echo "<table style=\"cellspacing: 0, padding: 0px; margin: 0;\" border=1>";
       echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
 
@@ -102,6 +103,7 @@ echo "<td width=140 class=\"nopadding_s\" valign=\"middle\" align=\"left\"><h5 c
       }
 
       echo "</table>";
+      echo "</div>";
     echo "</td>";
   echo "</tr>";
 echo "</table>";
