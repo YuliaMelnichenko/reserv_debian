@@ -22,6 +22,7 @@ $dateForm = $summary['range_start_label'];
 $today = $summary['range_stop_label'];
 
 echo "<h5 class=\"big\"> Глубина просмотра журнала ($depthDays дней): $dateForm - $today </h5>";
+echo "<div class=\"notification-table-scroll\">";
 echo "<table class=\"add_time notification-summary-table\" id=\"delay_approvement_table_users\">";
 echo "<tr class=\"notification-table-head\">";
 echo "<td class=\"add_time notification-user-name-cell\"><h5 class=\"big\">Сотрудник</h5></td>";
@@ -76,4 +77,5 @@ foreach ($summary['entries'] as $entry)
 }
 
 echo "</table>";
+echo "</div>";
 ?>

@@ -5,22 +5,22 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" href="style/main.css">
     </head>
-    <body bgcolor="#ffffff">
+    <body class="app-page">
         <script type="text/javascript" src="lib/jquery/jquery.js"></script>
-        <script type="text/javascript" src="js/tory.js"></script>
+        <script type="text/javascript" src="js/tory.js?v=20260729-layout"></script>
 
 <?php
 echo "<div align=\"left\">";
-echo "<table border=0>";
+echo "<table class=\"staff-leaves-page-table\" border=0>";
 echo "<tr>";
-echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
+echo "<td class=\"staff-leaves-nav-cell\" bordercolor=\"#888888\">";
 
 include_once dirname(__DIR__) . "/navigate.php";
 
 echo "</td>";
 
 
-echo "<td class=\"vac\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\">";
+echo "<td class=\"vac staff-leaves-content-cell\" bordercolor=\"#888888\">";
 
 echo "<h5 class=\"dark\"><br>/Больничные и отпуска сотрудников <br></h5>";
 
@@ -161,7 +161,7 @@ echo "</div>";
     </div>
 </div>
 
-<script type="text/javascript" src="js/staff-leaves.js?v=20260729-export"></script>
+<script type="text/javascript" src="js/staff-leaves.js?v=20260729-layout"></script>
 
 <?php
 echo "</td>";

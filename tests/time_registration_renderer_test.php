@@ -40,4 +40,19 @@ return function () {
         preg_match('/function\s+(?:in_time_part|pure_work_day_duration_part|delay_part)\s*\(/', $controller),
         'Rendering helpers must not return to the AJAX controller'
     );
+
+    $indexScript = file_get_contents(__DIR__ . '/../js/index-page.js');
+    test_assert_true(
+        strpos($indexScript, 'switch_day_state(0, function()') !== false
+            && strpos($indexScript, 'window.location.reload();') !== false,
+        'Rolling back the time-registration state must refresh the page after a successful update'
+    );
+
+    $lunchOverlay = file_get_contents(__DIR__ . '/../ajax/set_lunch.php');
+    $pauseOverlay = file_get_contents(__DIR__ . '/../ajax/get_pause_stop_content.php');
+    test_assert_true(
+        strpos($lunchOverlay, 'lunch-pause-dialog') !== false
+            && strpos($pauseOverlay, 'pause-status-dialog') !== false,
+        'Lunch and pause status overlays must use their compact dialog styles'
+    );
 };

@@ -179,7 +179,9 @@ function rollback_state()
   var perform=confirm('будет осуществлен возврат к предыдущему состоянию регистрации времени. Продолжить?')
   if ( perform == true )
   {
-    switch_day_state( 0 );
+    switch_day_state(0, function() {
+      window.location.reload();
+    });
   }
 }
 

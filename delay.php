@@ -12,11 +12,11 @@ echo "<title>Система учета времени присутствия с�
 echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
-echo "<body bgcolor=\"#ffffff\" >";
+echo "<body class=\"app-page\">";
 ?>
 
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
-<script type="text/javascript" src="js/tory.js?v=20260709-filter"></script>
+<script type="text/javascript" src="js/tory.js?v=20260729-layout"></script>
 
 <?php
 ////////////////////////////////////////////////////////
@@ -28,18 +28,16 @@ auth();
 echo "<div id=\"delay_explanation_delay\">";
 echo "</div>";
 
-echo "<div align=\"left\">";
+echo "<div class=\"notification-page-layout\">";
 
-echo "<table border=0>";
+echo "<table class=\"notification-page-table\">";
 echo "<tr>";
 
-echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
+echo "<td class=\"notification-nav-cell\">";
 include_once __DIR__ . "/navigate.php";
 echo "</td>";
 
-$wholeWidth = 1210;
-
-echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
+echo "<td class=\"notification-content-cell notification-content-cell-extra-wide\">";
 
 echo "<h5 class=\"dark\"><br>/опоздания<br><br></h5>";
 
@@ -47,8 +45,6 @@ echo "<div id=\"delay_table\">";
 echo "</div>";
 
 echo "</td>";
-echo "</tr>";
-echo "</table>";
 echo "</tr>";
 echo "</table>";
 echo "</div>";

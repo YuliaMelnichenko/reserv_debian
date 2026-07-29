@@ -80,39 +80,199 @@
   }
 })(window, document);
 
-function fit_notification_table(containerId, tableId, fixedWidth, extraHeight, extraWidth) {
-  var container = document.getElementById(containerId);
-  var table = document.getElementById(tableId);
+var notificationLayoutResizeTimer = null;
+var notificationScrollbarWidth = null;
 
-  if (!container || !table) {
+function get_vertical_scrollbar_width() {
+  if (notificationScrollbarWidth !== null) {
+    return notificationScrollbarWidth;
+  }
+
+  var probe = document.createElement('div');
+  probe.style.position = 'absolute';
+  probe.style.top = '-9999px';
+  probe.style.width = '100px';
+  probe.style.height = '100px';
+  probe.style.overflow = 'scroll';
+  document.body.appendChild(probe);
+  notificationScrollbarWidth = probe.offsetWidth - probe.clientWidth;
+  probe.parentNode.removeChild(probe);
+
+  return notificationScrollbarWidth;
+}
+
+function get_notification_nav_cell(element) {
+  var cursor = element;
+
+  while (cursor && cursor.closest) {
+    var row = cursor.closest('tr');
+
+    if (!row) {
+      break;
+    }
+
+    var navCell = row.querySelector(
+      '.notification-nav-cell, .accounting-errors-nav-cell, .staff-leaves-nav-cell'
+    );
+
+    if (navCell) {
+      return navCell;
+    }
+
+    cursor = row.parentElement;
+  }
+
+  return null;
+}
+
+function get_notification_available_height(scroll) {
+  var navCell = get_notification_nav_cell(scroll);
+  var scrollRect = scroll.getBoundingClientRect();
+  var bottom = window.innerHeight;
+
+  if (navCell) {
+    bottom = navCell.getBoundingClientRect().top;
+
+    Array.prototype.forEach.call(navCell.children, function(child) {
+      var childRect = child.getBoundingClientRect();
+
+      if (childRect.height > 0) {
+        bottom = Math.max(bottom, childRect.bottom);
+      }
+    });
+  }
+
+  return Math.max(120, Math.floor(bottom - scrollRect.top - 10));
+}
+
+function align_notification_toolbar(scroll, width) {
+  var detailTable = scroll.closest('.notification-detail-header-table');
+
+  if (detailTable) {
+    detailTable.style.width = width + 'px';
+
+    var nestedHeader = detailTable.querySelector(
+      ':scope > tbody > tr > td > .notification-detail-header-table'
+    );
+
+    if (nestedHeader) {
+      nestedHeader.style.width = '100%';
+    }
+  }
+
+  var contentCell = scroll.closest(
+    '.notification-content-cell, .accounting-errors-content-cell'
+  );
+
+  if (contentCell) {
+    contentCell.style.width = (width + 10) + 'px';
+  }
+
+  var accountingToolbar = document.getElementById('accountingErrorsUserToolbar');
+
+  if (
+    accountingToolbar
+    && accountingToolbar.parentNode
+    && accountingToolbar.parentNode.contains(scroll)
+  ) {
+    accountingToolbar.style.width = width + 'px';
+  }
+}
+
+function fit_notification_scroll(scroll) {
+  if (!scroll) {
     return { height: 0, width: 0 };
   }
 
-  extraHeight = extraHeight || 0;
-  extraWidth = extraWidth || 0;
+  var table = scroll.querySelector('table');
 
-  var rect = container.getBoundingClientRect();
-  var availableHeight = Math.max(120, window.innerHeight - rect.top - 5);
-  var tableHeight = table.offsetHeight + extraHeight;
-  var tableWidth = table.offsetWidth + extraWidth;
-  var panelHeight = Math.min(tableHeight, availableHeight);
-  var panelWidth = fixedWidth || tableWidth;
-
-  if (panelWidth > window.innerWidth) {
-    panelWidth = window.innerWidth;
+  if (!table || table.offsetWidth === 0) {
+    return { height: 0, width: 0 };
   }
 
-  container.style.height = panelHeight + "px";
-  container.style.width = panelWidth + "px";
+  scroll.style.width = '';
+  scroll.style.maxWidth = '';
+  scroll.style.overflowY = 'hidden';
 
-  var scroll = container.querySelector('.notification-table-scroll');
+  var availableHeight = get_notification_available_height(scroll);
+  var tableHeight = Math.ceil(table.getBoundingClientRect().height);
+  var tableWidth = Math.ceil(table.getBoundingClientRect().width);
+  var needsVerticalScroll = tableHeight > availableHeight;
+  var scrollbarWidth = needsVerticalScroll ? get_vertical_scrollbar_width() : 0;
+  var availableWidth = Math.max(
+    180,
+    Math.floor(window.innerWidth - scroll.getBoundingClientRect().left - 10)
+  );
+  var panelWidth = Math.min(tableWidth + scrollbarWidth, availableWidth);
 
-  if (scroll) {
-    scroll.style.maxHeight = Math.max(80, panelHeight - 5) + "px";
-  }
+  scroll.style.maxHeight = availableHeight + 'px';
+  scroll.style.width = panelWidth + 'px';
+  scroll.style.maxWidth = panelWidth + 'px';
+  scroll.style.overflowY = needsVerticalScroll ? 'auto' : 'hidden';
+  scroll.style.overflowX = tableWidth > panelWidth ? 'auto' : 'hidden';
 
-  return { height: panelHeight, width: panelWidth };
+  align_notification_toolbar(scroll, panelWidth);
+
+  return {
+    height: Math.min(tableHeight, availableHeight),
+    width: panelWidth
+  };
 }
+
+function fit_notification_layout(root) {
+  var scope = root && root.querySelectorAll ? root : document;
+  var scrolls = Array.prototype.slice.call(
+    scope.querySelectorAll('.notification-table-scroll')
+  );
+  var accountingScrollIds = [
+    'accountingErrorsTableScroll',
+    'accountingErrorsApprovementTableScroll',
+    'accountingErrorsUserTableScroll'
+  ];
+
+  accountingScrollIds.forEach(function(id) {
+    var scroll = document.getElementById(id);
+
+    if (scroll && scrolls.indexOf(scroll) === -1) {
+      scrolls.push(scroll);
+    }
+  });
+
+  var lastFit = { height: 0, width: 0 };
+
+  scrolls.forEach(function(scroll) {
+    lastFit = fit_notification_scroll(scroll);
+  });
+
+  return lastFit;
+}
+
+function schedule_notification_layout(root) {
+  window.requestAnimationFrame(function() {
+    fit_notification_layout(root || document);
+  });
+}
+
+function fit_notification_table(containerId, tableId) {
+  var container = document.getElementById(containerId);
+
+  if (!container || !document.getElementById(tableId)) {
+    return { height: 0, width: 0 };
+  }
+
+  return fit_notification_layout(container);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  schedule_notification_layout(document);
+});
+
+window.addEventListener('resize', function() {
+  window.clearTimeout(notificationLayoutResizeTimer);
+  notificationLayoutResizeTimer = window.setTimeout(function() {
+    fit_notification_layout(document);
+  }, 80);
+});
 
 function reload_if_missing_container(containerId) {
   if (!document.getElementById(containerId)) {
@@ -521,7 +681,7 @@ function show_pause_notification(){
       document.getElementById('pause_approvement').innerHTML = dat1;
 
       if ( document.getElementById('pause_approvement_table_users') && document.getElementById('pause_approvement') ){
-        fit_notification_table('pause_approvement', 'pause_approvement_table_users', 0, 50, 30);
+        fit_notification_table('pause_approvement', 'pause_approvement_table_users');
         set_delay_notificationc_count();
       }
     }
@@ -535,7 +695,7 @@ function show_pause_by_user( user ){
       document.getElementById('pause_approvement').innerHTML = dat1;
 
       if ( document.getElementById('pause_approvement_table') && document.getElementById('pause_approvement') ){
-        fit_notification_table('pause_approvement', 'pause_approvement_table', 550, 0, 0);
+        fit_notification_table('pause_approvement', 'pause_approvement_table');
         set_delay_notificationc_count();
       }
     }
@@ -584,7 +744,7 @@ function show_delay_notification(){
       document.getElementById('delay_approvement').innerHTML = dat1;
 
       if ( document.getElementById('delay_approvement_table_users') && document.getElementById('delay_approvement') ){
-        var fit = fit_notification_table('delay_approvement', 'delay_approvement_table_users', 0, 50, 25);
+        var fit = fit_notification_table('delay_approvement', 'delay_approvement_table_users');
         set_delay_notificationc_count();
 
         $.post('ajax/get_delay_approvment_header_content.php', { width: fit.width, offs: 12 }, RetSWT2);
@@ -603,7 +763,7 @@ function show_delays_by_user( user ){
       document.getElementById('delay_approvement').innerHTML = dat1;
 
       if ( document.getElementById('delay_approvement_table') && document.getElementById('delay_approvement') ){
-        var fit = fit_notification_table('delay_approvement', 'delay_approvement_table', 1020, 0, 0);
+        var fit = fit_notification_table('delay_approvement', 'delay_approvement_table');
         set_delay_notificationc_count();
 
         $.post('ajax/get_delay_approvment_header_content.php', { width: fit.width, offs: 8 }, RetSWT2);
@@ -700,12 +860,10 @@ function show_add_times_by_user( user ){
       document.getElementById('add_time_content').innerHTML = dat1;
 
       if ( document.getElementById('add_time_approvement_table') && document.getElementById('add_time_content') ){
-        tWidth = 1095;
-
-        fit_notification_table('add_time_content', 'add_time_approvement_table', tWidth, 0, 0);
+        var fit = fit_notification_table('add_time_content', 'add_time_approvement_table');
         set_add_time_notificationc_count();
 
-        $.post('ajax/get_time_approvment_header_content.php', { width: tWidth, offs: 8 }, RetSWT2);
+        $.post('ajax/get_time_approvment_header_content.php', { width: fit.width, offs: 8 }, RetSWT2);
         function RetSWT2(dat2) {
           document.getElementById('addTimeHeader').innerHTML = dat2;
         }
@@ -785,6 +943,7 @@ function show_table(){
     $.post('ajax/get_add_times_table.php', RetSWT1);
     function RetSWT1(dat1) {
       document.getElementById('add_times_table').innerHTML = dat1;
+      schedule_notification_layout(document.getElementById('add_times_table'));
     }
   }
 }
@@ -796,6 +955,7 @@ function show_pause_table(){
 
     function RetSWT1(dat1) {
       document.getElementById('pause_times_table').innerHTML = dat1;
+      schedule_notification_layout(document.getElementById('pause_times_table'));
     }
   }
 }
@@ -815,6 +975,7 @@ function show_delay_table(){
     $.post('ajax/get_delay_table.php', RetSWT1);
     function RetSWT1(dat1) {
       document.getElementById('delay_table').innerHTML = dat1;
+      schedule_notification_layout(document.getElementById('delay_table'));
     }
   }
 }
