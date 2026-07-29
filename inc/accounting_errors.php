@@ -364,11 +364,21 @@ function get_accounting_errors_counts_by_user($link, $userID, &$totalCount, &$ac
     return true;
 }
 
-function get_accounting_errors_supervised_user_ids($link, $supervisorID)
+function get_accounting_errors_supervised_users($link, $supervisorID)
 {
     $result = db_query(
         $link,
-        'SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = ? AND TRIM(TYPE) = ? AND USERID NOT IN (156, 161) ORDER BY USERID',
+        "SELECT DISTINCT
+           membership.USERID,
+           employee.SURNAME,
+           employee.FIRSTNAME,
+           employee.LASTNAME
+         FROM GROUPS membership
+         INNER JOIN employees employee ON employee.ID = membership.USERID
+         WHERE membership.SUPERVISORID = ?
+           AND TRIM(membership.TYPE) = ?
+           AND membership.USERID NOT IN (156, 161)
+         ORDER BY employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME",
         'ii',
         array((int)$supervisorID, 3)
     );
@@ -378,11 +388,27 @@ function get_accounting_errors_supervised_user_ids($link, $supervisorID)
         return false;
     }
 
-    $userIDs = array();
+    $users = array();
 
     while ($row = db_fetch_one($result)) {
-        $userIDs[] = (int)$row['USERID'];
+        $users[] = array(
+            'user_id' => (int)$row['USERID'],
+            'user_name' => trim(
+                $row['SURNAME'] . ' ' . $row['FIRSTNAME'] . ' ' . $row['LASTNAME']
+            ),
+        );
     }
 
-    return $userIDs;
+    return $users;
+}
+
+function get_accounting_errors_supervised_user_ids($link, $supervisorID)
+{
+    $users = get_accounting_errors_supervised_users($link, $supervisorID);
+
+    if ($users === false) {
+        return false;
+    }
+
+    return array_column($users, 'user_id');
 }

@@ -4,6 +4,7 @@ require_once __DIR__ . '/test_helpers.php';
 
 $testFiles = array(
     __DIR__ . '/time_registration_renderer_test.php',
+    __DIR__ . '/accounting_errors_test.php',
     __DIR__ . '/ajax_response_test.php',
     __DIR__ . '/ajax_endpoint_conventions_test.php',
     __DIR__ . '/add_time_journal_test.php',

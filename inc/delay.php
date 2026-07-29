@@ -1,5 +1,20 @@
 <?php
 
+function is_delay_check_disabled_for_weekend($dateTime)
+{
+    if (!is_string($dateTime) || trim($dateTime) === '') {
+        return false;
+    }
+
+    $timestamp = strtotime($dateTime);
+
+    if ($timestamp === false) {
+        return false;
+    }
+
+    return (int)date('N', $timestamp) >= 6;
+}
+
 function get_delay_value($arrivalDateTime, $defaultStartTime, $allowedDelay)
 {
     if (
@@ -16,6 +31,10 @@ function get_delay_value($arrivalDateTime, $defaultStartTime, $allowedDelay)
     $arrivalTimestamp = strtotime($arrivalDateTime);
 
     if ($arrivalTimestamp === false) {
+        return array(0, 0);
+    }
+
+    if (is_delay_check_disabled_for_weekend($arrivalDateTime)) {
         return array(0, 0);
     }
 

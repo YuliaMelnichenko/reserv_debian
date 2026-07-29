@@ -48,6 +48,15 @@ if (request_post_int('mode') === 1)
   $delayID = request_post_int('delayID');
 }
 
+if ($mode === 0 && is_delay_check_disabled_for_weekend($currentDate)) {
+  $_SESSION['ss_there_is_delay'] = 0;
+  $_SESSION['ss_delay_show_save'] = 0;
+  $_SESSION['ss_delay_duration_val'] = 0;
+  $_SESSION['ss_delay_duration'] = 0;
+  echo "weekend";
+  exit;
+}
+
 $transaction = db_transaction_start($link);
 if (!$transaction) {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);

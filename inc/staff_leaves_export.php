@@ -46,17 +46,31 @@ function buildStaffLeavesArchiveSheetRows($rows, $periodTitle, $employeeTitle, $
     $sheetRows .= buildXlsxRow(4, array('Событие', $eventTitle), 2);
     $sheetRows .= buildXlsxRow(5, array('Дата выгрузки', $exportTime), 2);
     $sheetRows .= buildXlsxRow(6, array(''));
-    $sheetRows .= buildXlsxRow(7, array('ФИО', 'Дата начала', 'Дата окончания', 'Кол-во дней', 'Событие'), 3);
+    $sheetRows .= buildXlsxRow(
+        7,
+        array(
+            'ФИО',
+            'Дата начала',
+            'Дата окончания',
+            'Календарные дни',
+            'Рабочие дни',
+            'Рабочие часы',
+            'Событие',
+        ),
+        3
+    );
     $rowIndex = 8;
 
     foreach ($rows as $row) {
         $sheetRows .= buildXlsxRow(
             $rowIndex,
             array(
-                $row['name'],
+                $row['excel_name'],
                 formatArchiveDateRu($row['start_date']),
                 formatArchiveDateRu($row['stop_date']),
-                $row['total_days'],
+                $row['calendar_days'],
+                $row['work_days'],
+                $row['work_hours'],
                 $row['event'],
             )
         );
@@ -109,9 +123,9 @@ function sendStaffLeavesArchiveXlsx($rows, $periodTitle, $employeeTitle, $eventT
 <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>',
         'xl/worksheets/sheet1.xml' => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-<cols><col min="1" max="1" width="34" customWidth="1"/><col min="2" max="3" width="16" customWidth="1"/><col min="4" max="4" width="14" customWidth="1"/><col min="5" max="5" width="18" customWidth="1"/></cols>
+<cols><col min="1" max="1" width="40" customWidth="1"/><col min="2" max="3" width="16" customWidth="1"/><col min="4" max="6" width="17" customWidth="1"/><col min="7" max="7" width="18" customWidth="1"/></cols>
 <sheetData>' . $sheetRows . '</sheetData>
-<mergeCells count="5"><mergeCell ref="A1:E1"/><mergeCell ref="B2:E2"/><mergeCell ref="B3:E3"/><mergeCell ref="B4:E4"/><mergeCell ref="B5:E5"/></mergeCells></worksheet>',
+<mergeCells count="5"><mergeCell ref="A1:G1"/><mergeCell ref="B2:G2"/><mergeCell ref="B3:G3"/><mergeCell ref="B4:G4"/><mergeCell ref="B5:G5"/></mergeCells></worksheet>',
         'docProps/core.xml' => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>Архив отсутствий сотрудников</dc:title><dc:creator>TORI</dc:creator><cp:lastModifiedBy>TORI</cp:lastModifiedBy><dcterms:created xsi:type="dcterms:W3CDTF">' . escapeXlsxValue($createdIso) . '</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">' . escapeXlsxValue($createdIso) . '</dcterms:modified></cp:coreProperties>',
         'docProps/app.xml' => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>TORI</Application></Properties>',

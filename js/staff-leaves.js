@@ -455,21 +455,25 @@ function getArchiveFilterParams() {
         tableHtml += '<th>ФИО</th>';
         tableHtml += '<th>Дата начала</th>';
         tableHtml += '<th>Дата окончания</th>';
-        tableHtml += '<th>Кол-во дней</th>';
+        tableHtml += '<th>Календарные дни</th>';
+        tableHtml += '<th>Рабочие дни</th>';
+        tableHtml += '<th>Рабочие часы</th>';
         tableHtml += '<th>Событие</th>';
         tableHtml += '</tr>';
         tableHtml += '</thead>';
         tableHtml += '<tbody>';
 
         if (!Array.isArray(data.rows) || data.rows.length === 0) {
-            tableHtml += '<tr><td colspan="5" align="center">Нет данных для выгрузки</td></tr>';
+            tableHtml += '<tr><td colspan="7" align="center">Нет данных для выгрузки</td></tr>';
         } else {
             data.rows.forEach(row => {
                 tableHtml += '<tr>';
-                tableHtml += '<td>' + escapeHtml(row.name) + '</td>';
+                tableHtml += '<td>' + escapeHtml(row.excel_name) + '</td>';
                 tableHtml += '<td>' + formatDate(row.start_date) + '</td>';
                 tableHtml += '<td>' + formatDate(row.stop_date) + '</td>';
-                tableHtml += '<td>' + escapeHtml(row.total_days) + '</td>';
+                tableHtml += '<td>' + escapeHtml(row.calendar_days) + '</td>';
+                tableHtml += '<td>' + escapeHtml(row.work_days) + '</td>';
+                tableHtml += '<td>' + escapeHtml(row.work_hours) + '</td>';
                 tableHtml += '<td>' + escapeHtml(row.event) + '</td>';
                 tableHtml += '</tr>';
             });

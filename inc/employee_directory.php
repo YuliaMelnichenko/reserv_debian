@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/delay.php';
 
 function get_sv_name_by_userid($user_id)
 {
@@ -334,7 +335,9 @@ function get_and_update_start_time_status($userID)
 {
     include __DIR__ . '/../php_tori/connect.php';
 
-    $currentTime = get_splited_current_date_time_in_timezone()[1];
+    $currentDateTimeParts = get_splited_current_date_time_in_timezone();
+    $currentTime = $currentDateTimeParts[1];
+    $currentDate = $currentDateTimeParts[2];
     $isThereDelay = 0;
     $defaultStartTime = '';
     $allowedDelay = 0;
@@ -384,7 +387,11 @@ function get_and_update_start_time_status($userID)
         $defaultStartTimeWithDelayValue = strtotime($defaultStartTimeWithDelay);
         $_SESSION['ss_defaultStartTimeWithDelayVal'] = $defaultStartTimeWithDelayValue;
 
-        if ($currentTime > $defaultStartTimeWithDelayValue && (int)$remoteWork !== 1) {
+        if (
+            !is_delay_check_disabled_for_weekend($currentDate)
+            && $currentTime > $defaultStartTimeWithDelayValue
+            && (int)$remoteWork !== 1
+        ) {
             $isThereDelay = 2;
         }
 
