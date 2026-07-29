@@ -155,6 +155,10 @@ function unset_cookie(csrfToken){
 function set_delay(/* userID */){
   $.post('ajax/set_delay_by_entrance.php', RetSWT1);
   function RetSWT1(dat1) {
+    if (dat1 === 'weekend') {
+      return;
+    }
+
     add_expl();
 
     if ( document.getElementById('explBtn') ){ document.getElementById('explBtn').disabled = false; }

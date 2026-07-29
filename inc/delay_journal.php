@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/delay.php';
+require_once __DIR__ . '/calendar.php';
 
 function get_delay_journal_context($link, $userID, $currentDate, $includeDeleted = true)
 {
@@ -22,19 +23,8 @@ function get_delay_journal_context($link, $userID, $currentDate, $includeDeleted
         return null;
     }
 
-    $depthResult = db_query($link, "
-        SELECT valueInt
-        FROM DBSETUP
-        WHERE paramName = 'delay_journal_deep_day'
-        LIMIT 1
-    ");
-
-    if (!$depthResult) {
-        return false;
-    }
-
-    $depthRow = db_fetch_one($depthResult);
-    $depthDays = $depthRow ? abs((int)$depthRow['valueInt']) : 180;
+    list($periodStartDate, $periodStopDate, $periodStopExclusive) =
+        get_current_quarter_date_range(false, $currentDate);
     $defaultStartTime = (string)$user['defaultStartTime'];
     $allowedDelay = (int)$user['AllowedDelayMinutes'];
 
@@ -62,9 +52,10 @@ function get_delay_journal_context($link, $userID, $currentDate, $includeDeleted
         LEFT JOIN employees supervisor ON supervisor.ID = a.supervisorID
         LEFT JOIN employees acceptor ON acceptor.ID = a.acceptorID
         WHERE a.userID = ?
-          AND a.date > ADDDATE(?, INTERVAL ? DAY)
+          AND a.date >= ?
+          AND a.date < ?
         ORDER BY a.date DESC, a.id DESC
-    ", 'isi', array((int)$userID, $currentDate, -$depthDays));
+    ", 'iss', array((int)$userID, $periodStartDate, $periodStopExclusive));
 
     if (!$delayResult) {
         return false;
@@ -106,6 +97,8 @@ function get_delay_journal_context($link, $userID, $currentDate, $includeDeleted
         'user_name' => trim($user['SURNAME'] . ' ' . $user['FIRSTNAME'] . ' ' . $user['LASTNAME']),
         'default_start_time' => $defaultStartTime,
         'allowed_delay' => $allowedDelay,
+        'period_start_date' => $periodStartDate,
+        'period_stop_date' => $periodStopDate,
         'entries' => $entries,
     );
 }

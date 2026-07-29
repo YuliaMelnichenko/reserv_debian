@@ -25,6 +25,16 @@ return function () {
     );
     test_assert_same(
         array(0, 0),
+        get_delay_value('2026-07-25 12:00:00', '09:00:00', 30),
+        'A Saturday arrival must not be marked late'
+    );
+    test_assert_same(
+        array(0, 0),
+        get_delay_value('2026-07-26 12:00:00', '09:00:00', 30),
+        'A Sunday arrival must not be marked late'
+    );
+    test_assert_same(
+        array(0, 0),
         get_delay_value('2026-07-21 05:00:00', '09:00:00', 30),
         'An early arrival on the following date must use its own calendar day'
     );
@@ -38,4 +48,12 @@ return function () {
         get_delay_value('2026-07-20 10:00:00', 'NDF', 30),
         'An employee without a default start time must not be marked late'
     );
+
+    foreach (array('set_delay_by_entrance.php', 'set_delay_explanation.php') as $endpoint) {
+        $source = file_get_contents(__DIR__ . '/../ajax/' . $endpoint);
+        test_assert_true(
+            strpos($source, 'is_delay_check_disabled_for_weekend') !== false,
+            'Weekend delay records must be rejected by ' . $endpoint
+        );
+    }
 };

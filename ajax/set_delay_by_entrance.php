@@ -24,6 +24,15 @@ $ss_delay_duration_db = format_time_d_hhmmss_pure($ss_delay_duration);
 $currentDateArr = get_current_datetime_in_timezone();
 $currentDate = $currentDateArr[2];
 
+if (is_delay_check_disabled_for_weekend($currentDate)) {
+  $_SESSION['ss_there_is_delay'] = 0;
+  $_SESSION['ss_delay_show_save'] = 0;
+  $_SESSION['ss_delay_duration_val'] = 0;
+  $_SESSION['ss_delay_duration'] = 0;
+  echo "weekend";
+  exit;
+}
+
 $transaction = db_transaction_start($link);
 if (!$transaction) {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);

@@ -56,6 +56,54 @@ function getStaffLeaveDaysCount($startDate, $stopDate)
     return (int)$startValue->diff($stopValue)->days + 1;
 }
 
+function calculateStaffLeaveArchiveMetrics($startDate, $stopDate, $weeklyRate, $dayTypes = array())
+{
+    list($start, $stop) = normalizeStaffLeaveRange($startDate, $stopDate);
+    $dailyHours = (float)$weeklyRate > 0 ? (float)$weeklyRate / 5 : 8.0;
+    $calendarDays = 0;
+    $workDays = 0;
+    $workHours = 0.0;
+    $day = new DateTimeImmutable($start);
+    $lastDay = new DateTimeImmutable($stop);
+
+    while ($day <= $lastDay) {
+        $date = $day->format('Y-m-d');
+        $calendarDays++;
+
+        if ((int)$day->format('N') <= 5) {
+            $dayType = isset($dayTypes[$date]) ? (int)$dayTypes[$date] : null;
+
+            if ($dayType !== 0) {
+                $workDays++;
+                $workHours += $dayType === 2 ? max(0, $dailyHours - 1) : $dailyHours;
+            }
+        }
+
+        $day = $day->modify('+1 day');
+    }
+
+    return array(
+        'calendar_days' => $calendarDays,
+        'work_days' => $workDays,
+        'work_hours' => round($workHours, 2),
+    );
+}
+
+function buildStaffLeaveArchiveEmployeeName($row)
+{
+    $parts = array();
+
+    foreach (array('employee_surname', 'employee_firstname', 'employee_lastname') as $field) {
+        $value = isset($row[$field]) ? trim((string)$row[$field]) : '';
+
+        if ($value !== '') {
+            $parts[] = $value;
+        }
+    }
+
+    return count($parts) > 0 ? implode(' ', $parts) : trim((string)$row['fio']);
+}
+
 function getArchivePeriodDates($periodType, $startDateManual, $stopDateManual, $currentDate = null)
 {
     $currDate = normalize_date_value($currentDate === null ? date('Y-m-d') : $currentDate);
@@ -149,13 +197,13 @@ function getArchiveEmployeeTitle($link, $employeeId)
 
     $result = db_query(
         $link,
-        'SELECT surname, firstname FROM employees WHERE id = ? LIMIT 1',
+        'SELECT surname, firstname, lastname FROM employees WHERE id = ? LIMIT 1',
         'i',
         array((int)$employeeId)
     );
 
     if ($row = db_fetch_one($result)) {
-        return $row['surname'] . ' ' . $row['firstname'];
+        return trim($row['surname'] . ' ' . $row['firstname'] . ' ' . $row['lastname']);
     }
 
     return 'Выбранный сотрудник';
@@ -191,6 +239,8 @@ function buildStaffLeavesArchiveQuery($employeeId, $event, $filterStartDate, $fi
 
 function mapStaffLeaveRow($row)
 {
+    $calendarDays = getStaffLeaveDaysCount($row['start_date'], $row['stop_date']);
+
     return array(
         'id' => (int)$row['id'],
         'user_id' => isset($row['user_id']) ? (int)$row['user_id'] : 0,
@@ -199,8 +249,52 @@ function mapStaffLeaveRow($row)
         'start_date' => $row['start_date'],
         'stop_date' => $row['stop_date'],
         'event' => $row['event'],
-        'total_days' => getStaffLeaveDaysCount($row['start_date'], $row['stop_date']),
+        'total_days' => $calendarDays,
+        'excel_name' => buildStaffLeaveArchiveEmployeeName($row),
+        'calendar_days' => $calendarDays,
+        'work_days' => 0,
+        'work_hours' => 0,
     );
+}
+
+function enrichStaffLeavesArchiveRows($link, $rows)
+{
+    if (count($rows) === 0) {
+        return $rows;
+    }
+
+    $startDates = array_column($rows, 'start_date');
+    $stopDates = array_column($rows, 'stop_date');
+    $rangeStart = min($startDates);
+    $rangeStop = max($stopDates);
+    $calendarResult = db_query(
+        $link,
+        'SELECT date, type FROM work_dayoff WHERE date >= ? AND date <= ? AND type IN (0, 2)',
+        'ss',
+        array($rangeStart, $rangeStop)
+    );
+
+    if (!$calendarResult) {
+        throw new RuntimeException(db_error($link));
+    }
+
+    $dayTypes = array();
+
+    while ($calendarRow = db_fetch_one($calendarResult)) {
+        $dayTypes[$calendarRow['date']] = (int)$calendarRow['type'];
+    }
+
+    foreach ($rows as $index => $row) {
+        $metrics = calculateStaffLeaveArchiveMetrics(
+            $row['start_date'],
+            $row['stop_date'],
+            isset($row['employee_rate']) ? $row['employee_rate'] : 40,
+            $dayTypes
+        );
+        $rows[$index] = array_merge($row, $metrics);
+    }
+
+    return $rows;
 }
 
 function fetchStaffLeavesArchiveRows($link, $employeeId, $event, $filterStartDate, $filterStopDate, $limit)
@@ -208,9 +302,15 @@ function fetchStaffLeavesArchiveRows($link, $employeeId, $event, $filterStartDat
     $types = '';
     $params = array();
     $whereSql = buildStaffLeavesArchiveQuery($employeeId, $event, $filterStartDate, $filterStopDate, $types, $params);
-    $sql = 'SELECT id, user_id, fio, start_date, stop_date, event FROM staff_leaves '
+    $sql = 'SELECT leave_entry.id, leave_entry.user_id, leave_entry.fio, '
+        . 'leave_entry.start_date, leave_entry.stop_date, leave_entry.event, '
+        . 'employee.surname AS employee_surname, employee.firstname AS employee_firstname, '
+        . 'employee.lastname AS employee_lastname, employee.rate AS employee_rate '
+        . 'FROM staff_leaves leave_entry '
+        . 'LEFT JOIN employees employee ON employee.id = leave_entry.user_id '
         . $whereSql
-        . ' ORDER BY fio ASC, start_date DESC, stop_date DESC';
+        . ' ORDER BY employee.surname ASC, employee.firstname ASC, '
+        . 'leave_entry.start_date DESC, leave_entry.stop_date DESC';
 
     if ((int)$limit > 0) {
         $sql .= ' LIMIT ' . (int)$limit;
@@ -226,7 +326,7 @@ function fetchStaffLeavesArchiveRows($link, $employeeId, $event, $filterStartDat
         $rows[] = mapStaffLeaveRow($row);
     }
 
-    return $rows;
+    return enrichStaffLeavesArchiveRows($link, $rows);
 }
 
 function fetchActiveStaffLeaves($link, $event)

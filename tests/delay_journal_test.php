@@ -31,6 +31,12 @@ return function () {
         strpos($service, 'LEFT JOIN employees acceptor') !== false,
         'The delay journal must load acceptor names in its data query'
     );
+    test_assert_true(
+        strpos($service, 'get_current_quarter_date_range') !== false
+            && strpos($service, 'period_start_date') !== false
+            && strpos($service, 'period_stop_date') !== false,
+        'The employee delay journal must expose the current-quarter period'
+    );
     test_assert_same(0, preg_match('/SELECT\s+\*/i', $service), 'Delay journal queries must select explicit fields');
 
     $detailPage = file_get_contents(__DIR__ . '/../delay_approvement_user.php');
@@ -65,6 +71,10 @@ return function () {
     test_assert_true(
         strpos($employeeTable, 'journal-action-button journal-action-button-delay') !== false,
         'The existing employee delay action must remain available'
+    );
+    test_assert_true(
+        strpos($employeeTable, 'Текущий квартал:') !== false,
+        'The employee delay table must display its current-quarter period'
     );
     test_assert_true(
         strpos($service, '$includeDeleted') !== false,

@@ -56,13 +56,14 @@ echo "<table class=\"accounting-errors-page-table\">";
           $img = "go1.png";
           $rowCount = 0;
 
-          $supervisedUserIDs = get_accounting_errors_supervised_user_ids($link, $userID_);
+          $supervisedUsers = get_accounting_errors_supervised_users($link, $userID_);
 
-          if ($supervisedUserIDs === false) {
+          if ($supervisedUsers === false) {
             echo "<tr><td colspan=7><h5 class=\"middle\">Не удалось загрузить список сотрудников.</h5></td></tr>";
           }
           else {
-            foreach ($supervisedUserIDs as $userID) {
+            foreach ($supervisedUsers as $supervisedUser) {
+              $userID = $supervisedUser['user_id'];
 
               sync_accounting_errors_for_user($link, $userID, $depthDays);
 
@@ -72,7 +73,7 @@ echo "<table class=\"accounting-errors-page-table\">";
               $deletedNotificationCount = 0;
               $newNotificationCount = 0;
 
-              get_accounting_errors_counts_by_user(
+              $countsLoaded = get_accounting_errors_counts_by_user(
                 $link,
                 $userID,
                 $notificationCount,
@@ -82,9 +83,13 @@ echo "<table class=\"accounting-errors-page-table\">";
                 $newNotificationCount
               );
 
+              if (!$countsLoaded || $notificationCount <= 0) {
+                continue;
+              }
+
               $rowCount++;
 
-              $userName = html_escape(get_user_name_by_id($userID));
+              $userName = html_escape($supervisedUser['user_name']);
               $muid = getMaskedUID(32, $userID);
               $userUrl = "accounting_errors_approvement_user.php?mid=$muid";
               $uhref = "location.href='$userUrl'";
