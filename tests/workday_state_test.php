@@ -28,4 +28,11 @@ return function () {
     test_assert_same(null, get_workday_transition(0, 1), 'Finished day cannot move forward');
     test_assert_same(null, get_workday_transition(5, 1), 'Unknown state must be rejected');
     test_assert_same(null, get_workday_transition(1, 2), 'Unknown direction must be rejected');
+
+    $service = file_get_contents(__DIR__ . '/../inc/workday_transition_service.php');
+    test_assert_same(
+        false,
+        strpos($service, 'TORI_SWITCH_SYNC') !== false,
+        'Normal workday transitions must not be written to the PHP error log'
+    );
 };
