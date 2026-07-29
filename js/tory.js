@@ -1311,6 +1311,12 @@ function check_pause_state( force ){
     else if ( dat == 1 ){
       $.post('ajax/get_pause_stop_content.php', RetSWT1);
       function RetSWT1(dat1) {
+        var pauseHtml = $.trim(dat1);
+
+        if (pauseHtml === '' || pauseHtml === '0' || pauseHtml.indexOf('id="pauseFullScreen"') === -1) {
+          return;
+        }
+
         $("body").html(dat1);
       }
     }

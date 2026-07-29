@@ -5,7 +5,7 @@ require_once __DIR__ . '/inc/session.php';
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
-<script type="text/javascript" src="js/tory.js"></script> 
+<script type="text/javascript" src="js/tory.js?v=20260729-pause-guard"></script>
 <script type="text/javascript" charset="utf-8"> 
 
 check_pause_state();
