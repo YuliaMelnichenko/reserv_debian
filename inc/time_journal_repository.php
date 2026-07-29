@@ -75,7 +75,8 @@ function time_journal_query_pause_intervals($link, $userId, $quarterStartDate, $
            AND $startExpr < ?
            AND $startExpr <> '0000-00-00 00:00:00'
            AND $stopExpr <> '0000-00-00 00:00:00'
-           AND $stopExpr > $startExpr",
+           AND $stopExpr > $startExpr
+           AND DATE($stopExpr) = DATE($startExpr)",
         'iss',
         array((int)$userId, $quarterStartDate, $quarterStopExclusive)
     );
@@ -172,6 +173,7 @@ function time_journal_query_add_work_for_period($link, $userId, $startDateTime, 
            AND a.START_DT <> '0000-00-00 00:00:00'
            AND a.STOP_DT <> '0000-00-00 00:00:00'
            AND a.STOP_DT > a.START_DT
+           AND (a.PAUSE_MODE = 0 OR DATE(a.STOP_DT) = DATE(a.START_DT))
          ORDER BY a.START_DT",
         'ssi',
         array($stopDateTime, $startDateTime, (int)$userId)
@@ -196,6 +198,7 @@ function time_journal_query_add_work_journal($link, $userId, $pauseMode, $curren
            AND $startExpr <> '0000-00-00 00:00:00'
            AND $stopExpr <> '0000-00-00 00:00:00'
            AND $stopExpr > $startExpr
+           AND (a.PAUSE_MODE = 0 OR DATE($stopExpr) = DATE($startExpr))
            AND $stopExpr > ADDDATE(?, INTERVAL ? DAY)
          ORDER BY START_DT_EFFECTIVE DESC",
         'iisi',
@@ -228,6 +231,7 @@ function time_journal_query_pause_journal(
            AND $startExpr <> '0000-00-00 00:00:00'
            AND $stopExpr <> '0000-00-00 00:00:00'
            AND $stopExpr > $startExpr
+           AND DATE($stopExpr) = DATE($startExpr)
            AND $startExpr >= ?
            AND $startExpr < ?
          ORDER BY START_DT_EFFECTIVE DESC, a.ID DESC",
@@ -236,22 +240,45 @@ function time_journal_query_pause_journal(
     );
 }
 
-function time_journal_query_open_pause($link, $userId)
+function time_journal_query_open_pause($link, $userId, $periodStartDateTime = null, $periodStopDateTime = null)
 {
+    $periodCondition = '';
+    $types = 'i';
+    $params = array((int)$userId);
+
+    if ($periodStartDateTime !== null && $periodStopDateTime !== null) {
+        $periodCondition = ' AND START_DT >= ? AND START_DT < ?';
+        $types .= 'ss';
+        $params[] = (string)$periodStartDateTime;
+        $params[] = (string)$periodStopDateTime;
+    }
+
     return db_query(
         $link,
         'SELECT ID FROM ADD_TIME
          WHERE USERID = ? AND PAUSE_MODE = 1
            AND START_DT <> \'0000-00-00 00:00:00\'
            AND (STOP_DT IS NULL OR STOP_DT = \'0000-00-00 00:00:00\')
+           ' . $periodCondition . '
          ORDER BY START_DT DESC LIMIT 1',
-        'i',
-        array((int)$userId)
+        $types,
+        $params
     );
 }
 
-function time_journal_query_open_pause_details($link, $userId)
+function time_journal_query_open_pause_details($link, $userId, $periodStartDateTime = null, $periodStopDateTime = null)
 {
+    $periodCondition = '';
+    $types = 'i';
+    $params = array((int)$userId);
+
+    if ($periodStartDateTime !== null && $periodStopDateTime !== null) {
+        $periodCondition = ' AND START_DT >= ? AND START_DT < ?';
+        $types .= 'ss';
+        $params[] = (string)$periodStartDateTime;
+        $params[] = (string)$periodStopDateTime;
+    }
+
     return db_query(
         $link,
         'SELECT ID, SUIR, START_DT, DESCRIPTION
@@ -260,10 +287,11 @@ function time_journal_query_open_pause_details($link, $userId)
            AND PAUSE_MODE = 1
            AND START_DT <> \'0000-00-00 00:00:00\'
            AND (STOP_DT IS NULL OR STOP_DT = \'0000-00-00 00:00:00\')
+           ' . $periodCondition . '
          ORDER BY START_DT DESC, ID DESC
          LIMIT 1',
-        'i',
-        array((int)$userId)
+        $types,
+        $params
     );
 }
 
@@ -276,6 +304,7 @@ function time_journal_query_latest_completed_pause($link, $userId, $date)
          WHERE USERID = ? AND PAUSE_MODE = 1
            AND START_DT >= ? AND START_DT < ADDDATE(?, INTERVAL 1 DAY)
            AND STOP_DT > START_DT
+           AND DATE(STOP_DT) = DATE(START_DT)
          ORDER BY START_DT DESC LIMIT 1',
         'iss',
         array((int)$userId, $date, $date)

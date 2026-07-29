@@ -68,6 +68,13 @@ return function () {
 
     test_assert_same(7200, get_add_time_duration_by_times_ex($addTimeInfo), 'Active offsite work must be added');
     test_assert_same(1800, get_pause_time_duration_by_times($addTimeInfo), 'Only valid active pauses must be subtracted');
+    test_assert_same(
+        0,
+        get_pause_time_duration_by_times(array(
+            array('2026-07-15 15:00:00', '2026-07-29 14:00:00', -1, '', 0, 0, 0, 1),
+        )),
+        'A damaged pause spanning multiple days must not affect daily report totals'
+    );
 
     $visitStat = get_completed_visit_statistics(
         '2026-07-20 09:45:00',

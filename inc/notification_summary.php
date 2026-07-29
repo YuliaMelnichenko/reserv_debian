@@ -193,6 +193,7 @@ function get_pause_notification_summary($link, $supervisorID, $currentDateTime)
          AND $startExpression <> '0000-00-00 00:00:00'
          AND $stopExpression <> '0000-00-00 00:00:00'
          AND $stopExpression > $startExpression
+         AND DATE($stopExpression) = DATE($startExpression)
          AND $startExpression >= ?
          AND $startExpression < ?
         WHERE membership.SUPERVISORID = ?

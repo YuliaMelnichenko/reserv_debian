@@ -25,4 +25,11 @@ return function () {
     $fallback = get_report_user_context($usersInfo, 0);
     test_assert_same('NDF', $fallback['default_start_time'], 'A missing start time must keep the legacy fallback');
     test_assert_same(0, $fallback['allowed_delay'], 'A missing delay allowance must keep the legacy fallback');
+
+    $statistics = file_get_contents(__DIR__ . '/../inc/report_period_statistics.php');
+    test_assert_true(
+        strpos($statistics, '$unfinishedHistoricalDates') !== false
+            && strpos($statistics, '$isCompletedVisit') !== false,
+        'A historical unfinished workday must be excluded from report calculations'
+    );
 };

@@ -13,11 +13,13 @@ require_once __DIR__ . '/../inc/time_journal_repository.php';
 $dtResult = get_current_datetime_in_timezone();
 $currentDate = $dtResult[2];
 $currentDateTime = $dtResult[1];
+$periodStart = $currentDate . ' 00:00:00';
+$periodStop = date('Y-m-d 00:00:00', strtotime($currentDate . ' +1 day'));
 
 
 db_set_charset($link, "utf8");
 
-$query = time_journal_query_open_pause_details($link, $userID);
+$query = time_journal_query_open_pause_details($link, $userID, $periodStart, $periodStop);
 
 
 $merr = db_error($link);

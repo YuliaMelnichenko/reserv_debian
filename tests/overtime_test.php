@@ -26,6 +26,12 @@ return function () {
     test_assert_same('1 ч 30 мин', formatHours(1.5), 'Fractional hours must be formatted as hours and minutes');
     test_assert_same('—', formatHours(0), 'A zero duration must use the legacy empty marker');
 
+    $controller = file_get_contents(__DIR__ . '/../inc/work_overtime_controller.php');
+    test_assert_true(
+        strpos($controller, 'AND DATE(a.START_DT) = DATE(a.STOP_DT)') !== false,
+        'A pause spanning multiple days must not be included in overtime calculations'
+    );
+
     $exceptionThrown = false;
     try {
         getOvertimePeriodBounds('custom', '2026-07-10', '2026-07-01');

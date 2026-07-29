@@ -162,6 +162,10 @@ return function () {
         'Time notification counts must reject zero and inverted intervals'
     );
     test_assert_true(
+        strpos($service, 'AND DATE($stopExpression) = DATE($startExpression)') !== false,
+        'Pause notifications must reject intervals spanning multiple days'
+    );
+    test_assert_true(
         strpos($service, "paramName = 'add_time_journal_deep_day'") !== false,
         'The remote-work summary must use the add-time journal depth setting'
     );

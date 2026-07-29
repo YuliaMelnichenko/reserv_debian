@@ -93,6 +93,7 @@ function handle_work_overtime_request($link)
                         JOIN ($numbersSql) n ON n.n <= DATEDIFF(DATE(a.STOP_DT), DATE(a.START_DT))
                         WHERE $addRangeSql
                         AND a.REASON = -1
+                        AND DATE(a.START_DT) = DATE(a.STOP_DT)
                         GROUP BY a.USERID, $addWorkDateSql
                     ) p ON d.user_id = p.user_id AND d.work_date = p.work_date
                     WHERE GREATEST(
@@ -234,6 +235,7 @@ function handle_work_overtime_request($link)
                     WHERE a.USERID = ?
                     AND $addRangeSql
                     AND a.REASON = -1
+                    AND DATE(a.START_DT) = DATE(a.STOP_DT)
                     GROUP BY $addWorkDateSql
                 ) p ON d.work_date = p.work_date
                 WHERE GREATEST(

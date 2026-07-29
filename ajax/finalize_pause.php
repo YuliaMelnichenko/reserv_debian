@@ -11,7 +11,14 @@ include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 require_once __DIR__ . "/../inc/pause_service.php";
 
-$pauseQuery = time_journal_query_open_pause($link, $userID);
+$currentDateTime = get_current_datetime_in_timezone_str(1, 0);
+$currentDate = substr($currentDateTime, 0, 10);
+$pauseQuery = time_journal_query_open_pause(
+  $link,
+  $userID,
+  $currentDate . ' 00:00:00',
+  date('Y-m-d 00:00:00', strtotime($currentDate . ' +1 day'))
+);
 
 if (!$pauseQuery) {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);
@@ -25,8 +32,6 @@ if (!$pause) {
 }
 
 $pauseID = (int)$pause['ID'];
-$currentDateTime = get_current_datetime_in_timezone_str(1, 0);
-
 $result = finish_time_pause($link, $userID, $visitingID, $pauseID, $currentDateTime);
 
 if ($result === false) {
