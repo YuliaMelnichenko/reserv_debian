@@ -33,6 +33,9 @@ else
   if ( $vn == 1 )
   { 
     $row = db_fetch_one($query);
+
+    // Do not retain the prior employee's report, navigation, or workday state.
+    $_SESSION = array();
     session_regenerate_id(true);
     $_SESSION['ss_id'] = $row["id"];
     $_SESSION['ss_rate'] = $row["rate"];
