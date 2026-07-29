@@ -644,7 +644,8 @@ h5.bigbig1 {
   font-family: Arial, sans;
   font-size: 17px;
   color: #222222;
-  display:inline
+  display:inline;
+  margin-right: 135px;
 }
 
 h5.bigbigbig {
@@ -3482,8 +3483,8 @@ h5.activ_time {
 }
 
 #btn_add {
+  padding: 0;
   cursor: pointer;
-  margin-right: 7px;
   background: none;
   border: none;
 }
@@ -4349,6 +4350,7 @@ h5.activ_time {
 }
 
 .journal-action-button-delay {
+  margin: 6px;
   width: 140px;
   height: 20px;
 }
@@ -4357,6 +4359,7 @@ h5.activ_time {
   width: 14px;
   height: 14px;
   padding: 0;
+  margin: 5px 10px;
   border: 0 solid #888888;
   background: transparent;
 }
@@ -4821,10 +4824,6 @@ h5.activ_time {
   width: auto;
 }
 
-#btn_add {
-  margin-right: 0;
-}
-
 #archive_filters {
   margin-right: 0;
 }
@@ -4849,8 +4848,4 @@ h5.activ_time {
 .lunch-pause-dialog .no_padding_real,
 .pause-status-dialog .no_padding_real {
   width: 100% !important;
-}
-
-.lunch-pause-title {
-  margin-right: 0 !important;
 }
