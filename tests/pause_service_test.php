@@ -51,4 +51,25 @@ return function () {
     $service = file_get_contents(__DIR__ . '/../inc/pause_service.php');
     test_assert_true(strpos($service, 'db_transaction_start') !== false, 'Pause transitions must use transactions');
     test_assert_true(strpos($service, 'FOR UPDATE') !== false, 'Pause transitions must lock mutable records');
+
+    $pauseStateEndpoint = file_get_contents(__DIR__ . '/../ajax/is_there_pause.php');
+    $pauseOverlayEndpoint = file_get_contents(__DIR__ . '/../ajax/get_pause_stop_content.php');
+    $repository = file_get_contents(__DIR__ . '/../inc/time_journal_repository.php');
+    test_assert_true(
+        strpos($pauseStateEndpoint, 'time_journal_query_open_pause') !== false
+            && strpos($pauseStateEndpoint, 'take_pause') === false,
+        'Pause state must be derived from an actual open pause, not a stale visit flag'
+    );
+    test_assert_true(
+        strpos($pauseOverlayEndpoint, 'time_journal_query_open_pause_details') !== false
+            && strpos($repository, 'function time_journal_query_open_pause_details') !== false,
+        'The pause overlay must use the same open-pause criteria as the state check'
+    );
+
+    $scripts = file_get_contents(__DIR__ . '/../js/tory.js');
+    test_assert_true(
+        strpos($scripts, "pauseHtml === '0'") !== false
+            && strpos($scripts, "pauseHtml.indexOf('id=\"pauseFullScreen\"')") !== false,
+        'A non-overlay AJAX response must never replace the full page body'
+    );
 };

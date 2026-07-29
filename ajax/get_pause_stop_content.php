@@ -8,6 +8,7 @@ $userID = (int)$_SESSION['ss_id'];
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . '/../inc/time_journal_repository.php';
 
 $dtResult = get_current_datetime_in_timezone();
 $currentDate = $dtResult[2];
@@ -16,18 +17,14 @@ $currentDateTime = $dtResult[1];
 
 db_set_charset($link, "utf8");
 
-$query = db_query(
-  $link,
-  'SELECT ID, SUIR, START_DT, DESCRIPTION FROM ADD_TIME WHERE ADDDATE = ? AND USERID = ? AND PAUSE_MODE = 1 ORDER BY ADDDATE DESC, START_DT DESC LIMIT 1',
-  'si',
-  array($currentDate, $userID)
-);
+$query = time_journal_query_open_pause_details($link, $userID);
 
 
 $merr = db_error($link);
 if (!$query)
 {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
 }
 else
 {

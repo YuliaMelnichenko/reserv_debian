@@ -250,6 +250,23 @@ function time_journal_query_open_pause($link, $userId)
     );
 }
 
+function time_journal_query_open_pause_details($link, $userId)
+{
+    return db_query(
+        $link,
+        'SELECT ID, SUIR, START_DT, DESCRIPTION
+         FROM ADD_TIME
+         WHERE USERID = ?
+           AND PAUSE_MODE = 1
+           AND START_DT <> \'0000-00-00 00:00:00\'
+           AND (STOP_DT IS NULL OR STOP_DT = \'0000-00-00 00:00:00\')
+         ORDER BY START_DT DESC, ID DESC
+         LIMIT 1',
+        'i',
+        array((int)$userId)
+    );
+}
+
 function time_journal_query_latest_completed_pause($link, $userId, $date)
 {
     return db_query(
