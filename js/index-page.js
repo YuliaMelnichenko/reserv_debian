@@ -220,7 +220,12 @@ function reg_eat_start() {
 function reg_eat_stop() {
   switch_day_state(1, function() {
     $('#lunchPauseFullScreen').remove();
-    location.reload();
+    get_time_registration_div_content();
+    build_in_delay_expl();
+
+    if (typeof update_clock === 'function') {
+      update_clock();
+    }
   });
 }
 

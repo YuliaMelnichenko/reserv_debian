@@ -47,6 +47,11 @@ return function () {
             && strpos($indexScript, 'window.location.reload();') !== false,
         'Rolling back the time-registration state must refresh the page after a successful update'
     );
+    test_assert_true(
+        preg_match('/function\\s+reg_eat_stop\\s*\\(\\)\\s*\\{.*?get_time_registration_div_content\\s*\\(\\).*?\\}/s', $indexScript) === 1
+            && preg_match('/function\\s+reg_eat_stop\\s*\\(\\)\\s*\\{.*?location\\.reload\\s*\\(/s', $indexScript) === 0,
+        'Returning from lunch must refresh only the time-registration panel, not reload the whole current-day page'
+    );
 
     $lunchOverlay = file_get_contents(__DIR__ . '/../ajax/set_lunch.php');
     $pauseOverlay = file_get_contents(__DIR__ . '/../ajax/get_pause_stop_content.php');
