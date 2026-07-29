@@ -22,4 +22,16 @@ return function () {
     ajax_json_response(array('valid' => 1));
     $jsonResponse = ob_get_clean();
     test_assert_same('{"valid":1}', $jsonResponse, 'JSON AJAX responses must preserve payload fields');
+
+    $authEndpoint = file_get_contents(__DIR__ . '/../ajax/auth.php');
+    $authPage = file_get_contents(__DIR__ . '/../auth.php');
+    test_assert_true(
+        strpos($authEndpoint, '$_SESSION = array();') !== false
+            && strpos($authEndpoint, 'session_regenerate_id(true);') !== false,
+        'Signing in as another employee must reset the prior employee session state'
+    );
+    test_assert_true(
+        strpos($authPage, "window.location = 'index.php';") !== false,
+        'A successful sign-in must open the current-day page directly'
+    );
 };
