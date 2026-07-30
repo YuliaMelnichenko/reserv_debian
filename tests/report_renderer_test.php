@@ -39,4 +39,24 @@ return function () {
         strpos($presentation, 'Ошибка учета: незавершённый рабочий день') !== false,
         'The report must show unfinished historical workdays as accounting errors'
     );
+
+    $reportPage = file_get_contents(__DIR__ . '/../views/my_report_page.php');
+    $layoutScript = file_get_contents(__DIR__ . '/../js/tory.js');
+    $layoutStyles = file_get_contents(__DIR__ . '/../style/main.css');
+
+    test_assert_true(
+        strpos($reportPage, 'report-window-content-table') !== false
+            && strpos($reportPage, '$wholeWidth = 1000') === false,
+        'The attendance report must expose its real table width instead of a fixed page width'
+    );
+    test_assert_true(
+        strpos($layoutScript, 'function fit_report_layout') !== false
+            && strpos($layoutScript, 'tableWidth + scrollbarWidth') !== false,
+        'The attendance report must account for its vertical scrollbar when fitting the table'
+    );
+    test_assert_true(
+        strpos($layoutStyles, '.report_window_main') !== false
+            && strpos($layoutStyles, 'padding: 0 10px 10px 0;') !== false,
+        'The attendance report must keep the shared right and bottom spacing'
+    );
 };

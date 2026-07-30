@@ -4837,3 +4837,38 @@ h5.activ_time {
 .pause-status-dialog .no_padding_real {
   width: 100% !important;
 }
+
+/* Attendance report: size the blue panel to its rendered columns, not to the viewport. */
+.report-page-content {
+  width: auto;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.report_window_main {
+  display: inline-block;
+  height: auto;
+  max-width: calc(100vw - 280px);
+  padding: 0 10px 10px 0;
+  background: #ddeeff;
+  box-sizing: border-box;
+}
+
+.report-layout-table {
+  width: auto;
+}
+
+#report_window,
+#report_window_single {
+  width: auto;
+  max-width: calc(100vw - 380px);
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+
+#report_window_head,
+#report_window_head_single {
+  width: auto;
+  max-width: calc(100vw - 380px);
+  box-sizing: border-box;
+}

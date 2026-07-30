@@ -54,9 +54,7 @@ echo "<div align=\"left\">";
     }
     echo "</td>";
 
-    $wholeWidth = 1000;
-
-    echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
+    echo "<td class=\"report-page-content\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\">";
 
 ///***
 
@@ -200,7 +198,7 @@ echo "<table cellpadding=\"0\" cellspacing=\"0\" border=0>";
 echo "</table>";
 
 echo "<div class=\"report_window_main\" id=\"report_window_main\">";
-  echo "<table class = \"no_padding\">";
+  echo "<table class=\"no_padding report-layout-table\">";
     echo "<tr>";
       echo "<td class=\"report_no_padding_no_border\">";
         echo "<div class=\"report_window_head_left\" id=\"report_window_head_left\">";
@@ -215,7 +213,7 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
         else{
           echo "<div class=\"report_window_head\" id=\"report_window_head\">";
         }
-            echo "<table>";
+            echo "<table class=\"report-window-header-table\">";
             //Заголовок
               echo "<tr>";
                 for ( $userNum = 0; $userNum < $userCnt; $userNum ++ ){
@@ -279,7 +277,7 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
           else{
             echo "<div class=\"report_window\" id=\"report_window\" onscroll=\"make_div_scroll();\">";
           }
-              echo "<table>";
+              echo "<table class=\"report-window-content-table\">";
               //Тело
                 for ( $idx = count( $rowsContent ) - 1; $idx >= 0; $idx -- ){
                   echo "<tr>";
@@ -308,6 +306,6 @@ echo "</font>";
 echo "</div>";
 ?>
 
-<script type="text/javascript" src="js/tory.js?v=20260709"></script>
+<script type="text/javascript" src="js/tory.js?v=20260730-report-layout"></script>
 </body>
 </html>

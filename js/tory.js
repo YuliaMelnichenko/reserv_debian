@@ -1614,17 +1614,80 @@ function close_sport_pause(){
 }
 
 function make_div_scroll(){
-  var horizScrollVal = document.getElementById('report_window').scrollLeft;
-  document.getElementById('report_window_head').scrollLeft = horizScrollVal;
+  var reportWindow = document.getElementById('report_window');
+  var reportHead = document.getElementById('report_window_head');
+  var reportLeft = document.getElementById('report_window_left');
 
-  var vertScrollVal = document.getElementById('report_window').scrollTop;
-  document.getElementById('report_window_left').scrollTop = vertScrollVal;
+  if (!reportWindow) {
+    return;
+  }
+
+  if (reportHead) {
+    reportHead.scrollLeft = reportWindow.scrollLeft;
+  }
+
+  if (reportLeft) {
+    reportLeft.scrollTop = reportWindow.scrollTop;
+  }
 }
 
 function make_div_scroll_single(){
-  var vertScrollVal = document.getElementById('report_window_single').scrollTop;
-  document.getElementById('report_window_left').scrollTop = vertScrollVal;
+  var reportWindow = document.getElementById('report_window_single');
+  var reportLeft = document.getElementById('report_window_left');
+
+  if (reportWindow && reportLeft) {
+    reportLeft.scrollTop = reportWindow.scrollTop;
+  }
 }
+
+function fit_report_layout() {
+  var reportWindow = document.getElementById('report_window')
+    || document.getElementById('report_window_single');
+  var reportHead = document.getElementById('report_window_head')
+    || document.getElementById('report_window_head_single');
+  var reportMain = document.getElementById('report_window_main');
+  var contentTable = reportWindow
+    ? reportWindow.querySelector('.report-window-content-table')
+    : null;
+
+  if (!reportWindow || !reportHead || !reportMain || !contentTable) {
+    return;
+  }
+
+  reportWindow.style.width = '';
+  reportWindow.style.maxWidth = '';
+  reportWindow.style.overflowY = 'hidden';
+
+  var tableWidth = Math.ceil(contentTable.getBoundingClientRect().width);
+  var tableHeight = Math.ceil(contentTable.getBoundingClientRect().height);
+  var availableWidth = Math.max(
+    165,
+    Math.floor(window.innerWidth - reportWindow.getBoundingClientRect().left - 10)
+  );
+  var availableHeight = reportWindow.clientHeight;
+  var needsVerticalScroll = tableHeight > availableHeight;
+  var scrollbarWidth = needsVerticalScroll ? get_vertical_scrollbar_width() : 0;
+  var reportWidth = Math.min(tableWidth + scrollbarWidth, availableWidth);
+
+  reportWindow.style.width = reportWidth + 'px';
+  reportWindow.style.maxWidth = reportWidth + 'px';
+  reportWindow.style.overflowY = needsVerticalScroll ? 'auto' : 'hidden';
+  reportWindow.style.overflowX = tableWidth > reportWindow.clientWidth ? 'auto' : 'hidden';
+
+  reportHead.style.width = reportWindow.clientWidth + 'px';
+  reportHead.style.maxWidth = reportWindow.clientWidth + 'px';
+}
+
+function schedule_report_layout() {
+  window.requestAnimationFrame(fit_report_layout);
+}
+
+document.addEventListener('DOMContentLoaded', schedule_report_layout);
+
+window.addEventListener('resize', function() {
+  window.clearTimeout(window.toriReportLayoutResizeTimer);
+  window.toriReportLayoutResizeTimer = window.setTimeout(schedule_report_layout, 80);
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   attachTooltipListeners();
