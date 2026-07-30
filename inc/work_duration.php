@@ -204,6 +204,17 @@ function get_durations(
     $defaultStartTime = null,
     $allowedDelay = null
 ) {
+    if ((string)$state === 'ERROR') {
+        return array(
+            0 => 0,
+            1 => 0,
+            2 => 0,
+            3 => 0,
+            4 => 0,
+            5 => 0,
+        );
+    }
+
     if ($defaultStartTime === null) {
         $defaultStartTime = $_SESSION['ss_defaultStartTime'] ?? '00:00:00';
     }
