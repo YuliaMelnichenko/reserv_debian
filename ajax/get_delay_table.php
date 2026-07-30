@@ -125,7 +125,7 @@ foreach( $delays as $delay )
   }
 
   echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-  echo "<td width=70 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($delDate) . "</h5></td>";
+  echo "<td width=80 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($delDate) . "</h5></td>";
   echo "<td width=105 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($delInTime) . "</h5></td>";
   echo "<td width=185 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape("$delDefInTime >> $delDefInTimeWithDelay (+ $delAllowedDelay мин.)") . "</h5></td>";
   echo "<td width=95 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($delDurationStr) . "</h5></td>";
