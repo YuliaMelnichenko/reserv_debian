@@ -40,6 +40,11 @@ if ($summary === false) {
   exit;
 }
 
+$periodLabel = format_date_range_label(
+  $summary['quarter_start_date'],
+  $summary['quarter_stop_date']
+);
+
 echo "<input id=\"recIDTempVal\" type=\"hidden\" value=\"\">";
 echo "<input id=\"acceptTempVal\" type=\"hidden\" value=\"\">";
 echo "<input id=\"penIDTempVal\" type=\"hidden\" value=\"\">";
@@ -58,6 +63,8 @@ echo "<table class=\"notification-page-table\">";
       echo "<h5 class=\"dark\"><br>/уведомления по опозданиям<br><br></h5>";
     echo "</div>";
 
+echo "<h5 class=\"big\">Текущий квартал: " . html_escape($periodLabel) . "</h5>";
+
 echo "<div class=\"notification-table-scroll notification-table-scroll-wide\">";
 echo "<table class=\"add_time notification-summary-table\" id = \"delay_approvement_table_users\">";
 echo "<tr class=\"notification-table-head\">";
@@ -67,6 +74,7 @@ echo "<td class=\"add_time notification-accepted-cell\">"."<h5 class=\"big\">П�
 echo "<td class=\"add_time notification-refused-cell\">"."<h5 class=\"big\">Отклоненные</h5>"."</td>";
 echo "<td class=\"add_time notification-deleted-cell\">"."<h5 class=\"big\">Удаленные</h5>"."</td>";
 echo "<td class=\"add_time notification-count-cell\">"."<h5 class=\"big\">Новые</h5>"."</td>";
+echo "<td class=\"add_time notification-count-cell\">"."<h5 class=\"big\">Без<br>объяснения</h5>"."</td>";
 echo "<td class=\"add_time notification-view-cell\">"."<h5 class=\"big\">Просмотреть</h5>"."</td>";
 echo "</tr>";
 
@@ -82,6 +90,7 @@ foreach ($summary['entries'] as $entry)
     $refusedNotificationCount = $entry['refused_count'];
     $deletedNotificationCount = $entry['deleted_count'];
     $newNotificationCount = $entry['new_count'];
+    $withoutCommentCount = $entry['without_comment_count'];
 
     $muid = getMaskedUID( 32, $userID );
     $userUrl = "delay_approvement_user.php?mid=$muid";
@@ -89,6 +98,7 @@ foreach ($summary['entries'] as $entry)
 
     $cellStype = "middle";
     if ( $newNotificationCount > 0 ){ $cellStype = "middleBlue1"; }
+    $withoutCommentClass = $withoutCommentCount > 0 ? "middleBold_r" : "middle";
 
     $rowClass = $color == "#ddffff" ? "notification-row-alt" : "notification-row";
 
@@ -99,6 +109,7 @@ foreach ($summary['entries'] as $entry)
     echo "<td class=\"add_time notification-refused-cell\">"."<h5 class=\"middle\">$refusedNotificationCount</h5>"."</td>";
     echo "<td class=\"add_time notification-deleted-cell\">"."<h5 class=\"middle\">$deletedNotificationCount</h5>"."</td>";
     echo "<td class=\"add_time notification-count-cell\">"."<h5 class=\"$cellStype\">$newNotificationCount</h5>"."</td>";
+    echo "<td class=\"add_time notification-count-cell\">"."<h5 class=\"$withoutCommentClass\">$withoutCommentCount</h5>"."</td>";
     echo "<td class=\"add_time notification-view-cell\">";
       echo "<button class=\"journal-view-button\" id=\"explBtn\" title=\"Просмотреть\" onclick=\"$uhref\"><img src=\"img/$img\"></button>";
     echo "</td>";

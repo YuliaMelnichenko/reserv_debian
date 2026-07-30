@@ -3,10 +3,80 @@
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/workday_state.php';
 require_once __DIR__ . '/workday_registration.php';
+require_once __DIR__ . '/delay.php';
+require_once __DIR__ . '/time_format.php';
 
 function workday_transition_database_error($link)
 {
     return ajax_database_error_message($link, __FILE__ . ':' . __LINE__);
+}
+
+function workday_transition_set_delay_session(&$session, $delaySeconds)
+{
+    $delaySeconds = max(0, (int)$delaySeconds);
+    $session['ss_there_is_delay'] = $delaySeconds > 0 ? 2 : 0;
+    $session['ss_delay_show_save'] = $delaySeconds > 0 ? 1 : 0;
+    $session['ss_delay_duration_val'] = $delaySeconds;
+    $session['ss_delay_duration'] = $delaySeconds;
+}
+
+function workday_transition_create_delay_for_arrival($link, $userId, $arrivalDateTime, $employee)
+{
+    if ((int)$employee['RemoteWork'] === 1) {
+        return 0;
+    }
+
+    $delay = get_delay_value(
+        $arrivalDateTime,
+        (string)$employee['defaultStartTime'],
+        (int)$employee['allowedDelayMinutes']
+    );
+
+    if ($delay[0] !== 1) {
+        return 0;
+    }
+
+    $delayDate = substr($arrivalDateTime, 0, 10);
+    $existingResult = db_query(
+        $link,
+        'SELECT ID FROM Delays WHERE userID = ? AND date = ? ORDER BY ID DESC LIMIT 1 FOR UPDATE',
+        'is',
+        array((int)$userId, $delayDate)
+    );
+
+    if (!$existingResult) {
+        return false;
+    }
+
+    if (db_fetch_one($existingResult)) {
+        return (int)$delay[1];
+    }
+
+    $idResult = db_query($link, 'SELECT ID FROM Delays ORDER BY ID DESC LIMIT 1 FOR UPDATE');
+
+    if (!$idResult) {
+        return false;
+    }
+
+    $lastDelay = db_fetch_one($idResult);
+    $newDelayId = $lastDelay ? (int)$lastDelay['ID'] + 1 : 1;
+    $created = db_execute($link, "
+        INSERT INTO Delays (
+          ID, date, duration, userID, supervisorID, explaneDesk,
+          acceptorID, penaltyID, penaltyReply, status
+        ) VALUES (?, ?, ?, ?, -1, 'Без объяснения', -1, -1, '', 0)
+    ", 'issi', array(
+        $newDelayId,
+        $delayDate,
+        format_time_d_hhmmss_pure((int)$delay[1]),
+        (int)$userId,
+    ));
+
+    if (!$created) {
+        return false;
+    }
+
+    return (int)$delay[1];
 }
 
 function workday_transition_arrive($link, &$session, $context)
@@ -80,6 +150,26 @@ function workday_transition_arrive($link, &$session, $context)
             . '. Новый приход не создан. Обновите страницу.';
     }
 
+    $employeeResult = db_query($link, "
+        SELECT defaultStartTime, allowedDelayMinutes, RemoteWork
+        FROM employees
+        WHERE ID = ?
+        LIMIT 1
+        FOR UPDATE
+    ", 'i', array($userId));
+
+    if (!$employeeResult) {
+        $transaction->rollback();
+        return workday_transition_database_error($link);
+    }
+
+    $employee = db_fetch_one($employeeResult);
+
+    if (!$employee) {
+        $transaction->rollback();
+        return 'Ошибка: сотрудник не найден. Обновите страницу.';
+    }
+
     $created = db_execute($link, "
         INSERT INTO visiting (
           ID,
@@ -111,12 +201,25 @@ function workday_transition_arrive($link, &$session, $context)
         return workday_transition_database_error($link);
     }
 
+    $delaySeconds = workday_transition_create_delay_for_arrival(
+        $link,
+        $userId,
+        $context['now'],
+        $employee
+    );
+
+    if ($delaySeconds === false) {
+        $transaction->rollback();
+        return workday_transition_database_error($link);
+    }
+
     if (!$transaction->commit()) {
         return workday_transition_database_error($link);
     }
 
     $session['ss_state'] = $context['target_state'];
     $session['ss_visiting_ID'] = $newId;
+    workday_transition_set_delay_session($session, $delaySeconds);
 
     return '1';
 }

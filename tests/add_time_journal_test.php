@@ -32,6 +32,11 @@ return function () {
             && strpos($service, "'a.STOP_DT'") !== false,
         'The remote work journal must retry with modern date columns for schema compatibility'
     );
+    test_assert_true(
+        strpos($service, 'get_current_quarter_date_range') !== false
+            && strpos($service, 'quarter_start_date') !== false,
+        'The remote work journal must expose the current-quarter period'
+    );
 
     $repository = file_get_contents(__DIR__ . '/../inc/time_journal_repository.php');
     test_assert_true(
@@ -75,6 +80,10 @@ return function () {
         'The existing employee remote work controls must remain available'
     );
     test_assert_true(
+        strpos($employeeTable, 'Текущий квартал:') !== false,
+        'The employee remote work table must display its current-quarter period'
+    );
+    test_assert_true(
         strpos($service, '$includeDeleted') !== false,
         'The shared data service must support hiding deleted employee entries'
     );
@@ -102,5 +111,9 @@ return function () {
     test_assert_true(
         strpos($preview, 'add_addition_time();') !== false && strpos($preview, 'part_time_del(') !== false,
         'The existing remote work preview controls must remain available'
+    );
+    test_assert_true(
+        strpos($preview, 'Текущий квартал:') !== false,
+        'The remote work preview must display its current-quarter period'
     );
 };

@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/calendar.php';
 require_once __DIR__ . '/time_journal_repository.php';
 
 function get_add_time_journal_context($link, $userID, $currentDateTime, $includeDeleted = true)
@@ -22,26 +23,17 @@ function get_add_time_journal_context($link, $userID, $currentDateTime, $include
         return null;
     }
 
-    $depthResult = db_query($link, "
-        SELECT valueInt
-        FROM DBSETUP
-        WHERE paramName = 'add_time_journal_deep_day'
-        LIMIT 1
-    ");
-
-    if (!$depthResult) {
-        return false;
-    }
-
-    $depthRow = db_fetch_one($depthResult);
-    $depthDays = $depthRow ? abs((int)$depthRow['valueInt']) : 180;
+    list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(
+        false,
+        $currentDateTime
+    );
     $dateTimeExpressions = time_journal_add_work_datetime_expressions($link);
     $entryResult = time_journal_query_add_work_journal(
         $link,
         (int)$userID,
         0,
-        $currentDateTime,
-        -$depthDays,
+        $quarterStartDate,
+        $quarterStopExclusive,
         $dateTimeExpressions['start'],
         $dateTimeExpressions['stop']
     );
@@ -56,8 +48,8 @@ function get_add_time_journal_context($link, $userID, $currentDateTime, $include
             $link,
             (int)$userID,
             0,
-            $currentDateTime,
-            -$depthDays,
+            $quarterStartDate,
+            $quarterStopExclusive,
             'a.START_DT',
             'a.STOP_DT'
         );
@@ -102,6 +94,9 @@ function get_add_time_journal_context($link, $userID, $currentDateTime, $include
 
     return array(
         'user_name' => trim($user['SURNAME'] . ' ' . $user['FIRSTNAME'] . ' ' . $user['LASTNAME']),
+        'quarter_start_date' => $quarterStartDate,
+        'quarter_stop_date' => $quarterStopDate,
+        'quarter_stop_exclusive' => $quarterStopExclusive,
         'entries' => $entries,
     );
 }

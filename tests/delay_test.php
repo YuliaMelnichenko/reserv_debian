@@ -56,4 +56,14 @@ return function () {
             'Weekend delay records must be rejected by ' . $endpoint
         );
     }
+
+    $transitionService = file_get_contents(__DIR__ . '/../inc/workday_transition_service.php');
+    test_assert_true(
+        strpos($transitionService, 'workday_transition_create_delay_for_arrival') !== false,
+        'Arrival processing must create the delay record independently from the browser'
+    );
+    test_assert_true(
+        strpos($transitionService, "'Без объяснения'") !== false,
+        'An automatically created delay must be explicitly marked as missing an explanation'
+    );
 };

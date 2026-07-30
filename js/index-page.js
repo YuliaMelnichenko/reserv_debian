@@ -167,11 +167,12 @@ function switch_day_state(next, callback) {
     if (dat.trim() === "1") {
       if (typeof callback === 'function') callback();
       else get_time_registration_div_content();
+
+      build_in_delay_expl();
     } else {
       alert(dat);
     }
   });
-  build_in_delay_expl();
 }
 
 function rollback_state()
@@ -188,8 +189,6 @@ function rollback_state()
 function reg_in_work_with_delay()
 {
   reg_in_work();
-
-  set_delay();
 }
 
 function reg_in_work()

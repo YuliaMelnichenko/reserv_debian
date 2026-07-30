@@ -43,4 +43,35 @@ return function ($link) {
     test_assert_same('2026-07-28 12:00:00', $visit['eat_start_dt'], 'Lunch start must be persisted');
     test_assert_same('2026-07-28 13:00:00', $visit['eat_stop_dt'], 'Lunch finish must be persisted');
     test_assert_same('2026-07-28 17:30:00', $visit['out_dt'], 'Leave time must be persisted');
+
+    integration_seed_employee($link, 102, 'Опоздавший');
+    $lateSession = array();
+    $lateContext = array(
+        'user_id' => 102,
+        'visit_id' => 0,
+        'period_start' => '2026-07-29 06:00:00',
+        'period_stop' => '2026-07-30 06:00:00',
+        'now' => '2026-07-29 09:30:01',
+        'max_open_shift_seconds' => 10800,
+        'target_state' => 2,
+    );
+
+    test_assert_same(
+        '1',
+        workday_transition_arrive($link, $lateSession, $lateContext),
+        'A delayed employee must still be registered for work'
+    );
+
+    $delay = db_fetch_one(db_query(
+        $link,
+        'SELECT date, duration, explaneDesk, status FROM Delays WHERE userID = ?',
+        'i',
+        array(102)
+    ));
+
+    test_assert_same('2026-07-29', $delay['date'], 'A delay must be stored on the arrival date');
+    test_assert_same('00:00:01', $delay['duration'], 'The stored delay duration must respect the allowed boundary');
+    test_assert_same('Без объяснения', $delay['explaneDesk'], 'A delay must be visible before an employee submits a comment');
+    test_assert_same(0, (int)$delay['status'], 'A delay without a comment must remain under review');
+    test_assert_same(2, (int)$lateSession['ss_there_is_delay'], 'The employee must still be offered an explanation after arrival');
 };

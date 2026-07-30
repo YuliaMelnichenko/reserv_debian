@@ -88,11 +88,15 @@ db_set_charset($link, "utf8");
 
       $userName = $journal['user_name'];
       $addTimeInfo = $journal['entries'];
+      $quarterLabel = format_date_range_label(
+        $journal['quarter_start_date'],
+        $journal['quarter_stop_date']
+      );
 
       if ( count( $addTimeInfo ) == 0 ){
         echo "<table id=\"add_time_approvement_table\" class=\"notification-detail-header-table\">";
           echo "<tr>";
-            echo "<td class=\"notification-detail-title-cell notification-detail-title-wide\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5></td>";
+            echo "<td class=\"notification-detail-title-cell notification-detail-title-wide\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5><h5 class=\"big\">Текущий квартал: " . html_escape($quarterLabel) . "</h5></td>";
             echo "<td class=\"notification-detail-back-cell\">";
               echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"location.href='$backUrl';\"><h5>Назад</h5></button>";
             echo "</td>";
@@ -110,7 +114,7 @@ echo "<table id=\"add_time_approvement_table\" class=\"notification-detail-heade
     echo "<td class=\"nopadding_s\">";
       echo "<table class=\"notification-detail-header-table\">";
         echo "<tr>";
-          echo "<td class=\"notification-detail-title-cell notification-detail-title-wide\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5></td>";
+          echo "<td class=\"notification-detail-title-cell notification-detail-title-wide\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5><h5 class=\"big\">Текущий квартал: " . html_escape($quarterLabel) . "</h5></td>";
           echo "<td class=\"notification-detail-back-cell\">";
             echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"location.href='$backUrl';\"><h5>Назад</h5></button>";
           echo "</td>";

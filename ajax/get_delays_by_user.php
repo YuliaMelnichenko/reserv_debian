@@ -39,13 +39,17 @@ if ($journal === null) {
 
 $userName = $journal['user_name'];
 $delayTimes = $journal['entries'];
+$periodLabel = format_date_range_label(
+  $journal['period_start_date'],
+  $journal['period_stop_date']
+);
 
 echo "<table id=\"delay_approvement_table\" border=0>";
   echo "<tr>";
     echo "<td class=\"nopadding_s\">";
       echo "<table border=0>";
         echo "<tr>";
-          echo "<td valign=\"middle\" width=950 align=\"left\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5></td>";
+          echo "<td valign=\"middle\" width=950 align=\"left\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5><h5 class=\"big\">Текущий квартал: " . html_escape($periodLabel) . "</h5></td>";
           echo "<td width=10 valign=\"middle\" align=\"right\">";
             echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"delay_go_back();\"><h5>Назад</h5></button>";
           echo "</td>";

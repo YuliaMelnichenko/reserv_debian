@@ -17,11 +17,12 @@ if ($summary === false) {
   exit;
 }
 
-$depthDays = $summary['depth_days'];
-$dateForm = $summary['range_start_label'];
-$today = $summary['range_stop_label'];
+$periodLabel = format_date_range_label(
+  $summary['quarter_start_date'],
+  $summary['quarter_stop_date']
+);
 
-echo "<h5 class=\"big\"> Глубина просмотра журнала ($depthDays дней): $dateForm - $today </h5>";
+echo "<h5 class=\"big\">Текущий квартал: " . html_escape($periodLabel) . "</h5>";
 echo "<div class=\"notification-table-scroll\">";
 echo "<table class=\"add_time notification-summary-table\" id=\"delay_approvement_table_users\">";
 echo "<tr class=\"notification-table-head\">";
@@ -31,6 +32,7 @@ echo "<td class=\"add_time notification-accepted-cell\"><h5 class=\"big\">При
 echo "<td class=\"add_time notification-refused-cell\"><h5 class=\"big\">Отклоненные</h5></td>";
 echo "<td class=\"add_time notification-deleted-cell\"><h5 class=\"big\">Удаленные</h5></td>";
 echo "<td class=\"add_time notification-count-cell\"><h5 class=\"big\">Новые</h5></td>";
+echo "<td class=\"add_time notification-count-cell\"><h5 class=\"big\">Без<br>объяснения</h5></td>";
 echo "<td class=\"add_time notification-view-cell\"><h5 class=\"big\">Просмотреть</h5></td>";
 echo "</tr>";
 
@@ -46,9 +48,11 @@ foreach ($summary['entries'] as $entry)
     $refusedNotificationCount = $entry['refused_count'];
     $deletedNotificationCount = $entry['deleted_count'];
     $newNotificationCount = $entry['new_count'];
+    $withoutCommentCount = $entry['without_comment_count'];
 
     $cellStype = "middle";
     if ( $newNotificationCount > 0 ){ $cellStype = "middleBlue1"; }
+    $withoutCommentClass = $withoutCommentCount > 0 ? "middleBold_r" : "middle";
 
     $rowClass = $color == "#ddffff" ? "notification-row-alt" : "notification-row";
 
@@ -59,6 +63,7 @@ foreach ($summary['entries'] as $entry)
     echo "<td class=\"add_time notification-refused-cell\"><h5 class=\"middle\">$refusedNotificationCount</h5></td>";
     echo "<td class=\"add_time notification-deleted-cell\"><h5 class=\"middle\">$deletedNotificationCount</h5></td>";
     echo "<td class=\"add_time notification-count-cell\"><h5 class=\"$cellStype\">$newNotificationCount</h5></td>";
+    echo "<td class=\"add_time notification-count-cell\"><h5 class=\"$withoutCommentClass\">$withoutCommentCount</h5></td>";
     echo "<td class=\"add_time notification-view-cell\">";
       echo "<button id=\"explBtn\" class=\"journal-cell-icon-button\" title=\"Просмотреть\" onclick=\"show_delays_by_user('$userID');\"><img src=\"img/$img\" alt=\"\"></button>";
     echo "</td>";
