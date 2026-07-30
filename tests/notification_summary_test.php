@@ -179,6 +179,16 @@ return function () {
         'Delay notifications must expose records without an employee explanation'
     );
     test_assert_true(
+        strpos($delaySummarySource, "TRIM(membership.TYPE) IN ('0', '-1', '3')") !== false
+            && strpos($delaySummarySource, 'ORDER BY employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME, employee.ID') !== false,
+        'Delay notifications must show every direct subordinate in surname order'
+    );
+    $pauseSummarySource = substr($service, $pauseSummaryStart);
+    test_assert_true(
+        strpos($pauseSummarySource, 'ORDER BY employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME, employee.ID') !== false,
+        'Pause notifications must use the same surname order as other notification lists'
+    );
+    test_assert_true(
         strpos($delayController, 'Текущий квартал:') !== false
             && strpos($delayController, 'Без<br>объяснения') !== false,
         'The delay notification table must show its period and missing explanations'

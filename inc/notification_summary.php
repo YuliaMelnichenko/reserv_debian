@@ -67,7 +67,7 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
                 FROM GROUPS membership
                 WHERE membership.USERID = delay_entry.userID
                   AND membership.SUPERVISORID = ?
-                  AND TRIM(membership.TYPE) = ?
+                  AND TRIM(membership.TYPE) IN ('0', '-1', '3')
               )
               AND EXISTS (
                 SELECT 1
@@ -78,7 +78,7 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
                   AND visit.remoteWorkState = 0
               )
           ) AS DELAY_COUNT
-    ", 'siisssis', array(
+    ", 'siisssi', array(
         $currentDateTime,
         -$depthDays['add_time_journal_deep_day'],
         (int)$supervisorID,
@@ -86,7 +86,6 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
         $delayQuarterStartDate,
         $delayQuarterStopExclusive,
         (int)$supervisorID,
-        '3',
     ));
 
     if (!$countResult) {
@@ -142,10 +141,10 @@ function get_delay_notification_summary($link, $supervisorID, $currentDate)
          AND visit.in_dt < ADDDATE(delay_entry.date, INTERVAL 1 DAY)
          AND visit.remoteWorkState = 0
         WHERE membership.SUPERVISORID = ?
-          AND TRIM(membership.TYPE) = ?
+          AND TRIM(membership.TYPE) IN ('0', '-1', '3')
         GROUP BY employee.ID, employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME
         ORDER BY employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME, employee.ID
-    ", 'ssis', array($quarterStartDate, $quarterStopExclusive, (int)$supervisorID, '3'));
+    ", 'ssi', array($quarterStartDate, $quarterStopExclusive, (int)$supervisorID));
 
     if (!$summaryResult) {
         return false;
@@ -204,7 +203,7 @@ function get_pause_notification_summary($link, $supervisorID, $currentDateTime)
         WHERE membership.SUPERVISORID = ?
           AND TRIM(membership.TYPE) = ?
         GROUP BY employee.ID, employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME
-        ORDER BY employee.ID
+        ORDER BY employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME, employee.ID
     ", 'sssis', array(
         $currentDate,
         $quarterStartDate,
