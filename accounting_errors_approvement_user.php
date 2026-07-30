@@ -73,7 +73,7 @@ echo "<table class=\"accounting-errors-page-table\">";
 
       echo "<div id=\"accountingErrorsUserToolbar\" class=\"notification-detail-accounting-toolbar\">";
         echo "<div class=\"notification-detail-accounting-labels\">";
-          echo "<h5 class=\"big\">Сотрудник: $userName</h5>";
+          echo "<h5 class=\"big\">Сотрудник: $userName</h5><br><br>";
           echo "<h5 class=\"big\">Текущий квартал: $accountingErrorsPeriodLabel</h5>";
         echo "</div>";
         echo "<button class=\"button_style journal-back-button\" onclick=\"location.href='$backUrl'\">Назад</button>";
