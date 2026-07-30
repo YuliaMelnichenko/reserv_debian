@@ -322,6 +322,50 @@ function require_page_supervisor_for_user($targetUserID, $groupType)
     }
 }
 
+function access_current_user_can_view_delay_user($targetUserID)
+{
+    if (access_current_user_is_director()) {
+        return true;
+    }
+
+    $targetUserID = (int) $targetUserID;
+
+    if ($targetUserID <= 0) {
+        return false;
+    }
+
+    $link = access_open_database();
+
+    if (!$link) {
+        return false;
+    }
+
+    $result = db_query(
+        $link,
+        "SELECT 1
+         FROM GROUPS
+         WHERE SUPERVISORID = ?
+           AND USERID = ?
+           AND TRIM(TYPE) IN ('0', '-1', '3')
+         LIMIT 1",
+        'ii',
+        array((int) $_SESSION['ss_id'], $targetUserID)
+    );
+    $allowed = db_fetch_one($result);
+    db_close($link);
+
+    return (bool) $allowed;
+}
+
+function require_page_delay_supervisor_for_user($targetUserID)
+{
+    require_page_auth();
+
+    if (!access_current_user_can_view_delay_user($targetUserID)) {
+        deny_page_access();
+    }
+}
+
 function require_ajax_supervisor_for_user($targetUserID, $groupType)
 {
     require_ajax_auth();
