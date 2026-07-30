@@ -120,4 +120,19 @@ return function () {
     test_assert_same(7200, $durations[2], 'Offsite work must be reported separately');
     test_assert_same(1800, $durations[5], 'Pauses must be reported separately');
     test_assert_same(34200, $durations[3], 'The net duration must combine work, lunch, offsite work and pauses');
+
+    test_assert_same(
+        array(0, 0, 0, 0, 0, 0),
+        get_durations(
+            '2026-07-20 09:00:00',
+            '0000-00-00 00:00:00',
+            '2026-07-20 13:00:00',
+            '0000-00-00 00:00:00',
+            $addTimeInfo,
+            'ERROR',
+            0,
+            '2026-07-21 10:00:00'
+        ),
+        'An unfinished historical workday must not affect any duration calculation'
+    );
 };
