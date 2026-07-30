@@ -228,13 +228,15 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
     }
     if ( $found == 0 )
     {
+      $isUnfinishedHistoricalDay = isset($unfinishedHistoricalDates[$day]);
+
       $days_work_start[] = "0000-00-00 00:00:00";
       $days_work_stop[] = "0000-00-00 00:00:00";
       $days_eat_start[] = "0000-00-00 00:00:00";
       $days_eat_stop[] = "0000-00-00 00:00:00";
       $days_is_there_work_time[] = 0;
       $days_day_type[] = "NDF";
-      $days_day_state[] = "NDF";
+      $days_day_state[] = $isUnfinishedHistoricalDay ? "ERROR" : "NDF";
       $days_day_currday[] = "NDF";
 
       $days_remoteWorkState[] = "NDF";

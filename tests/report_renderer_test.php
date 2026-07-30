@@ -29,7 +29,14 @@ return function () {
     $statistics = file_get_contents(__DIR__ . '/../inc/report_period_statistics.php');
     test_assert_true(
         strpos($statistics, '$unfinishedHistoricalDates') !== false
-            && strpos($statistics, '$isCompletedVisit') !== false,
-        'A historical unfinished workday must be excluded from report calculations'
+            && strpos($statistics, '$isCompletedVisit') !== false
+            && strpos($statistics, '"ERROR"') !== false,
+        'A historical unfinished workday must be excluded from calculations and retain its error state'
+    );
+
+    $presentation = file_get_contents(__DIR__ . '/../inc/report_day_presentation.php');
+    test_assert_true(
+        strpos($presentation, 'Ошибка учета: незавершённый рабочий день') !== false,
+        'The report must clearly display an unfinished historical workday as an accounting error'
     );
 };

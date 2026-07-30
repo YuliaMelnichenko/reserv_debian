@@ -55,6 +55,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
   }
 
   $isStaffLeave = 0;
+  $isUnfinishedHistoricalDay = $days_day_state === "ERROR";
 
   if ($days_leave_event == "Отпуск" || $days_leave_event == "Больничный") {
     $isStaffLeave = 1;
@@ -228,6 +229,10 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
     $cellaligment = "left";
   }
 
+  if ($isUnfinishedHistoricalDay) {
+    $dayColor = "#FFDDDD";
+  }
+
 
   $workDayRange = "";
   {
@@ -258,6 +263,11 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
   else if ($isStaffLeave == 1){
     $noDataStr = $days_leave_event;
     $noDataStyle = "middleBoldGreen";
+  }
+
+  if ($isUnfinishedHistoricalDay) {
+    $noDataStr = "Ошибка учета: незавершённый рабочий день";
+    $noDataStyle = "middleBoldRed";
   }
 
   $prefix = "";
