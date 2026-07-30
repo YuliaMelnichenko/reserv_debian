@@ -161,10 +161,10 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $isCompletedVisit = $visitState === 0
         && is_time_defined($outDateTime) === 1
         && strtotime($outDateTime) > $in_dt_temp_val;
-      $isUnfinishedHistoricalDay = $currentDay === 0 && !$isCompletedVisit;
 
-      if ($isUnfinishedHistoricalDay) {
+      if ($currentDay === 0 && !$isCompletedVisit) {
         $unfinishedHistoricalDates[$in_dt_temp_shift] = true;
+        continue;
       }
 
       $tempDates[] = $in_dt_temp_shift;
@@ -173,10 +173,8 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
       $temp_days_work_stop[] = $row["out_dt"];
       $temp_days_eat_start[] = $row["eat_start_dt"];
       $temp_days_eat_stop[] = $row["eat_stop_dt"];
-      // Keep the original times visible, but prevent this unfinished day from
-      // contributing to hours, pauses, offsite work, or summary totals.
-      $temp_state = $isUnfinishedHistoricalDay ? "ERROR" : $visitState;
-      $temp_days_day_type[] = $isUnfinishedHistoricalDay ? 10 : 10 + $temp_state;
+      $temp_state = $visitState;
+      $temp_days_day_type[] = 10 + $temp_state;
       $temp_days_day_state[] = $temp_state;
       $temp_days_day_currday[] = $currentDay;
 
@@ -230,13 +228,15 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
     }
     if ( $found == 0 )
     {
+      $isUnfinishedHistoricalDay = isset($unfinishedHistoricalDates[$day]);
+
       $days_work_start[] = "0000-00-00 00:00:00";
       $days_work_stop[] = "0000-00-00 00:00:00";
       $days_eat_start[] = "0000-00-00 00:00:00";
       $days_eat_stop[] = "0000-00-00 00:00:00";
       $days_is_there_work_time[] = 0;
       $days_day_type[] = "NDF";
-      $days_day_state[] = "NDF";
+      $days_day_state[] = $isUnfinishedHistoricalDay ? "ERROR" : "NDF";
       $days_day_currday[] = "NDF";
 
       $days_remoteWorkState[] = "NDF";
