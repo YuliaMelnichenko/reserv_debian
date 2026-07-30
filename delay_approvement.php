@@ -40,11 +40,6 @@ if ($summary === false) {
   exit;
 }
 
-$periodLabel = format_date_range_label(
-  $summary['quarter_start_date'],
-  $summary['quarter_stop_date']
-);
-
 echo "<input id=\"recIDTempVal\" type=\"hidden\" value=\"\">";
 echo "<input id=\"acceptTempVal\" type=\"hidden\" value=\"\">";
 echo "<input id=\"penIDTempVal\" type=\"hidden\" value=\"\">";
@@ -62,8 +57,6 @@ echo "<table class=\"notification-page-table\">";
     echo "<div id=\"delayHeader\">";
       echo "<h5 class=\"dark\"><br>/уведомления по опозданиям<br><br></h5>";
     echo "</div>";
-
-echo "<h5 class=\"big\">Текущий квартал: " . html_escape($periodLabel) . "</h5>";
 
 echo "<div class=\"notification-table-scroll notification-table-scroll-wide\">";
 echo "<table class=\"add_time notification-summary-table\" id = \"delay_approvement_table_users\">";

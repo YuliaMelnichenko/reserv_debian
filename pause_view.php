@@ -53,8 +53,6 @@ echo "<table class=\"notification-page-table\">";
           echo "<h5 nowrap class=\"dark\"><br>/уведомления по приостановкам учета времени<br><br></h5>";
         echo "</div>";
 
-    echo "<h5 class=\"big\">Текущий квартал: " . html_escape($quarterLabel) . "</h5>";
-
     echo "<div class=\"notification-table-scroll notification-table-scroll-narrow\">";
     echo "<table id = \"pause_approvement_table_users\" class=\"add_time notification-summary-table\">";
     echo "<tr class=\"notification-table-head\">";

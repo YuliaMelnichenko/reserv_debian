@@ -69,7 +69,7 @@ $quarterLabel = format_date_range_label(
           echo "<h5 class=\"dark\"><br>/уведомления по работе вне офиса<br><br></h5>";
         echo "</div>";
 
-echo "<h5 class=\"big\">Текущий квартал: " . html_escape($quarterLabel) . "</h5>";
+// echo "<h5 class=\"big\">Текущий квартал: " . html_escape($quarterLabel) . "</h5>";
 
 echo "<div class=\"notification-table-scroll notification-table-scroll-wide\">";
 echo "<table id = \"add_time_approvement_table_users\" class = \"add_time notification-summary-table\">";

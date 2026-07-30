@@ -35,8 +35,8 @@ echo "<table class=\"journal-entry-layout\">";
 echo "<tr>";
 
 echo "<td class=\"journal-entry-toolbar-cell\">";
+echo "<button class=\"journal-action-button journal-action-button-add\" onclick=\"as_add_time();\">Добавить время</button><br><br>";
 echo "<h5 class=\"big\">Текущий квартал: " . html_escape($quarterLabel) . "</h5>";
-echo "<button class=\"journal-action-button journal-action-button-add\" onclick=\"as_add_time();\">Добавить время</button><br>";
 echo "</td>";    
 echo "</tr>";    
 echo "<tr>";    
