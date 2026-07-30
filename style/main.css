@@ -4713,6 +4713,17 @@ h5.activ_time {
   padding-right: 10px;
 }
 
+.notification-table-scroll {
+  display: block;
+  width: max-content !important;
+  max-width: 100%;
+  max-height: none;
+  margin: 0 0 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-sizing: border-box;
+}
+
 .notification-table-scroll-wide,
 .notification-table-scroll-narrow,
 .notification-table-scroll-medium,
@@ -4836,39 +4847,4 @@ h5.activ_time {
 .lunch-pause-dialog .no_padding_real,
 .pause-status-dialog .no_padding_real {
   width: 100% !important;
-}
-
-/* Attendance report: size the blue panel to its rendered columns, not to the viewport. */
-.report-page-content {
-  width: auto;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.report_window_main {
-  display: inline-block;
-  height: auto;
-  max-width: calc(100vw - 280px);
-  padding: 0 10px 10px 0;
-  background: #ddeeff;
-  box-sizing: border-box;
-}
-
-.report-layout-table {
-  width: auto;
-}
-
-#report_window,
-#report_window_single {
-  width: auto;
-  max-width: calc(100vw - 380px);
-  box-sizing: border-box;
-  overflow-x: auto;
-}
-
-#report_window_head,
-#report_window_head_single {
-  width: auto;
-  max-width: calc(100vw - 380px);
-  box-sizing: border-box;
 }

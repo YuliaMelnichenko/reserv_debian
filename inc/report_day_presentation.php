@@ -266,12 +266,11 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
   }
 
   if ($isUnfinishedHistoricalDay) {
-    $prefix = "<h5 class=\"bigmiddleRed\">Ошибка учета: незавершённый рабочий день";
+    $noDataStr = "Ошибка учета: незавершённый рабочий день";
+    $noDataStyle = "middleBoldRed";
   }
 
-  if (!isset($prefix)) {
-    $prefix = "";
-  }
+  $prefix = "";
 
   if ( $days_dates_set == $currentDate )
   {
