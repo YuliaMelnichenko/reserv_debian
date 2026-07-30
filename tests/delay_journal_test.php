@@ -57,6 +57,17 @@ return function () {
         strpos($detailPage, 'accept_delay_for_user(') !== false && strpos($detailPage, 'refuse_delay_for_user(') !== false,
         'The existing delay decision controls must remain available'
     );
+    test_assert_true(
+        strpos($detailPage, 'require_page_delay_supervisor_for_user($userID)') !== false,
+        'A supervisor must be able to view every employee shown in the delay summary'
+    );
+
+    $access = file_get_contents(__DIR__ . '/../inc/access.php');
+    test_assert_true(
+        strpos($access, 'function access_current_user_can_view_delay_user') !== false
+            && strpos($access, "TRIM(TYPE) IN ('0', '-1', '3')") !== false,
+        'Delay detail access must use the same direct-subordinate relationships as the delay summary'
+    );
 
     $employeeTable = file_get_contents(__DIR__ . '/../ajax/get_delay_table.php');
     test_assert_true(

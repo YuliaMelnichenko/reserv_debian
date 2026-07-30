@@ -21,7 +21,7 @@ if ($uidValid === 0 || $userID <= 0) {
   exit;
 }
 
-require_page_supervisor_for_user($userID, 3);
+require_page_delay_supervisor_for_user($userID);
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
