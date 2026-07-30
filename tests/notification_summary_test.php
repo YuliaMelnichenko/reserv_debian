@@ -134,10 +134,6 @@ return function () {
 
     $service = file_get_contents(__DIR__ . '/../inc/notification_summary.php');
     test_assert_true(
-        strpos($service, "paramName = 'delay_journal_deep_day'") !== false,
-        'The delay summary must use the delay journal depth setting'
-    );
-    test_assert_true(
         strpos($service, 'COUNT(DISTINCT') !== false,
         'Notification counts must remain stable when group or visit rows are duplicated'
     );
@@ -155,7 +151,7 @@ return function () {
     );
     test_assert_true(
         strpos($service, 'get_current_quarter_date_range') !== false,
-        'Pause notification counts must be limited to the current quarter'
+        'Notification summaries must be limited to the current quarter'
     );
     test_assert_true(
         strpos($service, 'AND $stopExpression > $startExpression') !== false,
@@ -164,10 +160,6 @@ return function () {
     test_assert_true(
         strpos($service, 'AND DATE($stopExpression) = DATE($startExpression)') !== false,
         'Pause notifications must reject intervals spanning multiple days'
-    );
-    test_assert_true(
-        strpos($service, "paramName = 'add_time_journal_deep_day'") !== false,
-        'The remote-work summary must use the add-time journal depth setting'
     );
     test_assert_true(
         strpos($service, 'function get_add_time_notification_summary') !== false,
@@ -181,6 +173,15 @@ return function () {
             "time_journal_add_work_datetime_expressions(\$link, 'add_time')"
         ) !== false,
         'The remote-work summary expressions must use the ADD_TIME join alias'
+    );
+    test_assert_true(
+        strpos($delaySummarySource, 'WITHOUT_COMMENT_COUNT') !== false,
+        'Delay notifications must expose records without an employee explanation'
+    );
+    test_assert_true(
+        strpos($delayController, 'Текущий квартал:') !== false
+            && strpos($delayController, 'Без<br>объяснения') !== false,
+        'The delay notification table must show its period and missing explanations'
     );
     test_assert_true(
         strpos($service, 'function get_pause_notification_count') !== false,

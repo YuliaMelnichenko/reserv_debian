@@ -180,7 +180,15 @@ function time_journal_query_add_work_for_period($link, $userId, $startDateTime, 
     );
 }
 
-function time_journal_query_add_work_journal($link, $userId, $pauseMode, $currentDate, $depthDays, $startExpr, $stopExpr)
+function time_journal_query_add_work_journal(
+    $link,
+    $userId,
+    $pauseMode,
+    $quarterStartDate,
+    $quarterStopExclusive,
+    $startExpr,
+    $stopExpr
+)
 {
     return db_query(
         $link,
@@ -199,10 +207,11 @@ function time_journal_query_add_work_journal($link, $userId, $pauseMode, $curren
            AND $stopExpr <> '0000-00-00 00:00:00'
            AND $stopExpr > $startExpr
            AND (a.PAUSE_MODE = 0 OR DATE($stopExpr) = DATE($startExpr))
-           AND $stopExpr > ADDDATE(?, INTERVAL ? DAY)
+           AND $startExpr < ?
+           AND $stopExpr > ?
          ORDER BY START_DT_EFFECTIVE DESC",
-        'iisi',
-        array((int)$userId, (int)$pauseMode, $currentDate, (int)$depthDays)
+        'iiss',
+        array((int)$userId, (int)$pauseMode, $quarterStopExclusive, $quarterStartDate)
     );
 }
 

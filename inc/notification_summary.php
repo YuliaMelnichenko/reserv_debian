@@ -30,6 +30,10 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
     }
 
     $currentDate = substr((string)$currentDateTime, 0, 10);
+    list($delayQuarterStartDate, , $delayQuarterStopExclusive) = get_current_quarter_date_range(
+        false,
+        $currentDate
+    );
     $dateTimeExpressions = time_journal_add_work_datetime_expressions($link);
     $startExpression = $dateTimeExpressions['start'];
     $stopExpression = $dateTimeExpressions['stop'];
@@ -56,7 +60,8 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
             SELECT COUNT(DISTINCT delay_entry.id)
             FROM Delays delay_entry
             WHERE delay_entry.status = 0
-              AND delay_entry.date > ADDDATE(?, INTERVAL ? DAY)
+              AND delay_entry.date >= ?
+              AND delay_entry.date < ?
               AND EXISTS (
                 SELECT 1
                 FROM GROUPS membership
@@ -73,13 +78,13 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
                   AND visit.remoteWorkState = 0
               )
           ) AS DELAY_COUNT
-    ", 'siissiis', array(
+    ", 'siisssis', array(
         $currentDateTime,
         -$depthDays['add_time_journal_deep_day'],
         (int)$supervisorID,
         '0',
-        $currentDate,
-        -$depthDays['delay_journal_deep_day'],
+        $delayQuarterStartDate,
+        $delayQuarterStopExclusive,
         (int)$supervisorID,
         '3',
     ));
@@ -102,19 +107,11 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
 
 function get_delay_notification_summary($link, $supervisorID, $currentDate)
 {
-    $depthResult = db_query($link, "
-        SELECT valueInt
-        FROM DBSETUP
-        WHERE paramName = 'delay_journal_deep_day'
-        LIMIT 1
-    ");
+    list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(
+        false,
+        $currentDate
+    );
 
-    if (!$depthResult) {
-        return false;
-    }
-
-    $depthRow = db_fetch_one($depthResult);
-    $depthDays = $depthRow ? abs((int)$depthRow['valueInt']) : 180;
     $summaryResult = db_query($link, "
         SELECT
           employee.ID AS USERID,
@@ -123,12 +120,22 @@ function get_delay_notification_summary($link, $supervisorID, $currentDate)
           COUNT(DISTINCT CASE WHEN visit.ID IS NOT NULL AND delay_entry.status = 1 THEN delay_entry.id END) AS ACCEPTED_COUNT,
           COUNT(DISTINCT CASE WHEN visit.ID IS NOT NULL AND delay_entry.status = -1 THEN delay_entry.id END) AS REFUSED_COUNT,
           COUNT(DISTINCT CASE WHEN visit.ID IS NOT NULL AND delay_entry.status IN (99, 100, 101) THEN delay_entry.id END) AS DELETED_COUNT,
-          COUNT(DISTINCT CASE WHEN visit.ID IS NOT NULL AND delay_entry.status = 0 THEN delay_entry.id END) AS NEW_COUNT
+          COUNT(DISTINCT CASE WHEN visit.ID IS NOT NULL AND delay_entry.status = 0 THEN delay_entry.id END) AS NEW_COUNT,
+          COUNT(DISTINCT CASE
+            WHEN visit.ID IS NOT NULL
+             AND delay_entry.status = 0
+             AND (
+               TRIM(COALESCE(delay_entry.explaneDesk, '')) = ''
+               OR TRIM(delay_entry.explaneDesk) = 'Без объяснения'
+             )
+            THEN delay_entry.id
+          END) AS WITHOUT_COMMENT_COUNT
         FROM GROUPS membership
         INNER JOIN employees employee ON employee.ID = membership.USERID
         LEFT JOIN Delays delay_entry
           ON delay_entry.userID = employee.ID
-         AND delay_entry.date > ADDDATE(?, INTERVAL ? DAY)
+         AND delay_entry.date >= ?
+         AND delay_entry.date < ?
         LEFT JOIN visiting visit
           ON visit.user_id = delay_entry.userID
          AND visit.in_dt >= delay_entry.date
@@ -137,8 +144,8 @@ function get_delay_notification_summary($link, $supervisorID, $currentDate)
         WHERE membership.SUPERVISORID = ?
           AND TRIM(membership.TYPE) = ?
         GROUP BY employee.ID, employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME
-        ORDER BY employee.ID
-    ", 'siis', array($currentDate, -$depthDays, (int)$supervisorID, '3'));
+        ORDER BY employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME, employee.ID
+    ", 'ssis', array($quarterStartDate, $quarterStopExclusive, (int)$supervisorID, '3'));
 
     if (!$summaryResult) {
         return false;
@@ -155,16 +162,14 @@ function get_delay_notification_summary($link, $supervisorID, $currentDate)
             'refused_count' => (int)$row['REFUSED_COUNT'],
             'deleted_count' => (int)$row['DELETED_COUNT'],
             'new_count' => (int)$row['NEW_COUNT'],
+            'without_comment_count' => (int)$row['WITHOUT_COMMENT_COUNT'],
         );
     }
 
-    $rangeStart = date('d.m.Y', strtotime($currentDate . ' -' . $depthDays . ' days'));
-    $rangeStop = date('d-m-Y', strtotime($currentDate));
-
     return array(
-        'depth_days' => $depthDays,
-        'range_start_label' => $rangeStart,
-        'range_stop_label' => $rangeStop,
+        'quarter_start_date' => $quarterStartDate,
+        'quarter_stop_date' => $quarterStopDate,
+        'quarter_stop_exclusive' => $quarterStopExclusive,
         'entries' => $entries,
     );
 }
@@ -271,19 +276,10 @@ function get_pause_notification_count($link, $userID, $currentDateTime)
 
 function get_add_time_notification_summary($link, $supervisorID, $currentDateTime)
 {
-    $depthResult = db_query($link, "
-        SELECT valueInt
-        FROM DBSETUP
-        WHERE paramName = 'add_time_journal_deep_day'
-        LIMIT 1
-    ");
-
-    if (!$depthResult) {
-        return false;
-    }
-
-    $depthRow = db_fetch_one($depthResult);
-    $depthDays = $depthRow ? abs((int)$depthRow['valueInt']) : 180;
+    list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(
+        false,
+        $currentDateTime
+    );
     $dateTimeExpressions = time_journal_add_work_datetime_expressions($link, 'add_time');
     $startExpression = $dateTimeExpressions['start'];
     $stopExpression = $dateTimeExpressions['stop'];
@@ -301,15 +297,16 @@ function get_add_time_notification_summary($link, $supervisorID, $currentDateTim
         LEFT JOIN ADD_TIME add_time
           ON add_time.USERID = employee.ID
          AND add_time.PAUSE_MODE = 0
-         AND $stopExpression > ADDDATE(?, INTERVAL ? DAY)
+         AND $startExpression < ?
+         AND $stopExpression > ?
          AND $startExpression <> '0000-00-00 00:00:00'
          AND $stopExpression <> '0000-00-00 00:00:00'
          AND $stopExpression > $startExpression
         WHERE membership.SUPERVISORID = ?
           AND TRIM(membership.TYPE) = ?
         GROUP BY employee.ID, employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME
-        ORDER BY employee.ID
-    ", 'siis', array($currentDateTime, -$depthDays, (int)$supervisorID, '0'));
+        ORDER BY employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME, employee.ID
+    ", 'ssis', array($quarterStopExclusive, $quarterStartDate, (int)$supervisorID, '0'));
 
     if (!$summaryResult) {
         return false;
@@ -330,7 +327,9 @@ function get_add_time_notification_summary($link, $supervisorID, $currentDateTim
     }
 
     return array(
-        'depth_days' => $depthDays,
+        'quarter_start_date' => $quarterStartDate,
+        'quarter_stop_date' => $quarterStopDate,
+        'quarter_stop_exclusive' => $quarterStopExclusive,
         'entries' => $entries,
     );
 }
