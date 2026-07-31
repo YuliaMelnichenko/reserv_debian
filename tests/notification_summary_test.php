@@ -85,6 +85,12 @@ return function () {
         strpos($navigation, 'get_supervisor_notification_counts') !== false,
         'Navigation must load both notification counters through the shared service'
     );
+    test_assert_true(
+        strpos($navigation, "onclick=\\\"location.href='time_approvement.php'\\\"") !== false
+            && strpos($navigation, "onclick=\\\"location.href='delay_approvement.php'\\\"") !== false
+            && strpos($navigation, "onclick=\\\"location.href='pause_view.php'\\\"") !== false,
+        'Notification buttons must use direct navigation from every page, including employee details'
+    );
     test_assert_same(
         0,
         preg_match('/\b(?:get_notification_count|get_delay_notification_count)\s*\(/', $navigation),

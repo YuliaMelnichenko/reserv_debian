@@ -257,6 +257,36 @@ function mapStaffLeaveRow($row)
     );
 }
 
+function clipStaffLeaveArchiveRowsToPeriod($rows, $filterStartDate, $filterStopDate)
+{
+    if ($filterStartDate === '' || $filterStopDate === '') {
+        return $rows;
+    }
+
+    list($filterStart, $filterStop) = normalizeStaffLeaveRange($filterStartDate, $filterStopDate);
+    $clippedRows = array();
+
+    foreach ($rows as $row) {
+        list($leaveStart, $leaveStop) = normalizeStaffLeaveRange($row['start_date'], $row['stop_date']);
+        $effectiveStart = max($leaveStart, $filterStart);
+        $effectiveStop = min($leaveStop, $filterStop);
+
+        if ($effectiveStart > $effectiveStop) {
+            continue;
+        }
+
+        $row['start_date'] = $effectiveStart;
+        $row['stop_date'] = $effectiveStop;
+        $row['total_days'] = getStaffLeaveDaysCount($effectiveStart, $effectiveStop);
+        $row['calendar_days'] = $row['total_days'];
+        $row['work_days'] = 0;
+        $row['work_hours'] = 0;
+        $clippedRows[] = $row;
+    }
+
+    return $clippedRows;
+}
+
 function enrichStaffLeavesArchiveRows($link, $rows)
 {
     if (count($rows) === 0) {
@@ -297,7 +327,7 @@ function enrichStaffLeavesArchiveRows($link, $rows)
     return $rows;
 }
 
-function fetchStaffLeavesArchiveRows($link, $employeeId, $event, $filterStartDate, $filterStopDate, $limit)
+function fetchStaffLeavesArchiveRows($link, $employeeId, $event, $filterStartDate, $filterStopDate, $limit, $clipToFilter = false)
 {
     $types = '';
     $params = array();
@@ -324,6 +354,10 @@ function fetchStaffLeavesArchiveRows($link, $employeeId, $event, $filterStartDat
     $rows = array();
     while ($row = db_fetch_one($result)) {
         $rows[] = mapStaffLeaveRow($row);
+    }
+
+    if ($clipToFilter) {
+        $rows = clipStaffLeaveArchiveRowsToPeriod($rows, $filterStartDate, $filterStopDate);
     }
 
     return enrichStaffLeavesArchiveRows($link, $rows);

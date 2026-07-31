@@ -51,6 +51,36 @@ return function () {
     test_assert_same(array(156, 'Командировка', '2026-06-30', '2026-04-01'), $params, 'Archive dates must use overlap order');
     test_assert_same(true, strpos($where, 'start_date <= ? AND stop_date >= ?') !== false, 'Archive filtering must include overlapping absences');
 
+    $clippedRows = clipStaffLeaveArchiveRowsToPeriod(
+        array(
+            array(
+                'id' => 1,
+                'start_date' => '2026-06-29',
+                'stop_date' => '2026-07-03',
+                'total_days' => 5,
+                'calendar_days' => 5,
+                'work_days' => 0,
+                'work_hours' => 0,
+            ),
+            array(
+                'id' => 2,
+                'start_date' => '2026-03-30',
+                'stop_date' => '2026-07-03',
+                'total_days' => 96,
+                'calendar_days' => 96,
+                'work_days' => 0,
+                'work_hours' => 0,
+            ),
+        ),
+        '2026-07-01',
+        '2026-07-31'
+    );
+    test_assert_same('2026-07-01', $clippedRows[0]['start_date'], 'An Excel row must begin at the selected period boundary');
+    test_assert_same('2026-07-03', $clippedRows[0]['stop_date'], 'An Excel row must keep only days inside the selected period');
+    test_assert_same(3, $clippedRows[0]['calendar_days'], 'Calendar days must be recalculated for the selected part of an absence');
+    test_assert_same('2026-07-01', $clippedRows[1]['start_date'], 'A long absence crossing several quarters must be clipped to the selected quarter');
+    test_assert_same('2026-07-03', $clippedRows[1]['stop_date'], 'A long absence must not extend past the selected period in Excel');
+
     $rowsXml = buildStaffLeavesArchiveSheetRows(
         array(array(
             'name' => 'Тест <Сотрудник>',

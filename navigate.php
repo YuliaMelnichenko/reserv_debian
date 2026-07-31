@@ -137,9 +137,9 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
     if ( $accountingErrorsNotifCount > 0 ){ $accountingErrorsNotifCountStr = "($accountingErrorsNotifCount)"; }
 
     echo "<tr><td height = 30px valign = \"bottom\"><h5 class=\"bigger\">Уведомления:</h5></td></tr>";
-    echo "<tr><td><button id=\"notifBtn\" class=\"nav-menu-button nav-notification-button nav-notification-button-wide\" onclick=\"add_time_set_start(); location.href='time_approvement.php'\"><h5 class=\"biggersmall\">По работе вне офиса $counterStr</h5></button></td></tr>";
-    echo "<tr><td><button id=\"notifDelayBtn\" class=\"nav-menu-button nav-notification-button\" onclick=\"delay_set_start(); location.href='delay_approvement.php'\"><h5 class=\"biggersmall\">По опозданиям $delayNotifCountStr</h5></button></td></tr>";
-    if ( $needToShow == 1 ){ echo "<tr><td><button id=\"notifPauseBtn\" class=\"nav-menu-button nav-notification-button\" onclick=\"pause_set_start(); location.href='pause_view.php'\"><h5 class=\"biggersmall\">По приостановкам учета времени $pauseNotifCountStr</h5></button></td></tr>"; }
+    echo "<tr><td><button id=\"notifBtn\" class=\"nav-menu-button nav-notification-button nav-notification-button-wide\" onclick=\"location.href='time_approvement.php'\"><h5 class=\"biggersmall\">По работе вне офиса $counterStr</h5></button></td></tr>";
+    echo "<tr><td><button id=\"notifDelayBtn\" class=\"nav-menu-button nav-notification-button\" onclick=\"location.href='delay_approvement.php'\"><h5 class=\"biggersmall\">По опозданиям $delayNotifCountStr</h5></button></td></tr>";
+    if ( $needToShow == 1 ){ echo "<tr><td><button id=\"notifPauseBtn\" class=\"nav-menu-button nav-notification-button\" onclick=\"location.href='pause_view.php'\"><h5 class=\"biggersmall\">По приостановкам учета времени $pauseNotifCountStr</h5></button></td></tr>"; }
     echo "<tr><td><button id=\"notifAccountingErrorsBtn\" class=\"nav-menu-button nav-notification-button\" onclick=\"location.href='accounting_errors_approvement.php'\"><h5 class=\"biggersmall\">По ошибкам учета $accountingErrorsNotifCountStr</h5></button></td></tr>";
   }
   echo "<tr><td class=\"nav-spacer-cell\" height=8px></td></tr>";

@@ -69,7 +69,8 @@ function handleStaffLeavesRequest($link, $server, $query, $post)
                 $filter['event'],
                 $filter['start_date'],
                 $filter['stop_date'],
-                $limit
+                $limit,
+                $action !== 'archive'
             );
 
             if ($action === 'archive') {
