@@ -3928,7 +3928,7 @@ h5.activ_time {
 }
 
 .notification-detail-date-cell {
-  width: 140px;
+  width: 145px;
   vertical-align: middle;
   text-align: center;
 }
@@ -3952,7 +3952,7 @@ h5.activ_time {
 }
 
 .notification-detail-comment-cell {
-  width: 140px;
+  width: 200px;
   vertical-align: middle;
   text-align: left;
 }
@@ -4709,7 +4709,6 @@ h5.activ_time {
   height: 14px;
 }
 
-/* Adaptive table frames shared by journals and supervisor notifications. */
 .notification-content-cell,
 .accounting-errors-content-cell,
 .staff-leaves-content-cell {
@@ -4829,7 +4828,6 @@ h5.activ_time {
   overflow-y: hidden;
 }
 
-/* The lunch and pause overlays use the general journal table style, but their content is compact. */
 .lunch-pause-dialog,
 .pause-status-dialog {
   width: 470px !important;
@@ -4842,7 +4840,6 @@ h5.activ_time {
   width: 100% !important;
 }
 
-/* Attendance report: size the blue panel to its rendered columns, not to the viewport. */
 .report-page-content {
   width: auto;
   padding: 0;
