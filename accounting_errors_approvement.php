@@ -39,6 +39,9 @@ echo "<table class=\"accounting-errors-page-table\">";
       echo "</div>";
 
       $depthDays = get_accounting_errors_default_depth_days();
+      $accountingErrorsPeriodLabel = get_accounting_errors_period_label();
+
+      echo "<h5 class=\"big\">Текущий квартал: $accountingErrorsPeriodLabel</h5>";
 
       echo "<div id=\"accountingErrorsApprovementTableScroll\">";
         echo "<table class=\"add_time\" id=\"accounting_errors_approvement_table_users\">";

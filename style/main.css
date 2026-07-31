@@ -1807,7 +1807,7 @@ report_window_head_single {
 
 #delay_explanation_add_time {
   position: fixed;
-  width: 1095px;
+  width: 1110px;
   height: 390px;
   left: 56%;
   top: 35%;
@@ -2585,6 +2585,7 @@ a.nounder {
 }
 
 .nav-menu-button-current {
+  margin-top: 10px;
   padding-right: 27px;
 }
 
@@ -2602,7 +2603,7 @@ a.nounder {
 }
 
 .nav-notification-button-wide {
-  margin-bottom: 10px;
+  margin: 10px 0;
   padding-right: 20px;
   font-size: 80%;
 }
@@ -4334,6 +4335,7 @@ h5.activ_time {
 }
 
 .journal-action-button-small-delete {
+  margin: 6px;
   width: 80px;
   font-size: 90%;
 }
@@ -4372,6 +4374,7 @@ h5.activ_time {
 }
 
 .journal-cell-icon-button {
+  margin: 6px;
   padding: 0;
   border: 0 solid #888888;
   background-color: #ffffff;
@@ -4517,6 +4520,7 @@ h5.activ_time {
 #accountingErrorsTableScroll,
 #accountingErrorsApprovementTableScroll {
   width: 820px;
+  margin: 10px 0;
 }
 
 #accountingErrorsTableScroll {
@@ -4871,4 +4875,8 @@ h5.activ_time {
   width: auto;
   max-width: calc(100vw - 380px);
   box-sizing: border-box;
+}
+
+.notification-detail-empty-header {
+  width: 100%;
 }

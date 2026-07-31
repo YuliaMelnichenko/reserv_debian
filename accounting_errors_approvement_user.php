@@ -47,7 +47,6 @@ require_page_supervisor_for_user($userID, 3);
 
 $depthDays = get_accounting_errors_default_depth_days();
 list($accountingErrorsStartDate, $accountingErrorsStopDate) = accounting_errors_get_range($depthDays);
-$accountingErrorsPeriodLabel = get_accounting_errors_period_label();
 $backUrl = "accounting_errors_approvement.php";
 
 sync_accounting_errors_for_user($link, $userID, $depthDays);
@@ -74,7 +73,6 @@ echo "<table class=\"accounting-errors-page-table\">";
       echo "<div id=\"accountingErrorsUserToolbar\" class=\"notification-detail-accounting-toolbar\">";
         echo "<div class=\"notification-detail-accounting-labels\">";
           echo "<h5 class=\"big\">Сотрудник: $userName</h5><br><br>";
-          echo "<h5 class=\"big\">Текущий квартал: $accountingErrorsPeriodLabel</h5>";
         echo "</div>";
         echo "<button class=\"button_style journal-back-button\" onclick=\"location.href='$backUrl'\">Назад</button>";
       echo "</div>";
