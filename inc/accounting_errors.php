@@ -22,7 +22,7 @@ function get_accounting_errors_default_depth_days()
 
 function is_accounting_errors_exempt_user($userID)
 {
-    return in_array((int)$userID, array(156, 161), true);
+    return in_array((int)$userID, array(156, 161, 600), true);
 }
 
 function accounting_errors_log_database_failure($link, $context)
@@ -305,7 +305,7 @@ function get_accounting_errors_notification_count($link, $supervisorID)
         'SELECT COUNT(DISTINCT ae.ID) AS CNT
          FROM accounting_errors ae
          INNER JOIN GROUPS g ON g.USERID = ae.USERID
-         WHERE g.SUPERVISORID = ? AND TRIM(g.TYPE) = ? AND ae.ERROR_DATE >= ? AND ae.ERROR_DATE <= ? AND ae.STATUS = 1 AND ae.USERID NOT IN (156, 161)',
+         WHERE g.SUPERVISORID = ? AND TRIM(g.TYPE) = ? AND ae.ERROR_DATE >= ? AND ae.ERROR_DATE <= ? AND ae.STATUS = 1 AND ae.USERID NOT IN (156, 161, 600)',
         'iiss',
         array((int)$supervisorID, 3, $startDate, $stopDate)
     );
@@ -377,7 +377,7 @@ function get_accounting_errors_supervised_users($link, $supervisorID)
          INNER JOIN employees employee ON employee.ID = membership.USERID
          WHERE membership.SUPERVISORID = ?
            AND TRIM(membership.TYPE) = ?
-           AND membership.USERID NOT IN (156, 161)
+           AND membership.USERID NOT IN (156, 161, 600)
          ORDER BY employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME",
         'ii',
         array((int)$supervisorID, 3)

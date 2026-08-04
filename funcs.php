@@ -321,11 +321,6 @@ function get_users_current_day_in_time_by_superuser( $SUID )
   return $rets;
 }
 
-
-
-
-
-
 function is_there_add_time_by_alert( $Date, $userID ){
   include __DIR__ . "/php_tori/connect.php";
 

@@ -65,7 +65,7 @@ echo "<table class=\"accounting-errors-page-table\">";
                 $link,
                 'SELECT ID, ERROR_DATE, STATUS, USER_COMMENT
                  FROM accounting_errors
-                 WHERE USERID = ? AND USERID NOT IN (156, 161) AND ERROR_DATE >= ? AND ERROR_DATE <= ? AND STATUS IN (0, 1, 2, 3)
+                 WHERE USERID = ? AND USERID NOT IN (156, 161, 600) AND ERROR_DATE >= ? AND ERROR_DATE <= ? AND STATUS IN (0, 1, 2, 3)
                  ORDER BY ERROR_DATE DESC',
                 'iss',
                 array((int)$userID, $accountingErrorsStartDate, $accountingErrorsStopDate)
