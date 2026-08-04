@@ -1,6 +1,6 @@
 <?php
 ob_start();
-session_start();
+require_once __DIR__ . '/inc/session.php';
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -10,7 +10,6 @@ echo "<html>";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";
 echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">";
-echo "<link rel=\"stylesheet\" href=\"style/style.css\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 echo "<body bgcolor=\"#ffffff\" >";
@@ -32,7 +31,7 @@ echo "<div align=\"left\">";
 
 include_once __DIR__ . "/php_tori/connect.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 echo "<table border=1>";
   echo "<tr>";

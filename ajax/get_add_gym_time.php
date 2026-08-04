@@ -1,7 +1,8 @@
 <?php
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
 
@@ -34,10 +35,10 @@ $content .= "</div>";
 
 $content .= "<div id=\"buttonBox\">";
 $content .= "<div class=\"add_train_btn\">";
-$content .= "<button style=\"cursor: pointer; font-size: 100%; width:90px; height:25px; background-color:#ff7979; border:1px solid #888888;\" onclick=\"close_add_sport_time();\">Закрыть</button><br>";
+$content .= "<button class=\"journal-action-button journal-action-button-compact journal-action-button-close\" onclick=\"close_add_sport_time();\">Закрыть</button><br>";
 $content .= "</div>";
 $content .= "<div class=\"add_train_btn\">";
-$content .= "<button style=\"cursor: pointer; font-size: 100%; width:90px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"save_entry('$example', '$allTime');\">Добавить</button><br>";
+$content .= "<button class=\"journal-action-button journal-action-button-compact\" onclick=\"save_entry('$example', '$allTime');\">Добавить</button><br>";
 $content .= "</div>";
 $content .= "</div>";
 

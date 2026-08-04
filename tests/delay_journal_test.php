@@ -1,0 +1,94 @@
+<?php
+
+return function () {
+    $controller = file_get_contents(__DIR__ . '/../ajax/get_delays_by_user.php');
+
+    test_assert_true(
+        strpos($controller, 'inc/delay_journal.php') !== false,
+        'The delay journal controller must load the shared data service'
+    );
+    test_assert_same(
+        0,
+        preg_match('/\bSELECT\b/i', $controller),
+        'SQL must not return to the delay journal controller'
+    );
+    test_assert_same(
+        0,
+        preg_match('/\b(?:get_all_delay_info_by_user|get_superuser_name_by_id|get_user_name_by_id)\s*\(/', $controller),
+        'The delay journal controller must not perform per-row lookups'
+    );
+    test_assert_true(
+        strpos($controller, 'id=\\"delay_approvement_table\\"') !== false,
+        'The existing delay table markup must remain available'
+    );
+
+    $service = file_get_contents(__DIR__ . '/../inc/delay_journal.php');
+    test_assert_true(
+        strpos($service, 'LEFT JOIN employees supervisor') !== false,
+        'The delay journal must load supervisor names in its data query'
+    );
+    test_assert_true(
+        strpos($service, 'LEFT JOIN employees acceptor') !== false,
+        'The delay journal must load acceptor names in its data query'
+    );
+    test_assert_true(
+        strpos($service, 'get_current_quarter_date_range') !== false
+            && strpos($service, 'period_start_date') !== false
+            && strpos($service, 'period_stop_date') !== false,
+        'The employee delay journal must expose the current-quarter period'
+    );
+    test_assert_same(0, preg_match('/SELECT\s+\*/i', $service), 'Delay journal queries must select explicit fields');
+
+    $detailPage = file_get_contents(__DIR__ . '/../delay_approvement_user.php');
+    test_assert_true(
+        strpos($detailPage, 'inc/delay_journal.php') !== false,
+        'The full delay detail page must use the shared data service'
+    );
+    test_assert_same(
+        0,
+        preg_match('/\b(?:get_all_delay_info_by_user|get_superuser_name_by_id|get_user_name_by_id|get_user_defStartTime_and_allowedDelay)\s*\(/', $detailPage),
+        'The full delay detail page must not perform legacy or per-row lookups'
+    );
+    test_assert_true(
+        strpos($detailPage, 'notification-table-scroll notification-table-scroll-full') !== false,
+        'The existing delay detail layout must remain available'
+    );
+    test_assert_true(
+        strpos($detailPage, 'accept_delay_for_user(') !== false && strpos($detailPage, 'refuse_delay_for_user(') !== false,
+        'The existing delay decision controls must remain available'
+    );
+    test_assert_true(
+        strpos($detailPage, 'require_page_delay_supervisor_for_user($userID)') !== false,
+        'A supervisor must be able to view every employee shown in the delay summary'
+    );
+
+    $access = file_get_contents(__DIR__ . '/../inc/access.php');
+    test_assert_true(
+        strpos($access, 'function access_current_user_can_view_delay_user') !== false
+            && strpos($access, "TRIM(TYPE) IN ('0', '-1', '3')") !== false,
+        'Delay detail access must use the same direct-subordinate relationships as the delay summary'
+    );
+
+    $employeeTable = file_get_contents(__DIR__ . '/../ajax/get_delay_table.php');
+    test_assert_true(
+        strpos($employeeTable, 'inc/delay_journal.php') !== false,
+        'The employee delay table must use the shared data service'
+    );
+    test_assert_same(
+        0,
+        preg_match('/\b(?:SELECT|get_all_delay_info_by_user|get_superuser_name_by_id|get_user_name_by_id)\b/i', $employeeTable),
+        'The employee delay table must not perform SQL, legacy, or per-row lookups'
+    );
+    test_assert_true(
+        strpos($employeeTable, 'journal-action-button journal-action-button-delay') !== false,
+        'The existing employee delay action must remain available'
+    );
+    test_assert_true(
+        strpos($employeeTable, 'Текущий квартал:') !== false,
+        'The employee delay table must display its current-quarter period'
+    );
+    test_assert_true(
+        strpos($service, '$includeDeleted') !== false,
+        'The delay service must support hiding deleted employee entries'
+    );
+};

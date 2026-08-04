@@ -1,64 +1,109 @@
 <?php 
-session_start();
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
 include __DIR__ . "/../php_tori/connect.php";
 
-$userID = $_SESSION['ss_id']; 
+$userID = (int)$_SESSION['ss_id'];
 
 $currentDate = get_current_datetime_in_timezone_str( 1, 0 );
 
-$start_time = $_POST['add_time_part_start_dt'];
-$stop_time = $_POST['add_time_part_stop_dt'];
-$base = $_POST['add_time_part_base'];
-$desk = $_POST['add_time_part_desk'];
+$start_time = request_post_datetime('add_time_part_start_dt');
+$stop_time = request_post_datetime('add_time_part_stop_dt');
+$base = request_post_int('add_time_part_base');
+$desk = request_post_trimmed_string('add_time_part_desk');
 
-if ( isset( $_POST['byAlert'] ) AND $_POST['byAlert'] == 1 ){
-  $byAlert = 1;
+$range = get_valid_datetime_range($start_time, $stop_time);
+
+if ($range === null) {
+  echo "Время окончания должно быть позже времени начала";
+  exit;
 }
-else{
-  $byAlert = 0;
+
+if ($base <= 0) {
+  echo "Не выбрано основание работы вне офиса";
+  exit;
 }
+
+$start_time = $range['start'];
+$stop_time = $range['stop'];
+
+$byAlert = request_post_int('byAlert') === 1 ? 1 : 0;
   
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
-$supervisor_query = mysqli_query($link,"SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 AND USERID = '$userID'");
-$row = mysqli_fetch_array($supervisor_query);
+$supervisor_query = db_query($link, 'SELECT SUPERVISORID FROM GROUPS WHERE TYPE = 100 AND USERID = ? LIMIT 1', 'i', array($userID));
 
-$sv_ID = $row["SUPERVISORID"];
+if (!$supervisor_query) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+$row = db_fetch_one($supervisor_query);
+
+if (!$row || (int)$row['SUPERVISORID'] <= 0) {
+  echo "Не найден руководитель для согласования";
+  exit;
+}
+
+$sv_ID = (int)$row["SUPERVISORID"];
+
+$transaction = db_transaction_start($link);
+if (!$transaction) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
                                             
-$query = mysqli_query($link, "INSERT INTO ADD_TIME (ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE, BYALERT ) VALUES ('$currentDate', '$sv_ID', '$userID','$start_time','$stop_time','$base','$desk', '', '0', '0', '$byAlert')");
-$merr=mysqli_error($link);
+$query = db_execute(
+  $link,
+  "INSERT INTO ADD_TIME (ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE, BYALERT) VALUES (?, ?, ?, ?, ?, ?, ?, '', 0, 0, ?)",
+  'siissisi',
+  array($currentDate, $sv_ID, $userID, $start_time, $stop_time, $base, $desk, $byAlert)
+);
+$merr = db_error($link);
 
 if (!$query){
-  echo "<br>mysql_error = $merr<br>";
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
 }
 else{
   if ( isset($_SESSION['ss_ch_delay_ID']) ){
-    mysqli_set_charset($link, "utf8"); 
+    db_set_charset($link, "utf8");
 
-    $addTimeDescID = $_SESSION['ss_ch_delay_ID'];
+    $addTimeDescID = (int)$_SESSION['ss_ch_delay_ID'];
 
-    $descDel = "<font color=\"#FF0000\">Из доп. времени:</font> ".$desk;
+    $descDel = "Из доп. времени: ".$desk;
 
-    $query1 = mysqli_query($link, "UPDATE Delays SET explaneDesk = '$descDel' WHERE id = '$addTimeDescID'");
+  $query1 = db_execute($link, 'UPDATE Delays SET explaneDesk = ? WHERE id = ?', 'si', array($descDel, $addTimeDescID));
 
-    unset($_SESSION['ss_ch_delay_ID']);
-                                        
-    $merr1 = mysqli_error($link);
+    $merr1 = db_error($link);
 
     if (!$query1){
-      echo "<br>mysql_error = $merr<br>";
-    }    
-    else{
-      echo "1";
+      $transaction->rollback();
+      ajax_database_error($link, __FILE__ . ':' . __LINE__);
+      exit;
     }
+
+    unset($_SESSION['ss_ch_delay_ID']);
   }
-  else{
-    echo "1";
+
+  $workDate = substr($start_time, 0, 10);
+
+  if (!clear_unsubmitted_accounting_errors_for_dates($link, $userID, array($workDate))) {
+    $transaction->rollback();
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
+    exit;
   }
+
+  if (!$transaction->commit()) {
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
+    exit;
+  }
+
+  $_SESSION['accounting_errors_sync_date'] = date('Y-m-d');
+  echo "1";
 }
 ?>

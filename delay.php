@@ -1,6 +1,6 @@
 <?php
 ob_start();
-session_start();
+require_once __DIR__ . '/inc/session.php';
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -10,14 +10,13 @@ echo "<html>";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";
 echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">";
-echo "<link rel=\"stylesheet\" href=\"style/style.css\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
-echo "<body bgcolor=\"#ffffff\" >";
+echo "<body class=\"app-page\">";
 ?>
 
-<script type="text/javascript" src="lib/jquery/jquery.js"></script> 
-<script type="text/javascript" src="js/tory.js"></script> 
+<script type="text/javascript" src="lib/jquery/jquery.js"></script>
+<script type="text/javascript" src="js/tory.js?v=20260729-layout"></script>
 
 <?php
 ////////////////////////////////////////////////////////
@@ -27,47 +26,42 @@ auth();
 ////////////////////////////////////////////////////////
 
 echo "<div id=\"delay_explanation_delay\">";
-echo "</div>"; 
+echo "</div>";
 
-echo "<div align=\"left\">";
+echo "<div class=\"notification-page-layout\">";
 
-echo "<table border=0>";
+echo "<table class=\"notification-page-table\">";
 echo "<tr>";
 
-echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
+echo "<td class=\"notification-nav-cell\">";
 include_once __DIR__ . "/navigate.php";
-echo "</td>";    
+echo "</td>";
 
-$wholeWidth = 1425;
-
-echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
+echo "<td class=\"notification-content-cell notification-content-cell-extra-wide\">";
 
 echo "<h5 class=\"dark\"><br>/опоздания<br><br></h5>";
 
 echo "<div id=\"delay_table\">";
-echo "</div>"; 
+echo "</div>";
 
-echo "</td>"; 
-echo "</tr>";    
-echo "</table>";    
+echo "</td>";
 echo "</tr>";
 echo "</table>";
 echo "</div>";
 ?>
 
-<script type="text/javascript" src="lib/jquery/jquery.js"></script> 
-<script type="text/javascript" charset="utf-8"> 
+<script type="text/javascript" charset="utf-8">
 
 function as_add_time()
 {
   show_delay_table();
-}  
+}
 show_delay_table();
 
 function update_clock()
 {
-  $.post('ajax/get_current_day_time.php', RetSWT);                           
-  function RetSWT(dat) 
+  $.post('ajax/get_current_day_time.php', RetSWT);
+  function RetSWT(dat)
   {
     if ( document.getElementById('dateTimeFieldNav') )
     {
@@ -76,10 +70,10 @@ function update_clock()
   }
 }
 
-var timerId=setInterval( "update_clock()", 10000 );
-</script> 
+var timerId = setInterval(update_clock, 10000);
+</script>
 
 <?php
 echo "</body>";
-echo "</html>";  
+echo "</html>";
 ?>

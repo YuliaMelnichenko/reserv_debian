@@ -1,53 +1,51 @@
 <?php
-session_start();
-
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/notification_summary.php";
 
-$userID_ = $_SESSION['ss_id']; 
+$userID_ = (int)$_SESSION['ss_id'];
+$summary = get_pause_notification_summary($link, $userID_, get_current_datetime_in_timezone_str(1, 0));
 
-echo "<h5 class=\"big\">Уведомления по приостановкам учета времени</h5>";
-echo "<table id = \"pause_approvement_table_users\" class=\"slim\" border=1>";
-echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
-echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Сотрудник</h5>"."</td>";
-echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Всего</h5>"."</td>";
-echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">За текущий день</h5>"."</td>";
-echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Просмотреть</h5>"."</td>";
+if ($summary === false) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+$quarterLabel = format_date_range_label($summary['quarter_start_date'], $summary['quarter_stop_date']);
+
+echo "<h5 class=\"big\">Текущий квартал: " . html_escape($quarterLabel) . "</h5>";
+echo "<div class=\"notification-table-scroll\">";
+echo "<table id=\"pause_approvement_table_users\" class=\"add_time notification-summary-table\">";
+echo "<tr class=\"notification-table-head\">";
+echo "<td class=\"add_time notification-user-name-cell\"><h5 class=\"big\">Сотрудник</h5></td>";
+echo "<td class=\"add_time notification-pause-count-cell\"><h5 class=\"big\">Всего</h5></td>";
+echo "<td class=\"add_time notification-current-day-cell\"><h5 class=\"big\">За текущий день</h5></td>";
+echo "<td class=\"add_time notification-pause-view-cell\"><h5 class=\"big\">Просмотреть</h5></td>";
 echo "</tr>";
 
 $color = "#ddffff";
 $img = "go1.png";
 
-mysqli_set_charset($link, "utf8");
-$query = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = '$userID_' AND TYPE = 4 "); 
-if (!$query)
+foreach ($summary['entries'] as $entry)
 {
-  echo "<br>mysql_error = $merr<br>";
-}
-else
-{
-  while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-  {  
-    $userID = $row["USERID"];
-    $userName = get_user_name_by_id($userID);
+    $userID = $entry['user_id'];
+    $userName = $entry['user_name'];
+    $notificationCount = $entry['total_count'];
+    $currentDayNotificationCount = $entry['current_day_count'];
 
-    $notificationCount = 0;
-    $currentDayNotificationCount = 0;
-    get_pause_notif_counts( $userID, $notificationCount, $currentDayNotificationCount );
+    $rowClass = $color == "#ddffff" ? "notification-row-alt" : "notification-row";
 
-    $cellStype = "middle";
-    if ( $newNotificationCount > 0 ){ $cellStype = "middleBlue1"; }
-
-    echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-    echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$userName</h5>"."</td>";
-    echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$notificationCount</h5>"."</td>";
-    echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$currentDayNotificationCount</h5>"."</td>";
-    echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
-      echo "<button id = \"explBtn\" title = \"Просмотреть\" style=\"padding: 0px 0px 0px 0px; background-color:#ffffff; border:0px solid #888888;\" onclick=\"show_pause_by_user( '$userID' );\"><img src=\"img/$img\"></button>";
+    echo "<tr class=\"$rowClass\">";
+    echo "<td class=\"add_time notification-user-name-cell\"><h5 class=\"middle\">" . html_escape($userName) . "</h5></td>";
+    echo "<td class=\"add_time notification-pause-count-cell\"><h5 class=\"middle\">$notificationCount</h5></td>";
+    echo "<td class=\"add_time notification-current-day-cell\"><h5 class=\"middle\">$currentDayNotificationCount</h5></td>";
+    echo "<td class=\"add_time notification-pause-view-cell\">";
+      echo "<button id=\"explBtn\" class=\"journal-cell-icon-button\" title=\"Просмотреть\" onclick=\"show_pause_by_user('$userID');\"><img src=\"img/$img\" alt=\"\"></button>";
     echo "</td>";
     echo "</tr>";
 
@@ -61,8 +59,8 @@ else
       $color = "#ddffff";
       $img = "go1.png";
     }  
-  }
 }
 
 echo "</table>";
+echo "</div>";
 ?>

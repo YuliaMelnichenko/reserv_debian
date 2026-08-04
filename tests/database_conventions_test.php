@@ -1,0 +1,58 @@
+<?php
+
+return function () {
+    $ajaxFiles = new DirectoryIterator(__DIR__ . '/../ajax');
+
+    foreach ($ajaxFiles as $file) {
+        if (!$file->isFile() || strtolower($file->getExtension()) !== 'php') {
+            continue;
+        }
+
+        $source = file_get_contents($file->getPathname());
+        $fileName = $file->getFilename();
+
+        test_assert_same(
+            0,
+            preg_match('/\bmysqli_(?:begin_transaction|commit|rollback)\s*\(/', $source),
+            'AJAX transactions must use DatabaseTransaction in ' . $fileName
+        );
+        test_assert_same(
+            0,
+            preg_match('/(?<!ajax_)database_error_message\s*\(/', $source),
+            'AJAX database errors must use the shared response helper in ' . $fileName
+        );
+    }
+
+    $root = realpath(__DIR__ . '/..');
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveCallbackFilterIterator(
+            new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS),
+            function ($current) {
+                if ($current->isDir()) {
+                    return !in_array($current->getFilename(), array('.git', 'lib', 'tests'), true);
+                }
+
+                return strtolower($current->getExtension()) === 'php';
+            }
+        )
+    );
+
+    foreach ($iterator as $file) {
+        $source = file_get_contents($file->getPathname());
+        $relativePath = str_replace('\\', '/', substr($file->getPathname(), strlen($root) + 1));
+
+        test_assert_same(
+            0,
+            preg_match('/\bSELECT\s+\*/i', $source),
+            'Production queries must use explicit field lists in ' . $file->getPathname()
+        );
+
+        if (!in_array($relativePath, array('inc/database.php', 'php_tori/connect.php'), true)) {
+            test_assert_same(
+                0,
+                preg_match('/\bmysqli_[a-z_]+\s*\(/i', $source),
+                'Direct mysqli calls must stay in database infrastructure: ' . $relativePath
+            );
+        }
+    }
+};

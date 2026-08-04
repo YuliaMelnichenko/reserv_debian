@@ -1,42 +1,41 @@
 <?php
-session_start();
-
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
 if (!isset($_SESSION['ss_id'])) {
   echo "Ошибка: пользователь не найден";
   exit;
 }
 
-$userID = $_SESSION['ss_id'];
+$userID = (int)$_SESSION['ss_id'];
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 $currentStartDT = isset($_SESSION['ss_startDTStr'])
   ? $_SESSION['ss_startDTStr']
   : date('Y-m-d 00:00:00');
 
-$query = mysqli_query($link, "
+$query = db_query($link, "
   SELECT ID, in_dt, eat_start_dt, eat_stop_dt, out_dt, state
   FROM visiting
-  WHERE user_id = '$userID'
+  WHERE user_id = ?
     AND state != 0
-    AND in_dt < '$currentStartDT'
+    AND in_dt < ?
   ORDER BY in_dt DESC, ID DESC
   LIMIT 1
-");
+", 'is', array($userID, $currentStartDT));
 
 if (!$query) {
-  echo "Ошибка БД: " . mysqli_error($link);
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
-if (mysqli_num_rows($query) == 0) {
+if (db_num_rows($query) == 0) {
   echo "<div class=\"reg_out_time\">";
   echo "<div class=\"reg_out_time_head\">";
   echo "<div class=\"reg_out_time_text\"><h5 class=\"big\">Незакрытых предыдущих дней не найдено</h5></div>";
@@ -49,7 +48,7 @@ if (mysqli_num_rows($query) == 0) {
   exit;
 }
 
-$row = mysqli_fetch_array($query, MYSQLI_ASSOC);
+$row = db_fetch_one($query);
 
 $visitID = (int)$row["ID"];
 $inDT = $row["in_dt"];
@@ -80,9 +79,9 @@ echo "<div class=\"reg_out_time\">";
   echo "</div>";
 
   echo "<div class=\"reg_out_time_body\">";
-    echo "<h5 class=\"middle\">Незакрытый приход: " . htmlspecialchars($inDT) . "</h5>";
+    echo "<h5 class=\"middle\">Незакрытый приход: " . html_escape($inDT) . "</h5>";
     echo "<input id=\"change_visit_id\" type=\"hidden\" value=\"$visitID\">";
-    echo "<input id=\"add_stop_time\" align=\"middle\" style=\"width:175px;\" type=\"datetime-local\" value=\"$defaultValue\" min=\"$minValue\" max=\"$maxValue\">";
+    echo "<input id=\"add_stop_time\" align=\"middle\" style=\"width:175px;\" type=\"datetime-local\" value=\"" . html_escape($defaultValue) . "\" min=\"" . html_escape($minValue) . "\" max=\"" . html_escape($maxValue) . "\">";
   echo "</div>";
 
   echo "<div class=\"reg_out_time_footer\">";

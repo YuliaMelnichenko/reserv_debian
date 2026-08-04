@@ -1,45 +1,109 @@
 <?php
-session_start();
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+$userID_ = (int)$_SESSION['ss_id'];
 
-$userID_ = $_SESSION['ss_id']; 
-
-$training_date = $_POST['training_date'];
-$training_start_time = $_POST['training_start_time'];
-$training_stop_time = $_POST['training_stop_time'];
+$training_date = request_post_date('training_date');
+$training_start_time = request_post_time('training_start_time');
+$training_stop_time = request_post_time('training_stop_time');
 
 include __DIR__ . "/../php_tori/connect.php";
 
-mysqli_set_charset($link, "utf8");
-
-$query0 = mysqli_query($link, "SELECT max(ID) FROM gym_schedule"); 
-$newID = 0;
-
-if ( !$query0 ) {
-  echo "<br>mysql_error = $merr<br>";
-} 
-else if ($row = mysqli_fetch_array($query0)) {
-  $newID = $row[0] + 1;
+if (
+  $training_date === null
+  || $training_start_time === null
+  || $training_stop_time === null
+  || $training_date < date('Y-m-d')
+  || $training_start_time >= $training_stop_time
+) {
+  deny_ajax_access(400, 'INVALID_SCHEDULE');
 }
 
-$query = mysqli_query($link, "INSERT INTO gym_schedule (ID, USERID, DATE_TRAIN, START_TIME, STOP_TIME) VALUES ('$newID','$userID_','$training_date', '$training_start_time', '$training_stop_time')");
+$transaction = db_transaction_start($link);
+if (!$transaction) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
 
-$merr=mysqli_error($link);
+$idQuery = db_query($link, 'SELECT ID FROM gym_schedule ORDER BY ID DESC LIMIT 1 FOR UPDATE');
+
+if (!$idQuery) {
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+$lastSchedule = db_fetch_one($idQuery);
+$newID = $lastSchedule ? (int)$lastSchedule['ID'] + 1 : 1;
+
+$duplicateQuery = db_query(
+  $link,
+  'SELECT ID FROM gym_schedule WHERE USERID = ? AND DATE_TRAIN = ? AND START_TIME = ? AND STOP_TIME = ? LIMIT 1 FOR UPDATE',
+  'isss',
+  array($userID_, $training_date, $training_start_time, $training_stop_time)
+);
+
+if (!$duplicateQuery) {
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+if (db_has_rows($duplicateQuery)) {
+  if (!$transaction->commit()) {
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
+    exit;
+  }
+
+  echo "2";
+  exit;
+}
+
+$slotQuery = db_query(
+  $link,
+  'SELECT USERID FROM gym_schedule WHERE DATE_TRAIN = ? AND START_TIME = ? AND STOP_TIME = ? FOR UPDATE',
+  'sss',
+  array($training_date, $training_start_time, $training_stop_time)
+);
+
+if (!$slotQuery) {
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+$slotUsers = array();
+
+while ($slotRow = db_fetch_one($slotQuery)) {
+  $slotUsers[(int)$slotRow['USERID']] = true;
+}
+
+if (count($slotUsers) >= 4) {
+  $transaction->rollback();
+  echo "1";
+  exit;
+}
+
+$query = db_execute(
+  $link,
+  'INSERT INTO gym_schedule (ID, USERID, DATE_TRAIN, START_TIME, STOP_TIME) VALUES (?, ?, ?, ?, ?)',
+  'iisss',
+  array($newID, $userID_, $training_date, $training_start_time, $training_stop_time)
+);
 
 if (!$query) {
-  $err .= "mysql_error = $merr<br>";
-}
-else {
-  $newID = $newID + 1;
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
 }
 
-if ( $err == "" ) {
-  echo "2";       
-} 
-else {
-  echo $err;       
-} 
+if (!$transaction->commit()) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+echo "2";
 ?>

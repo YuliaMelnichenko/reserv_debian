@@ -1,0 +1,61 @@
+<?php
+
+require_once __DIR__ . '/test_helpers.php';
+
+$testFiles = array(
+    __DIR__ . '/time_registration_renderer_test.php',
+    __DIR__ . '/accounting_errors_test.php',
+    __DIR__ . '/ajax_response_test.php',
+    __DIR__ . '/ajax_endpoint_conventions_test.php',
+    __DIR__ . '/add_time_journal_test.php',
+    __DIR__ . '/calendar_test.php',
+    __DIR__ . '/controller_service_boundaries_test.php',
+    __DIR__ . '/date_range_test.php',
+    __DIR__ . '/database_transaction_test.php',
+    __DIR__ . '/database_conventions_test.php',
+    __DIR__ . '/delay_test.php',
+    __DIR__ . '/delay_journal_test.php',
+    __DIR__ . '/entrance_adjustment_test.php',
+    __DIR__ . '/gym_schedule_test.php',
+    __DIR__ . '/index_presence_test.php',
+    __DIR__ . '/legacy_schema_audit_test.php',
+    __DIR__ . '/legacy_function_cleanup_test.php',
+    __DIR__ . '/module_extraction_test.php',
+    __DIR__ . '/notification_layout_test.php',
+    __DIR__ . '/notification_summary_test.php',
+    __DIR__ . '/offsite_work_test.php',
+    __DIR__ . '/overtime_test.php',
+    __DIR__ . '/pause_service_test.php',
+    __DIR__ . '/pause_journal_test.php',
+    __DIR__ . '/php85_compatibility_test.php',
+    __DIR__ . '/report_renderer_test.php',
+    __DIR__ . '/remote_work_test.php',
+    __DIR__ . '/request_input_test.php',
+    __DIR__ . '/staff_leaves_test.php',
+    __DIR__ . '/time_format_test.php',
+    __DIR__ . '/work_duration_test.php',
+    __DIR__ . '/workday_period_test.php',
+    __DIR__ . '/workday_registration_test.php',
+    __DIR__ . '/workday_state_test.php',
+);
+
+$failed = 0;
+
+foreach ($testFiles as $testFile) {
+    $test = require $testFile;
+    $testName = basename($testFile);
+
+    try {
+        $test();
+        echo "[OK] $testName" . PHP_EOL;
+    } catch (Throwable $error) {
+        $failed++;
+        echo "[FAIL] $testName: " . $error->getMessage() . PHP_EOL;
+    }
+}
+
+if ($failed > 0) {
+    exit(1);
+}
+
+echo "All tests passed." . PHP_EOL;

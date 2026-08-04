@@ -1,38 +1,38 @@
 <?php
-session_start();
-
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
-
-$userID = $_SESSION['ss_id'];
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
 include __DIR__ . "/../php_tori/connect.php";
-include_once __DIR__ . "/../funcs.php";
 
-mysqli_set_charset($link, "utf8");
+$date_train = request_post_date('training_date');
+$start_time = request_post_time('training_start_time');
+$stop_time = request_post_time('training_stop_time');
 
-$date_train = $_POST['training_date'];
-$start_time = $_POST['training_start_time'];
-$stop_time = $_POST['training_stop_time'];
+if ($date_train === null || $start_time === null || $stop_time === null) {
+  deny_ajax_access(400, 'INVALID_SCHEDULE');
+}
 
-$query = mysqli_query($link, "SELECT COUNT(DISTINCT USERID) FROM gym_schedule WHERE DATE_TRAIN='$date_train' AND START_TIME='$start_time' AND STOP_TIME='$stop_time'");
-$row = mysqli_fetch_assoc($query);
-$merr = mysqli_error($link);
-
-$count = $row["COUNT(DISTINCT USERID)"];
+$query = db_query(
+  $link,
+  'SELECT COUNT(DISTINCT USERID) AS people_count FROM gym_schedule WHERE DATE_TRAIN = ? AND START_TIME = ? AND STOP_TIME = ?',
+  'sss',
+  array($date_train, $start_time, $stop_time)
+);
 
 if (!$query) {
-    $err .= "mysql_error $merr<br>";
-}
-else {
-    $newID = $newID + 1;
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
 }
 
-if ($count > '3' && $count < '5') {
-    echo "1";
+$row = db_fetch_one($query);
+$count = (int)$row['people_count'];
+
+if ($count >= 4) {
+  echo "1";
 }
 else {
-    echo "2";
+  echo "2";
 }
 ?>

@@ -1,169 +1,70 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-session_start();
-
-header("Content-type: text/html; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_response_headers('text/html');
 
 $userID = $_SESSION['ss_id'] ?? null;
 
 include_once __DIR__ . "/../funcs.php";
 include __DIR__ . "/../php_tori/connect.php";
-mysqli_set_charset($link, "utf8");
-
-// -------------------- POST (SAVE) -------------------- //
+require_once __DIR__ . "/../inc/remote_work.php";
+db_set_charset($link, "utf8");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    header('Content-Type: application/json; charset=utf-8');
+    ajax_json_headers();
 
-    try {
-        if (!$userID) {
-            echo json_encode(["status" => "error", "message" => "Нет userID в сессии"]);
-            exit;        
-        }
+    if (!$userID) {
+        ajax_json_response(array('status' => 'error', 'message' => 'Нет userID в сессии'));
+        exit;
+    }
 
-        // Завершение удалёнки
-        if (isset($_POST['action']) && $_POST['action'] === 'finish') {
-            // Найдём открытую запись (stop_dt IS NULL) для этого пользователя за сегодня
-            $findSql = "SELECT id FROM remote_work WHERE user_id = ? AND DATE(start_dt) = CURDATE() AND stop_dt IS NULL ORDER BY id DESC LIMIT 1";
-            $findStmt = mysqli_prepare($link, $findSql);
-            mysqli_stmt_bind_param($findStmt, "i", $userID);
-            mysqli_stmt_execute($findStmt);
-            $findRes = mysqli_stmt_get_result($findStmt);
-            $row = mysqli_fetch_assoc($findRes);
+    $userID = (int)$userID;
 
-            if (!$row) {
-                echo json_encode(["status" => "error", "message" => "Запись удалённой работы для завершения не найдена"]);
-                exit;
-            }
-            
-            $remoteId = intval($row['id']);
-            $updSql = "UPDATE remote_work SET stop_dt = NOW() WHERE id = ? LIMIT 1";
-            $updStmt = mysqli_prepare($link, $updSql);
-            mysqli_stmt_bind_param($updStmt, "i", $remoteId);
+    if (request_post_string('action') === 'finish') {
+        $result = finish_remote_work($link, $userID);
 
-            if (!mysqli_stmt_execute($updStmt)) {
-                echo json_encode(["status" => "error", "message" => "Ошибка при завершении: " . mysqli_stmt_error($updStmt)]);
-                exit;
-            }
-
-            echo json_encode(["status" => "success"]);
+        if ($result === false) {
+            ajax_json_application_error('Remote work finish at ' . __FILE__ . ':' . __LINE__, db_error($link));
             exit;
         }
 
-        // Создание новой записи (начало удалёнки)
-        if (isset($_POST['supervisor_id'])) {
-            $supervisor_id = intval($_POST['supervisor_id']);
+        ajax_json_response($result);
+        exit;
+    }
 
-            if ($supervisor_id <= 0) {
-                echo json_encode(["status" => "error", "message" => "Некорректный supervisor_id"]);
-                exit;
-            }
+    if (request_post_has('supervisor_id')) {
+        $result = start_remote_work($link, $userID, request_post_int('supervisor_id'));
 
-            // Проверяем, что запись на сегодня ещё не создана (и нет незакрытой)
-            $checkSql = "SELECT id FROM remote_work WHERE user_id = ? AND DATE(start_dt) = CURDATE() AND stop_dt IS NULL LIMIT 1";
-            $checkStmt = mysqli_prepare($link, $checkSql);
-            mysqli_stmt_bind_param($checkStmt, "i", $userID);
-            mysqli_stmt_execute($checkStmt);
-            $checkRes = mysqli_stmt_get_result($checkStmt);
-
-            if (mysqli_num_rows($checkRes) > 0) {
-                echo json_encode(["status" => "error", "message" => "Вы уже начали удалённую работу сегодня"]);
-                exit;
-            }
-
-            // Вставляем запись: start_dt = NOW(), stop_dt NULL
-            $sql = "INSERT INTO remote_work (user_id, supervisor_id, start_dt) VALUES (?, ?, NOW())";
-            $stmt = mysqli_prepare($link, $sql);
-            mysqli_stmt_bind_param($stmt, "ii", $userID, $supervisor_id);
-
-            if (!mysqli_stmt_execute($stmt)) {
-                echo json_encode(["status" => "error", "message" => "Ошибка сохранения: " . mysqli_stmt_error($stmt)]);
-                exit;
-            }
-
-            echo json_encode(["status" => "success"]);
+        if ($result === false) {
+            ajax_json_application_error('Remote work creation at ' . __FILE__ . ':' . __LINE__, db_error($link));
             exit;
         }
 
-        // Если POST, но без нужных полей
-        echo json_encode(["status" => "error", "message" => "Неверные данные POST"]);
-        exit;
+        $statusCode = $result['status'] === 'forbidden' ? 403 : null;
 
-    } catch (Throwable $e) {
-        http_response_code(500);
-        echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+        if ($result['status'] === 'forbidden') {
+            $result['status'] = 'error';
+        }
+
+        ajax_json_response($result, $statusCode);
         exit;
     }
-}
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['finish_remote_by_out'])) {
-    if (!$userID) {
-        echo json_encode(["status" => "error", "message" => "No session userID"]);
-        exit;
-    } 
-
-    $sql = "UPDATE remote_work SET stop_dt = NOW() WHERE user_id = ? AND stop+dt IS NULL";
-
-    $stmt = mysqli_prepare($link, $sql);
-    mysqli_stmt_bind_param($stmt, "i", $userID);
-    mysqli_stmt_execute($stmt);
-
-    echo json_encode(["status" => "success"]);
+    ajax_json_response(array('status' => 'error', 'message' => 'Неверные данные POST'));
     exit;
 }
 
-// -------------------- GET (FORM) -------------------- //
+$userID = (int)$userID;
+$supervisors = $userID > 0 ? get_remote_work_supervisors($link, $userID) : false;
+$openRow = $userID > 0 ? get_open_remote_work($link, $userID) : false;
 
-// Если GET, вернём HTML-модалку: либо форму "Начать удалёнку" (select руководителя),
-// либо форму "Завершить удалёнку" (когда уже есть открытая запись)
-
-try {
-    if (!$userID) {
-        throw new Exception('No userID in session');
-    }
-
-    // Получаем список руководителей (как раньше)
-    $sql = "
-        SELECT DISTINCT g.SUPERVISORID AS id, 
-               CONCAT_WS(' ', e.surname, e.firstname, e.lastname) AS fio
-        FROM GROUPS g
-        JOIN employees e ON g.SUPERVISORID = e.id
-        WHERE TRIM(g.TYPE) = '3' AND g.USERID = ?
-        ORDER BY fio
-    ";
-
-    $stmt = mysqli_prepare($link, $sql);
-    mysqli_stmt_bind_param($stmt, "i", $userID);
-    mysqli_stmt_execute($stmt);
-    $res = mysqli_stmt_get_result($stmt);
-
-    $supervisors = [];
-    while ($row = mysqli_fetch_assoc($res)) {
-        $supervisors[] = $row;
-    }
-
-    // Проверим есть ли открытая запись remote_work для этого user (start_dt сегодня, stop_dt IS NULL)
-    $checkOpenSql = "SELECT rw.id, rw.supervisor_id, CONCAT_WS(' ', e.surname, e.firstname, e.lastname) AS supervisor_fio
-                     FROM remote_work rw
-                     LEFT JOIN employees e ON rw.supervisor_id = e.id
-                     WHERE rw.user_id = ? AND DATE(rw.start_dt) = CURDATE() AND rw.stop_dt IS NULL
-                     ORDER BY rw.id DESC LIMIT 1";
-    $chStmt = mysqli_prepare($link, $checkOpenSql);
-    mysqli_stmt_bind_param($chStmt, "i", $userID);
-    mysqli_stmt_execute($chStmt);
-    $chRes = mysqli_stmt_get_result($chStmt);
-    $openRow = mysqli_fetch_assoc($chRes);
-
-} catch (Throwable $e) {
-    echo "<div style='padding: 10px; color:#900;'>Error: " . htmlspecialchars($e->getMessage()) . "</div>";
+if ($supervisors === false || $openRow === false) {
+    $details = $userID > 0 ? db_error($link) : 'No userID in session';
+    $message = application_error_message('Remote work form at ' . __FILE__ . ':' . __LINE__, $details);
+    echo "<div style='padding: 10px; color:#900;'>" . html_escape($message) . "</div>";
     exit;
 }
-
-// ---------- РЕНДЕР МОДАЛКИ (HTML) ---------- //
 ?>
 
 <div id="modalWindow">

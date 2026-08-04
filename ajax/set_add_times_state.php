@@ -1,28 +1,33 @@
 <?php
-session_start();
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+$ID = request_post_int('addID');
+$mode = request_post_int('mode');
 
-$ID = $_POST['addID'];
-$mode = $_POST['mode'];
+if (!in_array($mode, array(100, 200), true)) {
+  deny_ajax_access(400, 'INVALID_MODE');
+}
+
+require_ajax_add_time_supervisor($ID, 0);
 
 include_once __DIR__ . "/../php_tori/connect.php";
 
 if ( $mode == 100 )
 {
-  $query = mysqli_query($link, "UPDATE ADD_TIME SET APPROVED=APPROVED + 100 WHERE ID = '$ID'"); 
+  $query = db_execute($link, 'UPDATE ADD_TIME SET APPROVED = APPROVED + 100 WHERE ID = ?', 'i', array($ID));
 }
-else if ( $mode == 200 )
+else
 {
-  $query = mysqli_query($link, "UPDATE ADD_TIME SET APPROVED=APPROVED - 100 WHERE ID = '$ID'"); 
+  $query = db_execute($link, 'UPDATE ADD_TIME SET APPROVED = APPROVED - 100 WHERE ID = ?', 'i', array($ID));
 }
 
-$merr=mysqli_error($link);
+$merr = db_error($link);
 if ( !$query ) 
 {
-  echo "<br>mysql_error = $merr<br>";
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
 } 
 echo $ID;                         
 ?>

@@ -1,32 +1,47 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   exit;
 }
 
-if (!isset($_POST['report_type'])) {
+if (!request_post_has('report_type')) {
   exit;
 }
 
-$report_type = intval($_POST['report_type']);
+$report_type = request_post_int('report_type');
 
 if ($report_type < 1 || $report_type > 7) {
   exit;
 }
 
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
 
 $currDate = date('Y-m-d');
 
-$start_report_date = isset($_POST['start_report_date']) ? $_POST['start_report_date'] : "";
-$stop_report_date = isset($_POST['stop_report_date']) ? $_POST['stop_report_date'] : "";
+$start_report_date = request_post_date('start_report_date');
+$stop_report_date = request_post_date('stop_report_date');
 
-error_log("CALL set_report_date_interval: " . json_encode($_POST));
+error_log("CALL set_report_date_interval: " . ajax_encode_json(array(
+  'report_type' => $report_type,
+  'start_report_date' => $start_report_date,
+  'stop_report_date' => $stop_report_date,
+)));
+
+if ($report_type == 7) {
+  if ($start_report_date === null || $stop_report_date === null || $stop_report_date < $start_report_date) {
+    die('Ошибка: неверный диапазон дат');
+  }
+
+  $customRangeDays = (strtotime($stop_report_date) - strtotime($start_report_date)) / 86400;
+
+  if ($customRangeDays > 366) {
+    die('Слишком большой диапазон дат');
+  }
+}
 
 unset($_SESSION['rep_start_date']);
 unset($_SESSION['rep_stop_date']);

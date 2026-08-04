@@ -1,19 +1,30 @@
 <?php
-session_start();
-
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
+require_once __DIR__ . "/../inc/notification_summary.php";
+include __DIR__ . "/../php_tori/connect.php";
 
-$notifCount = "";
+$notifCount = 0;
 
-if ( isset( $_SESSION['ss_id'] ) ){  
-  $notifCount = get_notification_count( $_SESSION['ss_id'] );
-  if ( $notifCount > 0 ){
-    $notifCountStr = "($notifCount)";  
-    echo "<h5 class=\"biggersmall\">По работе вне офиса $notifCountStr</h5>";
+if ( isset( $_SESSION['ss_id'] ) ){
+  $counts = get_supervisor_notification_counts(
+    $link,
+    (int)$_SESSION['ss_id'],
+    get_current_datetime_in_timezone_str(1, 0)
+  );
+
+  if ($counts === false) {
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
+    exit;
   }
+
+  $notifCount = $counts['add_time_count'];
 }
+
+$notifCountStr = $notifCount > 0 ? "($notifCount)" : "";
+echo "<h5 class=\"biggersmall\">По работе вне офиса $notifCountStr</h5>";
 ?>

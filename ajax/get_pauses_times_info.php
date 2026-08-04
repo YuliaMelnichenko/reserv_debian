@@ -1,9 +1,8 @@
 <?php
-session_start();
-
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
 $userID_ = $_SESSION['ss_id']; 
 $currentDate = date('Y-m-d');
@@ -11,11 +10,23 @@ $currentDate = date('Y-m-d');
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-$startDate = $_POST['startDate'];
-$stopDate = $_POST['stopDate'];
-$userID = $_POST['userID'];
+$rangeStart = request_post_date('startDate');
+$rangeStop = request_post_date('stopDate');
+$userID = request_post_int('userID');
 
-$addRets = get_add_work_info_by_user_and_day_range( $userID, $startDate, $stopDate );
+if ($userID <= 0) {
+  deny_ajax_access(400, 'INVALID_USER');
+}
+
+require_ajax_self_or_superuser($userID);
+
+if ($rangeStart === null || $rangeStop === null || $rangeStop < $rangeStart) {
+  deny_ajax_access(400, 'INVALID_DATE_RANGE');
+}
+
+$rangeStart .= ' 00:00:00';
+$rangeStop = date('Y-m-d 00:00:00', strtotime($rangeStop . ' +1 day'));
+$addRets = get_add_work_info_by_user_and_day_ex($userID, $rangeStart, $rangeStop, 0);
 
 echo "<table class=\"hor_bor\" border=0>";
   echo "<tr>";
@@ -43,8 +54,8 @@ echo "<table class=\"hor_bor\" border=1>";
 
 foreach( $addRets as $addRet )
 {
-  $startTime = $addRet[0];
-  $stopTime = $addRet[1];
+  $startTime = datetime_to_time_str($addRet[0]);
+  $stopTime = datetime_to_time_str($addRet[1]);
   $reason = $addRet[2];
   $description = $addRet[3];
   $approved = $addRet[4];
@@ -62,14 +73,14 @@ foreach( $addRets as $addRet )
       echo "<h5 class=\"small1\">($timeDurationStr)<br>[$startTime-$stopTime]"."</h5>";
     echo "</td>";  
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"center\" width = 165>";
-      echo "<h5 class=\"small1\">$superUserName"."</h5>";
+echo "<h5 class=\"small1\">" . html_escape($superUserName) . "</h5>";
     echo "</td>";  
     echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\" width = 210>";
-      echo "<h5 class=\"small1\">$description"."</h5>";
+echo "<h5 class=\"small1\">" . html_escape($description) . "</h5>";
     echo "</td>";  
   echo "</tr>";
 }
 
 echo "</table><br>";
 
-?>                                                                  
+?>

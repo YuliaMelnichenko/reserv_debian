@@ -1,45 +1,66 @@
 <?php
-session_start();
-
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/add_time_journal.php";
 
 $_SESSION['add_time_page_mode'] = 2;
-$add_time_journal_deep = $_SESSION['add_time_journal_deep'];
 
-$userID = $_POST['user'];
+$userID = request_post_int('user');
 
-if ( $userID != -1 )
-{ 
-  $_SESSION['add_time_page_user_id'] = $userID;
-}
-else
-{ 
-  $userID = $_SESSION['add_time_page_user_id'];
+if ( $userID == -1 )
+{
+  $userID = isset($_SESSION['add_time_page_user_id'])
+    ? (int) $_SESSION['add_time_page_user_id']
+    : 0;
 }
 
-$userName = get_user_name_by_id($userID);
+if ($userID <= 0) {
+  deny_ajax_access(400, 'INVALID_USER');
+}
+
+require_ajax_self_or_superuser($userID);
+$_SESSION['add_time_page_user_id'] = $userID;
+
+$journal = get_add_time_journal_context($link, $userID, get_current_datetime_in_timezone_str(1, 0));
+
+if ($journal === false) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+if ($journal === null) {
+  deny_ajax_access(404, 'USER_NOT_FOUND');
+}
+
+$userName = $journal['user_name'];
+$addTimeInfo = $journal['entries'];
+$quarterLabel = format_date_range_label(
+  $journal['quarter_start_date'],
+  $journal['quarter_stop_date']
+);
 
 echo "<table id=\"add_time_approvement_table\" border=0>";
   echo "<tr>";
     echo "<td class=\"nopadding_s\">";
       echo "<table border=0>";
         echo "<tr>";
-          echo "<td valign=\"middle\" width=1014 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";
+          echo "<td valign=\"middle\" width=1014 align=\"left\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5><h5 class=\"big\">Текущий квартал: " . html_escape($quarterLabel) . "</h5></td>";
           echo "<td width=10 valign=\"middle\" align=\"right\">";
-            echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"add_time_go_back();\"><h5>Назад</h5></button>";
+            echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"add_time_go_back();\"><h5>Назад</h5></button>";
           echo "</td>";
         echo "</tr>";
       echo "</table>";
-    echo "</td>";     
+    echo "</td>";
   echo "</tr>";
   echo "<tr>";
     echo "<td class=\"nopadding\" valign=\"middle\" align=\"left\">";
 
+      echo "<div class=\"notification-table-scroll\">";
       echo "<table border=1>";
       echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
 
@@ -51,54 +72,46 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
       echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Лицо,<br>принявшее решение</h5>"."</td>";
       echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Комментарий лица,<br>принявшего решение</h5>"."</td>";
       echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Статус</h5>"."</td>";
-      echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Управление</h5>"."</td>";   
+      echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Управление</h5>"."</td>";
       echo "</tr>";
-  
+
       $colorMode = 1;
       $color1 = "#ddffff";
-      $color2 = "#ddeedd";
       $color3 = "#ffffff";
-
-      $addTimeInfo = get_all_add_work_info_by_user( $userID );
 
       for ( $idx = 0; $idx < count( $addTimeInfo ); $idx ++ )
       {
         $addInf = $addTimeInfo[$idx];
 
-        $ta_id = $addInf[8];
-        $ta_start_dt = $addInf[0];
-        $ta_stop_dt = $addInf[1];
-        $ta_duration = $addTime[6];
+        $ta_id = $addInf['id'];
+        $ta_start_dt = $addInf['start_datetime'];
+        $ta_stop_dt = $addInf['stop_datetime'];
+        $ta_duration = $addInf['duration'];
 
-        $ta_reason_description = $addInf[11];
-        $ta_description = $addInf[3];
-        $ta_SUdescription = $addInf[10];
-        $ta_approved = $addInf[4];
-        $ta_superuser = $addInf[5];
-        
-        $ta_approved_str = "На рассмотрении";
-
-        $superUserName = get_superuser_name_by_id( $ta_superuser );
+        $ta_reason_description = $addInf['reason_description'];
+        $ta_description = $addInf['employee_comment'];
+        $ta_SUdescription = $addInf['decision_comment'];
+        $ta_approved = $addInf['status'];
+        $superUserName = $addInf['supervisor_name'];
 
         if ( $ta_approved == 0 )
-        { 
-          $approvedStr = "<h5 class=\"middleBold_r\">на рассмотрении</h5>";
-          $cellColor = $bkColor; 
+        {
+          $approvedStr = journal_status_label("на рассмотрении");
         }
         else if ( $ta_approved == 1 )
-        { 
-          $approvedStr = "<h5 class=\"middleBold_r\">принято</h5>";
-        }   
+        {
+          $approvedStr = journal_status_label("принято");
+        }
         else if ( $ta_approved == -1 )
-        { 
-          $approvedStr = "<h5 class=\"middleBold_r\">отклонено</h5>";
+        {
+          $approvedStr = journal_status_label("отклонено");
         }
         else if ( $ta_approved == 99 OR $ta_approved == 100 OR $ta_approved == 101 )
-        { 
-          $approvedStr = "<h5 class=\"middleBold_r\">удалено</h5>"; 
+        {
+          $approvedStr = journal_status_label("удалено");
         }
 
-        $time_duration = format_time_( strtotime($ta_stop_dt) - strtotime($ta_start_dt) );
+        $time_duration = $ta_duration > 0 ? format_time_( $ta_duration ) : "";
 
         if ( $colorMode == 0 )
         {
@@ -111,8 +124,6 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
           $colorMode = 0;
         }
 
-        $buttonAdd1 = "";
-
         $bgcolor = "";
         $accBtnDisabled = "";
         $refBtnDisabled = "";
@@ -122,7 +133,7 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
 
         if ( $ta_approved == 0 )
         {
-          $delRestore = "1";  
+          $delRestore = "1";
         }
         else if ( $ta_approved == 1 )
         {
@@ -149,52 +160,53 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
         }
 
         echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-        echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"center\"><h5 class=\"small\">".$ta_start_dt."</h5></td>";
-        echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"center\"><h5 class=\"small\">".$ta_stop_dt."</h5></td>";
-        echo "<td class=\"add_time\" width=85 valign=\"middle\" align=\"center\"><h5 class=\"small\">".$time_duration."</h5></td>";
-        echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_reason_description."</h5></td>";
-        echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_description."</h5></td>";
-        echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"center\">"."<h5 class = \"small\">$superUserName</h5>"."</td>";
-        echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_SUdescription."</h5></td>";
+        echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_dt) . "</h5></td>";
+        echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_stop_dt) . "</h5></td>";
+        echo "<td class=\"add_time\" width=85 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($time_duration) . "</h5></td>";
+        echo "<td class=\"add_time\" width=100 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_reason_description) . "</h5></td>";
+        echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
+        echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
+        echo "<td class=\"add_time\" width=140 valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_SUdescription) . "</h5></td>";
         echo "<td class=\"add_time\" width=115 bgcolor=\"$bgcolor\" valign=\"middle\" align=\"center\">$approvedStr</td>";
         echo "<td class=\"add_time\" width=70 valign=\"middle\" align=\"center\">";
 
           echo "<table border=0>";
             echo "<tr>";
               echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
-                echo "<button onclick=\"accept_add_time_for_user( '$ta_id', '$ta_SUdescription' );\" $accBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
-                  echo "<img title=\"Принять\" src=\"img/$accBtnImg\">";                   
+                echo "<button class=\"journal-icon-button\" onclick=\"accept_add_time_for_user(" . (int) $ta_id . ", " . html_escape(js_encode($ta_SUdescription)) . ");\" $accBtnDisabled>";
+                  echo "<img title=\"Принять\" src=\"img/$accBtnImg\">";
                 echo "</button>";
               echo "</td>";
               echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=0>";
-                echo "<button onclick=\"refuse_add_time_for_user('$ta_id', '$ta_SUdescription' );\" $refBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
-                  echo "<img title=\"Отклонить\" src=\"img/$refBtnImg\">";                   
+                echo "<button class=\"journal-icon-button\" onclick=\"refuse_add_time_for_user(" . (int) $ta_id . ", " . html_escape(js_encode($ta_SUdescription)) . ");\" $refBtnDisabled>";
+                  echo "<img title=\"Отклонить\" src=\"img/$refBtnImg\">";
                 echo "</button>";
               echo "</td>";
               echo "<td width=\"2\">";
               echo "</td>";
               echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
                 if ( $delRestore == 1 )
-                { 
-                  echo "<button onclick=\"mark_as_deleted_add_time_for_user( '$ta_id' );\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
-                    echo "<img title=\"Удалить\" src=\"img/delete_small.bmp\">";                   
+                {
+                  echo "<button class=\"journal-icon-button\" onclick=\"mark_as_deleted_add_time_for_user(" . (int) $ta_id . ");\">";
+                    echo "<img title=\"Удалить\" src=\"img/delete_small.bmp\">";
                   echo "</button>";
                 }
                 else
                 {
-                  echo "<button onclick=\"mark_as_undeleted_add_time_for_user( '$ta_id' );\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
-                    echo "<img title=\"Восстановить\" src=\"img/restore_small.bmp\">";                   
+                  echo "<button class=\"journal-icon-button\" onclick=\"mark_as_undeleted_add_time_for_user(" . (int) $ta_id . ");\">";
+                    echo "<img title=\"Восстановить\" src=\"img/restore_small.bmp\">";
                   echo "</button>";
                 }
               echo "</td>";
             echo "</tr>";
-          echo "</table>";   
+          echo "</table>";
 
         echo "</td>";
         echo "</tr>";
       }
 
       echo "</table>";
+      echo "</div>";
     echo "</td>";
   echo "</tr>";
 echo "</table>";

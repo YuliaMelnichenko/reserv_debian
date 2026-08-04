@@ -1,35 +1,23 @@
 <?php
-session_start();
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
-
-$userID = $_SESSION['ss_id']; 
-$ss_visiting_ID = $_SESSION['ss_visiting_ID'];
+$userID = (int)$_SESSION['ss_id'];
 
 include_once __DIR__ . "/../php_tori/connect.php";
+include_once __DIR__ . "/../funcs.php";
 
-$query = mysqli_query($link, "SELECT take_pause FROM visiting WHERE id = '$ss_visiting_ID' AND user_id = '$userID'");
-$merr=mysqli_error($link);
-if (!$query)
-{
-  echo "<br>mysql_error = $merr<br>";
+$currentDate = get_current_datetime_in_timezone()[2];
+$periodStart = $currentDate . ' 00:00:00';
+$periodStop = date('Y-m-d 00:00:00', strtotime($currentDate . ' +1 day'));
+$query = time_journal_query_open_pause($link, $userID, $periodStart, $periodStop);
+
+if (!$query) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
 }
-else
-{
-  $vn=mysqli_num_rows($query);
-  if ( $vn == 0 )
-  {
-    echo "0";
-  } 
-  else
-  {
-    if ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-    {  
-      $take_pause = $row["take_pause"];
-      echo $take_pause;
-    }
-  }  
-}
+
+echo db_has_rows($query) ? "1" : "0";
 ?>

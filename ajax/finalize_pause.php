@@ -1,34 +1,48 @@
 <?php
-session_start();
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+$userID = (int)$_SESSION['ss_id'];
+$visitingID = (int)($_SESSION['ss_visiting_ID'] ?? 0);
 
-$userID = $_SESSION['ss_id']; 
-$currentDate = date('Y-m-d');
-$currentTime = date("H:i:s");
-$pauseID = $_POST['pauseID'];
-
+include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/pause_service.php";
 
-$query = mysqli_query($link, "UPDATE visiting SET take_pause = '0' WHERE date = '$currentDate' AND user_id = '$userID'");
-$merr = mysqli_error($link);
-if (!$query)
-{
-  echo "<br>mysql_error = $merr<br>";
+$currentDateTime = get_current_datetime_in_timezone_str(1, 0);
+$currentDate = substr($currentDateTime, 0, 10);
+$pauseQuery = time_journal_query_open_pause(
+  $link,
+  $userID,
+  $currentDate . ' 00:00:00',
+  date('Y-m-d 00:00:00', strtotime($currentDate . ' +1 day'))
+);
+
+if (!$pauseQuery) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
 }
-else
-{
-  $query = mysqli_query($link, "UPDATE ADD_TIME SET STOPTIME = '$currentTime' WHERE id = '$pauseID'");
 
-  if (!$query)
-  {
-    echo "<br>mysql_error = $merr<br>";
-  }
-  else
-  { 
-    echo "1"; 
-  }
-}  
+$pause = db_fetch_one($pauseQuery);
+
+if (!$pause) {
+  deny_ajax_access(404, 'OPEN_PAUSE_NOT_FOUND');
+}
+
+$pauseID = (int)$pause['ID'];
+$result = finish_time_pause($link, $userID, $visitingID, $pauseID, $currentDateTime);
+
+if ($result === false) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+if ($result['status'] !== 'success') {
+  ajax_text_response($result['message']);
+  exit;
+}
+
+ajax_text_response('1');
 ?>

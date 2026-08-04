@@ -1,13 +1,12 @@
 <?php
-session_start();
-
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
 
-$userID_ = $_SESSION['ss_id']; 
+$userID_ = (int)$_SESSION['ss_id'];
 
 echo "<table id = \"alert_approvement_table_users\" class=\"slim\" border=1>";
 echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
@@ -94,7 +93,7 @@ for( $idx = 0; $idx < count( $stats[0] ); $idx ++ ){
   echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$date</h5>"."</td>";
   echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$prefix: $postfix</h5>"."</td>";
   echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
-    echo "<button id = \"explBtn\" title = \"Просмотреть\" style=\"padding: 0px 0px 0px 0px; background-color:#ffffff; border:0px solid #888888;\" onclick=\"fill_alerts_by_user( '$userID_', '$date', '$Sttime', '$messStr' );\"><img src=\"img/$img\"></button>";
+    echo "<button id = \"explBtn\" class=\"journal-cell-icon-button\" title = \"Просмотреть\" onclick=\"fill_alerts_by_user( '$userID_', '$date', '$Sttime', '$messStr' );\"><img src=\"img/$img\"></button>";
   echo "</td>";
   echo "</tr>";
 }
@@ -103,24 +102,29 @@ include __DIR__ . "/../php_tori/connect.php";
 
 $currentDate = date('Y-m-d');           
 
-mysqli_set_charset($link, "utf8");
-$query = mysqli_query($link, "SELECT * FROM ALERTS where DATE = '$currentDate' and USERID = '$userID_' and VIEWED = '0'"); 
+db_set_charset($link, "utf8");
+$query = db_query(
+  $link,
+  "SELECT ID, DATE, COMMENT FROM ALERTS WHERE DATE = ? AND USERID = ? AND VIEWED = 0",
+  'si',
+  array($currentDate, $userID_)
+);
 
-$merr=mysqli_error($link);
+$merr = db_error($link);
 if ( !$query ){
-  echo "<br>mysql_error = $merr<br>";
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
 }
 else{
-  while ( $row = mysqli_fetch_assoc($query) ){
+  while ( $row = db_fetch_one($query) ){
     $date = $row["DATE"];
-    $id = $row["ID"];
+    $id = (int)$row["ID"];
     $comments = $row["COMMENT"];
 
     echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
     echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$date</h5>"."</td>";
-    echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$comments</h5>"."</td>";
+    echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"left\"><h5 class=\"middle\">" . html_escape($comments) . "</h5></td>";
     echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
-      echo "<button id = \"explBtn\" title = \"Отметить как просмотренное\" style=\"padding: 0px 0px 0px 0px; background-color:#ffffff; border:0px solid #888888;\" onclick=\"set_alert_viewed( '$id' );\"><img src=\"img/closeSmall.png\"></button>";
+      echo "<button id=\"explBtn\" class=\"journal-cell-icon-button\" title=\"Отметить как просмотренное\" onclick=\"set_alert_viewed($id);\"><img src=\"img/closeSmall.png\" alt=\"\"></button>";
     echo "</td>";
     echo "</tr>";
   }

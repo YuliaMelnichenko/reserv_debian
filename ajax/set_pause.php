@@ -1,45 +1,48 @@
 <?php
-session_start();
-
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
 include __DIR__ . "/../php_tori/connect.php";
 include_once __DIR__ . "/../funcs.php";
+require_once __DIR__ . "/../inc/pause_service.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
-$userID = $_SESSION['ss_id'];
-$ss_visiting_ID = $_SESSION['ss_visiting_ID'];
- 
-$superUserID = $_POST['superuserID'];
-$description = $_POST['desk'];
+$userID = (int)($_SESSION['ss_id'] ?? 0);
+$visitingID = (int)($_SESSION['ss_visiting_ID'] ?? 0);
+$superUserID = request_post_int('superuserID', -1);
+$description = request_post_string('desk');
 
-$dtResult = get_current_datetime_in_timezone();
-
-$currentDate = $dtResult[2];
-$currentDateTime = $dtResult[1];
-
-$query = mysqli_query($link, "UPDATE visiting SET take_pause = '1' WHERE id = '$ss_visiting_ID' AND user_id = '$userID'");
-$merr=mysqli_error($link);
-
-if (!$query){
-  echo "<br>mysql_error = $merr<br>";
+if ($superUserID <= 0) {
+  deny_ajax_access(400, 'INVALID_SUPERVISOR');
 }
-else{
-  mysqli_set_charset($link, "utf8");
-  
-  $query = mysqli_query($link, "INSERT INTO ADD_TIME (ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE, BYALERT) VALUES ('$currentDate', '$superUserID', '$userID', '$currentDateTime', '0000-00-00 00:00:00', '-1', '$description', '', '0', '1', '0')");
 
-  $merr=mysqli_error($link);
-  if (!$query)
-  {
-    echo "<br>mysql_error = $merr<br>";
-  }
-  else
-  {    
-    echo "1"; 
-  }
-}  
+$dateTime = get_current_datetime_in_timezone();
+$result = start_time_pause(
+  $link,
+  $userID,
+  $visitingID,
+  $superUserID,
+  $dateTime[2],
+  $dateTime[1],
+  $description
+);
+
+if ($result === false) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+if ($result['status'] === 'forbidden') {
+  deny_ajax_access(403, $result['message']);
+}
+
+if ($result['status'] !== 'success') {
+  ajax_text_response($result['message']);
+  exit;
+}
+
+ajax_text_response('1');
 ?>

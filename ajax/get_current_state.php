@@ -1,10 +1,8 @@
 <?php
-session_start();
-
-header('Content-Type: text/plain; charset=utf-8');
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Pragma: no-cache");
-header("Expires: 0");
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
 if (!isset($_SESSION['ss_id'])) {
   echo 0;
@@ -14,9 +12,9 @@ if (!isset($_SESSION['ss_id'])) {
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
-$userID = $_SESSION['ss_id'];
+$userID = (int)$_SESSION['ss_id'];
 
 $userDayTransitionTime = isset($_SESSION['ss_dayTransitionTime'])
   ? $_SESSION['ss_dayTransitionTime']
@@ -33,37 +31,32 @@ $stopDTStr = $dateArr[1];
 $maxOpenShiftHours = 3;
 $maxOpenShiftSeconds = $maxOpenShiftHours * 60 * 60;
 
-$userID = mysqli_real_escape_string($link, $userID);
-$startDTStr = mysqli_real_escape_string($link, $startDTStr);
-$stopDTStr = mysqli_real_escape_string($link, $stopDTStr);
-$currentDateTime = mysqli_real_escape_string($link, $currentDateTime);
-
-$query = mysqli_query($link, "
+$query = db_query($link, "
   SELECT ID, state, eat_start_dt
   FROM visiting
-  WHERE user_id = '$userID'
+  WHERE user_id = ?
     AND (
       (
-        in_dt >= '$startDTStr'
-        AND in_dt < '$stopDTStr'
+        in_dt >= ?
+        AND in_dt < ?
       )
       OR
       (
         state != 0
-        AND in_dt < '$startDTStr'
-        AND TIMESTAMPDIFF(SECOND, '$startDTStr', '$currentDateTime') <= $maxOpenShiftSeconds
+        AND in_dt < ?
+        AND TIMESTAMPDIFF(SECOND, ?, ?) <= ?
       )
     )
   ORDER BY in_dt DESC, ID DESC
   LIMIT 1
-");
+ ", 'isssssi', array($userID, $startDTStr, $stopDTStr, $startDTStr, $startDTStr, $currentDateTime, $maxOpenShiftSeconds));
 
 if (!$query) {
   echo 0;
   exit;
 }
 
-if (mysqli_num_rows($query) == 0) {
+if (db_num_rows($query) == 0) {
   $_SESSION['ss_state'] = 1;
   $_SESSION['ss_visiting_ID'] = 0;
 
@@ -71,7 +64,7 @@ if (mysqli_num_rows($query) == 0) {
   exit;
 }
 
-$row = mysqli_fetch_array($query, MYSQLI_ASSOC);
+$row = db_fetch_one($query);
 
 $state = (int)$row["state"];
 

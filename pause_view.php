@@ -1,6 +1,11 @@
 <?php
 ob_start();
-session_start();
+require_once __DIR__ . '/inc/session.php';
+require_once __DIR__ . '/inc/access.php';
+include_once __DIR__ . "/funcs.php";
+require_once __DIR__ . "/inc/notification_summary.php";
+save_last_location( "pause_view.php" );
+require_page_superuser();
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -10,10 +15,9 @@ echo "<html>";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";
 echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">";
-echo "<link rel=\"stylesheet\" href=\"style/style.css\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
-echo "<body bgcolor=\"#ffffff\" >";
+echo "<body class=\"app-page\">";
 ?>
 
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
@@ -21,83 +25,68 @@ echo "<body bgcolor=\"#ffffff\" >";
 </script>
 
 <?php
-////////////////////////////////////////////////////////
+$userID_ = (int)$_SESSION['ss_id'];
 
-include_once __DIR__ . "/funcs.php";
-save_last_location( "delay_approvement.php" );
-auth();
-////////////////////////////////////////////////////////
-
-$userID_ = $_SESSION['ss_id']; 
-
-echo "<div align=\"left\">";
+echo "<div class=\"notification-page-layout\">";
 
 include_once __DIR__ . "/php_tori/connect.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
+$summary = get_pause_notification_summary($link, $userID_, get_current_datetime_in_timezone_str(1, 0));
 
-echo "<table border=0>";
+if ($summary === false) {
+  echo html_escape(database_error_message($link, __FILE__ . ':' . __LINE__));
+  exit;
+}
+
+$quarterLabel = format_date_range_label($summary['quarter_start_date'], $summary['quarter_stop_date']);
+
+echo "<table class=\"notification-page-table\">";
   echo "<tr>";
-    echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
+    echo "<td class=\"notification-nav-cell\">";
       include_once __DIR__ . "/navigate.php";
     echo "</td>"; 
 
-      $wholeWidth = 562;
-
-      echo "<td id=\"add_time_content_width\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
+      echo "<td id=\"add_time_content_width\" class=\"notification-content-cell notification-content-cell-narrow\">";
 
         echo "<div id=\"addTimeHeader\">";
           echo "<h5 nowrap class=\"dark\"><br>/уведомления по приостановкам учета времени<br><br></h5>";
         echo "</div>";
 
-    $paramArr = get_dbsetup_param( 'pause_journal_deep_day' );
-    $paramInt = (int)$paramArr[1];
+    echo "<h5 class=\"big\">Текущий квартал: " . html_escape($quarterLabel) . "</h5>";
 
-    $today = date("d-m-Y");
-    $dateForm = date("d.m.Y", strtotime("-$paramInt days"));
-
-    echo "<h5 class=\"big\"> Глубина просмотра журнала (180 дней): $dateForm - $today </h5>";
-    echo "<table id = \"pause_approvement_table_users\" class=\"add_time\" border=1>";
-    echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
-    echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Сотрудник</h5>"."</td>";
-    echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Всего</h5>"."</td>";
-    echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">За текущий день</h5>"."</td>";
-    echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"big\">Просмотреть</h5>"."</td>";
+    echo "<div class=\"notification-table-scroll notification-table-scroll-narrow\">";
+    echo "<table id = \"pause_approvement_table_users\" class=\"add_time notification-summary-table\">";
+    echo "<tr class=\"notification-table-head\">";
+    echo "<td class=\"add_time notification-user-name-cell\">"."<h5 class=\"big\">Сотрудник</h5>"."</td>";
+    echo "<td class=\"add_time notification-pause-count-cell\">"."<h5 class=\"big\">Всего</h5>"."</td>";
+    echo "<td class=\"add_time notification-current-day-cell\">"."<h5 class=\"big\">За текущий день</h5>"."</td>";
+    echo "<td class=\"add_time notification-pause-view-cell\">"."<h5 class=\"big\">Просмотреть</h5>"."</td>";
     echo "</tr>";
 
     $color = "#ddffff";
     $img = "go1.png";
 
-    mysqli_set_charset($link, "utf8");
-
-    $query = mysqli_query($link, "SELECT DISTINCT USERID FROM GROUPS WHERE SUPERVISORID = '$userID_' AND TYPE = 4 "); 
-    if (!$query)
+    foreach ($summary['entries'] as $entry)
     {
-      echo "<br>mysql_error = $merr<br>";
-    }
-    else
-    {
-      while ( $row = mysqli_fetch_array($query, MYSQLI_ASSOC) )
-      {  
-        $userID = $row["USERID"];
-        $userName = get_user_name_by_id($userID);
+        $userID = $entry['user_id'];
+        $userName = $entry['user_name'];
 
         $mid = getMaskedUID( 32, $userID );
-        $uhref = "location.href='pause_view_user.php?mid=$mid'";
+        $userUrl = "pause_view_user.php?mid=$mid";
+        $uhref = "location.href='$userUrl'";
 
-        $notificationCount = 0;
-        $currentDayNotificationCount = 0;
-        get_pause_notif_counts( $userID, $notificationCount, $currentDayNotificationCount );
+        $notificationCount = $entry['total_count'];
+        $currentDayNotificationCount = $entry['current_day_count'];
 
-        $cellStype = "middle";
-        if ( $newNotificationCount > 0 ){ $cellStype = "middleBlue1"; }
+        $rowClass = $color == "#ddffff" ? "notification-row-alt" : "notification-row";
 
-        echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-        echo "<td width = 250 class=\"add_time\" valign=\"middle\" align=\"left\">"."<h5 class=\"middle\">$userName</h5>"."</td>";
-        echo "<td width = 45 class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$notificationCount</h5>"."</td>";
-        echo "<td width = 120 class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"middle\">$currentDayNotificationCount</h5>"."</td>";
-        echo "<td width = 80 class=\"add_time\" valign=\"middle\" align=\"center\">";
-          echo "<button id = \"explBtn\" title = \"Просмотреть\" style=\"padding: 0px 0px 0px 0px; background-color:#ffffff; border:0px solid #888888;\" onclick=\"$uhref\";\"><img src=\"img/$img\"></button>";
+        echo "<tr class=\"$rowClass\">";
+        echo "<td class=\"add_time notification-user-name-cell\"><h5 class=\"middle\">" . html_escape($userName) . "</h5></td>";
+        echo "<td class=\"add_time notification-pause-count-cell\">"."<h5 class=\"middle\">$notificationCount</h5>"."</td>";
+        echo "<td class=\"add_time notification-current-day-cell\">"."<h5 class=\"middle\">$currentDayNotificationCount</h5>"."</td>";
+        echo "<td class=\"add_time notification-pause-view-cell\">";
+          echo "<button class=\"journal-view-button\" id=\"explBtn\" title=\"Просмотреть\" onclick=\"$uhref\"><img src=\"img/$img\"></button>";
         echo "</td>";
         echo "</tr>";
 
@@ -111,10 +100,10 @@ echo "<table border=0>";
           $color = "#ddffff";
           $img = "go1.png";
         }  
-      }
     }
 
     echo "</table>";
+    echo "</div>";
 
           echo "</td>"; 
     echo "</tr>";
@@ -122,7 +111,7 @@ echo "<table border=0>";
 echo "</div>";
 ?>
 
-<script type="text/javascript" src="js/tory.js"></script> 
+<script type="text/javascript" src="js/tory.js?v=20260729-layout"></script>
 <script type="text/javascript" charset="utf-8"> 
 
 function update_clock()
@@ -137,7 +126,7 @@ function update_clock()
   }
 }
 
-var timerId=setInterval( "update_clock()", 1000 );
+var timerId = setInterval(update_clock, 1000);
 </script> 
 
 <?php

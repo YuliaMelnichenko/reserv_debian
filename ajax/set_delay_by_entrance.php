@@ -1,68 +1,97 @@
 <?php
-session_start();
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
-
-if ( isset( $_POST['userID'] ) )
+if (request_post_has('userID'))
 {
-  $userId = $_POST['userID']; 
+  $userId = request_post_int('userID');
 }
 else
 {
-  $userId = $_SESSION['ss_id']; 
+  $userId = (int) $_SESSION['ss_id'];
 }
 
-$ss_delay_duration = $_SESSION['ss_delay_duration'];
+require_ajax_self_or_supervisor($userId, 3);
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
+$ss_delay_duration = (int)$_SESSION['ss_delay_duration'];
+$ss_delay_duration_db = format_time_d_hhmmss_pure($ss_delay_duration);
+
 $currentDateArr = get_current_datetime_in_timezone();
 $currentDate = $currentDateArr[2];
 
-mysqli_set_charset($link, "utf8");
-
-$query = mysqli_query($link, "SELECT * FROM Delays WHERE userID = '$userId' AND date = '$currentDate'");
-$merr=mysqli_error($link);
-if ( !$query ) 
-{
-  echo "<br>mysql_error = $merr<br>";
-  $errorThere = 1;
+if (is_delay_check_disabled_for_weekend($currentDate)) {
+  $_SESSION['ss_there_is_delay'] = 0;
+  $_SESSION['ss_delay_show_save'] = 0;
+  $_SESSION['ss_delay_duration_val'] = 0;
+  $_SESSION['ss_delay_duration'] = 0;
+  echo "weekend";
+  exit;
 }
 
-$vn=mysqli_num_rows($query);
+$transaction = db_transaction_start($link);
+if (!$transaction) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
 
-if ( $vn == 0 )
+$idQuery = db_query($link, 'SELECT ID FROM Delays ORDER BY ID DESC LIMIT 1 FOR UPDATE');
+
+if (!$idQuery) {
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+$lastDelay = db_fetch_one($idQuery);
+$newID = $lastDelay ? (int)$lastDelay['ID'] + 1 : 1;
+
+$query = db_query(
+  $link,
+  'SELECT ID FROM Delays WHERE userID = ? AND date = ? FOR UPDATE',
+  'is',
+  array($userId, $currentDate)
+);
+
+if (!$query) {
+  $transaction->rollback();
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+$delayExists = db_has_rows($query);
+
+if (!$delayExists)
 {
-  $newID = 0;
+  $query = db_execute(
+    $link,
+    "INSERT INTO Delays (ID, date, duration, userID, supervisorID, explaneDesk, acceptorID, penaltyID, penaltyReply, status)
+     VALUES (?, ?, ?, ?, -1, 'Без объяснения', -1, -1, '', 0)",
+    'issi',
+    array($newID, $currentDate, $ss_delay_duration_db, $userId)
+  );
 
-  $query = mysqli_query($link, "SELECT max(ID) FROM Delays"); 
-  $merr=mysqli_error($link);
-  if ( !$query ) 
-  {
-    echo "<br>mysql_error = $merr<br>";
-  }
-  else if ( $row = mysqli_fetch_array($query) )
-  {
-    $newID = $row[0] + 1;
-  }
-
-  $query = mysqli_query($link, "INSERT INTO Delays VALUES ('$newID', '$currentDate', '$ss_delay_duration', '$userId', '-1', 'Без объяснения', '-1', '-1', '', '0')");
-  $merr=mysqli_error($link);
   if (!$query)
   {
-    echo "<br>mysql_error = $merr<br>";
-  }
-  else
-  {
-    echo "insert";
-    $_SESSION['ss_ch_delay_ID'] = $newID; 	
+    $transaction->rollback();
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
+    exit;
   }          
 }
-else
-{
+
+if (!$transaction->commit()) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+if (!$delayExists) {
+  echo "insert";
+  $_SESSION['ss_ch_delay_ID'] = $newID;
+} else {
   echo "exist";
 }
 ?>

@@ -1,71 +1,48 @@
 <?php
-session_start();
-
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/pause_journal.php";
 
-$currentDate = get_current_datetime_in_timezone_str( 1, 0 );
+$userID_ = (int)$_SESSION['ss_id'];
+$journal = get_pause_journal_context($link, $userID_, get_current_datetime_in_timezone_str(1, 0));
 
-$userID_ = $_SESSION['ss_id']; 
+if ($journal === false) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
 
-$paramArr = get_dbsetup_param( 'pause_journal_deep_day' );
-$paramInt = (int)$paramArr[1];
+if ($journal === null) {
+  deny_ajax_access(404, 'USER_NOT_FOUND');
+}
 
-$today = date("d-m-Y");
-$dateForm = date("d.m.Y", strtotime("-$paramInt days"));
+$quarterLabel = format_date_range_label($journal['quarter_start_date'], $journal['quarter_stop_date']);
+$pauseEntries = $journal['entries'];
 
-echo "<h5 class=\"big\"> Глубина просмотра журнала (180 дней): $dateForm - $today </h5>";
-echo "<table class=\"add_time\" border=1>";
-echo "<tr bgcolor=\"#DDDDDD\" bordercolor=\"#888888\">";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Начало<br>(дата, время)</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Окончание<br>(дата, время)</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Длительность</h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Комментарий<br></h5>"."</td>";
-echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>С кем предварительно<br>согласовано</h5>"."</td>";
+echo "<h5 class=\"big\">Текущий квартал: $quarterLabel</h5>";
+echo "<div class=\"notification-table-scroll notification-table-scroll-medium\">";
+echo "<table class=\"add_time journal-entry-table\">";
+echo "<tr class=\"journal-entry-head\">";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Начало<br>(дата, время)</h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Окончание<br>(дата, время)</h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Длительность</h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>Комментарий<br></h5>"."</td>";
+echo "<td class=\"add_time journal-entry-head-cell\">"."<h5>С кем предварительно<br>согласовано</h5>"."</td>";
 echo "</tr>";
   
 $colorMode = 1;
 $color1 = "#ddffff";
-$color2 = "#ddeedd";
 $color3 = "#ffffff";
 
-mysqli_set_charset($link, "utf8");
-
-$query = mysqli_query($link, "SELECT * FROM ADD_TIME 
-                      WHERE   
-                      USERID='$userID_'
-                        AND
-                      (
-                        STOP_DT > ADDDATE('$currentDate', INTERVAL -$paramInt DAY)
-                        OR STOP_DT = '0000-00-00 00:00:00'
-                      )
-                        AND 
-                      pause_mode = 1
-                      ORDER BY ID DESC"); 
-
-if (!$query) {
-  echo "<br>mysqli_error = " . mysqli_error($link) . "<br>";
-  exit;
-}
-
-while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
-  $ta_id = $row["ID"];
-  $ta_suir = $row["SUIR"];
-  $ta_start_date = $row["START_DT"];
-  $ta_stop_date = $row["STOP_DT"];
-  $ta_reason = $row["REASON"];
-  $ta_description = $row["DESCRIPTION"];
-  $ta_approved = $row["APPROVED"];
-
-  $ta_approved_str = "На рассмотрении";
-
-  $superUserName = get_superuser_name_by_id( $ta_suir );
-
-  $ta_reason_description = "Приостановка учета времени";
+foreach ($pauseEntries as $pauseEntry) {
+  $ta_start_date = $pauseEntry['start_datetime'];
+  $ta_stop_date = $pauseEntry['stop_datetime'];
+  $ta_description = $pauseEntry['employee_comment'];
+  $superUserName = $pauseEntry['supervisor_name'];
 
   if ( $colorMode == 0 ) {
     $color = $color1;
@@ -76,22 +53,19 @@ while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
     $colorMode = 0;
   }
                           
-  if (is_time_defined($ta_stop_date) == 1) {
-    $time_duration = format_time_(strtotime($ta_stop_date) - strtotime($ta_start_date));
-  } else {
-    $timeRes = get_current_datetime_in_timezone();
-    $time_duration = format_time_(strtotime($timeRes[1]) - strtotime($ta_start_date));
-    $ta_stop_date = "Активна";
-  }
+  $time_duration = format_time_($pauseEntry['duration']);
   	
-  echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-  echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">$ta_start_date</h5></td>";
-  echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">$ta_stop_date</h5></td>";
-  echo "<td width=80  class=\"add_time\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$time_duration."</h5></td>";
-  echo "<td width=160 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_description."</h5></td>";
-  echo "<td width=190 class=\"add_time\" valign=\"middle\" align=\"left\"><h5 class=\"small\">".$superUserName."</h5></td>";
+  $rowClass = $color == $color1 ? "journal-entry-row-alt" : "journal-entry-row";
+
+  echo "<tr class=\"$rowClass\">";
+echo "<td class=\"add_time journal-entry-date-cell\"><h5 class=\"small\">" . html_escape($ta_start_date) . "</h5></td>";
+echo "<td class=\"add_time journal-entry-date-cell\"><h5 class=\"small\">" . html_escape($ta_stop_date) . "</h5></td>";
+  echo "<td class=\"add_time journal-entry-duration-cell\"><h5 class=\"small\">".$time_duration."</h5></td>";
+echo "<td class=\"add_time journal-entry-pause-comment-cell\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
+echo "<td class=\"add_time journal-entry-pause-supervisor-cell\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
   echo "</tr>";
 }
 
 echo "</table>";
+echo "</div>";
 ?>

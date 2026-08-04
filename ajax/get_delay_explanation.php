@@ -1,40 +1,54 @@
 <?php
-session_start();
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
-
-$userID_ = $_SESSION['ss_id']; 
+$userID_ = (int)$_SESSION['ss_id'];
 $currentDate = date('Y-m-d');
 
 $mode = 0;
+$delayID = 0;
+$userID = $userID_;
 
-if ( isset( $_POST['mode'] ) ){
-  $mode = $_POST['mode'];
-  $delayID = $_POST['delayId'];
-  $userID = $_POST['userId'];
+if (request_post_has('mode')) {
+  $mode = request_post_int('mode');
+  $delayID = request_post_int('delayId');
+  $userID = request_post_int('userId', $userID_);
+
+  if ($mode != 0) {
+    require_ajax_self_or_superuser($userID);
+  }
 }
 
 include __DIR__ . "/../php_tori/connect.php";
 include_once __DIR__ . "/../funcs.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 if ( $mode == 0 ){
-  $query0 = mysqli_query($link, "SELECT id, status, supervisorID, explaneDesk FROM Delays WHERE date = '$currentDate' AND userID = '$userID_'"); 
+  $query0 = db_query($link, "SELECT id, status, supervisorID, explaneDesk FROM Delays WHERE date = ? AND userID = ?", 'si', array($currentDate, $userID_));
 }
 else{
-  $query0 = mysqli_query($link, "SELECT status, supervisorID, explaneDesk FROM Delays WHERE id = '$delayID' AND userID = '$userID'"); 
+  $query0 = db_query($link, "SELECT status, supervisorID, explaneDesk FROM Delays WHERE id = ? AND userID = ?", 'ii', array($delayID, $userID));
+}
+
+if (!$query0) {
+  http_response_code(500);
+  echo "Ошибка базы данных";
+  exit;
 }
 
 $found = 0;
 $status = 0;
+$supervisorID = -1;
+$explaneDesk = "";
+$disableStr = "";
 
-while ( $row0 = mysqli_fetch_assoc($query0) ){
+while ( $row0 = db_fetch_one($query0) ){
   $status = $row0["status"];
   $supervisorID = $row0["supervisorID"];
-  $explaneDesk = $row0["explaneDesk"];
+  $explaneDesk = strip_tags($row0["explaneDesk"]);
   $found = 1;
 }
 
@@ -66,7 +80,7 @@ echo "<table cellpadding=\"0\" cellspacing=\"0\" border=1 bordercolor=\"#888888\
       echo "</select>";      
     echo "</td>";
     echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\">";
-     echo "<textarea $disableStr id=\"delayExplanation\" style=\"width:240px; resize: none;\" cols=\"33\" rows=\"2\">".$explaneDesk."</textarea>";
+     echo "<textarea $disableStr id=\"delayExplanation\" class=\"delay-explanation-textarea\" cols=\"33\" rows=\"2\">" . html_escape($explaneDesk) . "</textarea>";
     echo "</td>";
   echo "</tr>";
 echo "</table>"; 
@@ -90,16 +104,16 @@ if ( $status != 0 ){
 }
 
 echo "<td bordercolor=\"#000000\" width=\"210px\" valign=\"middle\" align=\"left\">";
-echo "<button style=\"font-size: 100%; width:178px; height:20px; background-color:#ff7979; border:1px solid #888888;\" onclick=\"close_explanation( '$mode' );\">Закрыть</button><br>";
+echo "<button class=\"delay-explanation-button delay-explanation-button-close\" onclick=\"close_explanation( '$mode' );\">Закрыть</button><br>";
 echo "</td>";
 
 echo "<td bordercolor=\"#000000\" width=\"300px\" valign=\"middle\" align=\"right\">";
 
 if ( $mode == 0 ){
-  echo "<button $disableStr style=\"font-size: 100%; width:178px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"set_explanation( '0', '-1' );\">Сохранить</button><br>";
+  echo "<button $disableStr class=\"delay-explanation-button delay-explanation-button-save\" onclick=\"set_explanation( '0', '-1' );\">Сохранить</button><br>";
 }
 else{
-  echo "<button $disableStr style=\"font-size: 100%; width:178px; height:20px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"set_explanation( '$mode', '$delayID' );\">Сохранить</button><br>";
+  echo "<button $disableStr class=\"delay-explanation-button delay-explanation-button-save\" onclick=\"set_explanation( '$mode', '$delayID' );\">Сохранить</button><br>";
 }
 echo "</td>";
 

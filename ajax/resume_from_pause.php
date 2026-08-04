@@ -1,40 +1,36 @@
 <?php
-session_start();
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+$userID = (int)($_SESSION['ss_id'] ?? 0);
+$visitingID = (int)($_SESSION['ss_visiting_ID'] ?? 0);
+$pauseID = request_post_int('pauseID');
 
-$userID = $_SESSION['ss_id']; 
-$ss_visiting_ID = $_SESSION['ss_visiting_ID'];
-
-$pauseID = $_POST['pauseID'];
+require_ajax_add_time_access($pauseID);
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/pause_service.php";
 
-$dtResult = get_current_datetime_in_timezone();
+$result = finish_time_pause(
+  $link,
+  $userID,
+  $visitingID,
+  $pauseID,
+  get_current_datetime_in_timezone_str(1, 0)
+);
 
-$currentDate = $dtResult[2];
-$currentDateTime = $dtResult[1];
-
-$query = mysqli_query($link, "UPDATE visiting SET take_pause = '0' WHERE id = '$ss_visiting_ID' AND user_id = '$userID'");
-$merr=mysqli_error($link);
-if (!$query)
-{
-  echo "<br>mysql_error = $merr<br>";
+if ($result === false) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
 }
-else
-{
-  $query = mysqli_query($link, "UPDATE ADD_TIME SET STOP_DT = '$currentDateTime' WHERE id = '$pauseID'");
 
-  if (!$query)
-  {
-    echo "<br>mysql_error = $merr<br>";
-  }
-  else
-  {
-    echo "1"; 
-  }
+if ($result['status'] !== 'success') {
+  ajax_text_response($result['message']);
+  exit;
 }
+
+ajax_text_response('1');
 ?>

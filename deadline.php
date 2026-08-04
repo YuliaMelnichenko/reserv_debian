@@ -1,11 +1,11 @@
 <?php
 ob_start();
-session_start();
+require_once __DIR__ . '/inc/session.php';
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
-<script type="text/javascript" src="js/tory.js"></script> 
+<script type="text/javascript" src="js/tory.js?v=20260729-pause-guard"></script>
 <script type="text/javascript" charset="utf-8"> 
 
 check_pause_state();
@@ -224,7 +224,6 @@ echo "<html>";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";
 echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">";
-echo "<link rel=\"stylesheet\" href=\"style/style.css\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
 echo "<body bgcolor=\"#ffffff\" >";
@@ -265,16 +264,7 @@ echo "<div align=\"left\">";
 include_once __DIR__ . "/funcs.php";
 include __DIR__ . "/short_stat.php";
 
-$ip = $_SERVER['REMOTE_ADDR'];
-
-if ( $ip == "192.168.100.50" or $ip == "192.168.100.69" ){
-  $_SESSION['rep_start_stop_date_mode'] = 2;	
-  save_last_location( "my_report_scr.php" );
-}
-else{
-  save_last_location( "index.php" );
-}
-
+save_last_location( "index.php" );
 auth();
 
 ////////////////////////////////////////////////////////
@@ -284,7 +274,7 @@ auth();
 
   include __DIR__ . "/php_tori/connect.php";
   if ( isset( $_SESSION['ss_id'] ) ){ 
-    $user_id = $_SESSION['ss_id'];
+    $user_id = (int)$_SESSION['ss_id'];
     $user_rate = $_SESSION['ss_rate'];
     $user_defaultStartTime = $_SESSION['ss_defaultStartTime'];
     $user_defaultStartHour = $_SESSION['ss_defaultStartHour'];
@@ -292,9 +282,14 @@ auth();
     $user_allowedDelay = $_SESSION['ss_allowedDelay'];
     $_date = date('Y-m-d');
 
-    mysqli_set_charset($link, "utf8");
-    $query0 = mysqli_query($link, "SELECT * FROM employees WHERE id = '$user_id'"); 
-    $vn0 = mysqli_num_rows($query0);
+    db_set_charset($link, "utf8");
+    $query0 = db_query(
+      $link,
+      "SELECT STATE, SURNAME, FIRSTNAME, LASTNAME FROM employees WHERE id = ?",
+      'i',
+      array($user_id)
+    );
+    $vn0 = db_num_rows($query0);
 
     echo "<table cellpadding=\"10\" cellspacing=\"0\" border=1>";
     echo "<tr>";
@@ -311,17 +306,22 @@ auth();
     //-----------------------------------------------------------------------------------------------------------------
     
     if ( $vn0 == 1 ){
-      $row0 = mysqli_fetch_assoc($query0);
+      $row0 = db_fetch_one($query0);
 
       $empl_state = $row0["STATE"];
 
       $sv_name = get_sv_name_by_userid( $user_id );
 
-      mysqli_set_charset($link, "utf8");
+      db_set_charset($link, "utf8");
     
-      $query01 = mysqli_query($link, "SELECT * FROM departments WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = '$user_id')"); 
+      $query01 = db_query(
+        $link,
+        "SELECT NAME, ROOM FROM departments WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = ?)",
+        'i',
+        array($user_id)
+      );
 
-      $row01 = mysqli_fetch_assoc($query01);
+      $row01 = db_fetch_one($query01);
 
       $depName = $row01["NAME"];
 
@@ -341,7 +341,7 @@ auth();
             echo "<font size=\"2\" color=\"#000000\" face=\"Arial\">Сотрудник"."</font>";
           echo "</td>";  
           echo "<td class=\"nopadding_s\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"center\" width = $width22>";
-            echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>".$row0["SURNAME"]." ".$row0["FIRSTNAME"]." ".$row0["LASTNAME"]."</b></font><br>";
+      echo "<font size=\"2\" color=\"#000000\" face=\"Arial\"><b>" . html_escape($row0["SURNAME"] . " " . $row0["FIRSTNAME"] . " " . $row0["LASTNAME"]) . "</b></font><br>";
           echo "</td>";  
         echo "</tr>";
         echo "<tr>";
@@ -485,7 +485,7 @@ build_in_delay_expl();
 build_in_add_work();
 get_time_registration_div_content();   
 
-var timerId=setInterval( "update_clock()", 5000 );
+var timerId = setInterval(update_clock, 5000);
 
 </script> 
 

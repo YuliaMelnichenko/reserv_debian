@@ -1,9 +1,8 @@
 <?php
-session_start();
-
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
 echo "<table cellpadding=\"0\" cellspacing=\"0\" border=0>";
   echo "<tr height = 30 valign=\"middle\">";
@@ -19,10 +18,10 @@ echo "</table>";
 echo "<br><table cellpadding=\"0\" cellspacing=\"0\" border=0>";
   echo "<tr width = 450>";
     echo "<td valign=\"middle\" align=\"left\" width = 250>";
-      echo "<button style=\"font-size: 100%; width:130px; height:25px; background-color:#91f591; border:1px solid #888888;\" onclick=\"as_add_time();\">Дa</button>";
+      echo "<button class=\"delay-question-button delay-question-button-yes\" onclick=\"as_add_time();\">Дa</button>";
     echo "</td>";
     echo "<td valign=\"middle\" align=\"right\" width = 250>";
-      echo "<button style=\"font-size: 100%; width:130px; height:25px; background-color:#f79398; border:1px solid #888888;\" onclick=\"as_delay();\">Нет</button>";
+      echo "<button class=\"delay-question-button delay-question-button-no\" onclick=\"as_delay();\">Нет</button>";
     echo "</td>";
   echo "</tr>";
 echo "</table>"; 

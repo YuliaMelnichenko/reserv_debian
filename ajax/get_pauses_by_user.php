@@ -1,36 +1,54 @@
 <?php
-session_start();
-
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/pause_journal.php";
 
 $_SESSION['pause_page_mode'] = 2;
 
-$userID = $_POST['user'];
+$userID = request_post_int('user');
 
-if ( $userID != -1 )
+if ( $userID == -1 )
 { 
-  $_SESSION['add_time_page_user_id'] = $userID;
-}
-else
-{ 
-  $userID = $_SESSION['add_time_page_user_id'];
+  $userID = isset($_SESSION['add_time_page_user_id'])
+    ? (int) $_SESSION['add_time_page_user_id']
+    : 0;
 }
 
-$userName = get_user_name_by_id($userID);
+if ($userID <= 0) {
+  deny_ajax_access(400, 'INVALID_USER');
+}
+
+require_ajax_self_or_superuser($userID);
+$_SESSION['add_time_page_user_id'] = $userID;
+
+$journal = get_pause_journal_context($link, $userID, get_current_datetime_in_timezone_str(1, 0));
+
+if ($journal === false) {
+  ajax_database_error($link, __FILE__ . ':' . __LINE__);
+  exit;
+}
+
+if ($journal === null) {
+  deny_ajax_access(404, 'USER_NOT_FOUND');
+}
+
+$userName = $journal['user_name'];
+$addTimes = $journal['entries'];
+$quarterLabel = format_date_range_label($journal['quarter_start_date'], $journal['quarter_stop_date']);
 
 echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
   echo "<tr>";
     echo "<td class=\"nopadding_s\">";
       echo "<table class=\"slim\" border=0>";
         echo "<tr>";
-          echo "<td class=\"nopadding\" valign=\"middle\" width=473 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";
+          echo "<td class=\"nopadding\" valign=\"middle\" width=473 align=\"left\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5><h5 class=\"big\">Текущий квартал: " . html_escape($quarterLabel) . "</h5></td>";
           echo "<td class=\"nopadding\" width=10 valign=\"middle\" align=\"right\">";
-            echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"pause_go_back();\"><h5>Назад</h5></button>";
+            echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"pause_go_back();\"><h5>Назад</h5></button>";
           echo "</td>";
         echo "</tr>";
       echo "</table>";
@@ -39,6 +57,7 @@ echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
   echo "<tr>";
     echo "<td class=\"nopadding\" width=600 valign=\"middle\" align=\"left\">";
 
+      echo "<div class=\"notification-table-scroll\">";
       echo "<table style=\"cellspacing: 0, padding: 0px; margin: 0;\" border=1>";
       echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
 
@@ -51,33 +70,18 @@ echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
   
       $colorMode = 1;
       $color1 = "#ddffff";
-      $color2 = "#ddeedd";
       $color3 = "#ffffff";
-
-      $tempAddTimes = get_all_add_work_info_by_user( $userID, 0 );
-
-      $addTimes = Array();
-
-      foreach( $tempAddTimes as $tempAddTime )
-      {
-        if ( $tempAddTime[7] == 1 ) 
-        {
-          $addTimes[] = $tempAddTime;
-        }
-      }
 
       foreach( $addTimes as $addTime )
       {
-        $ta_id = $addTime[8];
-        $ta_start_date = $addTime[9];
-        $ta_start_time = $addTime[0];
-        $ta_stop_time = $addTime[1];
-        $ta_duration = $addTime[6];
-        $ta_description = $addTime[3];
-        $ta_superuser = $addTime[5];
+        $ta_start_date = $addTime['date'];
+        $ta_start_time = $addTime['start_datetime'];
+        $ta_stop_time = $addTime['stop_datetime'];
+        $ta_duration = $addTime['duration'];
+        $ta_description = $addTime['employee_comment'];
+        $superUserName = $addTime['supervisor_name'];
 
         $time_duration = format_time_d_hhmmss_pure( $ta_duration );
-        $superUserName = get_superuser_name_by_id( $ta_superuser );
 
         if ( $colorMode == 0 )
         {
@@ -91,15 +95,16 @@ echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
         }
 
         echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-        echo "<td nowrap class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$ta_start_date."</h5></td>";
-        echo "<td nowrap class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$ta_start_time." - ".$ta_stop_time."</h5></td>";
-        echo "<td nowrap class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"small\">".$time_duration."</h5></td>";
-        echo "<td width=160 class=\"nopadding_s\" valign=\"middle\" align=\"left\"><h5 class=\"small\">".$ta_description."</h5></td>";
-        echo "<td width=140 class=\"nopadding_s\" valign=\"middle\" align=\"left\">"."<h5 class = \"small\">$superUserName</h5>"."</td>";
+echo "<td nowrap class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_date) . "</h5></td>";
+echo "<td nowrap class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($ta_start_time . " - " . $ta_stop_time) . "</h5></td>";
+        echo "<td nowrap class=\"nopadding_s\" valign=\"middle\" align=\"center\"><h5 class=\"small\">" . html_escape($time_duration) . "</h5></td>";
+echo "<td width=160 class=\"nopadding_s\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($ta_description) . "</h5></td>";
+echo "<td width=140 class=\"nopadding_s\" valign=\"middle\" align=\"left\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
         echo "</tr>";
       }
 
       echo "</table>";
+      echo "</div>";
     echo "</td>";
   echo "</tr>";
 echo "</table>";

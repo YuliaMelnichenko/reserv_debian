@@ -1,0 +1,312 @@
+<?php
+
+require_once __DIR__ . '/database.php';
+
+function time_pause_result($status, $message = null)
+{
+    $result = array('status' => $status);
+
+    if ($message !== null) {
+        $result['message'] = $message;
+    }
+
+    return $result;
+}
+
+function start_time_pause($link, $userID, $visitingID, $supervisorID, $currentDate, $currentDateTime, $description)
+{
+    if ((int)$supervisorID <= 0) {
+        return time_pause_result('error', 'Не выбран руководитель для согласования');
+    }
+
+    return start_time_pause_for_group(
+        $link,
+        $userID,
+        $visitingID,
+        (int)$supervisorID,
+        '3',
+        $currentDate,
+        $currentDateTime,
+        $description
+    );
+}
+
+function start_sport_time_pause($link, $userID, $visitingID, $currentDate, $currentDateTime, $description)
+{
+    return start_time_pause_for_group(
+        $link,
+        $userID,
+        $visitingID,
+        null,
+        '100',
+        $currentDate,
+        $currentDateTime,
+        $description
+    );
+}
+
+function start_time_pause_for_group(
+    $link,
+    $userID,
+    $visitingID,
+    $supervisorID,
+    $groupType,
+    $currentDate,
+    $currentDateTime,
+    $description
+)
+{
+    if ((int)$userID <= 0 || (int)$visitingID <= 0) {
+        return time_pause_result('error', 'Не найдена активная запись рабочего дня');
+    }
+
+    $transaction = db_transaction_start($link);
+
+    if (!$transaction) {
+        return false;
+    }
+
+    $visitResult = db_query($link, "
+        SELECT ID, state, take_pause
+        FROM visiting
+        WHERE ID = ?
+          AND user_id = ?
+        LIMIT 1
+        FOR UPDATE
+    ", 'ii', array((int)$visitingID, (int)$userID));
+
+    if (!$visitResult) {
+        $transaction->rollback();
+        return false;
+    }
+
+    $visit = db_fetch_one($visitResult);
+
+    if (!$visit) {
+        $transaction->rollback();
+        return time_pause_result('error', 'Не найдена активная запись рабочего дня');
+    }
+
+    if (!in_array((int)$visit['state'], array(2, 4), true)) {
+        $transaction->rollback();
+        return time_pause_result('error', 'Приостановка учета времени сейчас недоступна');
+    }
+
+    if ($supervisorID === null) {
+        $supervisorResult = db_query($link, "
+            SELECT SUPERVISORID
+            FROM GROUPS
+            WHERE USERID = ?
+              AND TRIM(TYPE) = ?
+            ORDER BY SUPERVISORID
+            LIMIT 1
+        ", 'is', array((int)$userID, (string)$groupType));
+    }
+    else {
+        $supervisorResult = db_query($link, "
+            SELECT SUPERVISORID
+            FROM GROUPS
+            WHERE USERID = ?
+              AND SUPERVISORID = ?
+              AND TRIM(TYPE) = ?
+            LIMIT 1
+        ", 'iis', array((int)$userID, (int)$supervisorID, (string)$groupType));
+    }
+
+    if (!$supervisorResult) {
+        $transaction->rollback();
+        return false;
+    }
+
+    $supervisor = db_fetch_one($supervisorResult);
+
+    if (!$supervisor || (int)$supervisor['SUPERVISORID'] <= 0) {
+        $transaction->rollback();
+
+        if ($supervisorID !== null) {
+            return time_pause_result('forbidden', 'FORBIDDEN_SUPERVISOR');
+        }
+
+        return time_pause_result('error', 'Выбранный руководитель недоступен для согласования');
+    }
+
+    $resolvedSupervisorID = (int)$supervisor['SUPERVISORID'];
+
+    $pausePeriodStart = $currentDate . ' 00:00:00';
+    $pausePeriodStop = date('Y-m-d 00:00:00', strtotime($currentDate . ' +1 day'));
+    $openPauseResult = db_query($link, "
+        SELECT ID
+        FROM ADD_TIME
+        WHERE USERID = ?
+          AND PAUSE_MODE = 1
+          AND START_DT <> '0000-00-00 00:00:00'
+          AND (STOP_DT IS NULL OR STOP_DT = '0000-00-00 00:00:00')
+          AND START_DT >= ?
+          AND START_DT < ?
+        ORDER BY START_DT DESC, ID DESC
+        LIMIT 1
+        FOR UPDATE
+    ", 'iss', array((int)$userID, $pausePeriodStart, $pausePeriodStop));
+
+    if (!$openPauseResult) {
+        $transaction->rollback();
+        return false;
+    }
+
+    if (db_has_rows($openPauseResult)) {
+        $visitUpdated = db_execute($link, "
+            UPDATE visiting
+            SET take_pause = 1
+            WHERE ID = ?
+              AND user_id = ?
+        ", 'ii', array((int)$visitingID, (int)$userID));
+
+        if (!$visitUpdated) {
+            $transaction->rollback();
+            return false;
+        }
+
+        if (!$transaction->commit()) {
+            return false;
+        }
+
+        return time_pause_result('success');
+    }
+
+    $visitUpdated = db_execute($link, "
+        UPDATE visiting
+        SET take_pause = 1
+        WHERE ID = ?
+          AND user_id = ?
+    ", 'ii', array((int)$visitingID, (int)$userID));
+
+    if (!$visitUpdated) {
+        $transaction->rollback();
+        return false;
+    }
+
+    $pauseCreated = db_execute($link, "
+        INSERT INTO ADD_TIME (
+          ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION,
+          SUPERVISORDESC, APPROVED, PAUSE_MODE, BYALERT
+        )
+        VALUES (?, ?, ?, ?, '0000-00-00 00:00:00', -1, ?, '', 0, 1, 0)
+    ", 'siiss', array(
+        $currentDate,
+        $resolvedSupervisorID,
+        (int)$userID,
+        $currentDateTime,
+        (string)$description,
+    ));
+
+    if (!$pauseCreated) {
+        $transaction->rollback();
+        return false;
+    }
+
+    if (!$transaction->commit()) {
+        return false;
+    }
+
+    return time_pause_result('success');
+}
+
+function finish_time_pause($link, $userID, $visitingID, $pauseID, $currentDateTime)
+{
+    if ((int)$userID <= 0 || (int)$visitingID <= 0 || (int)$pauseID <= 0) {
+        return time_pause_result('error', 'Не найдена открытая приостановка учета времени');
+    }
+
+    $transaction = db_transaction_start($link);
+
+    if (!$transaction) {
+        return false;
+    }
+
+    $visitResult = db_query($link, "
+        SELECT ID
+        FROM visiting
+        WHERE ID = ?
+          AND user_id = ?
+        LIMIT 1
+        FOR UPDATE
+    ", 'ii', array((int)$visitingID, (int)$userID));
+
+    if (!$visitResult) {
+        $transaction->rollback();
+        return false;
+    }
+
+    if (!db_fetch_one($visitResult)) {
+        $transaction->rollback();
+        return time_pause_result('error', 'Не найдена активная запись рабочего дня');
+    }
+
+    $pauseResult = db_query($link, "
+        SELECT ID, START_DT, STOP_DT
+        FROM ADD_TIME
+        WHERE ID = ?
+          AND USERID = ?
+          AND PAUSE_MODE = 1
+        LIMIT 1
+        FOR UPDATE
+    ", 'ii', array((int)$pauseID, (int)$userID));
+
+    if (!$pauseResult) {
+        $transaction->rollback();
+        return false;
+    }
+
+    $pause = db_fetch_one($pauseResult);
+
+    if (!$pause) {
+        $transaction->rollback();
+        return time_pause_result('error', 'Не найдена открытая приостановка учета времени');
+    }
+
+    $pauseStartDate = isset($pause['START_DT']) ? substr((string)$pause['START_DT'], 0, 10) : '';
+    $currentDate = substr((string)$currentDateTime, 0, 10);
+
+    if ($pauseStartDate === '' || $pauseStartDate !== $currentDate) {
+        $transaction->rollback();
+        return time_pause_result('error', 'Незавершенную приостановку можно завершить только в день ее начала');
+    }
+
+    $visitUpdated = db_execute($link, "
+        UPDATE visiting
+        SET take_pause = 0
+        WHERE ID = ?
+          AND user_id = ?
+    ", 'ii', array((int)$visitingID, (int)$userID));
+
+    if (!$visitUpdated) {
+        $transaction->rollback();
+        return false;
+    }
+
+    $stopDateTime = isset($pause['STOP_DT']) ? $pause['STOP_DT'] : null;
+    $isAlreadyClosed = is_string($stopDateTime)
+        && $stopDateTime !== ''
+        && $stopDateTime !== '0000-00-00 00:00:00';
+
+    if (!$isAlreadyClosed) {
+        $pauseUpdated = db_execute($link, "
+            UPDATE ADD_TIME
+            SET STOP_DT = ?
+            WHERE ID = ?
+              AND USERID = ?
+              AND PAUSE_MODE = 1
+        ", 'sii', array($currentDateTime, (int)$pauseID, (int)$userID));
+
+        if (!$pauseUpdated) {
+            $transaction->rollback();
+            return false;
+        }
+    }
+
+    if (!$transaction->commit()) {
+        return false;
+    }
+
+    return time_pause_result('success');
+}

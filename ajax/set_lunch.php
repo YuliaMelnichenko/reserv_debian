@@ -1,10 +1,8 @@
 <?php
-session_start();
-
-header("Content-type: text/html; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Pragma: no-cache");
-header("Expires: 0");
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_response_headers('text/html');
 
 if (!isset($_SESSION['ss_id']) || !isset($_SESSION['ss_visiting_ID'])) {
   exit('');
@@ -12,11 +10,12 @@ if (!isset($_SESSION['ss_id']) || !isset($_SESSION['ss_visiting_ID'])) {
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . "/../inc/workday_registration.php";
 
-$userID = $_SESSION['ss_id'];
+$userID = (int)$_SESSION['ss_id'];
 $visitingID = (int)$_SESSION['ss_visiting_ID'];
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 if ($visitingID <= 0) {
   exit('');
@@ -37,42 +36,21 @@ $stopDTStr = $dateArr[1];
 $maxOpenShiftHours = 3;
 $maxOpenShiftSeconds = $maxOpenShiftHours * 60 * 60;
 
-$userID = mysqli_real_escape_string($link, $userID);
-$currentDateTimeEsc = mysqli_real_escape_string($link, $currentDateTime);
-$startDTStrEsc = mysqli_real_escape_string($link, $startDTStr);
-$stopDTStrEsc = mysqli_real_escape_string($link, $stopDTStr);
+$row = get_current_visit_row(
+  $link,
+  $userID,
+  $visitingID,
+  $startDTStr,
+  $stopDTStr,
+  $currentDateTime,
+  $maxOpenShiftSeconds
+);
 
-$query = mysqli_query($link, "
-  SELECT ID, in_dt, eat_start_dt, eat_stop_dt, state
-  FROM visiting
-  WHERE ID = '$visitingID'
-    AND user_id = '$userID'
-    AND (
-      (
-        in_dt >= '$startDTStrEsc'
-        AND in_dt < '$stopDTStrEsc'
-      )
-      OR
-      (
-        state != 0
-        AND in_dt < '$startDTStrEsc'
-        AND TIMESTAMPDIFF(SECOND, '$startDTStr', '$currentDateTimeEsc') <= $maxOpenShiftSeconds
-      )
-    )
-  LIMIT 1
-");
-
-if (!$query) {
-  exit('');
-}
-
-if (mysqli_num_rows($query) == 0) {
+if ($row === null) {
   $_SESSION['ss_state'] = 1;
   $_SESSION['ss_visiting_ID'] = 0;
   exit('');
 }
-
-$row = mysqli_fetch_assoc($query);
 
 $eatStart = $row['eat_start_dt'];
 $eatStop = $row['eat_stop_dt'];
@@ -97,14 +75,14 @@ $durationStr = format_time_d_hhmmss_pure($duration);
 <table bgcolor="#FFFFFF" id="lunchPauseFullScreen">
   <tr>
     <td align="center" valign="middle">
-      <table class="add_time" border="0" bgcolor="#ddeeff">
+      <table class="add_time lunch-pause-dialog" border="0" bgcolor="#ddeeff">
         <tr>
           <td align="center" width="446">
             <div id="lunch_head_block">
               <div class="left_button" style="display: flex; align-items: center; margin-left: 2px">
-                <button id ="lunch_time_back" title="возврат состояния регистрации времени до предыдущего" style="font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;" onclick="rollback_state(); location.reload();"><img src="img/rollbackState.png"></button>
+                <button id ="lunch_time_back" title="возврат состояния регистрации времени до предыдущего" style="font-size: 100%; width:40px; height:20px; background-color:#f8d888; border:1px solid #888888;" onclick="rollback_state();"><img src="img/rollbackState.png"></button>
               </div>
-              <h5 class="bigbig1" style="margin-right: 135px"><br>Сотрудник на обеде<br><br></h5>
+              <h5 class="bigbig1 lunch-pause-title"><br>Сотрудник на обеде<br><br></h5>
             </div>
           </td>
         </tr>
@@ -116,7 +94,7 @@ $durationStr = format_time_d_hhmmss_pure($duration);
                   <h5 class="big">Время начала обеда:</h5>
                 </td>
                 <td class="report_no_padding" valign="middle" align="left">
-                  <h5 class="big"><?= htmlspecialchars($eatStart) ?></h5>
+                  <h5 class="big"><?= html_escape($eatStart) ?></h5>
                 </td>
               </tr>
               <tr bgcolor="#ffffff">
@@ -124,7 +102,7 @@ $durationStr = format_time_d_hhmmss_pure($duration);
                   <h5 class="big">Длительность:</h5>
                 </td>
                 <td class="report_no_padding" valign="middle" align="left">
-                  <h5 class="big" id="lunchDurationTimer"><?= htmlspecialchars($durationStr) ?></h5>
+                  <h5 class="big" id="lunchDurationTimer"><?= html_escape($durationStr) ?></h5>
                 </td>
               </tr>
             </table>

@@ -1,6 +1,27 @@
 <?php
 ob_start();
-session_start();
+require_once __DIR__ . '/inc/session.php';
+require_once __DIR__ . '/inc/access.php';
+include_once __DIR__ . "/funcs.php";
+require_once __DIR__ . "/inc/delay_journal.php";
+save_last_location( "delay_approvement.php" );
+$mid = request_get_trimmed_string('mid');
+
+if ($mid === '') {
+  header('Location: delay_approvement.php');
+  exit;
+}
+
+$resArr = extractUidFromMaskedUID($mid);
+$uidValid = (int) $resArr[0];
+$userID = (int) $resArr[1];
+
+if ($uidValid === 0 || $userID <= 0) {
+  header('Location: delay_approvement.php');
+  exit;
+}
+
+require_page_delay_supervisor_for_user($userID);
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -10,10 +31,9 @@ echo "<html>";
 echo "<head>";
 echo "<title>Система учета времени присутствия сотрудников ООО НПФ &quot;ТОРИ&quot;</title>";
 echo "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">";
-echo "<link rel=\"stylesheet\" href=\"style/style.css\">";
 echo "<link rel=\"stylesheet\" href=\"style/main.css\">";
 echo "</head>";
-echo "<body bgcolor=\"#ffffff\" >";
+echo "<body class=\"app-page\">";
 ?>
 
 <script type="text/javascript" src="lib/jquery/jquery.js"></script> 
@@ -28,33 +48,16 @@ function update_clock(){
   }
 }
 
-var timerId=setInterval( "update_clock()", 10000 );
+var timerId = setInterval(update_clock, 10000);
 
 </script> 
 
 <?php
-////////////////////////////////////////////////////////
-include_once __DIR__ . "/funcs.php";
-include_once __DIR__ . "/php_tori/connect.php";
-save_last_location( "delay_approvement.php" );
-auth();
-////////////////////////////////////////////////////////
-
-$mid = $_GET['mid'];
-
-$resArr = extractUidFromMaskedUID( $mid );
-$uidValid = $resArr[0];
-$userID = $resArr[1];
-
-if ( $uidValid == 0 ){
-  header('Location: '.'time_approvement.php');
-}
-
-echo "<div align=\"left\">";
+echo "<div class=\"notification-page-layout\">";
 
 include_once __DIR__ . "/php_tori/connect.php";
 
-mysqli_set_charset($link, "utf8");
+db_set_charset($link, "utf8");
 
 echo "<input id=\"recIDTempVal\" type=\"hidden\" value=\"\">";
 echo "<input id=\"acceptTempVal\" type=\"hidden\" value=\"\">";
@@ -62,40 +65,50 @@ echo "<input id=\"penIDTempVal\" type=\"hidden\" value=\"\">";
 echo "<input id=\"penDateTempVal\" type=\"hidden\" value=\"\">";
 echo "<input id=\"penUserIDTempVal\" type=\"hidden\" value=\"\">";
 
-echo "<table border=0>";
+echo "<table class=\"notification-page-table\">";
   echo "<tr>";
-    echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
+    echo "<td class=\"notification-nav-cell\">";
       include_once __DIR__ . "/navigate.php";
     echo "</td>";    
 
     $wholeWidth = 1272;
 
-    echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = $wholeWidth>";
+    echo "<td class=\"notification-content-cell notification-content-cell-delay-wide\">";
 
     echo "<div id=\"delayHeader\">";
       echo "<h5 class=\"dark\"><br>/уведомления по опозданиям<br><br></h5>";
     echo "</div>";
 
-$user_defaultStartTime = "10:00:00";
-$user_allowedDelay = 30;
+$backUrl = "delay_approvement.php";
+$currentDate = get_current_datetime_in_timezone()[2];
+$journal = get_delay_journal_context($link, $userID, $currentDate);
 
-get_user_defStartTime_and_allowedDelay( $userID, $user_defaultStartTime, $user_allowedDelay );
-$userName = get_user_name_by_id($userID);
+if ($journal === false) {
+  echo "<h5>" . html_escape(database_error_message($link, __FILE__ . ':' . __LINE__)) . "</h5>";
+  exit;
+}
 
-$delayTimes = Array();
+if ($journal === null) {
+  header('Location: delay_approvement.php');
+  exit;
+}
 
-$delayTimes = get_all_delay_info_by_user( $userID, $user_defaultStartTime, $user_allowedDelay );
+$userName = $journal['user_name'];
+$delayTimes = $journal['entries'];
+$periodLabel = format_date_range_label(
+  $journal['period_start_date'],
+  $journal['period_stop_date']
+);
 
       if ( count( $delayTimes ) == 0 ){
-        echo "<table id=\"add_time_approvement_table\" border=0>";
+        echo "<table id=\"add_time_approvement_table\" class=\"notification-detail-header-table notification-detail-empty-header\">";
           echo "<tr>";
-            echo "<td valign=\"middle\" width=1000 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";
-            echo "<td width=262 valign=\"middle\" align=\"right\">";
-              echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='delay_approvement.php';\"><h5>Назад</h5></button>";
+            echo "<td class=\"notification-detail-title-cell notification-detail-title-delay\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5><br></td>";
+            echo "<td class=\"notification-detail-back-cell notification-detail-back-wide\">";
+              echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"location.href='$backUrl';\"><h5>Назад</h5></button>";
             echo "</td>";
           echo "</tr>";
         echo "</table>";
-
         echo "<h5><br>Нет сведений!</h5>";
         echo "</td>";
         echo "<tr>";
@@ -105,58 +118,56 @@ $delayTimes = get_all_delay_info_by_user( $userID, $user_defaultStartTime, $user
 
 $rWidth = $wholeWidth - 312;
 
-echo "<table id=\"delay_approvement_table\" border=0>";
+echo "<table id=\"delay_approvement_table\" class=\"notification-detail-header-table\">";
   echo "<tr>";
     echo "<td class=\"nopadding_s\">";
-      echo "<table border=0>";
+      echo "<table class=\"notification-detail-header-table\">";
         echo "<tr>";
-          echo "<td valign=\"middle\" width=1000 align=\"left\">"."<h5 class=\"bigbig17\">$userName</h5>"."</td>";
-          echo "<td width=262 valign=\"middle\" align=\"right\">";
-            echo "<button title = \"Назад\" style=\"padding: 5px 5px 5px 5px; width:73px; height:25px; background-color:#f8d888; border:1px solid #888888;\" onclick=\"location.href='delay_approvement.php';\"><h5>Назад</h5></button>";
+          echo "<td class=\"notification-detail-title-cell notification-detail-title-delay\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5><br></td>";
+          echo "<td class=\"notification-detail-back-cell notification-detail-back-wide\">";
+            echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"location.href='$backUrl';\"><h5>Назад</h5></button>";
           echo "</td>";
         echo "</tr>";
       echo "</table>";
     echo "</td>";
   echo "</tr>";
   echo "<tr>";
-    echo "<td class=\"nopadding\" width=1300 valign=\"middle\" align=\"left\">";
+    echo "<td class=\"nopadding notification-detail-body-cell notification-detail-body-wide\">";
 
-      echo "<table border=1>";
-      echo "<tr bgcolor=\"#EEEEEE\" bordercolor=\"#888888\">";
+      echo "<div class=\"notification-table-scroll notification-table-scroll-full\">";
+      echo "<table class=\"add_time notification-detail-table delay-detail-table\">";
+      echo "<tr class=\"notification-detail-head\">";
 
-      echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Дата</h5>"."</td>";
-      echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Время<br>прихода</h5>"."</td>";
-      echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Длительность<br>опоздания</h5>"."</td>";
-      echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Комментарий<br>работника</h5>"."</td>";
-      echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>С кем предварительно<br>согласовано</h5>"."</td>";
-      echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Лицо, принявшее<br> решения</h5>"."</td>";
-      echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Комментарий лица,<br>принявшего решение</h5>"."</td>";
-      echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Статус</h5>"."</td>";
-      echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5>Управление</h5>"."</td>";
+      echo "<td class=\"add_time notification-detail-head-cell\">"."<h5>Дата</h5>"."</td>";
+      echo "<td class=\"add_time notification-detail-head-cell\">"."<h5>Время<br>прихода</h5>"."</td>";
+      echo "<td class=\"add_time notification-detail-head-cell\">"."<h5>Длительность<br>опоздания</h5>"."</td>";
+      echo "<td class=\"add_time notification-detail-head-cell\">"."<h5>Комментарий<br>работника</h5>"."</td>";
+      echo "<td class=\"add_time notification-detail-head-cell\">"."<h5>С кем предварительно<br>согласовано</h5>"."</td>";
+      echo "<td class=\"add_time notification-detail-head-cell\">"."<h5>Лицо, принявшее<br> решения</h5>"."</td>";
+      echo "<td class=\"add_time notification-detail-head-cell\">"."<h5>Комментарий лица,<br>принявшего решение</h5>"."</td>";
+      echo "<td class=\"add_time notification-detail-head-cell\">"."<h5>Статус</h5>"."</td>";
+      echo "<td class=\"add_time notification-detail-head-cell\">"."<h5>Управление</h5>"."</td>";
       echo "</tr>";
   
       $colorMode = 1;
       $color1 = "#ddffff";
-      $color2 = "#ddeedd";
       $color3 = "#ffffff";
 
       foreach( $delayTimes as $delayTime ){
-        $retDelay_id = $delayTime[0];
-        $retDelay_superuserID = $delayTime[1];
-        $retDelay_agreed = $delayTime[2];
-        $retDelay_description = $delayTime[3];
-        $retDelay_penalty_id = $delayTime[4];
-        $retDelay_acceptor_description = $delayTime[5];
-        $retDelay_approved = $delayTime[6];
-        $retDelay_duration = $delayTime[7];
-        $retDelay_start_time = $delayTime[8];
-        $retDelay_start_date = $delayTime[11];
-        $retDelay_acceptorID = $delayTime[12];
+        $retDelay_id = $delayTime['id'];
+        $retDelay_agreed = $delayTime['agreed'];
+        $retDelay_description = $delayTime['employee_comment'];
+        $retDelay_penalty_id = $delayTime['penalty_id'];
+        $retDelay_acceptor_description = $delayTime['decision_comment'];
+        $retDelay_approved = $delayTime['status'];
+        $retDelay_duration = $delayTime['duration'];
+        $retDelay_start_time = $delayTime['arrival'];
+        $retDelay_start_date = $delayTime['date'];
+        $superUserName = $delayTime['supervisor_name'];
+        $acceptorName = $delayTime['acceptor_name'];
 
-        $superUserName = get_superuser_name_by_id( $retDelay_superuserID );  
-        $acceptorName = get_superuser_name_by_id( $retDelay_acceptorID );  
-
-        $bgcolor = "";
+        $statusClass = "";
+        $agreedClass = "";
         $accBtnDisabled = "";
         $refBtnDisabled = "";
 
@@ -164,37 +175,37 @@ echo "<table id=\"delay_approvement_table\" border=0>";
           if ( $superUserName == "" ){
             $superUserName = "Ни с кем!";
           }
-          $bgcolor1 = "#FFAAAA";
+          $agreedClass = "notification-status-refused";
         }
         else if ( $retDelay_agreed == 1 ){
-          $bgcolor1 = "";
+          $agreedClass = "";
         }   
 
         $accBtnImg = "accept_small.bmp";
         $refBtnImg = "refuse_small.bmp";
 
         if ( $retDelay_approved == 0 ){
-          $content1 = "<h5 class=\"middleBold_r\">на рассмотрении</h5>";
-          $bgcolor = '#ffffff'; 
+          $content1 = journal_status_label("на рассмотрении");
+          $statusClass = "";
           $delRestore = "1";  
         }
         else if ( $retDelay_approved == 1 ){
-          $content1 = "<h5 class=\"middleBold_r\">принято</h5>";
-          $bgcolor = "#AAFFAA";
+          $content1 = journal_status_label("принято");
+          $statusClass = "notification-status-accepted";
           $accBtnDisabled = "disabled";
           $accBtnImg = "acceptDis_small.bmp";
           $delRestore = "1";
         }
         else if ( $retDelay_approved == -1 ){ 
-          $content1 = "<h5 class=\"middleBold_r\">отклонено</h5>";
-          $bgcolor = "#FFAAAA";
+          $content1 = journal_status_label("отклонено");
+          $statusClass = "notification-status-refused";
           $refBtnDisabled = "disabled";
           $refBtnImg = "refuseDis_small.bmp";
           $delRestore = "1";
         }
         else if ( $retDelay_approved == 99 OR $retDelay_approved == 100 OR $retDelay_approved == 101 ){
-          $content1 = "<h5 class=\"big\">отклонено</h5>";
-          $bgcolor = "#DDDDDD";
+          $content1 = journal_status_label("отклонено", "big");
+          $statusClass = "notification-status-deleted";
           $accBtnDisabled = "disabled";
           $refBtnDisabled = "disabled";
           $accBtnImg = "acceptDis_small.bmp";
@@ -213,67 +224,68 @@ echo "<table id=\"delay_approvement_table\" border=0>";
           $colorMode = 0;
         }
 
-        echo "<tr bgcolor=\"$color\" bordercolor=\"#888888\">";
-          echo "<td width=60 class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$retDelay_start_date</h5>"."</td>";
-          echo "<td width=100 class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$retDelay_start_time</h5>"."</td>";
-          echo "<td width=85 class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class=\"small\">$time_duration</h5>"."</td>";
-          echo "<td width=160 class=\"add_time\" valign=\"middle\" align=\"left\">"."<h5 class=\"small\">$retDelay_description</h5>"."</td>";
-          echo "<td width=200 bgcolor=\"$bgcolor1\" class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class = \"small\">$superUserName</h5>"."</td>";
-          echo "<td width=200 class=\"add_time\" valign=\"middle\" align=\"center\">"."<h5 class = \"small\">$acceptorName</h5>"."</td>";
-          echo "<td width=160 class=\"add_time\" valign=\"middle\" align=\"left\">"."<h5 class=\"small\">$retDelay_acceptor_description</h5>"."</td>";
-          echo "<td width=130 bgcolor=\"$bgcolor\" class=\"add_time\" valign=\"middle\" align=\"center\">$content1</td>";
+        $rowClass = $color == $color1 ? "notification-detail-row-alt" : "notification-detail-row";
 
-          echo "<td class=\"add_time\" valign=\"middle\" align=\"center\">";
+        echo "<tr class=\"$rowClass\">";
+          echo "<td class=\"add_time notification-detail-short-date-cell\"><h5 class=\"small\">" . html_escape($retDelay_start_date) . "</h5></td>";
+          echo "<td class=\"add_time notification-detail-date-cell\"><h5 class=\"small\">" . html_escape($retDelay_start_time) . "</h5></td>";
+          echo "<td class=\"add_time notification-detail-duration-cell\">"."<h5 class=\"small\">$time_duration</h5>"."</td>";
+          echo "<td class=\"add_time notification-detail-delay-comment-cell\"><h5 class=\"small\">" . html_escape($retDelay_description) . "</h5></td>";
+          echo "<td class=\"add_time notification-detail-supervisor-wide-cell $agreedClass\"><h5 class=\"small\">" . html_escape($superUserName) . "</h5></td>";
+          echo "<td class=\"add_time notification-detail-supervisor-wide-cell\"><h5 class=\"small\">" . html_escape($acceptorName) . "</h5></td>";
+          echo "<td class=\"add_time notification-detail-delay-comment-cell\"><h5 class=\"small\">" . html_escape($retDelay_acceptor_description) . "</h5></td>";
+          echo "<td class=\"add_time notification-detail-delay-status-cell $statusClass\">$content1</td>";
+
+          echo "<td class=\"add_time notification-detail-actions-cell\">";
    
-            echo "<table border=0>";
+            echo "<table class=\"notification-detail-actions-table\">";
               echo "<tr>";
-                echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
-                  echo "<button onclick=\"accept_delay_for_user( '$retDelay_id', '$retDelay_acceptor_description', '$retDelay_penalty_id', '$retDelay_start_date', '$userID' );\" $accBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                echo "<td class=\"nopadding_s notification-detail-action-cell\">";
+                  echo "<button class=\"journal-icon-button\" onclick=\"accept_delay_for_user(" . (int) $retDelay_id . ", " . html_escape(js_encode($retDelay_acceptor_description)) . ", " . (int) $retDelay_penalty_id . ", " . html_escape(js_encode($retDelay_start_date)) . ", " . (int) $userID . ");\" $accBtnDisabled>";
                     echo "<img title=\"Принять\" src=\"img/$accBtnImg\">";
                   echo "</button>";
                 echo "</td>";
-                echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
-                  echo "<button onclick=\"refuse_delay_for_user('$retDelay_id', '$retDelay_acceptor_description', '$retDelay_penalty_id', '$retDelay_start_date', '$userID' );\" $refBtnDisabled style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                echo "<td class=\"nopadding_s notification-detail-action-cell\">";
+                  echo "<button class=\"journal-icon-button\" onclick=\"refuse_delay_for_user(" . (int) $retDelay_id . ", " . html_escape(js_encode($retDelay_acceptor_description)) . ", " . (int) $retDelay_penalty_id . ", " . html_escape(js_encode($retDelay_start_date)) . ", " . (int) $userID . ");\" $refBtnDisabled>";
                     echo "<img title=\"Отклонить\" src=\"img/$refBtnImg\">";
                   echo "</button>";
-                // echo "</td>";
-                //   echo "<td width=\"2\">";
-                //   echo "</td>";
-                echo "<td class=\"nopadding_s\" valign=\"middle\" align=\"center\" border=0>";
-                  if ( $delRestore == 1 ){ 
-                    echo "<button onclick=\"mark_as_deleted_delay_for_user( '$retDelay_id' ); location.reload();\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                echo "</td>";
+                echo "<td class=\"nopadding_s notification-detail-action-cell\">";
+                  if ( $delRestore == 1 ){
+                    echo "<button class=\"journal-icon-button\" onclick=\"mark_as_deleted_delay_for_user(" . (int) $retDelay_id . ");\">";
                       echo "<img title=\"Удалить\" src=\"img/delete_small.bmp\">";
                     echo "</button>";
                   }
                   else{
-                    echo "<button onclick=\"mark_as_undeleted_delay_for_user( '$retDelay_id' ); location.reload();\" style=\"padding: 0px 0px 0px 0px; width:14px; height:14px; border:0px solid #888888;\">";
+                    echo "<button class=\"journal-icon-button\" onclick=\"mark_as_undeleted_delay_for_user(" . (int) $retDelay_id . ");\">";
                       echo "<img title=\"Восстановить\" src=\"img/restore_small.bmp\">";
                     echo "</button>";
                   }
                 echo "</td>";
               echo "</tr>";
-            echo "</table>";   
+            echo "</table>";
 
-          echo "</td>";  
+          echo "</td>";
       }
       echo "</table>";
+      echo "</div>";
     echo "</td>";
   echo "</tr>";
 echo "</table>";
-      
+
       echo "<div id=\"delay_approvement_desc\">";
         echo "<div class=\"comment\">";
           echo "<h5 class=\"bigbig\">Комментарий</h5>";
         echo "</div>";
         echo "<div class=\"text_box\">";
-          echo "<textarea id=\"delay_part_desc_2\" style=\"width:250px; resize: none;\" cols=\"43\" rows=\"3\"></textarea>";
+          echo "<textarea id=\"delay_part_desc_2\" class=\"journal-comment-textarea\" cols=\"43\" rows=\"3\"></textarea>";
         echo "</div>";
         echo "<div class=\"box_btn\">";
           echo "<div>";
-            echo "<button style=\"font-size: 100%; width:119px; height:20px; background-color:#ff8888; border:1px solid #888888;\" onclick=\"document.getElementById('delay_approvement_desc').style.display='none'; location.reload();\">Отмена</button>";
+            echo "<button class=\"journal-modal-action-button journal-modal-action-cancel\" onclick=\"document.getElementById('delay_approvement_desc').style.display='none';\">Отмена</button>";
           echo "</div>";
           echo "<div>";
-            echo "<button style=\"font-size: 100%; width:119px; height:20px; background-color:#88ff88; border:1px solid #888888;\" onclick=\"accept_refuse_delay_for_user_final( document.getElementById('recIDTempVal').value, document.getElementById('delay_part_desc_2').value, document.getElementById('acceptTempVal').value, document.getElementById('penIDTempVal').value, document.getElementById('penDateTempVal').value, document.getElementById('penUserIDTempVal').value ); location.reload();\">Сохранить</button>";
+            echo "<button class=\"journal-modal-action-button journal-modal-action-save\" onclick=\"accept_refuse_delay_for_user_final( document.getElementById('recIDTempVal').value, document.getElementById('delay_part_desc_2').value, document.getElementById('acceptTempVal').value, document.getElementById('penIDTempVal').value, document.getElementById('penDateTempVal').value, document.getElementById('penUserIDTempVal').value );\">Сохранить</button>";
           echo "</div>";
         echo "</div>";
       echo "</div>";
@@ -284,7 +296,7 @@ echo "</table>";
 echo "</div>";
 ?>
 
-<script type="text/javascript" src="js/tory.js"></script>
+<script type="text/javascript" src="js/tory.js?v=20260729-layout"></script>
 
 <?php
 echo "</body>";

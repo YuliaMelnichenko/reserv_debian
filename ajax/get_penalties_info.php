@@ -1,18 +1,28 @@
 <?php
-session_start();
-
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+require_once __DIR__ . '/../inc/session.php';
+require_once __DIR__ . '/../inc/access.php';
+require_ajax_auth();
+ajax_text_headers();
 
 $userID_ = $_SESSION['ss_id']; 
 
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 
-$startDate = $_POST['startDate'];
-$stopDate = $_POST['stopDate'];
-$userID = $_POST['userID'];
+$startDate = request_post_date('startDate');
+$stopDate = request_post_date('stopDate');
+$userID = request_post_int('userID');
+
+if ($userID <= 0) {
+  deny_ajax_access(400, 'INVALID_USER');
+}
+
+require_ajax_self_or_superuser($userID);
+
+if ($startDate === null || $stopDate === null || $stopDate < $startDate) {
+  deny_ajax_access(400, 'INVALID_DATE_RANGE');
+}
+
 $user_defaultStartTime = 0;
 $user_allowedDelay = 0;
 
@@ -93,7 +103,7 @@ else
         echo "<h5 class=\"small1\">$delayValStr</h5>";
       echo "</td>";  
       echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"left\" width = 240>";
-        echo "<h5 class=\"small1\">$explaneDesk</h5>"."</font>";
+echo "<h5 class=\"small1\">" . html_escape($explaneDesk) . "</h5></font>";
       echo "</td>";  
       echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"middle\" align=\"center\" width = 150>";
         echo "$statusStr";

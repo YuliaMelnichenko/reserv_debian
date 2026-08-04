@@ -1,48 +1,324 @@
-function scheduleTimeRegistrationPeriodReload() {
-  return;
+// Attach the session CSRF token to every same-origin state-changing request.
+(function(window, document) {
+  'use strict';
 
-  if (!window.toriStopDTStr) {
-    return;
+  function getCookie(name) {
+    var prefix = name + '=';
+    var cookies = document.cookie ? document.cookie.split(';') : [];
+
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = cookies[i].replace(/^\s+/, '');
+
+      if (cookie.indexOf(prefix) === 0) {
+        return decodeURIComponent(cookie.substring(prefix.length));
+      }
+    }
+
+    return '';
   }
 
-  var stopTime = new Date(window.toriStopDTStr.replace(' ', 'T')).getTime();
-
-  if (!stopTime || isNaN(stopTime)) {
-    console.log('Некорректный toriStopDTStr:', window.toriStopDTStr);
-    return;
+  function isUnsafeMethod(method) {
+    return !/^(GET|HEAD|OPTIONS)$/i.test(method || 'GET');
   }
 
-  var now = Date.now();
-  var delay = stopTime - now + 3000;
+  function isSameOrigin(url) {
+    var anchor = document.createElement('a');
+    anchor.href = url;
 
-  console.log('toriStopDTStr:', window.toriStopDTStr);
-  console.log('reload delay ms:', delay);
-
-  if (delay <= 0) {
-    console.log('Период уже завершен, автоперезагрузка отменена.');
-    return;
+    return anchor.protocol === window.location.protocol
+      && anchor.host === window.location.host;
   }
 
-  if (delay > 86400000) {
-    console.log('До конца периода больше суток, автоперезагрузка отменена.');
-    return;
+  if (window.XMLHttpRequest) {
+    var originalOpen = window.XMLHttpRequest.prototype.open;
+    var originalSend = window.XMLHttpRequest.prototype.send;
+
+    window.XMLHttpRequest.prototype.open = function(method, url) {
+      this.toriRequestMethod = method;
+      this.toriRequestUrl = url;
+      return originalOpen.apply(this, arguments);
+    };
+
+    window.XMLHttpRequest.prototype.send = function() {
+      var token = getCookie('TORI_CSRF_TOKEN');
+
+      if (
+        token
+        && isUnsafeMethod(this.toriRequestMethod)
+        && isSameOrigin(this.toriRequestUrl)
+      ) {
+        this.setRequestHeader('X-CSRF-Token', token);
+      }
+
+      return originalSend.apply(this, arguments);
+    };
   }
 
-  setTimeout(function() {
-    location.reload();
-  }, delay);
+  if (window.fetch) {
+    var originalFetch = window.fetch;
+
+    window.fetch = function(input, options) {
+      var requestOptions = options ? Object.assign({}, options) : {};
+      var requestUrl = typeof input === 'string' ? input : input.url;
+      var requestMethod = requestOptions.method
+        || (typeof input !== 'string' && input.method)
+        || 'GET';
+      var token = getCookie('TORI_CSRF_TOKEN');
+
+      if (token && isUnsafeMethod(requestMethod) && isSameOrigin(requestUrl)) {
+        var headers = new Headers(
+          requestOptions.headers
+          || (typeof input !== 'string' ? input.headers : undefined)
+          || {}
+        );
+        headers.set('X-CSRF-Token', token);
+        requestOptions.headers = headers;
+      }
+
+      return originalFetch.call(window, input, requestOptions);
+    };
+  }
+})(window, document);
+
+var notificationLayoutResizeTimer = null;
+var notificationScrollbarWidth = null;
+
+function get_vertical_scrollbar_width() {
+  if (notificationScrollbarWidth !== null) {
+    return notificationScrollbarWidth;
+  }
+
+  var probe = document.createElement('div');
+  probe.style.position = 'absolute';
+  probe.style.top = '-9999px';
+  probe.style.width = '100px';
+  probe.style.height = '100px';
+  probe.style.overflow = 'scroll';
+  document.body.appendChild(probe);
+  notificationScrollbarWidth = probe.offsetWidth - probe.clientWidth;
+  probe.parentNode.removeChild(probe);
+
+  return notificationScrollbarWidth;
 }
 
-function unset_cookie(){
-  $.post('ajax/delete_cookie.php', RetSWT1 );
-  function RetSWT1(dat1) {
-    console.log(dat1);
-  }    
+function get_notification_nav_cell(element) {
+  var cursor = element;
+
+  while (cursor && cursor.closest) {
+    var row = cursor.closest('tr');
+
+    if (!row) {
+      break;
+    }
+
+    var navCell = row.querySelector(
+      '.notification-nav-cell, .accounting-errors-nav-cell, .staff-leaves-nav-cell'
+    );
+
+    if (navCell) {
+      return navCell;
+    }
+
+    cursor = row.parentElement;
+  }
+
+  return null;
+}
+
+function get_notification_available_height(scroll) {
+  var navCell = get_notification_nav_cell(scroll);
+  var scrollRect = scroll.getBoundingClientRect();
+  var bottom = window.innerHeight;
+
+  if (navCell) {
+    bottom = navCell.getBoundingClientRect().top;
+
+    Array.prototype.forEach.call(navCell.children, function(child) {
+      var childRect = child.getBoundingClientRect();
+
+      if (childRect.height > 0) {
+        bottom = Math.max(bottom, childRect.bottom);
+      }
+    });
+  }
+
+  return Math.max(120, Math.floor(bottom - scrollRect.top - 10));
+}
+
+function align_notification_toolbar(scroll, width) {
+  var detailTable = scroll.closest('.notification-detail-header-table');
+
+  if (detailTable) {
+    detailTable.style.width = width + 'px';
+
+    var nestedHeader = detailTable.querySelector(
+      ':scope > tbody > tr > td > .notification-detail-header-table'
+    );
+
+    if (nestedHeader) {
+      nestedHeader.style.width = '100%';
+    }
+  }
+
+  var contentCell = scroll.closest(
+    '.notification-content-cell, .accounting-errors-content-cell'
+  );
+
+  if (contentCell) {
+    contentCell.style.width = (width + 10) + 'px';
+  }
+
+  var accountingToolbar = document.getElementById('accountingErrorsUserToolbar');
+
+  if (
+    accountingToolbar
+    && accountingToolbar.parentNode
+    && accountingToolbar.parentNode.contains(scroll)
+  ) {
+    accountingToolbar.style.width = width + 'px';
+  }
+}
+
+function fit_notification_scroll(scroll) {
+  if (!scroll) {
+    return { height: 0, width: 0 };
+  }
+
+  var table = scroll.querySelector('table');
+
+  if (!table || table.offsetWidth === 0) {
+    return { height: 0, width: 0 };
+  }
+
+  scroll.style.width = '';
+  scroll.style.maxWidth = '';
+  scroll.style.overflowY = 'hidden';
+
+  var availableHeight = get_notification_available_height(scroll);
+  var tableHeight = Math.ceil(table.getBoundingClientRect().height);
+  var tableWidth = Math.ceil(table.getBoundingClientRect().width);
+  var needsVerticalScroll = tableHeight > availableHeight;
+  var scrollbarWidth = needsVerticalScroll ? get_vertical_scrollbar_width() : 0;
+  var availableWidth = Math.max(
+    180,
+    Math.floor(window.innerWidth - scroll.getBoundingClientRect().left - 10)
+  );
+  var panelWidth = Math.min(tableWidth + scrollbarWidth, availableWidth);
+
+  scroll.style.maxHeight = availableHeight + 'px';
+  scroll.style.width = panelWidth + 'px';
+  scroll.style.maxWidth = panelWidth + 'px';
+  scroll.style.overflowY = needsVerticalScroll ? 'auto' : 'hidden';
+  scroll.style.overflowX = tableWidth > panelWidth ? 'auto' : 'hidden';
+
+  align_notification_toolbar(scroll, panelWidth);
+
+  return {
+    height: Math.min(tableHeight, availableHeight),
+    width: panelWidth
+  };
+}
+
+function fit_notification_layout(root) {
+  var scope = root && root.querySelectorAll ? root : document;
+  var scrolls = Array.prototype.slice.call(
+    scope.querySelectorAll('.notification-table-scroll')
+  );
+  var accountingScrollIds = [
+    'accountingErrorsTableScroll',
+    'accountingErrorsApprovementTableScroll',
+    'accountingErrorsUserTableScroll'
+  ];
+
+  accountingScrollIds.forEach(function(id) {
+    var scroll = document.getElementById(id);
+
+    if (scroll && scrolls.indexOf(scroll) === -1) {
+      scrolls.push(scroll);
+    }
+  });
+
+  var lastFit = { height: 0, width: 0 };
+
+  scrolls.forEach(function(scroll) {
+    lastFit = fit_notification_scroll(scroll);
+  });
+
+  return lastFit;
+}
+
+function schedule_notification_layout(root) {
+  window.requestAnimationFrame(function() {
+    fit_notification_layout(root || document);
+  });
+}
+
+function fit_notification_table(containerId, tableId) {
+  var container = document.getElementById(containerId);
+
+  if (!container || !document.getElementById(tableId)) {
+    return { height: 0, width: 0 };
+  }
+
+  return fit_notification_layout(container);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  schedule_notification_layout(document);
+});
+
+window.addEventListener('resize', function() {
+  window.clearTimeout(notificationLayoutResizeTimer);
+  notificationLayoutResizeTimer = window.setTimeout(function() {
+    fit_notification_layout(document);
+  }, 80);
+});
+
+function reload_if_missing_container(containerId) {
+  if (!document.getElementById(containerId)) {
+    window.location.reload();
+    return true;
+  }
+
+  return false;
+}
+
+function refresh_time_registration_or_reload() {
+  if (typeof get_time_registration_div_content === 'function') {
+    get_time_registration_div_content();
+    return;
+  }
+
+  window.location.reload();
+}
+
+function unset_cookie(csrfToken){
+  var token = csrfToken || window.TORI_CSRF_TOKEN || '';
+
+  if (!token) {
+    var prefix = 'TORI_CSRF_TOKEN=';
+    var cookies = document.cookie ? document.cookie.split(';') : [];
+
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = cookies[i].replace(/^\s+/, '');
+
+      if (cookie.indexOf(prefix) === 0) {
+        token = decodeURIComponent(cookie.substring(prefix.length));
+        break;
+      }
+    }
+  }
+
+  $.post('ajax/delete_cookie.php', {_csrf: token});
 }
 
 function set_delay(/* userID */){
   $.post('ajax/set_delay_by_entrance.php', RetSWT1);
   function RetSWT1(dat1) {
+    if (dat1 === 'weekend') {
+      return;
+    }
+
     add_expl();
 
     if ( document.getElementById('explBtn') ){ document.getElementById('explBtn').disabled = false; }
@@ -51,7 +327,7 @@ function set_delay(/* userID */){
 
 function set_delay_for_user_by_SY( userID ){
   $.post('ajax/set_delay_by_entrance.php', { userID: userID }, RetSWT1);
-  function RetSWT1(dat1) 
+  function RetSWT1(dat1)
   {
   }
 }
@@ -62,7 +338,7 @@ function delay_set( delayId, userId ){
   $.post('ajax/get_delay_explanation.php', {mode: 1, delayId: delayId, userId: userId}, RetSWT2 );
   function RetSWT2(dat2){
     if ( document.getElementById('delay_explanation_delay') ){ document.getElementById('delay_explanation_delay').innerHTML = dat2; }
-  } 
+  }
 }
 
 function close_explanation( mode ){
@@ -74,7 +350,7 @@ function close_explanation( mode ){
         alert( "Опоздания без указания причины считаются опозданиями без уважительной причины" );
       }
     }
-  } 
+  }
   if ( document.getElementById('delay_explanation_delay') ){ document.getElementById('delay_explanation_delay').style.display='none'; }
 }
 
@@ -88,7 +364,7 @@ function set_explanation( mode, delayID ){
       if ( mode == 0 ){
         build_in_delay_expl();
       }
-      else{ 
+      else{
         show_delay_table();
       }
       if ( dat1 == 2 ){
@@ -97,9 +373,11 @@ function set_explanation( mode, delayID ){
       else if ( dat1 == 0 ){
         alert( "Невозможно изменить уже заквитированных объяснений к опозданиям" );
       }
-      get_time_registration_div_content();
+      if (typeof get_time_registration_div_content === 'function') {
+        get_time_registration_div_content();
+      }
     }
-  } 
+  }
   if ( document.getElementById('delay_explanation_delay') ){ document.getElementById('delay_explanation_delay').style.display='none'; }
 }
 
@@ -107,20 +385,20 @@ function set_add_times_height(){
   $.post('ajax/get_add_times_block_height.php', {},RetSWT1);
   function RetSWT1(dat3) {
     var datVal = parseInt( dat3, 10 );
-    
+
     var tableHeight = 0;
 
-    if ( document.getElementById('addTimesTable') ){ 
+    if ( document.getElementById('addTimesTable') ){
       tableHeight = document.getElementById('addTimesTable').offsetHeight;
     }
-     
+
     datVal = datVal + tableHeight;
     if ( datVal > 360 ){
       datVal = 360;
-    } 
+    }
 
     if ( document.getElementById('delay_explanation_add_time') ){ document.getElementById('delay_explanation_add_time').style.height = datVal + "px"; }
-  }   
+  }
 }
 
 function set_delay_notificationc_count(){
@@ -135,7 +413,7 @@ function set_delay_notificationc_count(){
 function set_add_time_notificationc_count(){
   if ( document.getElementById('notifBtn') ){
     $.post('ajax/get_add_time_notif_count.php', {},RetSWT2);
-    function RetSWT2(dat2) { 
+    function RetSWT2(dat2) {
       document.getElementById('notifBtn').innerHTML = dat2;
     }
   }
@@ -167,7 +445,7 @@ function save_changes_time(userID) {
       function(dat1) {
         if (dat1 == 2) {
           alert("Время ухода изменено.");
-          location.reload();
+          refresh_time_registration_or_reload();
         }
         else {
           alert(dat1);
@@ -201,7 +479,7 @@ function save_changes_time(userID) {
       function(dat2) {
         if (dat2 == 2) {
           alert("Время изменено.");
-          location.reload();
+          refresh_time_registration_or_reload();
         }
         else {
           alert(dat2);
@@ -219,7 +497,7 @@ function show_entrance_page(){
   if ( document.getElementById('entrance_approvement') ){
     $.post('ajax/get_entrances.php', RetSWT1);
     function RetSWT1(dat1) {
-      document.getElementById('entrance_approvement').innerHTML = dat1;    
+      document.getElementById('entrance_approvement').innerHTML = dat1;
 
       tableHeight = document.getElementById('entrance_approvement_table_users').offsetHeight + 20;
       tableWidth = document.getElementById('entrance_approvement_table_users').offsetWidth;
@@ -232,8 +510,8 @@ function show_entrance_page(){
       document.getElementById('entrance_approvement').style.height = tableHeight + "px";
       document.getElementById('entrance_approvement').style.width = tableWidth + "px";
     }
-  }   	
-} 
+  }
+}
 
 function set_new_entrance_time( userID, inTime, newInTime, superUserID ){
   var perform=confirm('Будет изменено время прихода сотрудника на рабочее место. Продолжить?')
@@ -252,7 +530,7 @@ function set_new_entrance_time( userID, inTime, newInTime, superUserID ){
       else if ( dat1 == 0 ){
         adjInTime = 1;
       }
-         
+
       if ( adjInTime == 1 ){
         $.post('ajax/adj_in_time.php', { userID: userID, inTime: newInTime },RetSWT6);
         function RetSWT6(dat6){
@@ -261,8 +539,8 @@ function set_new_entrance_time( userID, inTime, newInTime, superUserID ){
             if ( perform == true ){
               $.post('ajax/delete_user_visitiong_info_by_currentDay.php', { userID: userID },RetSWT7);
               function RetSWT7(dat7){
-                $.post('ajax/set_user_alert.php', { userID: userID, messageMode: 1 },RetSWT8);  
-                function RetSWT8(dat8){  
+                $.post('ajax/set_user_alert.php', { userID: userID, messageMode: 1 },RetSWT8);
+                function RetSWT8(dat8){
                   window.location="entrance_management.php";
                 }
               }
@@ -270,33 +548,32 @@ function set_new_entrance_time( userID, inTime, newInTime, superUserID ){
             else
             {
             }
-          } 
+          }
           else{
             $.post('ajax/set_user_alert.php', { userID: userID, messageMode: 2 },RetSWT19);
             function RetSWT19(dat19){
               window.location="entrance_management.php";
             }
-          }  
-        } 
+          }
+        }
       }
       if ( adjDelay == 1 ){
         set_delay_for_user_by_SY( userID );
       }
     }
-  }  
+  }
 }
 
 function fill_alerts_by_user( userID, date, startTime, messStr ){
   add_addition_time_by_alert( userID, date, startTime, messStr );
-} 
+}
 
 function add_addition_time_by_alert( userID, date, startTime, messStr ){
   if ( document.getElementById('delay_explanation_add_time_part') ){
     $.post('ajax/get_add_time_part.php', { by_alert: 1 },RetSWT1);
-    function RetSWT1(dat1) {  
+    function RetSWT1(dat1) {
       document.getElementById('delay_explanation_add_time_part').innerHTML = dat1;
       document.getElementById('delay_explanation_add_time_part').style.display='block';
-      document.getElementById('add_time_part_date').value = date;
       document.getElementById('add_time_part_start_time').value = startTime;
       document.getElementById('add_time_part_stop_time').value = "18:00";
       document.getElementById('add_time_part_start_date').value = date;
@@ -335,19 +612,19 @@ function show_alerts_page(){
         window.location="index.php";
       }
     }
-  }   	
-} 
+  }
+}
 
 function set_alert_viewed( alertID ){
   $.post('ajax/set_alert_viewed.php', { alertID: alertID },RetSWT1);
   function RetSWT1(dat1) {
     update_alerts_page();
   }
-} 
+}
 
 function update_alerts_page() {
   $.post('ajax/get_alerts_count.php', RetSWT1);
-  function RetSWT1(dat1) { 
+  function RetSWT1(dat1) {
     if ( dat1 == 1 )
     {
       window.location="alerts.php";
@@ -363,14 +640,14 @@ function pause_set_start(){
   $.post('ajax/go_back_pause_page_mode.php', RetSWT1);
   function RetSWT1(dat1) {
     show_pause_page();
-  }  	
+  }
 }
 
 function pause_go_back(){
   $.post('ajax/go_back_pause_page_mode.php', RetSWT1);
   function RetSWT1(dat1) {
     show_pause_page();
-  }  	
+  }
 }
 
 function show_pause_page(){
@@ -379,13 +656,13 @@ function show_pause_page(){
     function RetSWT1(dat1) {
       if ( dat1 == 1 ){
         show_pause_notification();
-      }  
+      }
       if ( dat1 == 2 ){
         show_pause_by_user( -1 );
       }
       set_pause_notificationc_count();
     }
-  }   	
+  }
 }
 
 function set_pause_notificationc_count(){
@@ -404,20 +681,11 @@ function show_pause_notification(){
       document.getElementById('pause_approvement').innerHTML = dat1;
 
       if ( document.getElementById('pause_approvement_table_users') && document.getElementById('pause_approvement') ){
-        tableHeight = document.getElementById('pause_approvement_table_users').offsetHeight + 50;
-        tableWidth = document.getElementById('pause_approvement_table_users').offsetWidth + 30;
-        win_h = $(window).height();
-        win_w = $(window).width();
-
-        if ( tableHeight > win_h ){ tableHeight = win_h; }
-        if ( tableWidth > win_w ){ tableWidth = win_w; }
-
-        document.getElementById('pause_approvement').style.height = tableHeight + "px";
-        document.getElementById('pause_approvement').style.width = tableWidth + "px";
+        fit_notification_table('pause_approvement', 'pause_approvement_table_users');
         set_delay_notificationc_count();
       }
     }
-  }   	
+  }
 }
 
 function show_pause_by_user( user ){
@@ -427,21 +695,12 @@ function show_pause_by_user( user ){
       document.getElementById('pause_approvement').innerHTML = dat1;
 
       if ( document.getElementById('pause_approvement_table') && document.getElementById('pause_approvement') ){
-        tableHeight = document.getElementById('pause_approvement_table').offsetHeight;
-        tableWidth = document.getElementById('pause_approvement_table').offsetWidth;
-        win_h = $(window).height() - 110;
-        win_w = $(window).width();
-
-        if ( tableHeight > win_h ){ tableHeight = win_h; }
-        if ( tableWidth > win_w ){ tableWidth = win_w; }
-
-        document.getElementById('pause_approvement').style.height = tableHeight + "px";
-        document.getElementById('pause_approvement').style.width = 550 + "px";
+        fit_notification_table('pause_approvement', 'pause_approvement_table');
         set_delay_notificationc_count();
-      }  
+      }
     }
   }
-}        
+}
 
 function show_add_time_table( showTable ){
   $.post('ajax/get_add_times.php', {},RetSWT1);
@@ -460,20 +719,6 @@ function show_add_time_table( showTable ){
   if ( document.getElementById('delay_explanation_add_time') ){ document.getElementById('delay_explanation_add_time').style.display='block'; }
   if ( showTable == 1 ){
     show_table();
-  } 
-}
-
-function upl_add_time(){
-  if ( document.getElementById('ta_start_date_time') && document.getElementById('ta_stop_date_time') && document.getElementById('ta_base') && document.getElementById('ta_desc') ){
-    var ta_start_date_time = document.getElementById('ta_start_date_time').value;
-    var ta_stop_date_time = document.getElementById('ta_stop_date_time').value;
-    var ta_base = document.getElementById('ta_base').value;
-    var ta_desc = document.getElementById('ta_desc').value;
-
-    $.post('ajax/time_appender.php', {ta_start_date_time: ta_start_date_time, ta_stop_date_time: ta_stop_date_time, ta_base: ta_base, ta_desc: ta_desc}, RetSWT);
-    function RetSWT(dat) {
-      window.location=self.location;
-    }
   }
 }
 
@@ -483,13 +728,13 @@ function show_delay_page(){
     function RetSWT1(dat1) {
       if ( dat1 == 1 ){
         show_delay_notification();
-      }  
+      }
       if ( dat1 == 2 ){
         show_delays_by_user( -1 );
       }
       set_delay_notificationc_count();
     }
-  }   	
+  }
 }
 
 function show_delay_notification(){
@@ -499,25 +744,16 @@ function show_delay_notification(){
       document.getElementById('delay_approvement').innerHTML = dat1;
 
       if ( document.getElementById('delay_approvement_table_users') && document.getElementById('delay_approvement') ){
-        tableHeight = document.getElementById('delay_approvement_table_users').offsetHeight + 50;
-        tableWidth = document.getElementById('delay_approvement_table_users').offsetWidth + 25;
-        win_h = $(window).height();
-        win_w = $(window).width();
-
-        if ( tableHeight > win_h ){ tableHeight = win_h; }
-        if ( tableWidth > win_w ){ tableWidth = win_w; }
-
-        document.getElementById('delay_approvement').style.height = tableHeight + "px";
-        document.getElementById('delay_approvement').style.width = tableWidth + "px";
+        var fit = fit_notification_table('delay_approvement', 'delay_approvement_table_users');
         set_delay_notificationc_count();
 
-        $.post('ajax/get_delay_approvment_header_content.php', { width: tableWidth, offs: 12 }, RetSWT2);
+        $.post('ajax/get_delay_approvment_header_content.php', { width: fit.width, offs: 12 }, RetSWT2);
         function RetSWT2(dat2) {
           document.getElementById('delayHeader').innerHTML = dat2;
         }
       }
     }
-  }	
+  }
 }
 
 function show_delays_by_user( user ){
@@ -527,19 +763,10 @@ function show_delays_by_user( user ){
       document.getElementById('delay_approvement').innerHTML = dat1;
 
       if ( document.getElementById('delay_approvement_table') && document.getElementById('delay_approvement') ){
-        tableHeight = document.getElementById('delay_approvement_table').offsetHeight;
-        tableWidth = document.getElementById('delay_approvement_table').offsetWidth;
-        win_h = $(window).height() - 110;
-        win_w = $(window).width();
-
-        if ( tableHeight > win_h ){ tableHeight = win_h; }
-        if ( tableWidth > win_w ){ tableWidth = win_w; }
-
-        document.getElementById('delay_approvement').style.height = tableHeight + "px";
-        document.getElementById('delay_approvement').style.width = 1020 + "px";
+        var fit = fit_notification_table('delay_approvement', 'delay_approvement_table');
         set_delay_notificationc_count();
 
-        $.post('ajax/get_delay_approvment_header_content.php', { width: tWidth, offs: 8 }, RetSWT2);
+        $.post('ajax/get_delay_approvment_header_content.php', { width: fit.width, offs: 8 }, RetSWT2);
         function RetSWT2(dat2) {
           document.getElementById('delayHeader').innerHTML = dat2;
         }
@@ -552,22 +779,24 @@ function delay_go_back(){
   $.post('ajax/go_back_delay_page_mode.php', RetSWT1);
   function RetSWT1(dat1) {
     show_delay_page();
-  }	
+  }
 }
 
 function delay_set_start(){
   $.post('ajax/go_back_delay_page_mode.php', RetSWT1);
   function RetSWT1(dat1) {
     show_delay_page();
-  }  	
+  }
 }
 
 function accept_refuse_delay_for_user_final( addID, suDesc, accept, penaltyID, penDate, userID ){
   $.post('ajax/set_delay_penalty_info.php', { addID: addID, suDesc: suDesc, accept: accept, penaltyID: penaltyID, penDate: penDate, userID: userID }, RetSWT2);
   function RetSWT2(dat2) {
-    show_delays_by_user( -1 );
     document.getElementById('delay_approvement_desc').style.display='none';
-  }  
+    if (!reload_if_missing_container('delay_approvement')) {
+      show_delays_by_user( -1 );
+    }
+  }
 }
 
 function accept_delay_for_user( addID, suDesc, penaltyID, penDate, userID ){
@@ -578,7 +807,7 @@ function accept_delay_for_user( addID, suDesc, penaltyID, penDate, userID ){
     document.getElementById('penIDTempVal').value = penaltyID;
     document.getElementById('penDateTempVal').value = penDate;
     document.getElementById('penUserIDTempVal').value = userID;
-    document.getElementById('acceptTempVal').value = 1;  
+    document.getElementById('acceptTempVal').value = 1;
   }
   else {
     alert("WArning");
@@ -604,129 +833,79 @@ function mark_as_deleted_delay_for_user( addID ){
   var perform=confirm('Запись будет помечена как удаленная. Продолжить?')
   if ( perform == true ){
     var mode = 100;
-    $.post('ajax/set_delay_state.php', { addID: addID, mode: mode });
-  }   	
+    $.post('ajax/set_delay_state.php', { addID: addID, mode: mode }, function() {
+      if (!reload_if_missing_container('delay_approvement')) {
+        show_delays_by_user( -1 );
+      }
+    });
+  }
 }
 
 function mark_as_undeleted_delay_for_user( addID ){
   var perform=confirm('Запись будет восстановлена. Продолжить?')
   if ( perform == true ){
     var mode = 200;
-    $.post('ajax/set_delay_state.php', { addID: addID, mode: mode });
+    $.post('ajax/set_delay_state.php', { addID: addID, mode: mode }, function() {
+      if (!reload_if_missing_container('delay_approvement')) {
+        show_delays_by_user( -1 );
+      }
+    });
   }
 }
 
-function show_add_times_by_user( user ){  
-  if ( document.getElementById('add_time_content') ){  
+function show_add_times_by_user( user ){
+  if ( document.getElementById('add_time_content') ){
     $.post('ajax/get_add_times_by_user.php', { user: user }, RetSWT1);
-    function RetSWT1(dat1) {
-      document.getElementById('add_time_content').innerHTML = dat1;   
-
-      if ( document.getElementById('add_time_approvement_table') && document.getElementById('add_time_content') ){ 
-        tableHeight = document.getElementById('add_time_approvement_table').offsetHeight;
-        tableWidth = document.getElementById('add_time_approvement_table').offsetWidth;
-        win_h = $(window).height() - 150;
-        win_w = $(window).width();
-
-        if ( tableHeight > win_h ){ tableHeight = win_h; }
-        if ( tableWidth > win_w ){ tableWidth = win_w; }
-      
-        tWidth = 1095;
-
-        document.getElementById('add_time_content').style.height = tableHeight + "px";
-        document.getElementById('add_time_content').style.width = tWidth + "px";
-        set_add_time_notificationc_count();
-
-        $.post('ajax/get_time_approvment_header_content.php', { width: tWidth, offs: 8 }, RetSWT2);
-        function RetSWT2(dat2) {
-          document.getElementById('addTimeHeader').innerHTML = dat2;
-        }
-      }  
-    }
-  }   	
-}
-
-function show_add_time_notification(){  
-  $.post('ajax/get_add_times_notification_table.php', RetSWT1);
-  function RetSWT1(dat1) {
-    document.getElementById('add_time_content').innerHTML = dat1;
-
-    if ( document.getElementById('add_time_approvement_table_users') ){ 
-      tableWidth = document.getElementById('add_time_approvement_table_users').offsetWidth + 10;
-
-      widthStr = 'width:' + tableWidth + 'px';
-
-      document.getElementById('add_time_content').setAttribute("style",widthStr);
-
-      set_add_time_notificationc_count();
-
-      $.post('ajax/get_time_approvment_header_content.php', { width: tableWidth, offs: 12 }, RetSWT2);
-      function RetSWT2(dat2) {
-        document.getElementById('addTimeHeader').innerHTML = dat2;
-      } 
-    }
-  }
-}   	
-
-function show_add_time_notification(){  
-  if ( document.getElementById('add_time_content') ){  
-    document.getElementById('dateTimeField').style.display='none';
-
-    $.post('ajax/get_add_times_notification_table.php', RetSWT1);
     function RetSWT1(dat1) {
       document.getElementById('add_time_content').innerHTML = dat1;
 
-      if ( document.getElementById('add_time_approvement_table_users') ){ 
-        tableWidth = document.getElementById('add_time_approvement_table_users').offsetWidth + 10;
-
-        widthStr = 'width:' + tableWidth + 'px';
-
-        document.getElementById('add_time_content').setAttribute("style",widthStr);
-
+      if ( document.getElementById('add_time_approvement_table') && document.getElementById('add_time_content') ){
+        var fit = fit_notification_table('add_time_content', 'add_time_approvement_table');
         set_add_time_notificationc_count();
 
-        $.post('ajax/get_time_approvment_header_content.php', { width: tableWidth, offs: 12 }, RetSWT2);
+        $.post('ajax/get_time_approvment_header_content.php', { width: fit.width, offs: 8 }, RetSWT2);
         function RetSWT2(dat2) {
           document.getElementById('addTimeHeader').innerHTML = dat2;
-        } 
+        }
       }
     }
-    document.getElementById('dateTimeField').style.display='block';
   }
 }
 
-function add_time_go_back(){  
+function add_time_go_back(){
   $.post('ajax/go_back_add_time_page_mode.php', RetSWT1);
   function RetSWT1(dat1) {
     show_add_time_page();
-  }  	
-}
-
-function add_time_set_start(){  
-  $.post('ajax/go_back_add_time_page_mode.php', RetSWT1);                           
-  function RetSWT1(dat1) {
-    show_add_time_page();
-  }  	
-}
-
-function accept_refuse_add_time_for_user_final( addID, suDesc, accept ) {
-  $.post('ajax/set_add_times_info.php', { addID: addID, suDesc: suDesc, accept: accept }, RetSWT1);                           
-  function RetSWT1(dat1) {
-    show_add_times_by_user( -1 );
-    document.getElementById('add_time_approvement_desc').style.display='none';
   }
 }
 
-function accept_add_time_for_user( addID, suDesc ){ 
+function add_time_set_start(){
+  $.post('ajax/go_back_add_time_page_mode.php', RetSWT1);
+  function RetSWT1(dat1) {
+    show_add_time_page();
+  }
+}
+
+function accept_refuse_add_time_for_user_final( addID, suDesc, accept ) {
+  $.post('ajax/set_add_times_info.php', { addID: addID, suDesc: suDesc, accept: accept }, RetSWT1);
+  function RetSWT1(dat1) {
+    document.getElementById('add_time_approvement_desc').style.display='none';
+    if (!reload_if_missing_container('add_time_content')) {
+      show_add_times_by_user( -1 );
+    }
+  }
+}
+
+function accept_add_time_for_user( addID, suDesc ){
   if ( document.getElementById('add_time_approvement_desc') ){
     document.getElementById('add_time_approvement_desc').style.display='block';
     document.getElementById('add_time_part_desc_2').value = suDesc;
     document.getElementById('recIDTempVal').value = addID;
-    document.getElementById('acceptTempVal').value = 1;  
+    document.getElementById('acceptTempVal').value = 1;
   }
 }
 
-function refuse_add_time_for_user( addID, suDesc ){ 
+function refuse_add_time_for_user( addID, suDesc ){
   if ( document.getElementById('add_time_approvement_desc') ){
     document.getElementById('add_time_approvement_desc').style.display='block';
     document.getElementById('add_time_part_desc_2').value = suDesc;
@@ -735,67 +914,78 @@ function refuse_add_time_for_user( addID, suDesc ){
   }
 }
 
-function mark_as_deleted_add_time_for_user( addID ){  
+function mark_as_deleted_add_time_for_user( addID ){
   var perform=confirm('Запись будет помечена как удаленная. Продолжить?')
   if ( perform == true ){
     var mode = 100;
-    $.post('ajax/set_add_times_state.php', { addID: addID, mode: mode });                           
+    $.post('ajax/set_add_times_state.php', { addID: addID, mode: mode }, function() {
+      if (!reload_if_missing_container('add_time_content')) {
+        show_add_times_by_user( -1 );
+      }
+    });
   }
 }
 
-function mark_as_undeleted_add_time_for_user( addID ){  
+function mark_as_undeleted_add_time_for_user( addID ){
   var perform=confirm('Запись будет восстановлена. Продолжить?')
   if ( perform == true ){
     var mode = 200;
-    $.post('ajax/set_add_times_state.php', { addID: addID, mode: mode });
-  }   	
+    $.post('ajax/set_add_times_state.php', { addID: addID, mode: mode }, function() {
+      if (!reload_if_missing_container('add_time_content')) {
+        show_add_times_by_user( -1 );
+      }
+    });
+  }
 }
 
 function show_table(){
   if ( document.getElementById('add_times_table') ){
-    $.post('ajax/get_add_times_table.php', RetSWT1);                           
+    $.post('ajax/get_add_times_table.php', RetSWT1);
     function RetSWT1(dat1) {
-      document.getElementById('add_times_table').innerHTML = dat1;              
+      document.getElementById('add_times_table').innerHTML = dat1;
+      schedule_notification_layout(document.getElementById('add_times_table'));
     }
-  }   	
+  }
 }
 
 function show_pause_table(){
   if ( document.getElementById('pause_times_table') ){
-    $.post('ajax/get_pause_times_table.php', RetSWT1);  
+    $.post('ajax/get_pause_times_table.php', RetSWT1);
 
-                         
+
     function RetSWT1(dat1) {
       document.getElementById('pause_times_table').innerHTML = dat1;
+      schedule_notification_layout(document.getElementById('pause_times_table'));
     }
-  }   	
+  }
 }
 
 function show_pause_sport_table(){
   if ( document.getElementById('pause_sport_times_table') ){
-    $.post('ajax/get_pause_sport_table.php', RetSWT1);  
-        
+    $.post('ajax/get_pause_sport_table.php', RetSWT1);
+
     function RetSWT1(dat1) {
       document.getElementById('pause_sport_times_table').innerHTML = dat1;
     }
-  }   	
+  }
 }
 
 function show_delay_table(){
   if ( document.getElementById('delay_table') ){
-    $.post('ajax/get_delay_table.php', RetSWT1);                           
+    $.post('ajax/get_delay_table.php', RetSWT1);
     function RetSWT1(dat1) {
       document.getElementById('delay_table').innerHTML = dat1;
+      schedule_notification_layout(document.getElementById('delay_table'));
     }
-  }   	
+  }
 }
 
-function ta_delete( delID ){	
+function ta_delete( delID ){
   var perform=confirm('запись будет удалена. Продолжить?')
   if ( perform == true ){
     $.post('ajax/time_delete.php', {delID: delID}, RetSWT);
     function RetSWT(dat) {
-      show_table();  
+      show_table();
     }
   }
 }
@@ -807,7 +997,7 @@ function cancel_time_add(){
 function add_addition_time(){
   if ( document.getElementById('delay_explanation_add_time') && document.getElementById('delay_explanation_add_time_part') ){
     $.post('ajax/get_add_time_part.php', {},RetSWT1);
-    function RetSWT1(dat1) { 
+    function RetSWT1(dat1) {
       document.getElementById('delay_explanation_add_time').style.display='none';
       document.getElementById('delay_explanation_add_time_part').innerHTML = dat1;
       document.getElementById('delay_explanation_add_time_part').style.display='block';
@@ -815,12 +1005,43 @@ function add_addition_time(){
   }
 }
 
+function refresh_accounting_errors_after_offsite_work(){
+  $.post('ajax/get_accounting_errors_count.php', {}, function(data) {
+    var count = Number.parseInt(data, 10);
+
+    if (!Number.isFinite(count)) {
+      return;
+    }
+
+    var button = document.getElementById('accountingErrorsBtn');
+
+    if (count <= 0) {
+      if (button && button.closest('tr')) {
+        button.closest('tr').remove();
+      }
+
+      document.querySelectorAll('.accounting-error-attention').forEach(function(icon) {
+        icon.remove();
+      });
+      return;
+    }
+
+    if (button) {
+      var label = button.querySelector('h5');
+
+      if (label) {
+        label.textContent = 'Ошибки учета (' + count + ')';
+      }
+    }
+  });
+}
+
 function cancel_part_time_add(){
   if ( document.getElementById('delay_explanation_add_time_part') ){ document.getElementById('delay_explanation_add_time_part').style.display='none'; }
   $.post('ajax/get_add_times.php', {},RetSWT1);
-  function RetSWT1(dat1) { 
-    if ( document.getElementById('delay_explanation_add_time') ){ 
-      document.getElementById('delay_explanation_add_time').innerHTML = dat1; 
+  function RetSWT1(dat1) {
+    if ( document.getElementById('delay_explanation_add_time') ){
+      document.getElementById('delay_explanation_add_time').innerHTML = dat1;
       document.getElementById('delay_explanation_add_time').style.display='block';
     }
   }
@@ -828,7 +1049,7 @@ function cancel_part_time_add(){
 
 function add_training_time(){
   $.post('ajax/get_add_gym_time.php', RetSWT1);
-  function RetSWT1(dat1) { 
+  function RetSWT1(dat1) {
     if ( document.getElementById('delay_explanation_sport_time') ){
       document.getElementById('delay_explanation_sport_time').innerHTML = dat1;
       document.getElementById('delay_explanation_sport_time').style.display='flex';
@@ -837,41 +1058,54 @@ function add_training_time(){
 }
 
 function close_add_sport_time(){
-  location.reload();
   if ( document.getElementById('delay_explanation_sport_time') ){ document.getElementById('delay_explanation_sport_time').style.display='none'; }
 }
 
+var offsiteWorkRequestPending = false;
+
 function part_time_add( byAlert ){
+  if (offsiteWorkRequestPending) {
+    return;
+  }
+
   if ( document.getElementById('add_time_certain') && document.getElementById('add_time_range') ){
-    if ( document.getElementById('add_time_certain').checked ){ 
+    if ( document.getElementById('add_time_certain').checked ){
       if ( document.getElementById('add_time_part_start_dateTime') && document.getElementById('add_time_part_stop_dateTime') &&  document.getElementById('add_time_part_base') && document.getElementById('add_time_part_desc') ){
         var add_time_part_start_dt = document.getElementById('add_time_part_start_dateTime').value;
         var add_time_part_stop_dt = document.getElementById('add_time_part_stop_dateTime').value;
- 
+
         if ( add_time_part_start_dt == add_time_part_stop_dt ){
           alert( "Длительность работы равна 0 !" );
           return;
         }
- 
+
         if ( add_time_part_start_dt > add_time_part_stop_dt ){
           alert( "Время начала работ больше времени окончания работ!" );
           return;
         }
-  
+
         var add_time_part_base = document.getElementById('add_time_part_base').value;
         var add_time_part_desk = document.getElementById('add_time_part_desc').value;
 
-        $.post('ajax/add_time_part_certain.php', {add_time_part_start_dt: add_time_part_start_dt, add_time_part_stop_dt: add_time_part_stop_dt, 
-                add_time_part_base: add_time_part_base, add_time_part_desk: add_time_part_desk, byAlert: byAlert }, RetSWT10);
-        function RetSWT10(dat10) {  
+        offsiteWorkRequestPending = true;
+        $.post('ajax/add_time_part_certain.php', {add_time_part_start_dt: add_time_part_start_dt, add_time_part_stop_dt: add_time_part_stop_dt,
+                add_time_part_base: add_time_part_base, add_time_part_desk: add_time_part_desk, byAlert: byAlert }, RetSWT10)
+          .fail(function() {
+            alert('Ошибка сервера');
+          })
+          .always(function() {
+            offsiteWorkRequestPending = false;
+          });
+        function RetSWT10(dat10) {
           if ( dat10 == 1 ){
-            if ( byAlert == 1 ){ 
+            refresh_accounting_errors_after_offsite_work();
+            if ( byAlert == 1 ){
               update_alerts_page();
             }
             else{
               show_add_time_table( 1 );
             }
-          }                        
+          }
         }
       }
     }
@@ -931,6 +1165,7 @@ function part_time_add( byAlert ){
           return;
         }
 
+        offsiteWorkRequestPending = true;
         $.post(
           'ajax/add_time_part_range.php',
           {
@@ -944,10 +1179,17 @@ function part_time_add( byAlert ){
             byAlert: byAlert
           },
           RetSWT20
-        );
+        )
+          .fail(function() {
+            alert('Ошибка сервера');
+          })
+          .always(function() {
+            offsiteWorkRequestPending = false;
+          });
 
-        function RetSWT20(dat20) {  
-          if ( dat20 == 1 ){ 
+        function RetSWT20(dat20) {
+          if ( dat20 == 1 ){
+            refresh_accounting_errors_after_offsite_work();
             if ( byAlert == 1 ){
               update_alerts_page();
             }
@@ -982,21 +1224,25 @@ function save_entry (currentDay, startTime) {
         break;
       default:
         $.post('ajax/change_sum_people.php', {training_date: training_date, training_start_time: training_start_time, training_stop_time: training_stop_time}, RetSWT1);
-        function RetSWT1(dat1) {  
+        function RetSWT1(dat1) {
           if ( dat1 == 1 ) {
             alert( "На данное время превышен лимит записи! Выберите другую дату/время." );
           }
           else {
             $.post('ajax/gym_add_time.php', {training_date: training_date, training_start_time: training_start_time, training_stop_time: training_stop_time}, RetSWT2);
-            function RetSWT2(dat2) {  
+            function RetSWT2(dat2) {
             if ( dat2 == 2 ) {
               alert( "Тренировка запланирована!" );
-              location.reload();
+              close_add_sport_time();
+              show_pause_sport_table();
+            }
+            else if ( dat2 == 1 ) {
+              alert( "На данное время превышен лимит записи! Выберите другую дату/время." );
             }
             else {
               alert( "Ошибка" );
             }
-          }                       
+          }
         }
       }
     }
@@ -1005,7 +1251,7 @@ function save_entry (currentDay, startTime) {
 
 function delete_training_schedule () {
   $.post('ajax/delete_gym_schedule_window.php', RetSWT1);
-  function RetSWT1(dat1) { 
+  function RetSWT1(dat1) {
     if ( document.getElementById('delete_gym_schedule_window') ){
       document.getElementById('delete_gym_schedule_window').innerHTML = dat1;
       document.getElementById('delete_gym_schedule_window').style.display='flex';
@@ -1018,7 +1264,10 @@ function delete_gym_schedule(date_train, start_time, stop_time) {
   function RetSWT1(dat1) {
     if ( dat1 == 2 ) {
       alert( "Тренировка удалена." );
-      location.reload();
+      show_pause_sport_table();
+      if ( document.getElementById('delete_gym_schedule_window') ){
+        document.getElementById('delete_gym_schedule_window').style.display='none';
+      }
    }
    else {
      alert( "Ошибка" );
@@ -1026,34 +1275,12 @@ function delete_gym_schedule(date_train, start_time, stop_time) {
   }
 }
 
-function part_time_show(){
-  if ( document.getElementById('add_time_part_date') && document.getElementById('add_time_part_start_time') && document.getElementById('add_time_part_stop_time') && document.getElementById('add_time_part_base') && document.getElementById('add_time_part_desc') ){
-    var add_time_part_date = document.getElementById('add_time_part_date').value;
-    var add_time_part_start_time = document.getElementById('add_time_part_start_time').value;
-    var add_time_part_stop_time = document.getElementById('add_time_part_stop_time').value;
-    var add_time_part_base = document.getElementById('add_time_part_base').value;
-    var add_time_part_desk = document.getElementById('add_time_part_desc').value;
- 
-    $.post('ajax/add_time_part.php', {add_time_part_date: add_time_part_date, add_time_part_start_time: add_time_part_start_time, add_time_part_stop_time: add_time_part_stop_time, add_time_part_base: add_time_part_base, add_time_part_desk: add_time_part_desk }, RetSWT);
-    function RetSWT(dat) {  
-      if ( dat == 1 ){ 
-        $.post('ajax/get_add_times.php', {},RetSWT1);
-        function RetSWT1(dat1) { 
-          document.getElementById('delay_explanation_add_time_part').style.display='none';
-          document.getElementById('delay_explanation_add_time').innerHTML = dat1;
-          document.getElementById('delay_explanation_add_time').style.display='block';
-        }
-      }
-    }
-  }   
-}
-
 function part_time_del( itemId ){
   var perform=confirm('запись будет удалена. Продолжить?')
   if ( perform == true ){
     $.post('ajax/del_time_part.php', {itemId: itemId }, RetSWT);
-    function RetSWT(dat) {  
-      if ( dat == 1 ){ 
+    function RetSWT(dat) {
+      if ( dat == 1 ){
         show_add_time_table( 1 );
       }
     }
@@ -1064,15 +1291,15 @@ function set_pause_full_screen(){
   if ( document.getElementById('pauseFullScreen') ){
     win_w = $(window).width();
     win_h = $(window).height();
-   
-    document.getElementById('pauseFullScreen').style.height = ( win_h - 30 ) + "px"; 
-    document.getElementById('pauseFullScreen').style.width = ( win_w - 30 ) + "px";  
+
+    document.getElementById('pauseFullScreen').style.height = ( win_h - 30 ) + "px";
+    document.getElementById('pauseFullScreen').style.width = ( win_w - 30 ) + "px";
   }
 }
-         
+
 function check_pause_state( force ){
   $.post('ajax/is_there_pause.php', RetSWT);
-  function RetSWT(dat) { 
+  function RetSWT(dat) {
     if ( dat == 0 ){
       if ( force == 1 ){
         window.location=self.location;
@@ -1080,11 +1307,17 @@ function check_pause_state( force ){
       else{
         return;
       }
-    } 
+    }
     else if ( dat == 1 ){
       $.post('ajax/get_pause_stop_content.php', RetSWT1);
       function RetSWT1(dat1) {
-        $("body").html(dat1);  
+        var pauseHtml = $.trim(dat1);
+
+        if (pauseHtml === '' || pauseHtml === '0' || pauseHtml.indexOf('id="pauseFullScreen"') === -1) {
+          return;
+        }
+
+        $("body").html(dat1);
       }
     }
     else if ( dat == 2 ){
@@ -1099,12 +1332,12 @@ function check_pause_state( force ){
 
               if ( document.getElementById('resultContentTable') ){
                 tableHeight = document.getElementById('resultContentTable').offsetHeight + 15;
-                
+
                 if ( tableHeight > 500 ){
                   tableHeight = 500;
-                }  
+                }
 
-                document.getElementById('pause_result_head').style.height = tableHeight + "px"; 
+                document.getElementById('pause_result_head').style.height = tableHeight + "px";
               }
             }
           }
@@ -1112,52 +1345,6 @@ function check_pause_state( force ){
       }
     }
   }
-}
-
-function check_pause_state1( force ){
-  $.post('ajax/is_there_pause.php', RetSWT);
-  function RetSWT(dat) {
-	alert(dat);
-
-    if ( dat == 0 ){
-      if ( force == 1 ){
-        window.location=self.location;
-      }
-      else{
-        return;
-      }
-    } 
-    else if ( dat == 1 ){
-      $.post('ajax/get_pause_stop_content.php', RetSWT1);
-      function RetSWT1(dat1) {
-        $("body").html(dat1);  
-      }
-    }
-    else if ( dat == 2 ){
-      $.post('ajax/finalize_pause.php', RetSWT2);
-      function RetSWT2(dat2) {
-        if ( dat2 == 1 ){
-          $.post('ajax/get_pause_result_content.php', RetSWT3 );
-          function RetSWT3(dat3) {
-            if ( document.getElementById('delay_explanation_add_time') ){
-              document.getElementById('pause_result_head').innerHTML = dat3;
-              document.getElementById('pause_result_head').style.display='block';
-
-              if ( document.getElementById('resultContentTable') ){
-                tableHeight = document.getElementById('resultContentTable').offsetHeight + 15;
-                
-                if ( tableHeight > 500 ){
-                  tableHeight = 500;
-                }  
-
-                document.getElementById('pause_result_head').style.height = tableHeight + "px"; 
-              }
-            }
-          }
-        }
-      }
-    }
-  }                       
 }
 
 function set_pause_header(){
@@ -1172,7 +1359,7 @@ function set_pause_header(){
 
 function set_sport_pause() {
   if ( document.getElementById('sport_pause') ){
-    document.getElementById('sport_pause').style.display='block'; 
+    document.getElementById('sport_pause').style.display='block';
     $.post('ajax/get_pause_sport_content.php', RetSWT);
     function RetSWT(dat){
       document.getElementById('sport_pause').innerHTML = dat;
@@ -1193,7 +1380,7 @@ async function saveRemoteWork() {
   const sel = document.getElementById('supervisor');
 
   if (!sel) {
-    alert('Ошибка: элемент выбора руководителя не найден'); 
+    alert('Ошибка: элемент выбора руководителя не найден');
     return;
   }
 
@@ -1254,7 +1441,7 @@ async function saveRemoteWork() {
     alert('Connection error: ' + err.message);
   } finally {
     if (btn) {
-      btn.dataset.processing = '0'; 
+      btn.dataset.processing = '0';
       btn.disabled = false;
     }
   }
@@ -1318,7 +1505,7 @@ async function finishRemoteWork() {
 function remote_work() {
   const container = document.getElementById('remote_work');
   if (!container) return;
-  
+
   container.style.display='block';
 
   $.ajax({
@@ -1326,7 +1513,7 @@ function remote_work() {
     method: 'GET',
     success: function(html) {
       container.innerHTML = html;
-    },  
+    },
     error: function(jqXHR) {
       alert('Ошибка загрузки формы: ' + jqXHR.status);
     }
@@ -1383,7 +1570,7 @@ function set_pause_state(){
       }
       else{
         alert( dat );
-      } 
+      }
     }
   }
 }
@@ -1426,29 +1613,81 @@ function close_sport_pause(){
   }
 }
 
-function close_birth_window () {
-  if (document.getElementsByClassName('birth_person')) {
-    document.getElementsByClassName('birth_person').style.display='none';
+function make_div_scroll(){
+  var reportWindow = document.getElementById('report_window');
+  var reportHead = document.getElementById('report_window_head');
+  var reportLeft = document.getElementById('report_window_left');
+
+  if (!reportWindow) {
+    return;
+  }
+
+  if (reportHead) {
+    reportHead.scrollLeft = reportWindow.scrollLeft;
+  }
+
+  if (reportLeft) {
+    reportLeft.scrollTop = reportWindow.scrollTop;
   }
 }
 
-function make_div_scroll(){
-  var horizScrollVal = document.getElementById('report_window').scrollLeft;
-  document.getElementById('report_window_head').scrollLeft = horizScrollVal;
-
-  var vertScrollVal = document.getElementById('report_window').scrollTop;
-  document.getElementById('report_window_left').scrollTop = vertScrollVal;
-}
-
 function make_div_scroll_single(){
-  var vertScrollVal = document.getElementById('report_window_single').scrollTop;
-  document.getElementById('report_window_left').scrollTop = vertScrollVal;
+  var reportWindow = document.getElementById('report_window_single');
+  var reportLeft = document.getElementById('report_window_left');
+
+  if (reportWindow && reportLeft) {
+    reportLeft.scrollTop = reportWindow.scrollTop;
+  }
 }
 
-function make_div_scroll_sport() {
-  var vertScrollVal = document.getElementById('delete_button_cont').scrollTop;
-  document.getElementById('delete_button_cont').scrollTop = vertScrollVal;
+function fit_report_layout() {
+  var reportWindow = document.getElementById('report_window')
+    || document.getElementById('report_window_single');
+  var reportHead = document.getElementById('report_window_head')
+    || document.getElementById('report_window_head_single');
+  var reportMain = document.getElementById('report_window_main');
+  var contentTable = reportWindow
+    ? reportWindow.querySelector('.report-window-content-table')
+    : null;
+
+  if (!reportWindow || !reportHead || !reportMain || !contentTable) {
+    return;
+  }
+
+  reportWindow.style.width = '';
+  reportWindow.style.maxWidth = '';
+  reportWindow.style.overflowY = 'hidden';
+
+  var tableWidth = Math.ceil(contentTable.getBoundingClientRect().width);
+  var tableHeight = Math.ceil(contentTable.getBoundingClientRect().height);
+  var availableWidth = Math.max(
+    165,
+    Math.floor(window.innerWidth - reportWindow.getBoundingClientRect().left - 10)
+  );
+  var availableHeight = reportWindow.clientHeight;
+  var needsVerticalScroll = tableHeight > availableHeight;
+  var scrollbarWidth = needsVerticalScroll ? get_vertical_scrollbar_width() : 0;
+  var reportWidth = Math.min(tableWidth + scrollbarWidth, availableWidth);
+
+  reportWindow.style.width = reportWidth + 'px';
+  reportWindow.style.maxWidth = reportWidth + 'px';
+  reportWindow.style.overflowY = needsVerticalScroll ? 'auto' : 'hidden';
+  reportWindow.style.overflowX = tableWidth > reportWindow.clientWidth ? 'auto' : 'hidden';
+
+  reportHead.style.width = reportWindow.clientWidth + 'px';
+  reportHead.style.maxWidth = reportWindow.clientWidth + 'px';
 }
+
+function schedule_report_layout() {
+  window.requestAnimationFrame(fit_report_layout);
+}
+
+document.addEventListener('DOMContentLoaded', schedule_report_layout);
+
+window.addEventListener('resize', function() {
+  window.clearTimeout(window.toriReportLayoutResizeTimer);
+  window.toriReportLayoutResizeTimer = window.setTimeout(schedule_report_layout, 80);
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   attachTooltipListeners();
@@ -1483,7 +1722,7 @@ function showTime (event, tooltip) {
   tooltip.style.position = 'absolute';
   tooltip.style.maxWidth = '300px';
   tooltip.style.top = `${elRect.top + scrollTop}px`;
-  
+
   if (spaceRight > tooltipWidth + 20) {
     tooltip.style.left = `${elRect.left + scrollLeft + 60}px`;
   } else {

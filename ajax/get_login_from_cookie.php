@@ -1,11 +1,9 @@
 <?php
-header("Content-type: text/plain; charset=utf-8");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
+require_once __DIR__ . '/../inc/ajax_response.php';
+require_once __DIR__ . '/../inc/request.php';
+ajax_text_headers();
 
-$userName = $_COOKIE['T_O_R_I_USERNAME'];
-
-$userName = trim($userName);
+$userName = trim(request_cookie_string('T_O_R_I_USERNAME'));
 
 if ( $userName != "" )
 {
