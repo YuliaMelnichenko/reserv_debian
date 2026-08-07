@@ -11,6 +11,7 @@ require_csrf_for_unsafe_request(true);
 
 $__login = request_post_trimmed_string('login');
 $__passwd = md5(md5(request_post_trimmed_string('passwd')));
+$__rememberLogin = request_post_string('remember_login') === '1';
 
 db_set_charset($link, "utf8");
 
@@ -34,47 +35,14 @@ else
   { 
     $row = db_fetch_one($query);
 
-    // Do not retain the prior employee's report, navigation, or workday state.
-    $_SESSION = array();
-    session_regenerate_id(true);
-    $_SESSION['ss_id'] = $row["id"];
-    $_SESSION['ss_rate'] = $row["rate"];
-    $ss_defaultStartTime = $row["defaultStartTime"];	
-    $_SESSION['ss_defaultStartTime'] = $ss_defaultStartTime;
-    $defaultStartHour = (int)(date("H", strtotime($ss_defaultStartTime)));
-    $defaultStartMinute = (int)(date("i", strtotime($ss_defaultStartTime)));      
-    $ss_allowedDelay = $row["allowedDelayMinutes"];
-    $_SESSION['ss_allowedDelay'] = $ss_allowedDelay;
-    $ss_defaultStartTimeWithDelay = date("H:i:s", strtotime($ss_defaultStartTime." + ".$ss_allowedDelay." minute"));
-
-    $_SESSION['ss_defaultStartTimeWithDelay'] = $ss_defaultStartTimeWithDelay;
-    $_SESSION['ss_defaultStartTimeWithDelayVal'] = strtotime($ss_defaultStartTimeWithDelay);
-    $_SESSION['ss_defaultStartHour'] = $defaultStartHour;
-    $_SESSION['ss_defaultStartMinute'] = $defaultStartMinute;
-    $_SESSION['ss_mode'] = 1;
-    $_SESSION['ss_delay_show_save'] = 0;
-    $_SESSION['ss_UserTimeZoneMins'] = $row["userTimeZoneMins"];
-    $_SESSION['ss_sessid'] = session_id();
+    auth_start_employee_session($row);
     csrf_rotate_token();
-    $retArr = get_current_datetime_in_timezone();
-    $_SESSION['ss_UserTimeZoneStr'] = $retArr[5];
-    $ss_dayTransitionTime = get_standard_day_transition_time();
-    $_SESSION['ss_dayTransitionTime'] = $ss_dayTransitionTime;
-    
-
-    $ss_RemoteWork = $row["remoteWork"];
-    $_SESSION['ss_RemoteWorkStr'] = "В ОФИСЕ";
-    $_SESSION['ss_RemoteWork'] = 0;
-    if ( $ss_RemoteWork == 1 )
-    {
-      $_SESSION['ss_RemoteWork'] = 1;
-      $_SESSION['ss_RemoteWorkStr'] = "УДАЛЕННЫЙ";
+    if ($__rememberLogin) {
+      auth_issue_remember_token($link, (int) $row['id']);
     }
-    $_SESSION['ss_visiting_ID'] = -1;      
-
-    $_SESSION['rep_start_stop_date_mode'] = 2;
-
-    $_SESSION['ss_dayWasChanged'] = 0;
+    else {
+      auth_revoke_remember_token($link);
+    }
     echo "OK";
   }
   else
@@ -97,6 +65,7 @@ else
     unset($_SESSION['ss_RemoteWork']);
     unset($_SESSION['ss_RemoteWorkStr']);
     unset($_SESSION['ss_visiting_ID']);
+    auth_revoke_remember_token($link);
     session_destroy();
   }
 //header("Location: index.php");
