@@ -4877,3 +4877,7 @@ h5.activ_time {
 .notification-detail-empty-header {
   width: 100%;
 }
+
+.close_pause {
+  cursor: pointer;
+}
