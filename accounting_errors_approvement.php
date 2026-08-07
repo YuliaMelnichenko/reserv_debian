@@ -129,7 +129,7 @@ echo "<table class=\"accounting-errors-page-table\">";
 
             if ($rowCount == 0) {
               echo "<tr class=\"accounting-errors-row\">";
-                echo "<td class=\"add_time accounting-errors-empty-cell\" colspan=7><h5 class=\"middle\">Ошибок учета у подчиненных нет</h5></td>";
+                echo "<td class=\"add_time accounting-errors-empty-cell\" colspan=7><h5 class=\"middle\">Ошибок учета у сотрудников нет</h5></td>";
               echo "</tr>";
             }
           }

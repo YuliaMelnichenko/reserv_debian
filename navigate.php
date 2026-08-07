@@ -48,7 +48,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
     echo "<tr>";
       echo "<td class=\"nav-brand-cell\" width = 205>";
         echo "<a class=\"nounder\" href=\"index.php\">";
-          echo "<p class=\"nav-brand-title\"><span class=\"nav-brand-prefix\"> В </span><span class=\"nav-brand-name\"> ТОРИ 3.0 </span></p>";
+          echo "<p class=\"nav-brand-title\"><span class=\"nav-brand-prefix\"> В </span><span class=\"nav-brand-name\"> ТОРИ 2.0 </span></p>";
         echo "</a>";
       echo "</td>";
       echo "<td width=30 align=\"right\" class=\"nav-icon-cell\">";

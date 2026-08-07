@@ -215,19 +215,19 @@ $Val = $Val2 + $Val4 - $Val3 + $Val9;
 
       $ValRedmine = redmine_represent($ValFact);
 
-      $content .= "<h5 class=\"middle\" title=\"Норма часов за период с учетом выходных, праздников и предпраздничных дней, но без вычета отпуска и больничного\"> "
+      $content .= "<h5 class=\"middle\" title=\"Норма часов за период с учетом выходных, праздников и предпраздничных дней, но без вычета отпуска и больничного (ТК - трудовой кодекс, в соответствии с производственным календарем)\"> "
         . format_time_d_hhmmss_pure_HH($ValNormBeforeLeaves)
-        . " - Норма (ч.)</h5></br>";
+        . " - Норма по ТК (ч.)</h5></br>";
 
       if ($ValLeaveHours > 0) {
-        $content .= "<h5 class=\"middle\" title=\"Количество часов отпуска и больничного, вычтенное из нормы за выбранный период\"> "
+        $content .= "<h5 class=\"middle\" title=\"Количество часов отпуска и больничного, вычитаемое из нормы за выбранный период\"> "
           . format_time_d_hhmmss_pure_HH($ValLeaveHours)
           . " - Отсутствие (ч.)</h5></br>";
       }
 
       $content .= "<h5 class=\"middle\" title=\"Норма часов к отработке после вычета отпуска и больничного\"> "
         . format_time_d_hhmmss_pure_HH($ValNormAfterLeaves)
-        . " - К отработке (ч.)</h5></br>";
+        . " - По плану (ч.)</h5></br>";
 
       $content .= "<span title=\"Фактически отработанное время за выбранный период\">"
         . format_time_d_hhmmss_pure_styled($ValFact)

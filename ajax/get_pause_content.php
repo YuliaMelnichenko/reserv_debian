@@ -12,7 +12,7 @@ include __DIR__ . "/../php_tori/connect.php";
 echo "<table cellpadding=\"0\" cellspacing=\"0\" border=0 style=\"margin:0; padding:0; margin-left:0;\" >";
   echo "<tr>";
     echo "<td align=\"right\" width = \"250\">";
-      echo "<img onclick=\"close_pause();\" src=\"img/closeSmall.png\">";
+      echo "<img class=\"close_pause\" onclick=\"close_pause();\" src=\"img/closeSmall.png\">";
     echo "</td>";
   echo "</tr>";
   echo "<tr>";
