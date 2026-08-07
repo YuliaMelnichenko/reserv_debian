@@ -2,10 +2,16 @@
   ob_start();
 
   require_once __DIR__ . '/inc/session.php';
+  require_once __DIR__ . '/inc/authentication.php';
 
   $expires = time() - 3600;
   setcookie("T_O_R_I_PASSWORD", "", app_cookie_options($expires, '/ajax'));
   setcookie("TORIPASSWORD", "", app_cookie_options($expires));
+  $authLink = auth_open_database();
+  auth_revoke_remember_token($authLink);
+  if ($authLink) {
+    db_close($authLink);
+  }
   setcookie("T_O_R_I_USERNAME", "", app_cookie_options($expires, '/ajax'));
   setcookie("TORI_CSRF_TOKEN", "", app_cookie_options($expires, '/', false, 'Strict'));
 

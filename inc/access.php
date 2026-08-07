@@ -6,11 +6,18 @@ require_once __DIR__ . '/errors.php';
 require_once __DIR__ . '/session.php';
 require_once __DIR__ . '/ajax_response.php';
 require_once __DIR__ . '/request.php';
+require_once __DIR__ . '/authentication.php';
 
 function access_session_is_valid()
 {
-    return isset($_SESSION['ss_id'], $_SESSION['ss_sessid'])
+    $isValid = isset($_SESSION['ss_id'], $_SESSION['ss_sessid'])
         && hash_equals((string) $_SESSION['ss_sessid'], session_id());
+
+    if ($isValid) {
+        return true;
+    }
+
+    return auth_restore_session_from_remember_token();
 }
 
 function deny_ajax_access($statusCode, $message)

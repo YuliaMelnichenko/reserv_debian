@@ -256,16 +256,14 @@ function move_to_last_location(){
 
 function auth()
 {
-  $sessionIsValid = isset($_SESSION['ss_id'], $_SESSION['ss_sessid'])
-    && hash_equals((string) $_SESSION['ss_sessid'], session_id());
+  require_once __DIR__ . '/inc/access.php';
 
-  if (!$sessionIsValid)
+  if (!access_session_is_valid())
   {
     header('Location: auth.php');
     exit;
   }
 
-  require_once __DIR__ . '/inc/access.php';
   require_csrf_for_unsafe_request(false);
 }  
 

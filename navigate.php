@@ -4,7 +4,6 @@
 function log_out(){
   let perform = confirm('Выйти из системы?')
   if ( perform == true ){
-    unset_cookie();
     location.href='exit.php';
   }
 }

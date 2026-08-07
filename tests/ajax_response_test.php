@@ -24,14 +24,21 @@ return function () {
     test_assert_same('{"valid":1}', $jsonResponse, 'JSON AJAX responses must preserve payload fields');
 
     $authEndpoint = file_get_contents(__DIR__ . '/../ajax/auth.php');
+    $authenticationService = file_get_contents(__DIR__ . '/../inc/authentication.php');
     $authPage = file_get_contents(__DIR__ . '/../auth.php');
     test_assert_true(
-        strpos($authEndpoint, '$_SESSION = array();') !== false
-            && strpos($authEndpoint, 'session_regenerate_id(true);') !== false,
+        strpos($authEndpoint, 'auth_start_employee_session($row);') !== false
+            && strpos($authenticationService, 'session_regenerate_id(true);') !== false,
         'Signing in as another employee must reset the prior employee session state'
     );
     test_assert_true(
         strpos($authPage, "window.location = 'index.php';") !== false,
         'A successful sign-in must open the current-day page directly'
+    );
+    test_assert_true(
+        strpos($authPage, 'remember_login: rememberLogin') !== false
+            && strpos($authPage, "ajax/set_cookie.php") === false
+            && strpos($authPage, "unset_cookie(toriCsrfToken)") === false,
+        'Sign-in must issue or revoke remembered access in the same request to avoid CSRF races'
     );
 };
