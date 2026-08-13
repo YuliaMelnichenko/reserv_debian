@@ -39,9 +39,9 @@ if ($journal === null) {
 
 $userName = $journal['user_name'];
 $addTimeInfo = $journal['entries'];
-$quarterLabel = format_date_range_label(
-  $journal['quarter_start_date'],
-  $journal['quarter_stop_date']
+$periodLabel = format_period_label(
+  $journal['period_start_date'],
+  $journal['period_stop_date']
 );
 
 echo "<table id=\"add_time_approvement_table\" border=0>";
@@ -49,7 +49,7 @@ echo "<table id=\"add_time_approvement_table\" border=0>";
     echo "<td class=\"nopadding_s\">";
       echo "<table border=0>";
         echo "<tr>";
-          echo "<td valign=\"middle\" width=1014 align=\"left\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5><h5 class=\"big\">Текущий квартал: " . html_escape($quarterLabel) . "</h5></td>";
+          echo "<td valign=\"middle\" width=1014 align=\"left\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5><h5 class=\"big\">Период " . html_escape($periodLabel) . "</h5></td>";
           echo "<td width=10 valign=\"middle\" align=\"right\">";
             echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"add_time_go_back();\"><h5>Назад</h5></button>";
           echo "</td>";

@@ -26,9 +26,9 @@ if ($journal === null) {
 }
 
 $addTimeInfo = $journal['entries'];
-$quarterLabel = format_date_range_label($journal['quarter_start_date'], $journal['quarter_stop_date']);
+$periodLabel = format_period_label($journal['period_start_date'], $journal['period_stop_date']);
 $content = "<h5 class=\"big\">Работа вне офиса. Внесение сведений</h5>";
-$content .= "<h5 class=\"middle\">Текущий квартал: " . html_escape($quarterLabel) . "</h5><br>";
+$content .= "<h5 class=\"middle\">Период " . html_escape($periodLabel) . "</h5><br>";
 
 $content .= "<br><table border=0 width=1095>";
 $content .= "<tr>";

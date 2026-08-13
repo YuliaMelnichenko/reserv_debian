@@ -23,17 +23,14 @@ function get_add_time_journal_context($link, $userID, $currentDateTime, $include
         return null;
     }
 
-    list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(
-        false,
-        $currentDateTime
-    );
+    list($periodStartDate, $periodStopDate, $periodStopExclusive) = get_add_time_period_date_range($currentDateTime);
     $dateTimeExpressions = time_journal_add_work_datetime_expressions($link);
     $entryResult = time_journal_query_add_work_journal(
         $link,
         (int)$userID,
         0,
-        $quarterStartDate,
-        $quarterStopExclusive,
+        $periodStartDate,
+        $periodStopExclusive,
         $dateTimeExpressions['start'],
         $dateTimeExpressions['stop']
     );
@@ -48,8 +45,8 @@ function get_add_time_journal_context($link, $userID, $currentDateTime, $include
             $link,
             (int)$userID,
             0,
-            $quarterStartDate,
-            $quarterStopExclusive,
+            $periodStartDate,
+            $periodStopExclusive,
             'a.START_DT',
             'a.STOP_DT'
         );
@@ -94,9 +91,9 @@ function get_add_time_journal_context($link, $userID, $currentDateTime, $include
 
     return array(
         'user_name' => trim($user['SURNAME'] . ' ' . $user['FIRSTNAME'] . ' ' . $user['LASTNAME']),
-        'quarter_start_date' => $quarterStartDate,
-        'quarter_stop_date' => $quarterStopDate,
-        'quarter_stop_exclusive' => $quarterStopExclusive,
+        'period_start_date' => $periodStartDate,
+        'period_stop_date' => $periodStopDate,
+        'period_stop_exclusive' => $periodStopExclusive,
         'entries' => $entries,
     );
 }

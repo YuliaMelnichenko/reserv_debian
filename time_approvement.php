@@ -52,9 +52,9 @@ if ($summary === false) {
   exit;
 }
 
-$quarterLabel = format_date_range_label(
-  $summary['quarter_start_date'],
-  $summary['quarter_stop_date']
+$periodLabel = format_period_label(
+  $summary['period_start_date'],
+  $summary['period_stop_date']
 );
 
   echo "<table class=\"notification-page-table\">";
@@ -69,7 +69,7 @@ $quarterLabel = format_date_range_label(
           echo "<h5 class=\"dark\"><br>/уведомления по работе вне офиса<br><br></h5>";
         echo "</div>";
 
-echo "<h5 class=\"big\">Текущий квартал: " . html_escape($quarterLabel) . "</h5>";
+echo "<h5 class=\"big\">Период " . html_escape($periodLabel) . "</h5>";
 
 echo "<div class=\"notification-table-scroll notification-table-scroll-wide\">";
 echo "<table id = \"add_time_approvement_table_users\" class = \"add_time notification-summary-table\">";
