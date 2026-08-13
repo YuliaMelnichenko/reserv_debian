@@ -4,7 +4,9 @@
 
 `quality.yml` runs for pushes, pull requests, and manual starts on `main` and
 `develop`. It checks every PHP file with `php -l`, runs `php tests/run.php`,
-and rejects whitespace errors. The same suite runs with PHP 8.2 and PHP 8.5.
+and rejects whitespace errors. It uses the existing `debian-12` runner label
+to select the runner, then runs in the official `php:8.4-cli-bookworm`
+container. This matches the production PHP-FPM 8.4 version.
 
 `stage-deploy.yml` is manual only. It repeats the checks and deploys a release
 to the test stand using `scripts/deploy-stage-release.sh`. It does not change a
@@ -24,30 +26,17 @@ separate step until integration tests are configured.
 
 2. In the repository settings, enable `Repository Actions`.
 
-3. Create a small dedicated Debian virtual machine for the runner. Do not run
-   arbitrary CI jobs on the Gitea server or the production web server. Install
-   Docker, Git, and the current Gitea `act_runner` there.
+3. The existing global `proxmox-debian` runner must be online and expose the
+   `debian-12` label. No extra runner, registration token, Docker image, or
+   host-level package is required for the quality workflow.
 
-4. In the project directory on the runner VM, build the two local CI images:
+4. Push this configuration to Gitea. The first push will automatically start
+   one PHP 8.4 check in the `Actions` tab. The job runs in the runner's
+   temporary Debian container and does not access the application database,
+   Nginx, PHP-FPM, or project deployment directories.
 
-   ```bash
-   docker build -t tori/php-ci:8.2 -f ci/php82.Dockerfile .
-   docker build -t tori/php-ci:8.5 -f ci/php85.Dockerfile .
-   ```
-
-5. Register a repository-level runner with these labels:
-
-   ```text
-   php-8.2:docker://tori/php-ci:8.2,
-   php-8.5:docker://tori/php-ci:8.5
-   ```
-
-   Obtain the runner registration token from `Repository settings -> Actions ->
-   Runners`. Keep it only on the runner VM; do not add it to this repository or
-   send it in chat.
-
-6. After the runner is online, push this configuration to Gitea. The first
-   push will automatically start two checks in the `Actions` tab.
+5. The runner will download the official PHP 8.4 image from Docker Hub on its
+   first run. Later jobs reuse the local Docker image cache.
 
 ## Test-stand deployment
 
