@@ -1683,6 +1683,38 @@ function fit_report_layout() {
 
   reportHead.style.width = reportWindow.clientWidth + 'px';
   reportHead.style.maxWidth = reportWindow.clientWidth + 'px';
+
+  fit_report_header_columns(contentTable, reportHead);
+}
+
+function fit_report_header_columns(contentTable, reportHead) {
+  var headerCells = reportHead.querySelectorAll('.report-header-user-cell');
+  var firstContentRow = contentTable.querySelector('tr');
+
+  if (!firstContentRow || headerCells.length === 0) {
+    return;
+  }
+
+  var contentCells = firstContentRow.children;
+
+  if (contentCells.length < headerCells.length) {
+    return;
+  }
+
+  for (var index = 0; index < headerCells.length; index++) {
+    var columnWidth = Math.ceil(contentCells[index].getBoundingClientRect().width);
+
+    if (columnWidth <= 0) {
+      continue;
+    }
+
+    headerCells[index].style.width = columnWidth + 'px';
+    var nameBlock = headerCells[index].querySelector('.report-header-user-name');
+
+    if (nameBlock) {
+      nameBlock.style.width = columnWidth + 'px';
+    }
+  }
 }
 
 function schedule_report_layout() {

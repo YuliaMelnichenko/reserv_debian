@@ -1,18 +1,20 @@
-name: Deploy test stand
-
-on:
-  workflow_dispatch:
-
-jobs:
-  deploy:
-    name: Deploy selected revision to stage
-    runs-on: tori-stage-deploy
-    steps:
-      - name: Check out source
-        uses: actions/checkout@v4
-      - name: Validate source before deployment
-        run: |
-          bash scripts/ci/php-lint.sh
-          php tests/run.php
-      - name: Deploy release
-        run: bash scripts/deploy-stage-release.sh "${{ gitea.workspace }}"
+# CI/CD temporarily disabled while runner connectivity is being repaired.
+#
+# name: Deploy test stand
+#
+# on:
+#   workflow_dispatch:
+#
+# jobs:
+#   deploy:
+#     name: Deploy selected revision to stage
+#     runs-on: tori-stage-deploy
+#     steps:
+#       - name: Check out source
+#         uses: actions/checkout@v4
+#       - name: Validate source before deployment
+#         run: |
+#           bash scripts/ci/php-lint.sh
+#           php tests/run.php
+#       - name: Deploy release
+#         run: bash scripts/deploy-stage-release.sh "${{ gitea.workspace }}"
