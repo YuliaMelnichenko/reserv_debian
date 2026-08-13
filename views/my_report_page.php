@@ -225,8 +225,8 @@ echo "<div class=\"report_window_main\" id=\"report_window_main\">";
                       "firstname" => "",
                       "lastname" => "",
                     );
-                  echo "<td class=\"report_no_padding report-header-user-cell\" bgcolor=\"#ffffff\" valign=\"middle\" align=\"center\" width = $cellWidth>";
-                    echo "<div class=\"report_head_name report-header-user-name\">";
+                  echo "<td class=\"report_no_padding\" bgcolor=\"#ffffff\" valign=\"middle\" align=\"center\" width = $cellWidth>";
+                    echo "<div class=\"report_head_name\">";
                       echo "<div class=\"report_head_fio\">";
                         echo "<div class=\"report_head_surname\">" . html_escape($userNameParts["surname"]) . "</div>";
                         echo "<div class=\"report_head_patronymic\">";
