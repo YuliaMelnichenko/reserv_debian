@@ -1005,8 +1005,8 @@ function add_addition_time(){
   }
 }
 
-function refresh_accounting_errors_after_offsite_work(){
-  $.post('ajax/get_accounting_errors_count.php', {}, function(data) {
+function refresh_accounting_errors_after_offsite_work(onComplete){
+  return $.post('ajax/get_accounting_errors_count.php', {}, function(data) {
     var count = Number.parseInt(data, 10);
 
     if (!Number.isFinite(count)) {
@@ -1023,6 +1023,9 @@ function refresh_accounting_errors_after_offsite_work(){
       document.querySelectorAll('.accounting-error-attention').forEach(function(icon) {
         icon.remove();
       });
+      if (typeof onComplete === 'function') {
+        onComplete(count);
+      }
       return;
     }
 
@@ -1032,6 +1035,10 @@ function refresh_accounting_errors_after_offsite_work(){
       if (label) {
         label.textContent = 'Ошибки учета (' + count + ')';
       }
+    }
+
+    if (typeof onComplete === 'function') {
+      onComplete(count);
     }
   });
 }

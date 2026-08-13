@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS business_trip_missing_data (
+    ID INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    USERID INT NOT NULL,
+    TRIP_DATE DATE NOT NULL,
+    CREATED_DT DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (ID),
+    UNIQUE KEY uq_business_trip_missing_data_user_date (USERID, TRIP_DATE),
+    KEY idx_business_trip_missing_data_date (TRIP_DATE)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS remote_work;
 DROP TABLE IF EXISTS visiting;
 DROP TABLE IF EXISTS `GROUPS`;
 DROP TABLE IF EXISTS auth_remember_tokens;
+DROP TABLE IF EXISTS business_trip_missing_data;
 DROP TABLE IF EXISTS employees;
 
 CREATE TABLE employees (
@@ -40,6 +41,14 @@ CREATE TABLE auth_remember_tokens (
     LAST_USED_DT DATETIME NOT NULL,
     UNIQUE KEY auth_remember_token_hash (TOKEN_HASH),
     KEY auth_remember_user_expires (USERID, EXPIRES_AT)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE business_trip_missing_data (
+    ID INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    USERID INT NOT NULL,
+    TRIP_DATE DATE NOT NULL,
+    CREATED_DT DATETIME NOT NULL,
+    UNIQUE KEY business_trip_missing_data_user_date (USERID, TRIP_DATE)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE visiting (

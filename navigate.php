@@ -84,20 +84,14 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
   }
 
   if (isset($link) && $link) {
-    $accountingErrorsSyncDate = isset($_SESSION['accounting_errors_sync_date'])
-      ? (string)$_SESSION['accounting_errors_sync_date']
-      : '';
+    $syncResult = sync_accounting_errors_for_user(
+      $link,
+      (int)$_SESSION['ss_id'],
+      get_accounting_errors_default_depth_days()
+    );
 
-    if ($accountingErrorsSyncDate !== date('Y-m-d')) {
-      $syncResult = sync_accounting_errors_for_user(
-        $link,
-        (int)$_SESSION['ss_id'],
-        get_accounting_errors_default_depth_days()
-      );
-
-      if ($syncResult !== false) {
-        $_SESSION['accounting_errors_sync_date'] = date('Y-m-d');
-      }
+    if ($syncResult !== false) {
+      $_SESSION['accounting_errors_sync_date'] = date('Y-m-d');
     }
 
     $accountingErrorsCount = get_accounting_errors_count($link, (int)$_SESSION['ss_id']);
