@@ -4521,7 +4521,9 @@ h5.activ_time {
 
 #accountingErrorsTableScroll,
 #accountingErrorsApprovementTableScroll,
-#accountingErrorsUserTableScroll {
+#accountingErrorsUserTableScroll,
+#businessTripMissingDataTableScroll,
+#businessTripMissingDataSupervisorTableScroll {
   max-height: 560px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -4530,7 +4532,8 @@ h5.activ_time {
 }
 
 #accountingErrorsTableScroll,
-#accountingErrorsApprovementTableScroll {
+#accountingErrorsApprovementTableScroll,
+#businessTripMissingDataTableScroll {
   width: 820px;
   margin: 10px 0;
 }
@@ -4544,13 +4547,24 @@ h5.activ_time {
   margin-top: 10px;
 }
 
+#businessTripMissingDataTableScroll {
+  margin: 0;
+}
+
+#businessTripMissingDataSupervisorTableScroll {
+  width: 930px;
+  margin: 0;
+}
+
 .vac {
   width: 950px;
 }
 
 #accounting_errors_table,
 #accounting_errors_approvement_table_users,
-#accounting_errors_user_table {
+#accounting_errors_user_table,
+#business_trip_missing_data_table,
+#business_trip_missing_data_supervisor_table {
   width: 100%;
   border-collapse: collapse;
 }
@@ -4646,7 +4660,7 @@ h5.activ_time {
 }
 
 .accounting-errors-secondary-title {
-  margin-top: 16px;
+  margin: 16px 0 10px;
 }
 
 .accounting-errors-trip-reason-cell,
