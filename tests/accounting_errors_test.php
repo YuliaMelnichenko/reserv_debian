@@ -55,4 +55,12 @@ return function () {
             && strpos($supervisorPage, 'Данные вне офиса не внесены') !== false,
         'Supervisors must see business-trip reminders as information without approval actions'
     );
+
+    $styles = file_get_contents(__DIR__ . '/../style/main.css');
+    test_assert_true(
+        strpos($styles, '#businessTripMissingDataTableScroll') !== false
+            && strpos($styles, '#businessTripMissingDataSupervisorTableScroll') !== false
+            && strpos($styles, 'margin: 16px 0 10px;') !== false,
+        'Business-trip tables must align with accounting-error tables and keep spacing around their heading'
+    );
 };
