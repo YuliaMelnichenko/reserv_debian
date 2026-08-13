@@ -275,10 +275,7 @@ function get_pause_notification_count($link, $userID, $currentDateTime)
 
 function get_add_time_notification_summary($link, $supervisorID, $currentDateTime)
 {
-    list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(
-        false,
-        $currentDateTime
-    );
+    list($periodStartDate, $periodStopDate, $periodStopExclusive) = get_add_time_period_date_range($currentDateTime);
     $dateTimeExpressions = time_journal_add_work_datetime_expressions($link, 'add_time');
     $startExpression = $dateTimeExpressions['start'];
     $stopExpression = $dateTimeExpressions['stop'];
@@ -305,7 +302,7 @@ function get_add_time_notification_summary($link, $supervisorID, $currentDateTim
           AND TRIM(membership.TYPE) = ?
         GROUP BY employee.ID, employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME
         ORDER BY employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME, employee.ID
-    ", 'ssis', array($quarterStopExclusive, $quarterStartDate, (int)$supervisorID, '0'));
+    ", 'ssis', array($periodStopExclusive, $periodStartDate, (int)$supervisorID, '0'));
 
     if (!$summaryResult) {
         return false;
@@ -326,9 +323,9 @@ function get_add_time_notification_summary($link, $supervisorID, $currentDateTim
     }
 
     return array(
-        'quarter_start_date' => $quarterStartDate,
-        'quarter_stop_date' => $quarterStopDate,
-        'quarter_stop_exclusive' => $quarterStopExclusive,
+        'period_start_date' => $periodStartDate,
+        'period_stop_date' => $periodStopDate,
+        'period_stop_exclusive' => $periodStopExclusive,
         'entries' => $entries,
     );
 }

@@ -33,9 +33,9 @@ return function () {
         'The remote work journal must retry with modern date columns for schema compatibility'
     );
     test_assert_true(
-        strpos($service, 'get_current_quarter_date_range') !== false
-            && strpos($service, 'quarter_start_date') !== false,
-        'The remote work journal must expose the current-quarter period'
+        strpos($service, 'get_add_time_period_date_range') !== false
+            && strpos($service, 'period_start_date') !== false,
+        'The remote work journal must expose the current quarter and the preceding three months'
     );
 
     $repository = file_get_contents(__DIR__ . '/../inc/time_journal_repository.php');
@@ -80,8 +80,8 @@ return function () {
         'The existing employee remote work controls must remain available'
     );
     test_assert_true(
-        strpos($employeeTable, 'Текущий квартал:') !== false,
-        'The employee remote work table must display its current-quarter period'
+        strpos($employeeTable, 'Период ') !== false,
+        'The employee remote work table must display its configured period'
     );
     test_assert_true(
         strpos($service, '$includeDeleted') !== false,
@@ -113,7 +113,7 @@ return function () {
         'The existing remote work preview controls must remain available'
     );
     test_assert_true(
-        strpos($preview, 'Текущий квартал:') !== false,
-        'The remote work preview must display its current-quarter period'
+        strpos($preview, 'Период ') !== false,
+        'The remote work preview must display its configured period'
     );
 };
