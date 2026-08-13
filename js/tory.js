@@ -1665,6 +1665,9 @@ function fit_report_layout() {
   reportWindow.style.maxWidth = '';
   reportWindow.style.overflowY = 'hidden';
 
+  fit_report_table_cells(contentTable, reportHead);
+  fit_report_row_heights(contentTable);
+
   var tableWidth = Math.ceil(contentTable.getBoundingClientRect().width);
   var tableHeight = Math.ceil(contentTable.getBoundingClientRect().height);
   var availableWidth = Math.max(
@@ -1684,6 +1687,105 @@ function fit_report_layout() {
   reportHead.style.width = reportWindow.clientWidth + 'px';
   reportHead.style.maxWidth = reportWindow.clientWidth + 'px';
 
+}
+
+function fit_report_table_cells(contentTable, reportHead) {
+  var contentRows = contentTable.rows;
+  var headerTable = reportHead.querySelector('.report-window-header-table');
+
+  if (contentRows.length === 0 || !headerTable || headerTable.rows.length === 0) {
+    return;
+  }
+
+  var userCount = Math.min(
+    contentRows[0].cells.length,
+    headerTable.rows[0].cells.length
+  );
+
+  if (userCount === 0) {
+    return;
+  }
+
+  var widestCell = 165;
+
+  for (var rowIndex = 0; rowIndex < contentRows.length; rowIndex++) {
+    var contentCells = contentRows[rowIndex].cells;
+
+    for (var cellIndex = 0; cellIndex < userCount; cellIndex++) {
+      if (!contentCells[cellIndex]) {
+        continue;
+      }
+
+      widestCell = Math.max(
+        widestCell,
+        Math.ceil(contentCells[cellIndex].getBoundingClientRect().width),
+        contentCells[cellIndex].scrollWidth
+      );
+    }
+  }
+
+  contentTable.style.tableLayout = 'fixed';
+  contentTable.style.width = (widestCell * userCount) + 'px';
+  headerTable.style.tableLayout = 'fixed';
+
+  for (var currentRowIndex = 0; currentRowIndex < contentRows.length; currentRowIndex++) {
+    var currentRowCells = contentRows[currentRowIndex].cells;
+
+    for (var currentCellIndex = 0; currentCellIndex < userCount; currentCellIndex++) {
+      if (!currentRowCells[currentCellIndex]) {
+        continue;
+      }
+
+      currentRowCells[currentCellIndex].style.width = widestCell + 'px';
+    }
+  }
+
+  var headerCells = headerTable.rows[0].cells;
+
+  for (var headerIndex = 0; headerIndex < userCount; headerIndex++) {
+    headerCells[headerIndex].style.width = widestCell + 'px';
+    var nameBlock = headerCells[headerIndex].querySelector('.report_head_name');
+
+    if (nameBlock) {
+      nameBlock.style.width = widestCell + 'px';
+    }
+  }
+
+  var headerStubWidth = headerCells.length > userCount
+    ? Math.ceil(headerCells[headerCells.length - 1].getBoundingClientRect().width)
+    : 0;
+  headerTable.style.width = (widestCell * userCount + headerStubWidth) + 'px';
+}
+
+function fit_report_row_heights(contentTable) {
+  var reportLeft = document.getElementById('report_window_left');
+  var leftTable = reportLeft ? reportLeft.querySelector('table') : null;
+
+  if (!leftTable) {
+    return;
+  }
+
+  var rowCount = Math.min(leftTable.rows.length, contentTable.rows.length);
+
+  for (var rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+    var leftRow = leftTable.rows[rowIndex];
+    var contentRow = contentTable.rows[rowIndex];
+    var targetHeight = Math.max(
+      Math.ceil(leftRow.getBoundingClientRect().height),
+      Math.ceil(contentRow.getBoundingClientRect().height)
+    );
+
+    if (targetHeight <= 0) {
+      continue;
+    }
+
+    leftRow.style.height = targetHeight + 'px';
+    contentRow.style.height = targetHeight + 'px';
+
+    for (var cellIndex = 0; cellIndex < contentRow.cells.length; cellIndex++) {
+      contentRow.cells[cellIndex].style.height = targetHeight + 'px';
+    }
+  }
 }
 
 function schedule_report_layout() {
