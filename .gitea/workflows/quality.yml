@@ -1,0 +1,45 @@
+name: PHP quality checks
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  php82:
+    name: PHP 8.2 lint and tests
+    runs-on: php-8.2
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Check PHP syntax
+        run: bash scripts/ci/php-lint.sh
+      - name: Run dependency-free tests
+        run: php tests/run.php
+      - name: Check whitespace errors
+        run: |
+          if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
+            git diff --check HEAD^ HEAD
+          fi
+
+  php85:
+    name: PHP 8.5 lint and tests
+    runs-on: php-8.5
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Check PHP syntax
+        run: bash scripts/ci/php-lint.sh
+      - name: Run dependency-free tests
+        run: php tests/run.php
+      - name: Check whitespace errors
+        run: |
+          if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
+            git diff --check HEAD^ HEAD
+          fi
