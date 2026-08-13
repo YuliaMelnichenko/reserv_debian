@@ -13,11 +13,6 @@ function auth_remember_token_lifetime_seconds()
     return 60 * 60 * 24 * 30;
 }
 
-function auth_remember_token_rotation_grace_seconds()
-{
-    return 90;
-}
-
 function auth_remember_token_hash($token)
 {
     return hash('sha256', (string) $token);
@@ -111,31 +106,57 @@ function auth_start_employee_session($employee)
     $_SESSION['ss_sessid'] = session_id();
 }
 
-function auth_issue_remember_token($link, $userId, $preserveCurrentToken = false)
+function auth_remove_expired_remember_tokens($link)
+{
+    return db_execute(
+        $link,
+        'DELETE FROM auth_remember_tokens WHERE EXPIRES_AT < ?',
+        's',
+        array(date('Y-m-d H:i:s'))
+    );
+}
+
+function auth_refresh_remember_token($link, $token)
+{
+    if (!auth_remember_token_is_valid_format($token)) {
+        return false;
+    }
+
+    $expires = time() + auth_remember_token_lifetime_seconds();
+    $now = date('Y-m-d H:i:s');
+    $refreshed = db_execute(
+        $link,
+        'UPDATE auth_remember_tokens SET EXPIRES_AT = ?, LAST_USED_DT = ? WHERE TOKEN_HASH = ?',
+        'sss',
+        array(
+            date('Y-m-d H:i:s', $expires),
+            $now,
+            auth_remember_token_hash($token),
+        )
+    );
+
+    if (!$refreshed || !setcookie(auth_remember_token_cookie_name(), $token, auth_remember_token_cookie_options($expires))) {
+        return false;
+    }
+
+    $_COOKIE[auth_remember_token_cookie_name()] = $token;
+    return true;
+}
+
+function auth_issue_remember_token($link, $userId)
 {
     $name = auth_remember_token_cookie_name();
     $currentToken = request_cookie_string($name);
 
+    auth_remove_expired_remember_tokens($link);
+
     if (auth_remember_token_is_valid_format($currentToken)) {
-        if ($preserveCurrentToken) {
-            db_execute(
-                $link,
-                'UPDATE auth_remember_tokens SET EXPIRES_AT = ? WHERE TOKEN_HASH = ?',
-                'ss',
-                array(
-                    date('Y-m-d H:i:s', time() + auth_remember_token_rotation_grace_seconds()),
-                    auth_remember_token_hash($currentToken),
-                )
-            );
-        }
-        else {
-            db_execute(
-                $link,
-                'DELETE FROM auth_remember_tokens WHERE TOKEN_HASH = ?',
-                's',
-                array(auth_remember_token_hash($currentToken))
-            );
-        }
+        db_execute(
+            $link,
+            'DELETE FROM auth_remember_tokens WHERE TOKEN_HASH = ?',
+            's',
+            array(auth_remember_token_hash($currentToken))
+        );
     }
 
     try {
@@ -205,7 +226,7 @@ function auth_restore_session_from_remember_token()
         return false;
     }
 
-    db_execute($link, 'DELETE FROM auth_remember_tokens WHERE EXPIRES_AT < ?', 's', array(date('Y-m-d H:i:s')));
+    auth_remove_expired_remember_tokens($link);
     $query = db_query(
         $link,
         'SELECT e.id, e.rate, e.defaultStartTime, e.allowedDelayMinutes, e.userTimeZoneMins, e.remoteWork
@@ -225,10 +246,10 @@ function auth_restore_session_from_remember_token()
     }
 
     auth_start_employee_session($employee);
-    $rotated = auth_issue_remember_token($link, (int) $employee['id'], true);
+    $refreshed = auth_refresh_remember_token($link, $token);
     db_close($link);
 
-    if (!$rotated) {
+    if (!$refreshed) {
         auth_clear_remember_token_cookie();
     }
 
