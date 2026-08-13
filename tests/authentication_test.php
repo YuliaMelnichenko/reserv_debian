@@ -21,8 +21,9 @@ return function () {
     );
     $authenticationSource = file_get_contents(__DIR__ . '/../inc/authentication.php');
     test_assert_true(
-        strpos($authenticationSource, 'auth_remember_token_rotation_grace_seconds') !== false
-            && strpos($authenticationSource, 'auth_issue_remember_token($link, (int) $employee[\'id\'], true)') !== false,
-        'Session restoration must rotate tokens while preserving active parallel requests briefly'
+        strpos($authenticationSource, 'auth_refresh_remember_token') !== false
+            && strpos($authenticationSource, 'LAST_USED_DT = ?') !== false
+            && strpos($authenticationSource, 'auth_issue_remember_token($link, (int) $employee[\'id\'])') === false,
+        'Session restoration must extend the existing token instead of creating a new database row'
     );
 };
