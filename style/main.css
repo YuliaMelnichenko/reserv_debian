@@ -4545,7 +4545,9 @@ h5.activ_time {
 
 #accounting_errors_table tr:first-child td,
 #accounting_errors_approvement_table_users tr:first-child td,
-#accounting_errors_user_table tr:first-child td {
+#accounting_errors_user_table tr:first-child td,
+#business_trip_missing_data_table tr:first-child td,
+#business_trip_missing_data_supervisor_table tr:first-child td {
   position: sticky;
   top: 0;
   z-index: 2;
@@ -4628,6 +4630,33 @@ h5.activ_time {
 }
 
 .accounting-errors-action-cell {
+  width: 100px;
+}
+
+.accounting-errors-secondary-title {
+  margin-top: 16px;
+}
+
+.accounting-errors-trip-reason-cell,
+.accounting-errors-trip-status-cell,
+.accounting-errors-trip-count-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.accounting-errors-trip-reason-cell {
+  width: 180px;
+}
+
+.accounting-errors-trip-status-cell {
+  width: 350px;
+}
+
+.accounting-errors-trip-count-cell {
+  width: 115px;
+}
+
+.accounting-errors-trip-action {
   width: 100px;
 }
 

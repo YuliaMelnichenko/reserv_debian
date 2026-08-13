@@ -52,6 +52,7 @@ echo "<table class=\"accounting-errors-page-table\">";
             echo "<td class=\"add_time accounting-errors-refused-cell\"><h5 class=\"big\">Отклоненные</h5></td>";
             echo "<td class=\"add_time accounting-errors-deleted-cell\"><h5 class=\"big\">Удаленные</h5></td>";
             echo "<td class=\"add_time accounting-errors-count-cell\"><h5 class=\"big\">Новые</h5></td>";
+            echo "<td class=\"add_time accounting-errors-trip-count-cell\"><h5 class=\"big\">Командировки</h5></td>";
             echo "<td class=\"add_time accounting-errors-view-cell\"><h5 class=\"big\">Просмотреть</h5></td>";
           echo "</tr>";
 
@@ -75,6 +76,7 @@ echo "<table class=\"accounting-errors-page-table\">";
               $refusedNotificationCount = 0;
               $deletedNotificationCount = 0;
               $newNotificationCount = 0;
+              $businessTripNotificationCount = 0;
 
               $countsLoaded = get_accounting_errors_counts_by_user(
                 $link,
@@ -83,7 +85,8 @@ echo "<table class=\"accounting-errors-page-table\">";
                 $acceptedNotificationCount,
                 $refusedNotificationCount,
                 $deletedNotificationCount,
-                $newNotificationCount
+                $newNotificationCount,
+                $businessTripNotificationCount
               );
 
               if (!$countsLoaded || $notificationCount <= 0) {
@@ -112,6 +115,7 @@ echo "<table class=\"accounting-errors-page-table\">";
                 echo "<td class=\"add_time accounting-errors-refused-cell\"><h5 class=\"middle\">$refusedNotificationCount</h5></td>";
                 echo "<td class=\"add_time accounting-errors-deleted-cell\"><h5 class=\"middle\">$deletedNotificationCount</h5></td>";
                 echo "<td class=\"add_time accounting-errors-count-cell\"><h5 class=\"$cellStype\">$newNotificationCount</h5></td>";
+                echo "<td class=\"add_time accounting-errors-trip-count-cell\"><h5 class=\"middle\">$businessTripNotificationCount</h5></td>";
                 echo "<td class=\"add_time accounting-errors-view-cell\">";
                   echo "<button id=\"accountingErrorsViewBtn_$userID\" class=\"journal-cell-icon-button\" title=\"Просмотреть\" onclick=\"$uhref;\"><img src=\"img/$img\"></button>";
                 echo "</td>";
@@ -129,7 +133,7 @@ echo "<table class=\"accounting-errors-page-table\">";
 
             if ($rowCount == 0) {
               echo "<tr class=\"accounting-errors-row\">";
-                echo "<td class=\"add_time accounting-errors-empty-cell\" colspan=7><h5 class=\"middle\">Ошибок учета у сотрудников нет</h5></td>";
+                echo "<td class=\"add_time accounting-errors-empty-cell\" colspan=8><h5 class=\"middle\">Ошибок учета у сотрудников нет</h5></td>";
               echo "</tr>";
             }
           }

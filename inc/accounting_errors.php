@@ -79,6 +79,214 @@ function clear_unsubmitted_accounting_errors_for_dates($link, $userID, $dates)
     return true;
 }
 
+function clear_business_trip_missing_data_for_dates($link, $userID, $dates)
+{
+    $normalizedDates = array();
+
+    foreach ($dates as $date) {
+        $normalizedDate = normalize_date_value($date);
+
+        if ($normalizedDate !== null) {
+            $normalizedDates[$normalizedDate] = true;
+        }
+    }
+
+    foreach (array_keys($normalizedDates) as $date) {
+        $deleted = db_execute(
+            $link,
+            'DELETE FROM business_trip_missing_data WHERE USERID = ? AND TRIP_DATE = ?',
+            'is',
+            array((int)$userID, $date)
+        );
+
+        if (!$deleted) {
+            return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
+        }
+    }
+
+    return true;
+}
+
+function sync_business_trip_missing_data_for_user($link, $userID, $depthDays = 0)
+{
+    $userID = (int)$userID;
+
+    if ($userID <= 0 || is_accounting_errors_exempt_user($userID)) {
+        return 0;
+    }
+
+    list($startDate, $stopDate, $stopExclusive) = accounting_errors_get_range($depthDays);
+    $tripDates = array();
+    $tripResult = db_query(
+        $link,
+        "SELECT start_date, stop_date
+         FROM staff_leaves
+         WHERE user_id = ?
+           AND event = 'Командировка'
+           AND start_date <= ?
+           AND stop_date >= ?",
+        'iss',
+        array($userID, $stopDate, $startDate)
+    );
+
+    if (!$tripResult) {
+        return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
+    }
+
+    while ($trip = db_fetch_one($tripResult)) {
+        foreach (get_days_range_inclusive(
+            max($startDate, (string)$trip['start_date']),
+            min($stopDate, (string)$trip['stop_date'])
+        ) as $tripDate) {
+            $tripDates[$tripDate] = true;
+        }
+    }
+
+    $coveredDates = array();
+    $offsiteResult = db_query(
+        $link,
+        "SELECT START_DT, STOP_DT
+         FROM ADD_TIME
+         WHERE USERID = ?
+           AND PAUSE_MODE = 0
+           AND START_DT IS NOT NULL
+           AND STOP_DT IS NOT NULL
+           AND START_DT <> '0000-00-00 00:00:00'
+           AND STOP_DT <> '0000-00-00 00:00:00'
+           AND STOP_DT > START_DT
+           AND START_DT < ?
+           AND STOP_DT > ?",
+        'iss',
+        array($userID, $stopExclusive, $startDate . ' 00:00:00')
+    );
+
+    if (!$offsiteResult) {
+        return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
+    }
+
+    $periodStartTimestamp = strtotime($startDate . ' 00:00:00');
+    $periodStopTimestamp = strtotime($stopExclusive . ' 00:00:00');
+
+    while ($entry = db_fetch_one($offsiteResult)) {
+        $entryStart = strtotime((string)$entry['START_DT']);
+        $entryStop = strtotime((string)$entry['STOP_DT']);
+
+        if ($entryStart === false || $entryStop === false || $entryStop <= $entryStart) {
+            continue;
+        }
+
+        $segmentStart = max($entryStart, $periodStartTimestamp);
+        $segmentStop = min($entryStop, $periodStopTimestamp);
+
+        while ($segmentStart < $segmentStop) {
+            $coveredDates[date('Y-m-d', $segmentStart)] = true;
+            $nextDateStart = strtotime(date('Y-m-d 00:00:00', $segmentStart) . ' +1 day');
+            $segmentStart = min($nextDateStart, $segmentStop);
+        }
+    }
+
+    $missingDates = array_diff_key($tripDates, $coveredDates);
+    $transaction = db_transaction_start($link);
+
+    if (!$transaction) {
+        return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
+    }
+
+    $existingResult = db_query(
+        $link,
+        'SELECT ID, TRIP_DATE FROM business_trip_missing_data WHERE USERID = ? AND TRIP_DATE >= ? AND TRIP_DATE <= ? FOR UPDATE',
+        'iss',
+        array($userID, $startDate, $stopDate)
+    );
+
+    if (!$existingResult) {
+        $transaction->rollback();
+        return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
+    }
+
+    $existingDates = array();
+
+    while ($existing = db_fetch_one($existingResult)) {
+        $tripDate = (string)$existing['TRIP_DATE'];
+        $existingDates[$tripDate] = true;
+
+        if (!isset($missingDates[$tripDate])) {
+            $deleted = db_execute(
+                $link,
+                'DELETE FROM business_trip_missing_data WHERE ID = ? AND USERID = ?',
+                'ii',
+                array((int)$existing['ID'], $userID)
+            );
+
+            if (!$deleted) {
+                $transaction->rollback();
+                return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
+            }
+        }
+    }
+
+    $insertedCount = 0;
+
+    foreach (array_keys($missingDates) as $tripDate) {
+        if (isset($existingDates[$tripDate])) {
+            continue;
+        }
+
+        $inserted = db_execute_affected_rows(
+            $link,
+            'INSERT INTO business_trip_missing_data (USERID, TRIP_DATE, CREATED_DT)
+             SELECT ?, ?, NOW()
+             FROM DUAL
+             WHERE NOT EXISTS (
+               SELECT 1 FROM business_trip_missing_data WHERE USERID = ? AND TRIP_DATE = ? LIMIT 1
+             )',
+            'isis',
+            array($userID, $tripDate, $userID, $tripDate)
+        );
+
+        if ($inserted === false) {
+            $transaction->rollback();
+            return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
+        }
+
+        $insertedCount += max(0, $inserted);
+    }
+
+    if (!$transaction->commit()) {
+        return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
+    }
+
+    return $insertedCount;
+}
+
+function get_business_trip_missing_data_rows($link, $userID, $depthDays = 0)
+{
+    if (is_accounting_errors_exempt_user($userID)) {
+        return array();
+    }
+
+    list($startDate, $stopDate) = accounting_errors_get_range($depthDays);
+    $result = db_query(
+        $link,
+        'SELECT ID, TRIP_DATE FROM business_trip_missing_data WHERE USERID = ? AND TRIP_DATE >= ? AND TRIP_DATE <= ? ORDER BY TRIP_DATE DESC',
+        'iss',
+        array((int)$userID, $startDate, $stopDate)
+    );
+
+    if (!$result) {
+        accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
+        return false;
+    }
+
+    return db_fetch_all($result);
+}
+
+function get_business_trip_missing_data_count($link, $userID, $depthDays = 0)
+{
+    $rows = get_business_trip_missing_data_rows($link, $userID, $depthDays);
+    return is_array($rows) ? count($rows) : 0;
+}
+
 function sync_accounting_errors_for_user($link, $userID, $depthDays = 0)
 {
     $userID = (int)$userID;
@@ -269,7 +477,13 @@ function sync_accounting_errors_for_user($link, $userID, $depthDays = 0)
         return accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
     }
 
-    return $insertedCount;
+    $tripSyncResult = sync_business_trip_missing_data_for_user($link, $userID, $depthDays);
+
+    if ($tripSyncResult === false) {
+        return false;
+    }
+
+    return $insertedCount + $tripSyncResult;
 }
 
 function get_accounting_errors_count($link, $userID)
@@ -293,12 +507,19 @@ function get_accounting_errors_count($link, $userID)
     }
 
     $row = db_fetch_one($result);
-    return (int)$row['CNT'];
+    return (int)$row['CNT'] + get_business_trip_missing_data_count($link, $userID);
 }
 
 function get_accounting_errors_notification_count($link, $supervisorID)
 {
     list($startDate, $stopDate) = accounting_errors_get_range();
+    $supervisedUserIDs = get_accounting_errors_supervised_user_ids($link, $supervisorID);
+
+    if (is_array($supervisedUserIDs)) {
+        foreach ($supervisedUserIDs as $userID) {
+            sync_business_trip_missing_data_for_user($link, (int)$userID);
+        }
+    }
 
     $result = db_query(
         $link,
@@ -316,10 +537,29 @@ function get_accounting_errors_notification_count($link, $supervisorID)
     }
 
     $row = db_fetch_one($result);
-    return (int)$row['CNT'];
+    $tripResult = db_query(
+        $link,
+        "SELECT COUNT(DISTINCT trip.ID) AS CNT
+         FROM business_trip_missing_data trip
+         INNER JOIN GROUPS g ON g.USERID = trip.USERID
+         WHERE g.SUPERVISORID = ?
+           AND TRIM(g.TYPE) = ?
+           AND trip.TRIP_DATE >= ?
+           AND trip.TRIP_DATE <= ?",
+        'iiss',
+        array((int)$supervisorID, 3, $startDate, $stopDate)
+    );
+
+    if (!$tripResult) {
+        accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
+        return (int)$row['CNT'];
+    }
+
+    $tripRow = db_fetch_one($tripResult);
+    return (int)$row['CNT'] + (int)$tripRow['CNT'];
 }
 
-function get_accounting_errors_counts_by_user($link, $userID, &$totalCount, &$acceptedCount, &$refusedCount, &$deletedCount, &$newCount)
+function get_accounting_errors_counts_by_user($link, $userID, &$totalCount, &$acceptedCount, &$refusedCount, &$deletedCount, &$newCount, &$businessTripCount = null)
 {
     list($startDate, $stopDate) = accounting_errors_get_range();
 
@@ -328,6 +568,7 @@ function get_accounting_errors_counts_by_user($link, $userID, &$totalCount, &$ac
     $refusedCount = 0;
     $deletedCount = 0;
     $newCount = 0;
+    $businessTripCount = 0;
 
     if (is_accounting_errors_exempt_user($userID)) {
         return true;
@@ -360,6 +601,9 @@ function get_accounting_errors_counts_by_user($link, $userID, &$totalCount, &$ac
             $deletedCount += $count;
         }
     }
+
+    $businessTripCount = get_business_trip_missing_data_count($link, $userID);
+    $totalCount += $businessTripCount;
 
     return true;
 }

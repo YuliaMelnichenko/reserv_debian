@@ -51,6 +51,16 @@ $backUrl = "accounting_errors_approvement.php";
 
 sync_accounting_errors_for_user($link, $userID, $depthDays);
 
+$regularCountResult = db_query(
+  $link,
+  'SELECT COUNT(*) AS CNT FROM accounting_errors WHERE USERID = ? AND ERROR_DATE >= ? AND ERROR_DATE <= ?',
+  'iss',
+  array($userID, $accountingErrorsStartDate, $accountingErrorsStopDate)
+);
+$hasRegularErrors = !$regularCountResult || (int)db_fetch_one($regularCountResult)['CNT'] > 0;
+$businessTripRows = get_business_trip_missing_data_rows($link, $userID, $depthDays);
+$hasBusinessTripRows = is_array($businessTripRows) && count($businessTripRows) > 0;
+
 $userName = html_escape(get_user_name_by_id($userID));
 
 echo "<div class=\"accounting-errors-layout\">";
@@ -77,7 +87,8 @@ echo "<table class=\"accounting-errors-page-table\">";
         echo "<button class=\"button_style journal-back-button\" onclick=\"location.href='$backUrl'\">Назад</button>";
       echo "</div>";
 
-      echo "<div id=\"accountingErrorsUserTableScroll\">";
+      $regularTableStyle = !$hasRegularErrors && $hasBusinessTripRows ? ' style="display:none"' : '';
+      echo "<div id=\"accountingErrorsUserTableScroll\"$regularTableStyle>";
         echo "<table class=\"add_time\" id=\"accounting_errors_user_table\">";
           echo "<tr class=\"accounting-errors-table-head\">";
             echo "<td class=\"add_time accounting-errors-user-date-cell\"><h5 class=\"big\">Дата</h5></td>";
@@ -228,6 +239,31 @@ echo "<table class=\"accounting-errors-page-table\">";
 
         echo "</table>";
       echo "</div>";
+
+      if ($hasBusinessTripRows) {
+        echo "<h5 class=\"big accounting-errors-secondary-title\">Данные по командировкам</h5>";
+        echo "<div id=\"businessTripMissingDataSupervisorTableScroll\">";
+          echo "<table class=\"add_time\" id=\"business_trip_missing_data_supervisor_table\">";
+            echo "<tr class=\"accounting-errors-table-head\">";
+              echo "<td class=\"add_time accounting-errors-user-date-cell\"><h5 class=\"big\">Дата</h5></td>";
+              echo "<td class=\"add_time accounting-errors-trip-reason-cell\"><h5 class=\"big\">Причина отсутствия</h5></td>";
+              echo "<td class=\"add_time accounting-errors-trip-status-cell\"><h5 class=\"big\">Статус</h5></td>";
+            echo "</tr>";
+
+            $color = '#ddffff';
+            foreach ($businessTripRows as $tripRow) {
+              $rowClass = $color === '#ddffff' ? 'accounting-errors-row-alt' : 'accounting-errors-row';
+              $dateView = date('d.m.Y', strtotime($tripRow['TRIP_DATE']));
+              echo "<tr class=\"$rowClass\">";
+                echo "<td class=\"add_time accounting-errors-user-date-cell\"><h5 class=\"middle\">$dateView</h5></td>";
+                echo "<td class=\"add_time accounting-errors-trip-reason-cell\"><h5 class=\"middle\">Командировка</h5></td>";
+                echo "<td class=\"add_time accounting-errors-trip-status-cell\"><h5 class=\"middleRed\">Данные вне офиса не внесены</h5></td>";
+              echo "</tr>";
+              $color = $color === '#ddffff' ? '#ffffff' : '#ddffff';
+            }
+          echo "</table>";
+        echo "</div>";
+      }
 
     echo "</td>";
   echo "</tr>";

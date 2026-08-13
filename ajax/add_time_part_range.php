@@ -168,6 +168,17 @@ if (
   $err = ajax_database_error_message($link, __FILE__ . ':' . __LINE__);
 }
 
+if (
+  $err === ""
+  && !clear_business_trip_missing_data_for_dates(
+    $link,
+    $userID_,
+    array_column($dailyIntervals, 'date')
+  )
+) {
+  $err = ajax_database_error_message($link, __FILE__ . ':' . __LINE__);
+}
+
 if ($err == "" && $insertedCount === count($dailyIntervals)) {
   if (!$transaction->commit()) {
     ajax_database_error($link, __FILE__ . ':' . __LINE__);

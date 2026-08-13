@@ -98,6 +98,12 @@ else{
     exit;
   }
 
+  if (!clear_business_trip_missing_data_for_dates($link, $userID, array($workDate))) {
+    $transaction->rollback();
+    ajax_database_error($link, __FILE__ . ':' . __LINE__);
+    exit;
+  }
+
   if (!$transaction->commit()) {
     ajax_database_error($link, __FILE__ . ':' . __LINE__);
     exit;
