@@ -1780,25 +1780,53 @@ function fit_report_row_heights(contentTable) {
     }
 
     leftRow.style.height = targetHeight + 'px';
+    leftRow.style.minHeight = targetHeight + 'px';
+    leftRow.setAttribute('height', targetHeight);
     contentRow.style.height = targetHeight + 'px';
+    contentRow.style.minHeight = targetHeight + 'px';
+    contentRow.setAttribute('height', targetHeight);
+
+    for (var leftCellIndex = 0; leftCellIndex < leftRow.cells.length; leftCellIndex++) {
+      var leftCell = leftRow.cells[leftCellIndex];
+      leftCell.style.height = targetHeight + 'px';
+      leftCell.style.minHeight = targetHeight + 'px';
+      leftCell.setAttribute('height', targetHeight);
+    }
 
     if (leftRow.cells.length > 0) {
-      leftRow.cells[0].style.height = targetHeight + 'px';
       var leftCellContent = leftRow.cells[0].firstElementChild;
 
       if (leftCellContent) {
         leftCellContent.style.height = targetHeight + 'px';
+        leftCellContent.style.minHeight = targetHeight + 'px';
       }
     }
 
     for (var cellIndex = 0; cellIndex < contentRow.cells.length; cellIndex++) {
-      contentRow.cells[cellIndex].style.height = targetHeight + 'px';
+      var contentCell = contentRow.cells[cellIndex];
+      contentCell.style.height = targetHeight + 'px';
+      contentCell.style.minHeight = targetHeight + 'px';
+      contentCell.setAttribute('height', targetHeight);
     }
   }
 }
 
 function schedule_report_layout() {
-  window.requestAnimationFrame(fit_report_layout);
+  window.requestAnimationFrame(function() {
+    fit_report_layout();
+
+    window.requestAnimationFrame(function() {
+      var reportWindow = document.getElementById('report_window')
+        || document.getElementById('report_window_single');
+      var contentTable = reportWindow
+        ? reportWindow.querySelector('.report-window-content-table')
+        : null;
+
+      if (contentTable) {
+        fit_report_row_heights(contentTable);
+      }
+    });
+  });
 }
 
 document.addEventListener('DOMContentLoaded', schedule_report_layout);
