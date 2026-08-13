@@ -29,6 +29,17 @@ $timeInSrc = $timeIn;
   return $result;
 }
 
+function report_summary_metric($imagePath, $description, $valueContent)
+{
+  $escapedDescription = html_escape($description);
+  $escapedImagePath = html_escape($imagePath);
+
+  return '<div class="time_rep report-summary-metric" title="' . $escapedDescription . '">'
+    . '<div class="report_no_padding_rep"><img title="' . $escapedDescription . '" src="' . $escapedImagePath . '" alt=""></div>'
+    . '<div class="report_no_padding_rep">' . $valueContent . '</div>'
+    . '</div>';
+}
+
 function get_results_cell_content_by_stat( $stats, $index, $cellWidth, $userID, $defaultStartTimeStr, $user_allowedDelay, $resType, &$typeShowed, &$headContent )
 {
   $days_dates_set = $stats[0][$index];
@@ -131,83 +142,61 @@ function get_results_cell_content_by_stat( $stats, $index, $cellWidth, $userID, 
       }
 
       $content .= "<td class=\"report_no_padding\" bgcolor=\"$resultColor\" bordercolor=\"#888888\" valign=\"top\" align=\"left\">";
-      $content .=   "<div class=\"report_body_head_summary\" id=\"report_body_head_summary\">";
+      $content .=   "<div class=\"report_body_head_summary\">";
 
-      $content .=            "<div class = \"time_rep\">";
-      $content .=                "<div class = \"report_no_padding_rep\">";
-      $content .=                  "<img title=\"фактическая наработка за указанный интервал времени без учета обеда\" src=\"$timeSpendImg\"/>";
-      $content .=                "</div>";
-      $content .=                "<div class = \"report_no_padding_rep\">";
       $Val2 = (int)($results[2]);
       $Val4 = (int)($results[4]);
       $Val3 = (int)($results[3]);
       $Val9 = (int)($results[9]);
 
 $Val = $Val2 + $Val4 - $Val3 + $Val9;
-      $content .=                  format_time_d_hhmmss_pure_styled( $Val );
+      $content .= report_summary_metric(
+        $timeSpendImg,
+        'Фактическая наработка за указанный интервал времени без учета обеда',
+        format_time_d_hhmmss_pure_styled($Val)
+      );
 
-      $content .=                "</div>";
-
-      $content .=          "</div>";
-
-      $content .=            "<div class = \"time_rep\">";
-      $content .=                "<div class = \"report_no_padding_rep\">";
-      $content .=                  "<img title=\"обеденное время за указанный интервал времени\" src=\"$lunchImg\"/>";
-      $content .=                "</div>";
-      $content .=                "<div class = \"report_no_padding_rep\">";
       $Val = (int)($results[4]);
-      $content .=                  format_time_d_hhmmss_pure_styled( $Val );
+      $content .= report_summary_metric(
+        $lunchImg,
+        'Обеденное время за указанный интервал времени',
+        format_time_d_hhmmss_pure_styled($Val)
+      );
 
-      $content .=                "</div>";
-      $content .=            "</div>";
-
-      $content .=            "<div class = \"time_rep\">";
-      $content .=                "<div class = \"report_no_padding_rep\" align = \"left\" width = 5px>";
-      $content .=                  "<img title=\"рабочее время вне офиса за указанный интервал времени\" src=\"$addTimeImg\"/>";
-      $content .=                "</div>";
-      $content .=                "<div class = \"report_no_padding_rep\">";
       $Val = (int)($results[3]);
-      $content .=                  format_time_d_hhmmss_pure_styled( $Val );
+      $content .= report_summary_metric(
+        $addTimeImg,
+        'Рабочее время вне офиса за указанный интервал времени',
+        format_time_d_hhmmss_pure_styled($Val)
+      );
 
-      $content .=                "</div>";
-      $content .=            "</div>";
-
-      $content .=            "<div class = \"time_rep\">";
-      $content .=                "<div class = \"report_no_padding_rep\">";
-      $content .=                  "<img title=\"приостановки учета времени за указанный интервал времени\" src=\"$pauseTimeImg\"/>";
-      $content .=                "</div>";
-      $content .=                "<div class = \"report_no_padding_rep\" align = \"left\" width = 8px>";
       $Val = (int)($results[9]);
-      $content .=                  format_time_d_hhmmss_pure_styled( $Val );
+      $content .= report_summary_metric(
+        $pauseTimeImg,
+        'Приостановки учета времени за указанный интервал времени',
+        format_time_d_hhmmss_pure_styled($Val)
+      );
 
-      $content .=                "</div>";
-      $content .=            "</div>";
-
-      $content .=        "<div class = \"time_rep\">";
-
-      $content .=                "<div class = \"report_no_padding_rep\" align = \"left\" width = 3px>";
-      $content .=                  "<img title=\"штрафные санкции за опоздание по неуважительной причине за указанный интервал времени\" src=\"$penaltyImg\"/>";
-      $content .=                "</div>";
-
-      $content .=                "<div class = \"report_no_padding_rep\" align = \"left\" width = 152px>";
       $Val = (int)($results[7]);
       $ValC = (int)($results[8]);
       $ValP = $ValC * 1000;
-      $content .=                 format_time_d_hhmmss_pure_styled( $Val );
+      $penaltyContent = format_time_d_hhmmss_pure_styled($Val);
       if ($ValC > 0)
       {
-        $content .=                  "<h3 class=\"small1\"> [".(string)$ValC."x1000 = ".$ValP."р]</h3>";
+        $penaltyContent .= "<h3 class=\"small1\"> [".(string)$ValC."x1000 = ".$ValP."р]</h3>";
       }
-      $content .=                "</div>";
-      $content .=        "</div>";
+      $content .= report_summary_metric(
+        $penaltyImg,
+        'Штрафные санкции за опоздание по неуважительной причине за указанный интервал времени',
+        $penaltyContent
+      );
 
       $content .=        "<div class = \"result\">";
       $content .=             "<h5 class=\"middleSmall\">Итог:</h5>";
 
       $content .=        "</div>";
 
-      $content .=        "<div class = \"time_rep\">";
-      $content .=                "<div class = \"report_no_padding_rep\" align = \"left\" width = 10px>";
+      $content .=        "<div class=\"report-summary-total\">";
       $ValNormBeforeLeaves = isset($results[10]) ? (int)($results[10]) : (int)($results[6]);
       $ValLeaveHours = isset($results[11]) ? (int)($results[11]) : 0;
       $ValNormAfterLeaves = (int)($results[6]);
@@ -229,7 +218,7 @@ $Val = $Val2 + $Val4 - $Val3 + $Val9;
         . format_time_d_hhmmss_pure_HH($ValNormAfterLeaves)
         . " - По плану (ч.)</h5></br>";
 
-      $content .= "<span title=\"Фактически отработанное время за выбранный период\">"
+      $content .= "<span class=\"report-summary-fact\" title=\"Фактически отработанное время за выбранный период\">"
         . format_time_d_hhmmss_pure_styled($ValFact)
         . "(" . $ValRedmine . ")"
         . "</span><h5 class=\"middle\" title=\"Фактически отработанное время за выбранный период\"> - Факт </h5>";      $content .=        "</div>";
