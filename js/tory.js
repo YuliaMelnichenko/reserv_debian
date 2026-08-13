@@ -1782,6 +1782,15 @@ function fit_report_row_heights(contentTable) {
     leftRow.style.height = targetHeight + 'px';
     contentRow.style.height = targetHeight + 'px';
 
+    if (leftRow.cells.length > 0) {
+      leftRow.cells[0].style.height = targetHeight + 'px';
+      var leftCellContent = leftRow.cells[0].firstElementChild;
+
+      if (leftCellContent) {
+        leftCellContent.style.height = targetHeight + 'px';
+      }
+    }
+
     for (var cellIndex = 0; cellIndex < contentRow.cells.length; cellIndex++) {
       contentRow.cells[cellIndex].style.height = targetHeight + 'px';
     }
