@@ -464,7 +464,7 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
   $unformattedContent1 = $prefix;
   // $unformattedContent2 = $workContent.$eatContent.$addTimeContent.$pauseTimeContent.$PenaltyContent.$workPureContent;
 
-   if ($prefix == "<h5 class=\"middleBold\">Текущий день"){
+   if ($isCurrentDay == 1){
    $content  = "<td class=\"report_no_padding\" bgcolor=\"$dayColor\" bordercolor=\"#888888\" valign=\"$valignMode\" align=\"$cellaligment\" width = $cellWidth>";
    $content .=   "<div class=\"report_body_head_day\" id=\"report_body_head_day\">";
      //$content .=     "$unformattedContent1$unformattedContent2";
