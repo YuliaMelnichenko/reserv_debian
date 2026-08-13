@@ -26,6 +26,10 @@ function workday_transition_create_delay_for_arrival($link, $userId, $arrivalDat
         return 0;
     }
 
+    if (is_delay_check_disabled_for_non_working_day($link, $userId, $arrivalDateTime)) {
+        return 0;
+    }
+
     $delay = get_delay_value(
         $arrivalDateTime,
         (string)$employee['defaultStartTime'],

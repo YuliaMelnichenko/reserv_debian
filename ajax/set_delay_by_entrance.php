@@ -24,7 +24,7 @@ $ss_delay_duration_db = format_time_d_hhmmss_pure($ss_delay_duration);
 $currentDateArr = get_current_datetime_in_timezone();
 $currentDate = $currentDateArr[2];
 
-if (is_delay_check_disabled_for_weekend($currentDate)) {
+if (is_delay_check_disabled_for_non_working_day($link, $userId, $currentDate)) {
   $_SESSION['ss_there_is_delay'] = 0;
   $_SESSION['ss_delay_show_save'] = 0;
   $_SESSION['ss_delay_duration_val'] = 0;

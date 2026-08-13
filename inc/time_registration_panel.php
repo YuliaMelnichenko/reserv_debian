@@ -117,7 +117,9 @@ if ( $vn == 0 ) {
   $user_defaultStartTimeWithDelayVal = $retArr[4];
   $user_remoteWork = $retArr[5];
 
-  $currentDelayArr = get_delay_value($currentDateTime, $user_defaultStartTime, $user_allowedDelay);
+  $currentDelayArr = is_delay_check_disabled_for_non_working_day($link, $userID, $currentDateTime)
+    ? array(0, 0)
+    : get_delay_value($currentDateTime, $user_defaultStartTime, $user_allowedDelay);
   $currentDelayVal = $currentDelayArr[1];
 
   if ( $currentDelayArr[0] != 1 || $user_remoteWork == 1 ) {
@@ -156,7 +158,9 @@ else {
   $out_dt = $row1["out_dt"];
   $state_db = (int)$row1["state"];
   $visitID = (int)$row1["ID"];
-  $inDelayArr = get_delay_value($in_dt, $user_defaultStartTime, $user_allowedDelay);
+  $inDelayArr = is_delay_check_disabled_for_non_working_day($link, $userID, $in_dt)
+    ? array(0, 0)
+    : get_delay_value($in_dt, $user_defaultStartTime, $user_allowedDelay);
   $isThereDelayVal = $inDelayArr[0] == 1 ? 2 : 0;
   $_SESSION['ss_there_is_delay'] = $isThereDelayVal;
   $_SESSION['ss_delay_show_save'] = $isThereDelayVal == 2 ? 1 : 0;

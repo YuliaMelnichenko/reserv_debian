@@ -188,7 +188,10 @@ function rollback_state()
 
 function reg_in_work_with_delay()
 {
-  reg_in_work();
+  switch_day_state(1, function() {
+    get_time_registration_div_content();
+    set_delay();
+  });
 }
 
 function reg_in_work()

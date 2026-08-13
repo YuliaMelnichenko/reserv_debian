@@ -48,7 +48,7 @@ if (request_post_int('mode') === 1)
   $delayID = request_post_int('delayID');
 }
 
-if ($mode === 0 && is_delay_check_disabled_for_weekend($currentDate)) {
+if ($mode === 0 && is_delay_check_disabled_for_non_working_day($link, $userID_, $currentDate)) {
   $_SESSION['ss_there_is_delay'] = 0;
   $_SESSION['ss_delay_show_save'] = 0;
   $_SESSION['ss_delay_duration_val'] = 0;

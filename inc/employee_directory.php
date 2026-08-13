@@ -388,7 +388,7 @@ function get_and_update_start_time_status($userID)
         $_SESSION['ss_defaultStartTimeWithDelayVal'] = $defaultStartTimeWithDelayValue;
 
         if (
-            !is_delay_check_disabled_for_weekend($currentDate)
+            !is_delay_check_disabled_for_non_working_day($link, $userID, $currentDate)
             && $currentTime > $defaultStartTimeWithDelayValue
             && (int)$remoteWork !== 1
         ) {
