@@ -39,4 +39,20 @@ return function () {
         strpos($presentation, 'Ошибка учета: незавершённый рабочий день') !== false,
         'The report must clearly display an unfinished historical workday as an accounting error'
     );
+
+    $summaryPresentation = file_get_contents(__DIR__ . '/../inc/report_summary_presentation.php');
+    test_assert_true(
+        strpos($summaryPresentation, 'report_summary_metric') !== false
+            && strpos($summaryPresentation, 'Фактическая наработка за указанный интервал времени') !== false
+            && strpos($summaryPresentation, 'Рабочее время вне офиса за указанный интервал времени') !== false
+            && strpos($summaryPresentation, 'Штрафные санкции за опоздание') !== false,
+        'The report summary must explain every time metric with a hover tooltip'
+    );
+
+    $reportStyles = file_get_contents(__DIR__ . '/../style/main.css');
+    test_assert_true(
+        strpos($reportStyles, 'width: max-content;') !== false
+            && strpos($reportStyles, 'padding: 0 5px 2px 0;') !== false,
+        'The report summary cell must grow with its content and retain edge padding'
+    );
 };
