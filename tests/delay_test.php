@@ -34,6 +34,21 @@ return function () {
         'A Sunday arrival must not be marked late'
     );
     test_assert_same(
+        false,
+        is_delay_check_disabled_for_calendar_day('2026-07-25', 1),
+        'An official working Saturday must allow delay checks'
+    );
+    test_assert_same(
+        false,
+        is_delay_check_disabled_for_calendar_day('2026-07-26', 2),
+        'An official working day must allow delay checks even on a Sunday'
+    );
+    test_assert_same(
+        true,
+        is_delay_check_disabled_for_calendar_day('2026-07-21', 0),
+        'An official weekday day off must suppress delay checks'
+    );
+    test_assert_same(
         array(0, 0),
         get_delay_value('2026-07-21 05:00:00', '09:00:00', 30),
         'An early arrival on the following date must use its own calendar day'
@@ -52,8 +67,8 @@ return function () {
     foreach (array('set_delay_by_entrance.php', 'set_delay_explanation.php') as $endpoint) {
         $source = file_get_contents(__DIR__ . '/../ajax/' . $endpoint);
         test_assert_true(
-            strpos($source, 'is_delay_check_disabled_for_weekend') !== false,
-            'Weekend delay records must be rejected by ' . $endpoint
+            strpos($source, 'is_delay_check_disabled_for_non_working_day') !== false,
+            'Non-working day delay records must be rejected by ' . $endpoint
         );
     }
 
@@ -65,5 +80,16 @@ return function () {
     test_assert_true(
         strpos($transitionService, "'Без объяснения'") !== false,
         'An automatically created delay must be explicitly marked as missing an explanation'
+    );
+    test_assert_true(
+        strpos($transitionService, 'is_delay_check_disabled_for_non_working_day') !== false,
+        'Arrival processing must exclude official days off and staff leaves from delay records'
+    );
+
+    $indexScript = file_get_contents(__DIR__ . '/../js/index-page.js');
+    test_assert_true(
+        strpos($indexScript, 'function reg_in_work_with_delay()') !== false
+            && strpos($indexScript, 'set_delay();') !== false,
+        'Late arrival registration must open the explanation window automatically'
     );
 };
