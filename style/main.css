@@ -4544,7 +4544,7 @@ h5.activ_time {
 
 #accountingErrorsUserTableScroll {
   width: 930px;
-  margin-top: 10px;
+  margin: 10px 0 15px 0;
 }
 
 #businessTripMissingDataTableScroll {
@@ -4552,7 +4552,8 @@ h5.activ_time {
 }
 
 #businessTripMissingDataSupervisorTableScroll {
-  width: 930px;
+  margin: 10px 0 !important;
+  width: 926px;
   margin: 0;
 }
 
@@ -4610,7 +4611,7 @@ h5.activ_time {
 }
 
 .accounting-errors-content-cell-wide {
-  width: 950px;
+  width: 939px;
 }
 
 .accounting-errors-table-head,
@@ -4683,6 +4684,8 @@ h5.activ_time {
 }
 
 .accounting-errors-trip-action {
+  background-color: #f8d888;
+  margin: 3px;
   width: 100px;
 }
 
