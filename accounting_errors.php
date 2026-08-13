@@ -179,7 +179,7 @@ echo "<table class=\"accounting-errors-page-table\">";
                 echo "<td class=\"add_time accounting-errors-date-cell\"><h5 class=\"middle\">$dateView</h5></td>";
                 echo "<td class=\"add_time accounting-errors-trip-reason-cell\"><h5 class=\"middle\">Командировка</h5></td>";
                 echo "<td class=\"add_time accounting-errors-trip-status-cell\"><h5 class=\"middleRed\">Внести данные о работе вне офиса</h5></td>";
-                echo "<td class=\"add_time accounting-errors-action-cell\"><button class=\"button_style accounting-errors-trip-action\" onclick=\"location.href='time_add.php'\">Внести данные</button></td>";
+                echo "<td class=\"add_time accounting-errors-action-cell_business_trip\"><button class=\"button_style accounting-errors-trip-action\" onclick=\"location.href='time_add.php'\">Внести данные</button></td>";
               echo "</tr>";
               $color = $color === '#ddffff' ? '#ffffff' : '#ddffff';
             }
