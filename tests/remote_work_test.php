@@ -25,4 +25,10 @@ return function () {
         strpos($controller, "inc/remote_work.php") !== false,
         'The remote work controller must load the shared service'
     );
+
+    $service = file_get_contents(__DIR__ . '/../inc/remote_work.php');
+    test_assert_true(
+        strpos($service, 'FROM `GROUPS`') !== false,
+        'Remote work supervisor checks must quote the reserved GROUPS table for MySQL compatibility'
+    );
 };

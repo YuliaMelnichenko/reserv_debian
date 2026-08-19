@@ -51,6 +51,10 @@ return function () {
     $service = file_get_contents(__DIR__ . '/../inc/pause_service.php');
     test_assert_true(strpos($service, 'db_transaction_start') !== false, 'Pause transitions must use transactions');
     test_assert_true(strpos($service, 'FOR UPDATE') !== false, 'Pause transitions must lock mutable records');
+    test_assert_true(
+        strpos($service, 'FROM `GROUPS`') !== false,
+        'Pause supervisor checks must quote the reserved GROUPS table for MySQL compatibility'
+    );
 
     $pauseStateEndpoint = file_get_contents(__DIR__ . '/../ajax/is_there_pause.php');
     $pauseOverlayEndpoint = file_get_contents(__DIR__ . '/../ajax/get_pause_stop_content.php');
