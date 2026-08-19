@@ -10,6 +10,7 @@ parameters:
         - inc/workday_registration.php
         - inc/workday_transition_service.php
         - inc/index_page_service.php
+        - inc/notification_summary.php
         - inc/add_time_journal.php
         - inc/employee_directory.php
         - inc/work_calendar.php
