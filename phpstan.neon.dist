@@ -1,0 +1,16 @@
+parameters:
+    level: 0
+    paths:
+        - inc/database.php
+        - inc/health_check.php
+        - inc/delay.php
+        - inc/pause_service.php
+        - inc/remote_work.php
+        - inc/workday_registration.php
+        - inc/workday_transition_service.php
+        - inc/index_page_service.php
+        - inc/add_time_journal.php
+    scanDirectories:
+        - inc
+    scanFiles:
+        - funcs.php

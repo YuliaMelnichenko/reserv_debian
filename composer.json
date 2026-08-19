@@ -1,0 +1,11 @@
+{
+  "name": "torinsk/reserv-debian",
+  "description": "TORI time tracking application quality tools",
+  "license": "proprietary",
+  "require-dev": {
+    "phpstan/phpstan": "^2.1"
+  },
+  "config": {
+    "sort-packages": true
+  }
+}
