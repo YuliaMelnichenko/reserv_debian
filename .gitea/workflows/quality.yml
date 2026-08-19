@@ -63,7 +63,7 @@ jobs:
         run: |
           export DEBIAN_FRONTEND=noninteractive
           apt-get update
-          apt-get install -y --no-install-recommends git nodejs
+          apt-get install -y --no-install-recommends git nodejs default-mysql-client
           docker-php-ext-install mysqli
       - name: Check out source
         uses: actions/checkout@v4
@@ -77,3 +77,5 @@ jobs:
           exit 1
       - name: Run MySQL integration tests
         run: php tests/integration/run.php
+      - name: Check SQL migrations
+        run: bash scripts/ci/check-sql-migrations.sh
