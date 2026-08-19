@@ -18,6 +18,7 @@ $testFiles = array(
     __DIR__ . '/delay_journal_test.php',
     __DIR__ . '/entrance_adjustment_test.php',
     __DIR__ . '/gym_schedule_test.php',
+    __DIR__ . '/health_check_test.php',
     __DIR__ . '/index_presence_test.php',
     __DIR__ . '/legacy_schema_audit_test.php',
     __DIR__ . '/legacy_function_cleanup_test.php',

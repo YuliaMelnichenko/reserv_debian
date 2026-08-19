@@ -11,6 +11,7 @@ required_variables=(
   TORI_STAGE_CURRENT_LINK
   TORI_STAGE_SHARED_ENV
   TORI_STAGE_HEALTH_URL
+  TORI_STAGE_HEALTH_TOKEN
 )
 
 for variable_name in "${required_variables[@]}"; do
@@ -66,7 +67,9 @@ ln -s "$TORI_STAGE_SHARED_ENV" "$release_path/.env"
 ln -s "$release_path" "$next_link"
 mv -Tf "$next_link" "$TORI_STAGE_CURRENT_LINK"
 
-if ! curl --fail --silent --show-error --max-time 15 "$TORI_STAGE_HEALTH_URL" >/dev/null; then
+if ! curl --fail --silent --show-error --max-time 15 \
+  --header "X-Tori-Health-Token: ${TORI_STAGE_HEALTH_TOKEN}" \
+  "$TORI_STAGE_HEALTH_URL" >/dev/null; then
   if [[ -n "$previous_release" ]]; then
     ln -s "$previous_release" "$next_link"
     mv -Tf "$next_link" "$TORI_STAGE_CURRENT_LINK"
