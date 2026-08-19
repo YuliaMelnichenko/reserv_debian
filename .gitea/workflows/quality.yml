@@ -38,3 +38,42 @@ jobs:
           if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
             git diff --check HEAD^ HEAD
           fi
+
+  integration:
+    name: MySQL integration tests
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.4-cli-bookworm
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: tori_integration_test
+          MYSQL_USER: tori_test
+          MYSQL_PASSWORD: tori_test_password
+          MYSQL_ROOT_PASSWORD: tori_test_root_password
+    env:
+      TORI_TEST_DB_HOST: mysql
+      TORI_TEST_DB_PORT: 3306
+      TORI_TEST_DB_NAME: tori_integration_test
+      TORI_TEST_DB_USER: tori_test
+      TORI_TEST_DB_PASS: tori_test_password
+    steps:
+      - name: Install checkout and MySQL dependencies
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y --no-install-recommends git nodejs
+          docker-php-ext-install mysqli
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Wait for temporary MySQL
+        run: |
+          for attempt in $(seq 1 30); do
+            php -r 'mysqli_report(MYSQLI_REPORT_OFF); $db = @mysqli_connect(getenv("TORI_TEST_DB_HOST"), getenv("TORI_TEST_DB_USER"), getenv("TORI_TEST_DB_PASS"), getenv("TORI_TEST_DB_NAME"), (int)getenv("TORI_TEST_DB_PORT")); if ($db) { mysqli_close($db); exit(0); } exit(1);' && exit 0
+            sleep 2
+          done
+          echo 'Temporary MySQL did not become available.' >&2
+          exit 1
+      - name: Run MySQL integration tests
+        run: php tests/integration/run.php

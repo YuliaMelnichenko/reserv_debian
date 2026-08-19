@@ -3,6 +3,9 @@ SET SESSION sql_mode = '';
 DROP TABLE IF EXISTS ADD_TIME;
 DROP TABLE IF EXISTS remote_work;
 DROP TABLE IF EXISTS visiting;
+DROP TABLE IF EXISTS Delays;
+DROP TABLE IF EXISTS work_dayoff;
+DROP TABLE IF EXISTS staff_leaves;
 DROP TABLE IF EXISTS `GROUPS`;
 DROP TABLE IF EXISTS auth_remember_tokens;
 DROP TABLE IF EXISTS business_trip_missing_data;
@@ -93,6 +96,23 @@ CREATE TABLE Delays (
     penaltyReply TEXT NOT NULL,
     status INT NOT NULL DEFAULT 0,
     INDEX delays_user_date (userID, date, ID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE work_dayoff (
+    ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    date DATE NOT NULL,
+    type INT NOT NULL DEFAULT 0,
+    UNIQUE KEY work_dayoff_date (date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE staff_leaves (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    fio VARCHAR(255) NOT NULL DEFAULT '',
+    start_date DATE NOT NULL,
+    stop_date DATE NOT NULL,
+    event VARCHAR(100) NOT NULL,
+    INDEX staff_leaves_user_dates (user_id, start_date, stop_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE remote_work (
