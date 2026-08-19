@@ -39,7 +39,7 @@ return function ($link) {
                 (1, ?, ?, '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', 2, 0),
                 (2, ?, ?, '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', 2, 0)",
             'isis',
-            array($alphaId, $currentDate . ' 09:31:00', $betaId, $currentDate . '09:32:00')
+            array($alphaId, $currentDate . ' 09:31:00', $betaId, $currentDate . ' 09:32:00')
         ),
         'Delay visit fixtures must be created'
     );
@@ -59,6 +59,14 @@ return function ($link) {
             'Delay fixture must be created'
         );
     }
+
+    $acceptedDelay = db_fetch_one(db_query(
+        $link,
+        'SELECT status FROM Delays WHERE ID = ? AND userID = ?',
+        'ii',
+        array(2, $betaId)
+    ));
+    test_assert_same(1, (int)$acceptedDelay['status'], 'Accepted delay fixture must retain status 1');
 
     test_assert_same(
         true,
@@ -85,7 +93,11 @@ return function ($link) {
     test_assert_same(array($alphaId, $betaId), array_column($delaySummary['entries'], 'user_id'), 'Delay entries must be sorted by surname');
     test_assert_same(1, $delayEntriesByUserId[$alphaId]['new_count'], 'New delay must be visible to the supervisor');
     test_assert_same(1, $delayEntriesByUserId[$alphaId]['without_comment_count'], 'Unexplained delay must be marked separately');
-    test_assert_same(1, $delayEntriesByUserId[$betaId]['accepted_count'], 'Accepted delay must remain visible in history');
+    test_assert_same(
+        1,
+        $delayEntriesByUserId[$betaId]['accepted_count'],
+        'Accepted delay must remain visible in history: ' . json_encode($delayEntriesByUserId[$betaId])
+    );
 
     $pauseSummary = get_pause_notification_summary($link, $supervisorId, $currentDateTime);
     test_assert_same(1, count($pauseSummary['entries']), 'Pause notifications must include only assigned employees');
