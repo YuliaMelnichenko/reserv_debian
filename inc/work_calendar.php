@@ -3,10 +3,11 @@
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/calendar.php';
 require_once __DIR__ . '/employee_directory.php';
+require_once __DIR__ . '/project_database.php';
 
 function GetHourNormByMonth($date, $rate)
 {
-    include __DIR__ . '/../php_tori/connect.php';
+    $link = project_database_connect();
 
     $query = db_query(
         $link,
@@ -47,7 +48,7 @@ function GetHourNormByMonth($date, $rate)
 
 function get_workdays_holidays_bay_range($startDate, $stopDate)
 {
-    include __DIR__ . '/../php_tori/connect.php';
+    $link = project_database_connect();
 
     $query = db_query(
         $link,
@@ -74,7 +75,7 @@ function get_workdays_holidays_bay_range($startDate, $stopDate)
 
 function get_holidays()
 {
-    include __DIR__ . '/../php_tori/connect.php';
+    $link = project_database_connect();
 
     $query = db_query($link, 'SELECT DATE FROM work_dayoff WHERE TYPE = 0');
 
@@ -96,7 +97,7 @@ function get_holidays()
 
 function get_work_day()
 {
-    include __DIR__ . '/../php_tori/connect.php';
+    $link = project_database_connect();
 
     $query = db_query($link, 'SELECT DATE FROM work_dayoff WHERE TYPE = 1');
 

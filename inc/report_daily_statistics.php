@@ -4,6 +4,7 @@ require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/calendar.php';
 require_once __DIR__ . '/work_calendar.php';
 require_once __DIR__ . '/work_duration.php';
+require_once __DIR__ . '/project_database.php';
 
 function get_penalties( $userDays, $userID )
 {
@@ -12,7 +13,7 @@ function get_penalties( $userDays, $userID )
 
   $penalties = array();
   $idx = 1;
-  include __DIR__ . "/php_tori/connect.php";
+  $link = project_database_connect();
 
   $query = db_query($link, "SELECT date from Penalty where date >= ? and date <= ? and userID = ?", 'ssi', array($minDate, $maxDate, (int)$userID));
   $merr = db_error($link);
@@ -41,7 +42,7 @@ function get_penalties( $userDays, $userID )
 }
 
 function get_current_day_duration_sec( $userID, $defaultStartTime ){
-  include __DIR__ . "/php_tori/connect.php";
+  $link = project_database_connect();
 
   $currentDateTime = get_current_datetime_in_timezone()[1];
   $dateRange = datetimestr_to_day_start_stop_DT_ex_str($currentDateTime, '00:00:00');
@@ -72,7 +73,7 @@ function get_current_day_duration_sec( $userID, $defaultStartTime ){
 }
 
 function get_stat_by_range( $startDate, $stopDate, $userID, $user_defaultStartTime, $user_allowedDelay ){
-  include __DIR__ . "/php_tori/connect.php";
+  $link = project_database_connect();
 
   $holidays = get_holidays();
   $workDays = get_work_day();

@@ -1,9 +1,10 @@
 <?php
 
 require_once __DIR__ . '/../funcs.php';
+require_once __DIR__ . '/project_database.php';
 
 function change_time ($user) {
-  include __DIR__ . "/../php_tori/connect.php";
+  $link = project_database_connect();
   include_once __DIR__ . "/../funcs.php";
 
   db_set_charset($link, "utf8");
