@@ -54,13 +54,24 @@ stage release directory. Give its service environment these values:
 TORI_STAGE_RELEASES_DIR=/var/www/tori-stage-releases
 TORI_STAGE_CURRENT_LINK=/var/www/tori-stage-current
 TORI_STAGE_SHARED_ENV=/etc/tori-stage/.env
-TORI_STAGE_HEALTH_URL=http://127.0.0.1:8080/auth.php
+TORI_STAGE_HEALTH_URL=http://127.0.0.1:8080/health.php
+TORI_STAGE_HEALTH_TOKEN=<same value as HEALTH_CHECK_TOKEN in the stage .env>
 ```
 
 Point the test Nginx virtual host to `/var/www/tori-stage-current`. The deploy
 workflow copies the checked revision to a new release directory, attaches the
-server-only `.env`, switches the symlink, and checks the supplied URL. It keeps
-previous release directories for fast manual rollback.
+server-only `.env`, switches the symlink, and checks PHP plus MySQL through the
+supplied URL. It keeps previous release directories for fast manual rollback.
+
+Add a long random value to the server-only stage `.env`:
+
+```text
+HEALTH_CHECK_TOKEN=<long random value>
+```
+
+The token is sent only by the deployment runner as the `X-Tori-Health-Token`
+header. Requests without it receive `404` and cannot use `health.php` to probe
+the application.
 
 The stage runner must be dedicated to this private repository. Protect `main`
 and `develop` in Gitea so unreviewed code cannot reach it.

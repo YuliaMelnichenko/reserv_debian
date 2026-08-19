@@ -188,6 +188,13 @@ function db_connect($host, $user, $password, $database, $port = 3306)
     return mysqli_connect($host, $user, $password, $database, (int)$port);
 }
 
+function db_connect_silently($host, $user, $password, $database, $port = 3306)
+{
+    mysqli_report(MYSQLI_REPORT_OFF);
+
+    return db_connect($host, $user, $password, $database, $port);
+}
+
 function db_connect_error()
 {
     return mysqli_connect_error();
