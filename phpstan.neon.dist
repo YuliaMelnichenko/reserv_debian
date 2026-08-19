@@ -14,6 +14,7 @@ parameters:
         - inc/employee_directory.php
         - inc/work_calendar.php
         - inc/report_daily_statistics.php
+        - inc/report_period_statistics.php
         - inc/time_registration_renderer.php
     scanDirectories:
         - inc
