@@ -34,9 +34,12 @@ jobs:
       - name: Install PHPStan
         run: |
           curl --fail --silent --show-error --location https://getcomposer.org/composer-stable.phar --output /tmp/composer.phar
+          php /tmp/composer.phar validate --strict
           php /tmp/composer.phar install --no-interaction --no-progress --prefer-dist
       - name: Run PHPStan
         run: vendor/bin/phpstan analyse --no-progress --memory-limit=512M
+      - name: Audit Composer dependencies
+        run: php /tmp/composer.phar audit --locked --no-interaction
       - name: Check for tracked secrets
         run: bash scripts/ci/check-sensitive-files.sh
       - name: Check whitespace errors
@@ -85,3 +88,32 @@ jobs:
         run: php tests/integration/run.php
       - name: Check SQL migrations
         run: bash scripts/ci/check-sql-migrations.sh
+
+  php85:
+    name: PHP 8.5 compatibility
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.5-cli-bookworm
+    steps:
+      - name: Install checkout dependencies
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y --no-install-recommends git nodejs curl unzip
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Check PHP version
+        run: php --version
+      - name: Check PHP syntax
+        run: bash scripts/ci/php-lint.sh
+      - name: Run dependency-free tests
+        run: php tests/run.php
+      - name: Install PHPStan
+        run: |
+          curl --fail --silent --show-error --location https://getcomposer.org/composer-stable.phar --output /tmp/composer.phar
+          php /tmp/composer.phar validate --strict
+          php /tmp/composer.phar install --no-interaction --no-progress --prefer-dist
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=512M
+      - name: Audit Composer dependencies
+        run: php /tmp/composer.phar audit --locked --no-interaction

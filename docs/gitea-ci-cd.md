@@ -3,14 +3,20 @@
 ## What is already in the repository
 
 `quality.yml` runs for pushes, pull requests, and manual starts on `main` and
-`develop`. It checks every PHP file with `php -l`, runs `php tests/run.php`,
-rejects tracked local secrets and whitespace errors. It uses the
-`ubuntu-latest` runner label, then runs in the official `php:8.4-cli-bookworm`
-container. This matches the production PHP-FPM 8.4 version.
+`develop`. The PHP 8.4 job checks every PHP file with `php -l`, runs
+`php tests/run.php`, PHPStan and Composer audit, then rejects tracked local
+secrets and whitespace errors. It uses the `ubuntu-latest` runner label, then
+runs in the official `php:8.4-cli-bookworm` container. This matches the
+production PHP-FPM 8.4 version.
+
+The separate PHP 8.5 job repeats syntax checks, unit tests, PHPStan and the
+Composer audit. It is a compatibility warning system for the future PHP
+upgrade and does not alter the production runtime.
 
 The same workflow starts an isolated `mysql:8.4` service with the temporary
-`tori_integration_test` database. It runs `tests/integration/run.php` and
-applies every classified migration with `scripts/ci/check-sql-migrations.sh`.
+`tori_integration_test` database. It runs workday, pause, remote-work,
+presence, business-trip reminder and remember-token scenarios, then applies
+every classified migration with `scripts/ci/check-sql-migrations.sh`.
 The job has no production or stage database credentials and the service is
 discarded after the workflow finishes.
 
@@ -76,10 +82,9 @@ the application.
 The stage runner must be dedicated to this private repository. Protect `main`
 and `develop` in Gitea so unreviewed code cannot reach it.
 
-## What to add next
+## Further work
 
-1. Add a small authenticated health endpoint for the stage site. After that,
-   the deployment health check can validate PHP, session startup, and MySQL
-   connection instead of checking only the login page.
+1. Extend PHPStan from the current level 5 service scope to legacy report and
+   directory modules after their database connection handling is made explicit.
 2. Keep production deployment manual: only after the test stand is approved,
    run a dedicated production workflow from `main`.
