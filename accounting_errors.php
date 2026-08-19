@@ -161,7 +161,7 @@ echo "<table class=\"accounting-errors-page-table\">";
       echo "</div>";
 
       if ($hasBusinessTripRows) {
-        echo "<h5 class=\"big accounting-errors-secondary-title\">Данные по командировкам</h5>";
+        echo "<br><h5 class=\"big accounting-errors-secondary-title\">Данные по командировкам</h5>";
         echo "<div id=\"businessTripMissingDataTableScroll\">";
           echo "<table class=\"add_time\" id=\"business_trip_missing_data_table\">";
             echo "<tr class=\"accounting-errors-table-head\">";
