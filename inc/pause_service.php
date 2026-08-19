@@ -95,7 +95,7 @@ function start_time_pause_for_group(
     if ($supervisorID === null) {
         $supervisorResult = db_query($link, "
             SELECT SUPERVISORID
-            FROM GROUPS
+            FROM `GROUPS`
             WHERE USERID = ?
               AND TRIM(TYPE) = ?
             ORDER BY SUPERVISORID
@@ -105,7 +105,7 @@ function start_time_pause_for_group(
     else {
         $supervisorResult = db_query($link, "
             SELECT SUPERVISORID
-            FROM GROUPS
+            FROM `GROUPS`
             WHERE USERID = ?
               AND SUPERVISORID = ?
               AND TRIM(TYPE) = ?

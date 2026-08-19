@@ -84,7 +84,7 @@ function start_remote_work($link, $userID, $supervisorID)
 
     $supervisorResult = db_query($link, "
         SELECT 1
-        FROM GROUPS
+        FROM `GROUPS`
         WHERE USERID = ?
           AND SUPERVISORID = ?
           AND TRIM(TYPE) = '3'
@@ -144,7 +144,7 @@ function get_remote_work_supervisors($link, $userID)
         SELECT DISTINCT
           g.SUPERVISORID AS id,
           CONCAT_WS(' ', e.surname, e.firstname, e.lastname) AS fio
-        FROM GROUPS g
+        FROM `GROUPS` g
         JOIN employees e ON g.SUPERVISORID = e.id
         WHERE TRIM(g.TYPE) = '3'
           AND g.USERID = ?
