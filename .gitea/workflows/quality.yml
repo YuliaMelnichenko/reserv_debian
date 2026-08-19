@@ -33,7 +33,7 @@ jobs:
         run: php tests/run.php
       - name: Install PHPStan
         run: |
-          curl --fail --silent --show-error --location https://getcomposer.org/composer-stable.phar --output /tmp/composer.phar
+          curl --fail --silent --show-error --location --retry 4 --retry-all-errors --retry-delay 5 --connect-timeout 30 --max-time 180 https://getcomposer.org/composer-stable.phar --output /tmp/composer.phar
           php /tmp/composer.phar validate --strict
           php /tmp/composer.phar install --no-interaction --no-progress --prefer-dist
       - name: Run PHPStan
@@ -110,7 +110,7 @@ jobs:
         run: php tests/run.php
       - name: Install PHPStan
         run: |
-          curl --fail --silent --show-error --location https://getcomposer.org/composer-stable.phar --output /tmp/composer.phar
+          curl --fail --silent --show-error --location --retry 4 --retry-all-errors --retry-delay 5 --connect-timeout 30 --max-time 180 https://getcomposer.org/composer-stable.phar --output /tmp/composer.phar
           php /tmp/composer.phar validate --strict
           php /tmp/composer.phar install --no-interaction --no-progress --prefer-dist
       - name: Run PHPStan

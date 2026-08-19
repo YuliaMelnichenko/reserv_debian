@@ -50,7 +50,7 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
               AND $stopExpression > ADDDATE(?, INTERVAL ? DAY)
               AND EXISTS (
                 SELECT 1
-                FROM GROUPS membership
+                FROM `GROUPS` membership
                 WHERE membership.USERID = a.USERID
                   AND membership.SUPERVISORID = ?
                   AND TRIM(membership.TYPE) = ?
@@ -64,7 +64,7 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
               AND delay_entry.date < ?
               AND EXISTS (
                 SELECT 1
-                FROM GROUPS membership
+                FROM `GROUPS` membership
                 WHERE membership.USERID = delay_entry.userID
                   AND membership.SUPERVISORID = ?
                   AND TRIM(membership.TYPE) IN ('0', '-1', '3')
@@ -129,7 +129,7 @@ function get_delay_notification_summary($link, $supervisorID, $currentDate)
              )
             THEN delay_entry.id
           END) AS WITHOUT_COMMENT_COUNT
-        FROM GROUPS membership
+        FROM `GROUPS` membership
         INNER JOIN employees employee ON employee.ID = membership.USERID
         LEFT JOIN Delays delay_entry
           ON delay_entry.userID = employee.ID
@@ -189,7 +189,7 @@ function get_pause_notification_summary($link, $supervisorID, $currentDateTime)
           CONCAT_WS(' ', employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME) AS USER_NAME,
           COUNT(DISTINCT a.ID) AS TOTAL_COUNT,
           COUNT(DISTINCT CASE WHEN DATE($startExpression) = ? THEN a.ID END) AS CURRENT_DAY_COUNT
-        FROM GROUPS membership
+        FROM `GROUPS` membership
         INNER JOIN employees employee ON employee.ID = membership.USERID
         LEFT JOIN ADD_TIME a
           ON a.USERID = employee.ID
@@ -288,7 +288,7 @@ function get_add_time_notification_summary($link, $supervisorID, $currentDateTim
           COUNT(DISTINCT CASE WHEN add_time.APPROVED = -1 THEN add_time.ID END) AS REFUSED_COUNT,
           COUNT(DISTINCT CASE WHEN add_time.APPROVED IN (99, 100, 101) THEN add_time.ID END) AS DELETED_COUNT,
           COUNT(DISTINCT CASE WHEN add_time.APPROVED = 0 THEN add_time.ID END) AS NEW_COUNT
-        FROM GROUPS membership
+        FROM `GROUPS` membership
         INNER JOIN employees employee ON employee.ID = membership.USERID
         LEFT JOIN ADD_TIME add_time
           ON add_time.USERID = employee.ID

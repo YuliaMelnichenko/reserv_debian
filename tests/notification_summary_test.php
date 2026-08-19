@@ -207,5 +207,14 @@ return function () {
         strpos($service, 'function get_supervisor_notification_counts') !== false,
         'The shared service must provide combined supervisor notification counters'
     );
+    test_assert_same(
+        0,
+        preg_match('/\\bFROM\\s+GROUPS\\b/i', $service),
+        'Notification queries must quote the reserved GROUPS table name'
+    );
+    test_assert_true(
+        strpos($service, 'FROM `GROUPS` membership') !== false,
+        'Notification queries must use the quoted GROUPS table name'
+    );
     test_assert_same(0, preg_match('/SELECT\s+\*/i', $service), 'Summary queries must select explicit fields');
 };
