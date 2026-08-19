@@ -1,41 +1,38 @@
-# CI/CD temporarily disabled while runner connectivity is being repaired.
-#
-# name: PHP quality checks
-#
-# on:
-#   push:
-#     branches:
-#       - main
-#       - develop
-#   pull_request:
-#     branches:
-#       - main
-#       - develop
-#   workflow_dispatch:
-#
-# jobs:
-#   quality:
-#     name: PHP 8.4 lint and tests
-#     runs-on: debian-12
-#     container:
-#       image: php:8.4-cli-bookworm
-#     steps:
-#       - name: Install checkout dependencies
-#         run: |
-#           export DEBIAN_FRONTEND=noninteractive
-#           apt-get update
-#           apt-get install -y --no-install-recommends git nodejs
-#       - name: Check out source
-#         uses: actions/checkout@v4
-#       - name: Check PHP version
-#         run: |
-#           php --version
-#       - name: Check PHP syntax
-#         run: bash scripts/ci/php-lint.sh
-#       - name: Run dependency-free tests
-#         run: php tests/run.php
-#       - name: Check whitespace errors
-#         run: |
-#           if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
-#             git diff --check HEAD^ HEAD
-#           fi
+name: PHP quality checks
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  quality:
+    name: PHP 8.4 lint and tests
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.4-cli-bookworm
+    steps:
+      - name: Install checkout dependencies
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y --no-install-recommends git nodejs
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Check PHP version
+        run: php --version
+      - name: Check PHP syntax
+        run: bash scripts/ci/php-lint.sh
+      - name: Run dependency-free tests
+        run: php tests/run.php
+      - name: Check whitespace errors
+        run: |
+          if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
+            git diff --check HEAD^ HEAD
+          fi
