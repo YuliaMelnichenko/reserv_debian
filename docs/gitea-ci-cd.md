@@ -4,9 +4,15 @@
 
 `quality.yml` runs for pushes, pull requests, and manual starts on `main` and
 `develop`. It checks every PHP file with `php -l`, runs `php tests/run.php`,
-and rejects whitespace errors. It uses the existing `debian-12` runner label
-to select the runner, then runs in the official `php:8.4-cli-bookworm`
+rejects tracked local secrets and whitespace errors. It uses the
+`ubuntu-latest` runner label, then runs in the official `php:8.4-cli-bookworm`
 container. This matches the production PHP-FPM 8.4 version.
+
+The same workflow starts an isolated `mysql:8.4` service with the temporary
+`tori_integration_test` database. It runs `tests/integration/run.php` and
+applies every classified migration with `scripts/ci/check-sql-migrations.sh`.
+The job has no production or stage database credentials and the service is
+discarded after the workflow finishes.
 
 `stage-deploy.yml` is manual only. It repeats the checks and deploys a release
 to the test stand using `scripts/deploy-stage-release.sh`. It does not change a
@@ -26,9 +32,9 @@ separate step until integration tests are configured.
 
 2. In the repository settings, enable `Repository Actions`.
 
-3. The existing global `proxmox-debian` runner must be online and expose the
-   `debian-12` label. No extra runner, registration token, Docker image, or
-   host-level package is required for the quality workflow.
+3. The existing global `proxmox-ubuntu` runner must be online and expose the
+   `ubuntu-latest` label. Docker must be available to that runner so it can
+   start the PHP and temporary MySQL containers.
 
 4. Push this configuration to Gitea. The first push will automatically start
    one PHP 8.4 check in the `Actions` tab. The job runs in the runner's
@@ -61,15 +67,8 @@ and `develop` in Gitea so unreviewed code cannot reach it.
 
 ## What to add next
 
-1. Provision a separate MySQL database whose name includes `test`, and a
-   limited database user. Store its connection values as repository Secrets:
-   `TORI_TEST_DB_HOST`, `TORI_TEST_DB_PORT`, `TORI_TEST_DB_USER`,
-   `TORI_TEST_DB_PASS`, `TORI_TEST_DB_NAME`.
-2. Add a manual integration-test workflow that runs
-   `php tests/integration/run.php` against that database. It must never use the
-   production or stage database.
-3. Add a small authenticated health endpoint for the stage site. After that,
+1. Add a small authenticated health endpoint for the stage site. After that,
    the deployment health check can validate PHP, session startup, and MySQL
    connection instead of checking only the login page.
-4. Keep production deployment manual: only after the test stand is approved,
+2. Keep production deployment manual: only after the test stand is approved,
    run a dedicated production workflow from `main`.
