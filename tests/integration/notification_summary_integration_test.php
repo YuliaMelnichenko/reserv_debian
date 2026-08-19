@@ -44,19 +44,21 @@ return function ($link) {
         'Delay visit fixtures must be created'
     );
 
-    test_assert_same(
-        true,
-        db_execute(
-            $link,
-            'INSERT INTO Delays (ID, date, duration, userID, explaneDesk, status) VALUES (?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?)',
-            'issisiissisi',
-            array(
-                1, $currentDate, '00:01:00', $alphaId, 'Без объяснения', 0,
-                2, $currentDate, '00:02:00', $betaId, 'Согласовано', 1,
-            )
-        ),
-        'Delay fixtures must be created'
-    );
+    foreach (array(
+        array(1, $currentDate, '00:01:00', $alphaId, 'Без объяснения', 0),
+        array(2, $currentDate, '00:02:00', $betaId, 'Согласовано', 1),
+    ) as $delayFixture) {
+        test_assert_same(
+            true,
+            db_execute(
+                $link,
+                'INSERT INTO Delays (ID, date, duration, userID, explaneDesk, status) VALUES (?, ?, ?, ?, ?, ?)',
+                'issisi',
+                $delayFixture
+            ),
+            'Delay fixture must be created'
+        );
+    }
 
     test_assert_same(
         true,
@@ -74,10 +76,16 @@ return function ($link) {
     );
 
     $delaySummary = get_delay_notification_summary($link, $supervisorId, $currentDate);
+    $delayEntriesByUserId = array();
+
+    foreach ($delaySummary['entries'] as $entry) {
+        $delayEntriesByUserId[$entry['user_id']] = $entry;
+    }
+
     test_assert_same(array($alphaId, $betaId), array_column($delaySummary['entries'], 'user_id'), 'Delay entries must be sorted by surname');
-    test_assert_same(1, $delaySummary['entries'][0]['new_count'], 'New delay must be visible to the supervisor');
-    test_assert_same(1, $delaySummary['entries'][0]['without_comment_count'], 'Unexplained delay must be marked separately');
-    test_assert_same(1, $delaySummary['entries'][1]['accepted_count'], 'Accepted delay must remain visible in history');
+    test_assert_same(1, $delayEntriesByUserId[$alphaId]['new_count'], 'New delay must be visible to the supervisor');
+    test_assert_same(1, $delayEntriesByUserId[$alphaId]['without_comment_count'], 'Unexplained delay must be marked separately');
+    test_assert_same(1, $delayEntriesByUserId[$betaId]['accepted_count'], 'Accepted delay must remain visible in history');
 
     $pauseSummary = get_pause_notification_summary($link, $supervisorId, $currentDateTime);
     test_assert_same(1, count($pauseSummary['entries']), 'Pause notifications must include only assigned employees');
