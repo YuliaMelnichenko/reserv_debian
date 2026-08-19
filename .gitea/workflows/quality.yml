@@ -31,6 +31,8 @@ jobs:
         run: bash scripts/ci/php-lint.sh
       - name: Run dependency-free tests
         run: php tests/run.php
+      - name: Check for tracked secrets
+        run: bash scripts/ci/check-sensitive-files.sh
       - name: Check whitespace errors
         run: |
           if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
