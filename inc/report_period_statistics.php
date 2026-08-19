@@ -4,11 +4,12 @@ require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/calendar.php';
 require_once __DIR__ . '/work_calendar.php';
 require_once __DIR__ . '/work_duration.php';
+require_once __DIR__ . '/project_database.php';
 
 function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRate ){
   $userDayNorm = ( $userRate / 5 ) * 60 * 60;
 
-  include __DIR__ . "/../php_tori/connect.php";
+  $link = project_database_connect();
 
   $days_dates_set = array();
   $days_dates_start_set = array();
@@ -65,6 +66,13 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   $temp_days_penalty_remoteWorkState = array();
   $temp_days_penalty_timeZoneSec = array();
   $temp_days_penalty_dayTransitionTime = array();
+  $temp_days_remoteWorkState = array();
+  $temp_days_timeZoneSec = array();
+  $temp_days_dayTransitionTime = array();
+
+  $days_remoteWorkState = array();
+  $days_timeZoneSec = array();
+  $days_dayTransitionTime = array();
 
 
   $tempDates = array();
@@ -457,10 +465,7 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
   $leaveDurationYear = 0;
 
 
-  if ( count( $days_dates_set ) > 0 )
-  {
-    $firstPeriodDate = $days_dates_set[0];
-  }
+  $firstPeriodDate = $days_dates_set[0];
 
   $day = "";
 
