@@ -2,6 +2,7 @@ parameters:
     level: 5
     paths:
         - inc/database.php
+        - inc/project_database.php
         - inc/health_check.php
         - inc/delay.php
         - inc/pause_service.php
@@ -10,6 +11,10 @@ parameters:
         - inc/workday_transition_service.php
         - inc/index_page_service.php
         - inc/add_time_journal.php
+        - inc/employee_directory.php
+        - inc/work_calendar.php
+        - inc/report_daily_statistics.php
+        - inc/time_registration_renderer.php
     scanDirectories:
         - inc
     scanFiles:

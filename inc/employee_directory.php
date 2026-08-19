@@ -2,10 +2,11 @@
 
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/delay.php';
+require_once __DIR__ . '/project_database.php';
 
 function get_sv_name_by_userid($user_id)
 {
-    include __DIR__ . '/../php_tori/connect.php';
+    $link = project_database_connect();
 
     $query0 = db_query(
         $link,
@@ -48,7 +49,7 @@ function get_sv_name_by_userid($user_id)
 
 function get_group_user_info_by_svID_for_report_ex($svID)
 {
-    include __DIR__ . '/../php_tori/connect.php';
+    $link = project_database_connect();
 
     $userIDs = array();
     db_set_charset($link, 'utf8');
@@ -158,7 +159,7 @@ function get_group_user_info_by_svID_for_report_ex($svID)
 
 function am_i_superuser($userID)
 {
-    include __DIR__ . '/../php_tori/connect.php';
+    $link = project_database_connect();
 
     $query = db_query(
         $link,
@@ -177,7 +178,7 @@ function am_i_superuser($userID)
 
 function get_user_rate($userID)
 {
-    include __DIR__ . '/../php_tori/connect.php';
+    $link = project_database_connect();
 
     $query = db_query($link, 'SELECT RATE FROM employees WHERE ID = ?', 'i', array((int)$userID));
 
@@ -192,7 +193,7 @@ function get_user_rate($userID)
 
 function get_superuser_names_by_user_id($userID)
 {
-    include __DIR__ . '/../php_tori/connect.php';
+    $link = project_database_connect();
     db_set_charset($link, 'utf8');
 
     $query = db_query($link, "
@@ -225,7 +226,7 @@ function get_superuser_name_by_id($userID)
 
 function get_user_name_by_id($userID)
 {
-    include __DIR__ . '/../php_tori/connect.php';
+    $link = project_database_connect();
     db_set_charset($link, 'utf8');
 
     $query = db_query(
@@ -251,7 +252,7 @@ function get_user_name_by_id($userID)
 
 function get_pause_agree_able_superusers_by_userID($userID)
 {
-    include __DIR__ . '/../php_tori/connect.php';
+    $link = project_database_connect();
     db_set_charset($link, 'utf8');
 
     $query = db_query(
@@ -278,7 +279,7 @@ function get_pause_agree_able_superusers_by_userID($userID)
 
 function get_users_by_superusers_and_type($supervisorID, $type)
 {
-    include __DIR__ . '/../php_tori/connect.php';
+    $link = project_database_connect();
     db_set_charset($link, 'utf8');
 
     $query = db_query($link, "
@@ -306,7 +307,7 @@ function get_users_by_superusers_and_type($supervisorID, $type)
 
 function get_user_defStartTime_and_allowedDelay($userID, &$user_defaultStartTime, &$user_allowedDelay)
 {
-    include __DIR__ . '/../php_tori/connect.php';
+    $link = project_database_connect();
 
     $query = db_query(
         $link,
@@ -333,7 +334,7 @@ function get_user_defStartTime_and_allowedDelay($userID, &$user_defaultStartTime
 
 function get_and_update_start_time_status($userID)
 {
-    include __DIR__ . '/../php_tori/connect.php';
+    $link = project_database_connect();
 
     $currentDateTimeParts = get_splited_current_date_time_in_timezone();
     $currentTime = $currentDateTimeParts[1];
