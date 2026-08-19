@@ -113,7 +113,8 @@ return function () {
         'The existing remote work preview controls must remain available'
     );
     test_assert_true(
-        strpos($preview, 'Период ') !== false,
-        'The remote work preview must display its configured period'
+        strpos($preview, "format_period_label(\$journal['period_start_date'], \$journal['period_stop_date'])") !== false
+            && strpos($preview, '$periodLabel') !== false,
+        'The remote work preview must build and display its configured period'
     );
 };
