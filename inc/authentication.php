@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/request.php';
+require_once __DIR__ . '/session.php';
 
 function auth_remember_token_cookie_name()
 {

@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/date_range.php';
+require_once __DIR__ . '/calendar.php';
 
 function get_accounting_error_status_name($status)
 {
