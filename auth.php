@@ -83,7 +83,7 @@ if ( !$isAuthenticated )
 
   echo "<table cellpadding=\"10\" cellspacing=\"0\" border=0>";
   echo "<tr>";
-  echo "<td bgcolor=\"#ffffff\"  valign=\"top\" align=\"left\" width = 460>";
+  echo "<td bgcolor=\"#ffffff\"  valign=\"top\" align=\"left\" width = 445>";
 
   echo "<table cellpadding=\"10\" cellspacing=\"0\" border=1>";
   echo "<tr>";
