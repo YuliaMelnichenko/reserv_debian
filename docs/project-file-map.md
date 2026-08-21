@@ -377,6 +377,7 @@
 | `tests/integration/run.php` | Последовательно запускает интеграционные сценарии в отдельной тестовой БД. |
 | `tests/integration/schema.sql` | Минимальная временная схема MySQL для интеграционных тестов. |
 | `tests/integration/accounting_trip_missing_data_test.php` | Напоминания по командировкам без работы вне офиса. |
+| `tests/integration/legacy_datetime_audit_sql_test.php` | Запуск SQL-аудита на современной схеме без старых колонок. |
 | `tests/integration/notification_decision_test.php` | Принятие, отклонение, удаление и восстановление уведомлений руководителем. |
 | `tests/integration/notification_summary_integration_test.php` | Реальные выборки списков и счётчиков уведомлений. |
 | `tests/integration/password_hash_audit_test.php` | Реальный подсчёт MD5 и современных хешей. |
