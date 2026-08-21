@@ -3668,7 +3668,7 @@ h5.activ_time {
 
 .table_wrapper {
   margin: 10px 0;
-  max-height: 73vh;
+  max-height: 82vh;
   overflow-y: auto;
   border: 1px solid #ccc;
   width: 580px;
@@ -4067,6 +4067,7 @@ h5.activ_time {
 .journal-period-filter-button {
   width: 100px;
   height: 21px;
+  background-color: #f8d888 !important;
 }
 
 .journal-entry-content-cell {

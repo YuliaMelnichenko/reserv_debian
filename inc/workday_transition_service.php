@@ -142,13 +142,6 @@ function workday_transition_arrive($link, &$session, $context)
         $session['ss_state'] = (int)$openVisit['state'];
         $session['ss_visiting_ID'] = (int)$openVisit['ID'];
 
-        error_log(
-            'TORI_SWITCH_BLOCK_INSERT_RECENT user=' . $userId
-            . ' open_visit=' . $openVisit['ID']
-            . ' open_state=' . $openVisit['state']
-            . ' open_in=' . $openVisit['in_dt']
-        );
-
         return 'Ошибка: у сотрудника уже есть открытый рабочий день от '
             . $openVisit['in_dt']
             . '. Новый приход не создан. Обновите страницу.';

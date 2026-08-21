@@ -137,6 +137,23 @@ function db_execute_affected_rows($link, $sql, $types = '', $params = array())
     return $affectedRows;
 }
 
+function db_execute_sql_script($link, $sql)
+{
+    if (!mysqli_multi_query($link, $sql)) {
+        return false;
+    }
+
+    do {
+        $result = mysqli_store_result($link);
+
+        if ($result) {
+            mysqli_free_result($result);
+        }
+    } while (mysqli_more_results($link) && mysqli_next_result($link));
+
+    return db_error($link) === '';
+}
+
 function db_set_charset($link, $charset = 'utf8')
 {
     return mysqli_set_charset($link, $charset);

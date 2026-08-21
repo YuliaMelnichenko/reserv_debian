@@ -14,6 +14,8 @@ return function () {
     $reportPresentationHelpers = file_get_contents(__DIR__ . '/../inc/report_presentation_helpers.php');
     $reportDayPresentation = file_get_contents(__DIR__ . '/../inc/report_day_presentation.php');
     $reportSummaryPresentation = file_get_contents(__DIR__ . '/../inc/report_summary_presentation.php');
+    $deadlinePage = file_get_contents(__DIR__ . '/../deadline.php');
+    $deadlineService = file_get_contents(__DIR__ . '/../inc/deadline_page_service.php');
 
     test_assert_true(
         strpos($funcs, "inc/employee_directory.php") !== false,
@@ -144,6 +146,21 @@ return function () {
     test_assert_true(
         strpos($funcsRep, "inc/report_renderer.php") !== false,
         'funcs_rep.php must remain a compatibility loader for the report renderer'
+    );
+
+    test_assert_true(
+        strpos($deadlinePage, 'inc/deadline_page_service.php') !== false,
+        'The legacy deadline page must load its page data service'
+    );
+    test_assert_same(
+        0,
+        preg_match('/\bdb_query\s*\(/', $deadlinePage),
+        'The legacy deadline page must not query employee data directly'
+    );
+    test_assert_true(
+        strpos($deadlineService, 'deadline_load_employee_summary') !== false
+            && strpos($deadlineService, 'FROM `GROUPS`') !== false,
+        'The deadline page service must load employee data using the quoted groups table'
     );
 
     test_assert_same(

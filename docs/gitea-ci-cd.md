@@ -82,6 +82,26 @@ the application.
 The stage runner must be dedicated to this private repository. Protect `main`
 and `develop` in Gitea so unreviewed code cannot reach it.
 
+## Manual smoke check
+
+After a manual deployment to the test stand, run the following command on a
+host that can reach the stand. It checks the protected health endpoint, its
+database connection, and that the authorization page returns `200`. It does not
+write to the application or database.
+
+```bash
+export TORI_STAGE_HEALTH_TOKEN='<HEALTH_CHECK_TOKEN from the stage .env>'
+bash scripts/smoke-stage.sh http://192.168.100.216:8080
+```
+
+## Database migrations
+
+Versioned schema migrations are in `sql/migrations`. The CI job validates the
+catalog and applies it only to the disposable MySQL test database. The manual
+scripts in `sql/` that repair or inspect operational data are deliberately not
+run automatically. See [the migration guide](../sql/migrations/README.md) for
+the dry-run and explicit-confirmation commands.
+
 ## Further work
 
 1. Extend PHPStan from the current level 5 service scope to legacy report and
