@@ -317,6 +317,7 @@
 | `docs/gitea-ci-cd.md` | Инструкция по Gitea Actions, тестовому стенду, smoke-check и будущему деплою. |
 | `docs/legacy_database_audit.md` | Аудит рисков и особенностей старой структуры базы данных. |
 | `docs/project-file-map.md` | Этот справочник по назначению файлов проекта. |
+| `docs/stage-regression-checklist.md` | Чек-лист ручной проверки тестового стенда после обновления. |
 
 ## Тесты `tests/`
 
