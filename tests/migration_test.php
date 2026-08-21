@@ -6,7 +6,7 @@ return function () {
     $catalog = migration_catalog(__DIR__ . '/../sql/migrations');
 
     test_assert_same(
-        array('001', '002', '003'),
+        array('001', '002', '003', '004'),
         array_column($catalog, 'id'),
         'Schema migrations must have stable versions'
     );
@@ -26,6 +26,13 @@ return function () {
     test_assert_true(
         strpos($migrationScript, 'TORI_MIGRATION_DB_HOST') !== false,
         'The migration script must require explicit database environment settings'
+    );
+
+    $indexMigration = file_get_contents(__DIR__ . '/../sql/migrations/004_notification_journal_indexes.sql');
+    test_assert_true(
+        strpos($indexMigration, 'idx_groups_supervisor_user_type') !== false
+            && strpos($indexMigration, 'idx_add_time_user_pause_start') !== false,
+        'The notification and journal indexes must remain versioned migrations'
     );
 
     $smokeScript = file_get_contents(__DIR__ . '/../scripts/smoke-stage.sh');

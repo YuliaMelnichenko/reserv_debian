@@ -74,8 +74,6 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
   $dayNorm = 8 * 60 * 60;
   $eatNorm = 1 * 60 * 60;
 
-  $errorDur = 0;
-
   $changesArr = is_there_day_change_betw( $days_work_start, $days_eat_start, $days_eat_stop, $days_work_stop, $days_day_state );
   $durations = get_durations( $days_work_start, $days_work_stop, $days_eat_start, $days_eat_stop, $days_add_info, $days_day_state, $days_day_currday );
   $crossDayPeriod = 0;//$changesArr[4];
@@ -312,11 +310,6 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
 
   $workPureContent = "<h5 class=\"bigbig\">$resultPureTimeStr ($resultPureTimePartStr)</h5>";
 
-  if ( $currentDate != $days_dates_set AND $errorDur == 1 && !$isUnfinishedHistoricalDay )
-  {
-    $prefix = "<h5 class=\"bigmiddleRed\">Недостаточно сведений!";
-  }
-
   if ( $isThereData == 1 )
   {
     $tableContent =   "<div class = \"right_table\">";
@@ -347,7 +340,9 @@ function get_cell_content_by_stat( $stats, $index, $cellWidth, $userId, $default
     $tableContent .=            $workDayRange;
     $tableContent .=          "</div>";
     $tableContent .=        "</div>";
-    $showLegacyRemoteWorkStateInReport = 0;
+    // The legacy state is retained for historical data but is hidden by default.
+    $showLegacyRemoteWorkStateInReport = defined('TORI_SHOW_LEGACY_REMOTE_WORK_STATE')
+      && TORI_SHOW_LEGACY_REMOTE_WORK_STATE;
 
     if ( $showLegacyRemoteWorkStateInReport == 1 && $days_remoteWorkState != 0 && $days_remoteWorkState != "NDF" ){
       $tableContent .=          "<div class = \"remote_work_time_rep\">";
