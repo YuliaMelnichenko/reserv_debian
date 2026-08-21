@@ -15,6 +15,7 @@ if ($config === null) {
 }
 
 $testFiles = array(
+    __DIR__ . '/password_hash_migration_test.php',
     __DIR__ . '/remember_token_test.php',
     __DIR__ . '/workday_flow_test.php',
     __DIR__ . '/pause_remote_work_test.php',
@@ -33,6 +34,7 @@ try {
 
         try {
             integration_test_reset_schema($link);
+            integration_test_apply_migrations($link);
             $test = require $testFile;
             $test($link);
             echo '[OK] ' . $testName . PHP_EOL;

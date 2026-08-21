@@ -32,3 +32,9 @@ The older `sql/*.sql` files are retained for compatibility and audit history.
 `normalize_invalid_pauses.sql`, `auth_remember_tokens_cleanup.sql`, and
 `legacy_datetime_audit.sql` remain manual maintenance scripts: they are not run
 by the migration tool or CI because they can change or inspect operational data.
+
+Migration `005_employee_password_hash.sql` adds an empty `PASSWORD_HASH` column
+without changing existing MD5 values. After it is applied, each employee who
+successfully signs in is transparently upgraded to `password_hash()`; no password
+reset is needed. Keep the legacy `passwd` column until a separately approved
+final MD5-retirement migration is ready.

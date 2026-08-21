@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../../inc/database.php';
+require_once __DIR__ . '/../../inc/migrations.php';
 require_once __DIR__ . '/../test_helpers.php';
 
 function integration_test_config()
@@ -91,6 +92,16 @@ function integration_test_reset_schema($link)
 
     if (db_error($link) !== '') {
         throw new RuntimeException('Unable to finish integration schema setup: ' . db_error($link));
+    }
+}
+
+function integration_test_apply_migrations($link)
+{
+    $migrations = migration_catalog(__DIR__ . '/../../sql/migrations');
+    $applied = migrations_apply_pending($link, $migrations);
+
+    if ($applied === false) {
+        throw new RuntimeException('Unable to apply integration migrations: ' . db_error($link));
     }
 }
 

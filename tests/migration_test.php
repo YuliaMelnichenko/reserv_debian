@@ -6,7 +6,7 @@ return function () {
     $catalog = migration_catalog(__DIR__ . '/../sql/migrations');
 
     test_assert_same(
-        array('001', '002', '003', '004'),
+        array('001', '002', '003', '004', '005'),
         array_column($catalog, 'id'),
         'Schema migrations must have stable versions'
     );
