@@ -180,6 +180,8 @@ function get_pause_notification_summary($link, $supervisorID, $currentDateTime)
         $currentDateTime
     );
     $currentDate = substr((string)$currentDateTime, 0, 10);
+    $currentDayStartDateTime = $currentDate . ' 00:00:00';
+    $currentDayStopDateTime = date('Y-m-d 00:00:00', strtotime($currentDate . ' +1 day'));
     $dateTimeExpressions = time_journal_add_work_datetime_expressions($link);
     $startExpression = $dateTimeExpressions['start'];
     $stopExpression = $dateTimeExpressions['stop'];
@@ -188,7 +190,9 @@ function get_pause_notification_summary($link, $supervisorID, $currentDateTime)
           employee.ID AS USERID,
           CONCAT_WS(' ', employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME) AS USER_NAME,
           COUNT(DISTINCT a.ID) AS TOTAL_COUNT,
-          COUNT(DISTINCT CASE WHEN DATE($startExpression) = ? THEN a.ID END) AS CURRENT_DAY_COUNT
+          COUNT(DISTINCT CASE
+            WHEN $startExpression >= ? AND $startExpression < ? THEN a.ID
+          END) AS CURRENT_DAY_COUNT
         FROM `GROUPS` membership
         INNER JOIN employees employee ON employee.ID = membership.USERID
         LEFT JOIN ADD_TIME a
@@ -204,8 +208,9 @@ function get_pause_notification_summary($link, $supervisorID, $currentDateTime)
           AND TRIM(membership.TYPE) = ?
         GROUP BY employee.ID, employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME
         ORDER BY employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME, employee.ID
-    ", 'sssis', array(
-        $currentDate,
+    ", 'ssssis', array(
+        $currentDayStartDateTime,
+        $currentDayStopDateTime,
         $quarterStartDate,
         $quarterStopExclusive,
         (int)$supervisorID,

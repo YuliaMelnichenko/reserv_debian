@@ -102,7 +102,11 @@ return function ($link) {
     $pauseSummary = get_pause_notification_summary($link, $supervisorId, $currentDateTime);
     test_assert_same(1, count($pauseSummary['entries']), 'Pause notifications must include only assigned employees');
     test_assert_same($alphaId, $pauseSummary['entries'][0]['user_id'], 'Pause notification must belong to the assigned employee');
-    test_assert_same(1, $pauseSummary['entries'][0]['current_day_count'], 'Current-day pause count must be accurate');
+    test_assert_same(
+        1,
+        $pauseSummary['entries'][0]['current_day_count'],
+        'Current-day pause count must be accurate: ' . json_encode($pauseSummary['entries'][0])
+    );
 
     $offsiteSummary = get_add_time_notification_summary($link, $supervisorId, $currentDateTime);
     test_assert_same(2, count($offsiteSummary['entries']), 'Offsite summary must include every assigned employee');
