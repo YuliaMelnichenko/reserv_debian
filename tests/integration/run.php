@@ -15,8 +15,8 @@ if ($config === null) {
 }
 
 $testFiles = array(
-    __DIR__ . '/password_hash_migration_test.php',
     __DIR__ . '/remember_token_test.php',
+    __DIR__ . '/password_hash_migration_test.php',
     __DIR__ . '/workday_flow_test.php',
     __DIR__ . '/pause_remote_work_test.php',
     __DIR__ . '/presence_query_test.php',
@@ -25,6 +25,7 @@ $testFiles = array(
     __DIR__ . '/notification_summary_integration_test.php',
 );
 $failed = 0;
+$testResults = array();
 $link = null;
 
 try {
@@ -38,10 +39,10 @@ try {
             integration_test_apply_migrations($link);
             $test = require $testFile;
             $test($link);
-            echo '[OK] ' . $testName . PHP_EOL;
+            $testResults[] = '[OK] ' . $testName;
         } catch (Throwable $error) {
             $failed++;
-            echo '[FAIL] ' . $testName . ': ' . $error->getMessage() . PHP_EOL;
+            $testResults[] = '[FAIL] ' . $testName . ': ' . $error->getMessage();
         }
     }
 } catch (Throwable $error) {
@@ -51,6 +52,10 @@ try {
     if ($link) {
         db_close($link);
     }
+}
+
+foreach ($testResults as $testResult) {
+    echo $testResult . PHP_EOL;
 }
 
 if ($failed > 0) {
