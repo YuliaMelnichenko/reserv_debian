@@ -7,6 +7,7 @@ $testFiles = array(
     __DIR__ . '/accounting_errors_test.php',
     __DIR__ . '/ajax_response_test.php',
     __DIR__ . '/authentication_test.php',
+    __DIR__ . '/password_hash_audit_test.php',
     __DIR__ . '/ajax_endpoint_conventions_test.php',
     __DIR__ . '/add_time_journal_test.php',
     __DIR__ . '/add_time_journal_period_test.php',

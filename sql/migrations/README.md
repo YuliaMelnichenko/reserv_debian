@@ -38,3 +38,23 @@ without changing existing MD5 values. After it is applied, each employee who
 successfully signs in is transparently upgraded to `password_hash()`; no password
 reset is needed. Keep the legacy `passwd` column until a separately approved
 final MD5-retirement migration is ready.
+
+## Password hash report
+
+The following read-only script shows aggregate counts of active and archived
+accounts: modern hashes, remaining MD5 hashes and records without a supported
+hash. It displays no passwords, hashes, logins or employee names and does not
+change the database.
+
+```bash
+TORI_PASSWORD_AUDIT_DB_HOST=127.0.0.1 \
+TORI_PASSWORD_AUDIT_DB_PORT=3306 \
+TORI_PASSWORD_AUDIT_DB_NAME=tori_stage \
+TORI_PASSWORD_AUDIT_DB_USER=tori_auditor \
+TORI_PASSWORD_AUDIT_DB_PASS='<password>' \
+php scripts/db/password-hash-report.php
+```
+
+For convenience, the script can reuse `TORI_MIGRATION_DB_*` variables when the
+dedicated `TORI_PASSWORD_AUDIT_DB_*` names are not set. Give the audit account
+only `SELECT` access to the project database.
