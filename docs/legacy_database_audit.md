@@ -1,45 +1,60 @@
-# Legacy datetime fields audit
+# Аудит устаревших полей даты и времени
 
-## Canonical fields
+## Основные поля
 
-New and updated code must use the following datetime columns:
+Новый и обновляемый код должен использовать следующие колонки даты и времени:
 
-- `ADD_TIME.START_DT` and `ADD_TIME.STOP_DT`.
-- `visiting.in_dt`, `visiting.out_dt`, `visiting.eat_start_dt`, and `visiting.eat_stop_dt`.
+- `ADD_TIME.START_DT` и `ADD_TIME.STOP_DT`;
+- `visiting.in_dt`, `visiting.out_dt`, `visiting.eat_start_dt` и
+  `visiting.eat_stop_dt`.
 
-The old split columns are retained only while production data is being checked:
+Старые раздельные колонки сохранены только на период проверки рабочих данных:
 
-- `ADD_TIME.STARTDATE`, `ADD_TIME.STARTTIME`, and `ADD_TIME.STOPTIME`.
-- `visiting.date`, `visiting.in_time`, `visiting.out_time`, `visiting.eat_start`, and `visiting.eat_stop`.
+- `ADD_TIME.STARTDATE`, `ADD_TIME.STARTTIME` и `ADD_TIME.STOPTIME`;
+- `visiting.date`, `visiting.in_time`, `visiting.out_time`,
+  `visiting.eat_start` и `visiting.eat_stop`.
 
-## Completed in code
+## Что уже сделано в коде
 
-The following paths now use canonical datetime values:
+Следующие части системы уже используют основные значения даты и времени:
 
-- work outside the office in reports and statistics;
-- accounting-alert lookup for `ADD_TIME`;
-- delay arrival lookup for a date range;
-- pause completion and the latest completed pause preview;
-- pause journal range filtering.
+- работа вне офиса в отчётах и статистике;
+- поиск записей ошибок учёта для `ADD_TIME`;
+- поиск времени прихода при расчёте опоздания за диапазон дат;
+- завершение приостановки и предварительный просмотр последней завершённой
+  приостановки;
+- фильтрация журнала приостановок по диапазону.
 
-Legacy `ADD_TIME` columns are now read only through `add_time_datetime_sql()` as a temporary fallback for historical rows. The test suite rejects new writes to these columns and rejects direct use outside the compatibility layer.
+Старые колонки `ADD_TIME` теперь читаются только через
+`add_time_datetime_sql()` как временный запасной вариант для исторических
+строк. Тесты запрещают новые записи в эти колонки и прямое использование старых
+полей вне слоя совместимости.
 
-## Remaining visiting compatibility
+## Оставшаяся совместимость `visiting`
 
-The following workflows still depend on old `visiting` columns and must be migrated only after the production data has been audited:
+Следующие сценарии всё ещё зависят от старых колонок `visiting`. Их можно
+переводить только после аудита рабочих данных:
 
-- current entrance list in `funcs.php`;
-- short statistics in `funcs.php`;
-- manual current-day adjustment in `ajax/adj_in_time.php`;
-- current-day visit deletion in `ajax/delete_user_visitiong_info_by_currentDay.php`.
+- текущий список приходов в `funcs.php`;
+- краткая статистика в `funcs.php`;
+- ручная корректировка текущего дня в `ajax/adj_in_time.php`;
+- удаление текущей записи посещения в
+  `ajax/delete_user_visitiong_info_by_currentDay.php`.
 
-Removing these reads or writes before confirming that every old row has canonical datetime values can change employee reports. They are therefore documented rather than silently removed.
+Удаление этих чтений или записей до подтверждения того, что каждая старая строка
+имеет основные значения даты и времени, способно изменить отчёты сотрудников.
+Поэтому они документированы, а не удалены незаметно.
 
-## Deployment procedure
+## Порядок развёртывания
 
-1. Run `sql/legacy_datetime_audit.sql` against a staging copy of the production database. It contains read-only statements.
-2. Review rows where a canonical value is missing but a legacy value is present.
-3. Back up the database and migrate those rows in a separate, reviewed migration.
-4. Test entrance, lunch, departure, pause, offsite-work, overtime, and temporary-report workflows.
-5. Run the audit again and confirm that no required canonical values are missing.
-6. Only then remove the compatibility expressions and old columns in a later release.
+1. Выполните `sql/legacy_datetime_audit.sql` на тестовой копии рабочей базы.
+   Скрипт содержит только запросы на чтение.
+2. Проверьте строки, где основное значение отсутствует, но старое поле заполнено.
+3. Создайте резервную копию БД и перенесите такие значения отдельной проверенной
+   миграцией.
+4. Проверьте приход, обед, уход, приостановки, работу вне офиса, переработки и
+   временный отчёт.
+5. Повторно выполните аудит и убедитесь, что в необходимых основных полях больше
+   нет пропусков.
+6. Только после этого удаляйте выражения совместимости и старые колонки в одном
+   из следующих релизов.
