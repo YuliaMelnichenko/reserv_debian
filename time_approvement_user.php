@@ -3,7 +3,7 @@ ob_start();
 require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 include_once __DIR__ . "/funcs.php";
-require_once __DIR__ . "/inc/add_time_journal.php";
+require_once __DIR__ . "/inc/notification_detail_page_service.php";
 save_last_location( "time_approvement.php" );
 $mid = request_get_trimmed_string('mid');
 
@@ -74,7 +74,7 @@ db_set_charset($link, "utf8");
       echo "</div>";
 
       $backUrl = "time_approvement.php";
-      $journal = get_add_time_journal_context($link, $userID, get_current_datetime_in_timezone_str(1, 0));
+      $journal = notification_detail_load_add_time_context($link, $userID, get_current_datetime_in_timezone_str(1, 0));
 
       if ($journal === false) {
         echo "<h5>" . html_escape(database_error_message($link, __FILE__ . ':' . __LINE__)) . "</h5>";
@@ -88,10 +88,7 @@ db_set_charset($link, "utf8");
 
       $userName = $journal['user_name'];
       $addTimeInfo = $journal['entries'];
-      $periodLabel = format_period_label(
-        $journal['period_start_date'],
-        $journal['period_stop_date']
-      );
+      $periodLabel = $journal['period_label'];
 
       if ( count( $addTimeInfo ) == 0 ){
         echo "<table id=\"add_time_approvement_table\" class=\"notification-detail-header-table notification-detail-empty-header\">";

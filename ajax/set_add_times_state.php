@@ -14,15 +14,9 @@ if (!in_array($mode, array(100, 200), true)) {
 require_ajax_add_time_supervisor($ID, 0);
 
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . '/../inc/notification_decision_service.php';
 
-if ( $mode == 100 )
-{
-  $query = db_execute($link, 'UPDATE ADD_TIME SET APPROVED = APPROVED + 100 WHERE ID = ?', 'i', array($ID));
-}
-else
-{
-  $query = db_execute($link, 'UPDATE ADD_TIME SET APPROVED = APPROVED - 100 WHERE ID = ?', 'i', array($ID));
-}
+$query = notification_decision_set_add_time_deleted($link, $ID, $mode);
 
 $merr = db_error($link);
 if ( !$query ) 

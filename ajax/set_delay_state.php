@@ -14,15 +14,9 @@ if (!in_array($mode, array(100, 200), true)) {
 require_ajax_delay_supervisor($ID, 3);
 
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . '/../inc/notification_decision_service.php';
 
-if ( $mode == 100 )
-{
-  $query = db_execute($link, 'UPDATE Delays SET status = status + 100 WHERE ID = ?', 'i', array($ID));
-}
-else
-{
-  $query = db_execute($link, 'UPDATE Delays SET status = status - 100 WHERE ID = ?', 'i', array($ID));
-}
+$query = notification_decision_set_delay_deleted($link, $ID, $mode);
 
 $merr = db_error($link);
 if ( !$query ) 
