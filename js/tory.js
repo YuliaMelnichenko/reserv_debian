@@ -944,8 +944,63 @@ function show_table(){
     function RetSWT1(dat1) {
       document.getElementById('add_times_table').innerHTML = dat1;
       schedule_notification_layout(document.getElementById('add_times_table'));
+      toggle_add_time_journal_manual_period();
     }
   }
+}
+
+function toggle_add_time_journal_manual_period(){
+  var periodType = document.getElementById('add_time_journal_period_type');
+  var manualPeriod = document.getElementById('add_time_journal_manual_period');
+
+  if (!periodType || !manualPeriod) {
+    return;
+  }
+
+  manualPeriod.style.display = periodType.value === '7' ? 'inline' : 'none';
+}
+
+function set_add_time_journal_period(){
+  var periodType = document.getElementById('add_time_journal_period_type');
+  var startDate = document.getElementById('add_time_journal_start_date');
+  var stopDate = document.getElementById('add_time_journal_stop_date');
+
+  if (!periodType || !startDate || !stopDate) {
+    return;
+  }
+
+  if (periodType.value === '7' && (!startDate.value || !stopDate.value || startDate.value > stopDate.value)) {
+    alert('Укажите корректные дату начала и дату окончания периода.');
+    return;
+  }
+
+  $.ajax({
+    type: 'POST',
+    url: 'ajax/set_add_time_journal_period.php',
+    dataType: 'json',
+    data: {
+      period_mode: periodType.value,
+      start_date: startDate.value,
+      stop_date: stopDate.value
+    },
+    success: function(response) {
+      if (!response || response.status !== 'ok') {
+        alert(response && response.message ? response.message : 'Не удалось применить период.');
+        return;
+      }
+
+      show_table();
+    },
+    error: function(xhr) {
+      var message = 'Не удалось применить период.';
+
+      if (xhr.responseJSON && xhr.responseJSON.message) {
+        message = xhr.responseJSON.message;
+      }
+
+      alert(message);
+    }
+  });
 }
 
 function show_pause_table(){

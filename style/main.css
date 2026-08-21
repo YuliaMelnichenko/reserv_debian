@@ -4039,6 +4039,36 @@ h5.activ_time {
   height: 30px;
 }
 
+.journal-period-filter {
+  margin: 0 0 8px;
+  white-space: nowrap;
+}
+
+.journal-period-filter-label {
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  margin-right: 5px;
+}
+
+.journal-period-filter-select {
+  width: 170px;
+  margin-right: 8px;
+}
+
+.journal-period-filter-manual {
+  margin-right: 5px;
+}
+
+.journal-period-filter-manual input {
+  width: 110px;
+}
+
+.journal-period-filter-button {
+  width: 100px;
+  height: 21px;
+}
+
 .journal-entry-content-cell {
   width: 0;
 }
