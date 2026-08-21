@@ -41,8 +41,9 @@ return function () {
 
     $detailPage = file_get_contents(__DIR__ . '/../delay_approvement_user.php');
     test_assert_true(
-        strpos($detailPage, 'inc/delay_journal.php') !== false,
-        'The full delay detail page must use the shared data service'
+        strpos($detailPage, 'inc/notification_detail_page_service.php') !== false
+            && strpos($detailPage, 'notification_detail_load_delay_context') !== false,
+        'The full delay detail page must use the shared notification detail service'
     );
     test_assert_same(
         0,

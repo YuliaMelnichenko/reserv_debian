@@ -23,6 +23,7 @@ $testFiles = array(
     __DIR__ . '/accounting_trip_missing_data_test.php',
     __DIR__ . '/staff_leaves_archive_test.php',
     __DIR__ . '/notification_summary_integration_test.php',
+    __DIR__ . '/notification_decision_test.php',
 );
 $failed = 0;
 $testResults = array();

@@ -16,14 +16,10 @@ if (!in_array($ACCEPTMODE, array(-1, 1), true)) {
 require_ajax_add_time_supervisor($ID, 0);
 
 include_once __DIR__ . "/../php_tori/connect.php";
+require_once __DIR__ . '/../inc/notification_decision_service.php';
 
 db_set_charset($link, "utf8");
-$query = db_execute(
-  $link,
-  'UPDATE ADD_TIME SET SUIR = ?, SUPERVISORDESC = ?, APPROVED = ? WHERE ID = ?',
-  'isii',
-  array($userID, $DESC, $ACCEPTMODE, $ID)
-);
+$query = notification_decision_update_add_time($link, $ID, $userID, $DESC, $ACCEPTMODE);
 
 $merr = db_error($link);
 if ( !$query ) 

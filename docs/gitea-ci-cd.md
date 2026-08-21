@@ -20,6 +20,13 @@ every classified migration with `scripts/ci/check-sql-migrations.sh`.
 The job has no production or stage database credentials and the service is
 discarded after the workflow finishes.
 
+After the three local checks succeed, the optional `stage-smoke` job runs on
+the same `ubuntu-latest` runner. It only requests the protected `health.php`
+endpoint and the authorization page of the test stand. It never deploys code,
+changes Nginx or PHP-FPM, writes to the application database, or runs SQL.
+Until the required repository secrets are added, this job completes with a
+clear skip message and the rest of CI remains fully usable.
+
 `stage-deploy.yml` is manual only. It repeats the checks and deploys a release
 to the test stand using `scripts/deploy-stage-release.sh`. It does not change a
 database or execute SQL files. Database migrations must remain a reviewed,
@@ -49,6 +56,18 @@ separate step until integration tests are configured.
 
 5. The runner will download the official PHP 8.4 image from Docker Hub on its
    first run. Later jobs reuse the local Docker image cache.
+
+6. To enable the read-only test-stand check, add these **repository Action
+   secrets** in `Settings -> Actions -> Secrets`:
+
+   ```text
+   TORI_STAGE_SMOKE_URL=http://192.168.100.216:8080
+   TORI_STAGE_HEALTH_TOKEN=<same value as HEALTH_CHECK_TOKEN in the stage .env>
+   ```
+
+   `TORI_STAGE_HEALTH_URL` is optional and is needed only when `health.php` is
+   published at a different URL. No secret gives the workflow access to the
+   production server.
 
 ## Test-stand deployment
 

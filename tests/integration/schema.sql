@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS accounting_errors;
 DROP TABLE IF EXISTS remote_work;
 DROP TABLE IF EXISTS visiting;
 DROP TABLE IF EXISTS Delays;
+DROP TABLE IF EXISTS Penalty;
 DROP TABLE IF EXISTS DBSETUP;
 DROP TABLE IF EXISTS work_dayoff;
 DROP TABLE IF EXISTS staff_leaves;
@@ -113,6 +114,15 @@ CREATE TABLE Delays (
     penaltyReply TEXT NOT NULL,
     status INT NOT NULL DEFAULT 0,
     INDEX delays_user_date (userID, date, ID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE Penalty (
+    date DATE NOT NULL,
+    ID INT NOT NULL PRIMARY KEY,
+    userID INT NOT NULL,
+    supervisorID INT NOT NULL,
+    reason TEXT NOT NULL,
+    INDEX penalty_user (userID, ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE DBSETUP (

@@ -117,3 +117,29 @@ jobs:
         run: vendor/bin/phpstan analyse --no-progress --memory-limit=512M
       - name: Audit Composer dependencies
         run: php /tmp/composer.phar audit --locked --no-interaction --ignore-unreachable
+
+  stage-smoke:
+    name: Optional stage smoke check
+    needs: [quality, integration, php85]
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.4-cli-bookworm
+    env:
+      TORI_STAGE_SMOKE_URL: ${{ secrets.TORI_STAGE_SMOKE_URL }}
+      TORI_STAGE_HEALTH_TOKEN: ${{ secrets.TORI_STAGE_HEALTH_TOKEN }}
+      TORI_STAGE_HEALTH_URL: ${{ secrets.TORI_STAGE_HEALTH_URL }}
+    steps:
+      - name: Install checkout dependencies
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y --no-install-recommends git nodejs curl
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Run read-only stage smoke check
+        run: |
+          if [ -z "${TORI_STAGE_SMOKE_URL:-}" ] || [ -z "${TORI_STAGE_HEALTH_TOKEN:-}" ]; then
+            echo 'Stage smoke check skipped: TORI_STAGE_SMOKE_URL and TORI_STAGE_HEALTH_TOKEN are not configured.'
+            exit 0
+          fi
+          bash scripts/smoke-stage.sh
