@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../../inc/notification_summary.php';
+require_once __DIR__ . '/../../inc/pause_service.php';
 
 return function ($link) {
     $supervisorId = 501;
@@ -15,6 +16,7 @@ return function ($link) {
 
     foreach (array(
         array($alphaId, '0'),
+        array($alphaId, '3'),
         array($betaId, '0'),
         array($alphaId, '4'),
     ) as $membership) {
@@ -73,15 +75,33 @@ return function ($link) {
         db_execute(
             $link,
             'INSERT INTO ADD_TIME (ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            'siississiisiississii',
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'siississii',
             array(
                 $currentDate, $supervisorId, $alphaId, $currentDate . ' 10:00:00', $currentDate . ' 11:00:00', 1, 'Выезд', '', 0, 0,
-                $currentDate, $supervisorId, $alphaId, $currentDate . '12:00:00', $currentDate . ' 12:30:00', 1, 'Встреча', '', 0, 1,
             )
         ),
         'Time notification fixtures must be created'
     );
+
+    $pauseStarted = start_time_pause(
+        $link,
+        $alphaId,
+        1,
+        $supervisorId,
+        $currentDate,
+        $currentDate . ' 12:00:00',
+        'Встреча'
+    );
+    test_assert_same('success', $pauseStarted['status'], 'Pause notification fixture must be started through the application service');
+    $pause = db_fetch_one(db_query(
+        $link,
+        'SELECT ID FROM ADD_TIME WHERE USERID = ? AND PAUSE_MODE = 1 ORDER BY ID DESC LIMIT 1',
+        'i',
+        array($alphaId)
+    ));
+    $pauseFinished = finish_time_pause($link, $alphaId, 1, (int) $pause['ID'], $currentDate . ' 12:30:00');
+    test_assert_same('success', $pauseFinished['status'], 'Pause notification fixture must be completed through the application service');
 
     $delaySummary = get_delay_notification_summary($link, $supervisorId, $currentDate);
     $delayEntriesByUserId = array();
