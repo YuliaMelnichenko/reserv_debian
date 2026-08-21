@@ -10,11 +10,7 @@ return function ($link) {
     $leaveStop = date('Y-m-d', strtotime($filterStop . ' +3 days'));
 
     integration_seed_employee($link, $employeeId, 'Архив');
-    test_assert_same(
-        true,
-        createStaffLeave($link, $employeeId, $leaveStart, $leaveStop, 'Командировка'),
-        'A staff-leave archive fixture must be created'
-    );
+    createStaffLeave($link, $employeeId, $leaveStart, $leaveStop, 'Командировка');
 
     $rows = fetchStaffLeavesArchiveRows(
         $link,

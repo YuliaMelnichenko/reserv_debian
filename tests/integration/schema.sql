@@ -1,5 +1,6 @@
 SET SESSION sql_mode = '';
 
+DROP TABLE IF EXISTS schema_migrations;
 DROP TABLE IF EXISTS ADD_TIME;
 DROP TABLE IF EXISTS accounting_errors;
 DROP TABLE IF EXISTS remote_work;
