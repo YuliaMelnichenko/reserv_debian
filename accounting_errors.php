@@ -34,13 +34,14 @@ if ($syncResult !== false) {
   $_SESSION['accounting_errors_sync_date'] = date('Y-m-d');
 }
 
-$regularCountResult = db_query(
+$regularRows = get_accounting_errors_rows(
   $link,
-  'SELECT COUNT(*) AS CNT FROM accounting_errors WHERE USERID = ? AND ERROR_DATE >= ? AND ERROR_DATE <= ? AND STATUS IN (0, 1, 2, 3)',
-  'iss',
-  array((int)$userID, $accountingErrorsStartDate, $accountingErrorsStopDate)
+  $userID,
+  $accountingErrorsStartDate,
+  $accountingErrorsStopDate,
+  true
 );
-$hasRegularErrors = !$regularCountResult || (int)db_fetch_one($regularCountResult)['CNT'] > 0;
+$hasRegularErrors = $regularRows === false || count($regularRows) > 0;
 $businessTripRows = get_business_trip_missing_data_rows($link, $userID, $depthDays);
 $hasBusinessTripRows = is_array($businessTripRows) && count($businessTripRows) > 0;
 
@@ -72,24 +73,14 @@ echo "<table class=\"accounting-errors-page-table\">";
             echo "<td class=\"add_time accounting-errors-action-cell\"><h5 class=\"big\">Действие</h5></td>";
             echo "</tr>";
 
-            $query = db_query(
-                $link,
-                'SELECT ID, ERROR_DATE, STATUS, USER_COMMENT
-                 FROM accounting_errors
-                 WHERE USERID = ? AND USERID NOT IN (156, 161, 600) AND ERROR_DATE >= ? AND ERROR_DATE <= ? AND STATUS IN (0, 1, 2, 3)
-                 ORDER BY ERROR_DATE DESC',
-                'iss',
-                array((int)$userID, $accountingErrorsStartDate, $accountingErrorsStopDate)
-            );
-
-            if (!$query) {
+            if ($regularRows === false) {
                 echo "<tr><td colspan=4><h5 class=\"middle\">Не удалось загрузить ошибки учета.</h5></td></tr>";
             }
             else {
                 $color = "#ddffff";
                 $rowCount = 0;
 
-                while ($row = db_fetch_one($query)) {
+                foreach ($regularRows as $row) {
                     $rowCount++;
 
                     $errorID = (int)$row["ID"];

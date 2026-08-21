@@ -80,6 +80,32 @@ function clear_unsubmitted_accounting_errors_for_dates($link, $userID, $dates)
     return true;
 }
 
+function get_accounting_errors_rows($link, $userID, $startDate, $stopDate, $activeStatusesOnly = false)
+{
+    $sql = 'SELECT ID, ERROR_DATE, STATUS, USER_COMMENT, SUPERVISOR_COMMENT, SUPERVISORID, USER_REPLY_DT, SUPERVISOR_REPLY_DT '
+        . 'FROM accounting_errors '
+        . 'WHERE USERID = ? AND USERID NOT IN (156, 161, 600) AND ERROR_DATE >= ? AND ERROR_DATE <= ?';
+
+    if ($activeStatusesOnly) {
+        $sql .= ' AND STATUS IN (0, 1, 2, 3)';
+    }
+
+    $sql .= ' ORDER BY ERROR_DATE DESC';
+    $result = db_query($link, $sql, 'iss', array((int) $userID, (string) $startDate, (string) $stopDate));
+
+    if (!$result) {
+        return false;
+    }
+
+    $rows = array();
+
+    while ($row = db_fetch_one($result)) {
+        $rows[] = $row;
+    }
+
+    return $rows;
+}
+
 function clear_business_trip_missing_data_for_dates($link, $userID, $dates)
 {
     $normalizedDates = array();

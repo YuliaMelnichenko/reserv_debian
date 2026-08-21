@@ -32,6 +32,10 @@ return function () {
         'Missing offsite-work data for business trips must be synchronized separately from regular accounting errors'
     );
     test_assert_true(
+        strpos($service, 'function get_accounting_errors_rows') !== false,
+        'Accounting-error data loading must stay in the shared service'
+    );
+    test_assert_true(
         strpos($service, 'get_accounting_errors_supervised_user_ids($link, $supervisorID)') !== false,
         'Supervisor notification counts must synchronize business-trip reminders before rendering'
     );
@@ -54,6 +58,12 @@ return function () {
         strpos($supervisorPage, 'business_trip_missing_data_supervisor_table') !== false
             && strpos($supervisorPage, 'Данные вне офиса не внесены') !== false,
         'Supervisors must see business-trip reminders as information without approval actions'
+    );
+    test_assert_same(
+        0,
+        preg_match('/\bdb_query\s*\(/', $employeePage)
+            + preg_match('/\bdb_query\s*\(/', $supervisorPage),
+        'Accounting-error pages must render rows returned by the shared service'
     );
 
     $styles = file_get_contents(__DIR__ . '/../style/main.css');
