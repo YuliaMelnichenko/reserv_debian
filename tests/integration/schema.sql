@@ -34,7 +34,8 @@ CREATE TABLE `GROUPS` (
     USERID INT NOT NULL,
     SUPERVISORID INT NOT NULL,
     TYPE VARCHAR(20) NOT NULL,
-    INDEX groups_user_type (USERID, TYPE)
+    INDEX groups_user_type (USERID, TYPE),
+    INDEX idx_groups_supervisor_user_type (SUPERVISORID, USERID, TYPE)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE auth_remember_tokens (
@@ -93,7 +94,8 @@ CREATE TABLE ADD_TIME (
     APPROVED TINYINT NOT NULL DEFAULT 0,
     PAUSE_MODE TINYINT NOT NULL DEFAULT 0,
     BYALERT TINYINT NOT NULL DEFAULT 0,
-    INDEX add_time_user_start (USERID, START_DT, ID)
+    INDEX add_time_user_start (USERID, START_DT, ID),
+    INDEX idx_add_time_user_pause_start (USERID, PAUSE_MODE, START_DT)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE Delays (

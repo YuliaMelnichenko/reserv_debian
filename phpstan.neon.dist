@@ -16,7 +16,14 @@ parameters:
         - inc/work_calendar.php
         - inc/report_daily_statistics.php
         - inc/report_period_statistics.php
+        - inc/report_statistics.php
+        - inc/report_presentation.php
+        - inc/report_presentation_helpers.php
+        - inc/report_day_presentation.php
+        - inc/report_summary_presentation.php
         - inc/time_registration_renderer.php
+        - inc/migrations.php
+        - inc/deadline_page_service.php
     scanDirectories:
         - inc
     scanFiles:
