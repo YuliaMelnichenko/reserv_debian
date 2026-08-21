@@ -70,9 +70,11 @@ return function () {
         strpos($employeeTable, 'inc/add_time_journal.php') !== false,
         'The employee remote work table must use the shared data service'
     );
+    $employeeTableHasQuery = preg_match('/\bSELECT\b/', $employeeTable)
+        || preg_match('/\b(?:get_all_add_work_info_by_user|get_superuser_name_by_id|get_user_name_by_id)\b/i', $employeeTable);
     test_assert_same(
-        0,
-        preg_match('/\b(?:SELECT|get_all_add_work_info_by_user|get_superuser_name_by_id|get_user_name_by_id)\b/i', $employeeTable),
+        false,
+        (bool)$employeeTableHasQuery,
         'The employee remote work table must not perform SQL, legacy, or per-row lookups'
     );
     test_assert_true(

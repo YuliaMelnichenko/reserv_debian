@@ -7,13 +7,17 @@ ajax_text_headers();
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 require_once __DIR__ . "/../inc/add_time_journal.php";
+require_once __DIR__ . "/../inc/add_time_journal_period.php";
 
 $userID = (int)$_SESSION['ss_id'];
+$selectedPeriod = get_add_time_journal_period_from_session(get_current_datetime_in_timezone_str(1, 0));
 $journal = get_add_time_journal_context(
   $link,
   $userID,
   get_current_datetime_in_timezone_str(1, 0),
-  false
+  false,
+  $selectedPeriod['start_date'],
+  $selectedPeriod['stop_date']
 );
 
 if ($journal === false) {
@@ -36,6 +40,32 @@ echo "<tr>";
 
 echo "<td class=\"journal-entry-toolbar-cell\">";
 echo "<button class=\"journal-action-button journal-action-button-add\" onclick=\"as_add_time();\">Добавить время</button><br><br>";
+echo "<div class=\"journal-period-filter\">";
+echo "<span class=\"journal-period-filter-label\">Период:</span>";
+echo "<select id=\"add_time_journal_period_type\" class=\"flat journal-period-filter-select\" onchange=\"toggle_add_time_journal_manual_period();\">";
+
+$periodOptions = array(
+  1 => 'С начала недели',
+  2 => 'С начала месяца',
+  3 => 'За предыдущий месяц',
+  4 => 'С начала квартала',
+  5 => 'За предыдущий квартал',
+  7 => 'Задать вручную',
+);
+
+foreach ($periodOptions as $periodMode => $periodTitle) {
+  $selected = $selectedPeriod['mode'] === $periodMode ? ' selected' : '';
+  echo "<option value=\"$periodMode\"$selected>" . html_escape($periodTitle) . "</option>";
+}
+
+echo "</select>";
+$manualDisplay = $selectedPeriod['mode'] === 7 ? '' : ' style=\"display:none;\"';
+echo "<span id=\"add_time_journal_manual_period\" class=\"journal-period-filter-manual\"$manualDisplay>";
+echo "<input id=\"add_time_journal_start_date\" type=\"date\" value=\"" . html_escape($selectedPeriod['start_date']) . "\">";
+echo " - <input id=\"add_time_journal_stop_date\" type=\"date\" value=\"" . html_escape($selectedPeriod['stop_date']) . "\">";
+echo "</span>";
+echo "<button class=\"button_style journal-period-filter-button\" onclick=\"set_add_time_journal_period();\">Показать</button>";
+echo "</div>";
 echo "<h5 class=\"big\">Период " . html_escape($periodLabel) . "</h5>";
 echo "</td>";    
 echo "</tr>";    

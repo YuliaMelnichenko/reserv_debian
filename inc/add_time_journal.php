@@ -4,7 +4,14 @@ require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/calendar.php';
 require_once __DIR__ . '/time_journal_repository.php';
 
-function get_add_time_journal_context($link, $userID, $currentDateTime, $includeDeleted = true)
+function get_add_time_journal_context(
+    $link,
+    $userID,
+    $currentDateTime,
+    $includeDeleted = true,
+    $periodStartDate = null,
+    $periodStopDate = null
+)
 {
     $userResult = db_query($link, "
         SELECT SURNAME, FIRSTNAME, LASTNAME
@@ -23,7 +30,13 @@ function get_add_time_journal_context($link, $userID, $currentDateTime, $include
         return null;
     }
 
-    list($periodStartDate, $periodStopDate, $periodStopExclusive) = get_add_time_period_date_range($currentDateTime);
+    if ($periodStartDate === null || $periodStopDate === null) {
+        list($periodStartDate, $periodStopDate, $periodStopExclusive) = get_add_time_period_date_range($currentDateTime);
+    } else {
+        $periodStartDate = (string)$periodStartDate;
+        $periodStopDate = (string)$periodStopDate;
+        $periodStopExclusive = date('Y-m-d', strtotime($periodStopDate . ' +1 day'));
+    }
     $dateTimeExpressions = time_journal_add_work_datetime_expressions($link);
     $entryResult = time_journal_query_add_work_journal(
         $link,
