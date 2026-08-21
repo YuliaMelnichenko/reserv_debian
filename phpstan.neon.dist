@@ -24,6 +24,8 @@ parameters:
         - inc/time_registration_renderer.php
         - inc/migrations.php
         - inc/deadline_page_service.php
+        - inc/authentication.php
+        - inc/employee_registration.php
     scanDirectories:
         - inc
     scanFiles:

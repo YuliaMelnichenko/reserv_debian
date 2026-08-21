@@ -10,17 +10,12 @@ require_once __DIR__ . "/../inc/access.php";
 require_csrf_for_unsafe_request(true);
 
 $__login = request_post_trimmed_string('login');
-$__passwd = md5(md5(request_post_trimmed_string('passwd')));
+$__password = request_post_trimmed_string('passwd');
 $__rememberLogin = request_post_string('remember_login') === '1';
 
 db_set_charset($link, "utf8");
 
-$query = db_query(
-  $link,
-  'SELECT id, rate, defaultStartTime, allowedDelayMinutes, userTimeZoneMins, dayTransitionTime, remoteWork FROM employees WHERE login = ? AND passwd = ?',
-  'ss',
-  array($__login, $__passwd)
-);
+$query = auth_find_employee_by_login($link, $__login);
 $merr = db_error($link);
 
 if ( !$query ) 
@@ -34,18 +29,29 @@ else
   if ( $vn == 1 )
   { 
     $row = db_fetch_one($query);
+    $passwordVerification = auth_verify_employee_password($row, $__password);
 
-    auth_start_employee_session($row);
-    csrf_rotate_token();
-    if ($__rememberLogin) {
-      auth_issue_remember_token($link, (int) $row['id']);
+    if (!$passwordVerification['is_valid']) {
+      $vn = 0;
     }
     else {
-      auth_revoke_remember_token($link);
+      if ($passwordVerification['needs_hash_upgrade']
+        && !auth_upgrade_employee_password_hash($link, (int) $row['id'], $__password)) {
+        error_log('[TORI] Password hash upgrade failed for employee ' . (int) $row['id']);
+      }
+
+      auth_start_employee_session($row);
+      csrf_rotate_token();
+      if ($__rememberLogin) {
+        auth_issue_remember_token($link, (int) $row['id']);
+      }
+      else {
+        auth_revoke_remember_token($link);
+      }
+      echo "OK";
     }
-    echo "OK";
   }
-  else
+  if ( $vn != 1 )
   {
     echo "Ошибка авторизации! Неправильный логин/пароль";
     unset($_SESSION['ss_id']);

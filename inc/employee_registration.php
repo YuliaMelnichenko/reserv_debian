@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/errors.php';
+require_once __DIR__ . '/authentication.php';
 
 function validate_employee_registration_input($input)
 {
@@ -95,22 +96,36 @@ function register_employee($link, $input)
         return array('Пользователь с таким логином уже существует');
     }
 
-    $passwordHash = md5(md5(trim($employee['password'])));
+    $legacyPasswordHash = auth_legacy_password_hash($employee['password']);
+    $passwordHashColumnExists = auth_password_hash_column_exists($link);
+    $passwordHash = $passwordHashColumnExists ? auth_create_password_hash($employee['password']) : null;
+    $employeeFields = 'id, login, passwd, firstname, lastname, surname, phone, email, rate';
+    $placeholders = '?, ?, ?, ?, ?, ?, ?, ?, ?';
+    $types = 'isssssssi';
+    $parameters = array(
+        $newUserId,
+        $employee['login'],
+        $legacyPasswordHash,
+        $employee['first_name'],
+        $employee['second_name'],
+        $employee['surname'],
+        '',
+        '',
+        -1,
+    );
+
+    if ($passwordHashColumnExists) {
+        $employeeFields .= ', PASSWORD_HASH';
+        $placeholders .= ', ?';
+        $types .= 's';
+        $parameters[] = $passwordHash;
+    }
+
     $created = db_execute(
         $link,
-        'INSERT INTO employees VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        'isssssssi',
-        array(
-            $newUserId,
-            $employee['login'],
-            $passwordHash,
-            $employee['first_name'],
-            $employee['second_name'],
-            $employee['surname'],
-            '',
-            '',
-            -1,
-        )
+        'INSERT INTO employees (' . $employeeFields . ') VALUES (' . $placeholders . ')',
+        $types,
+        $parameters
     );
 
     if (!$created) {

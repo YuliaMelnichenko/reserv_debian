@@ -9,6 +9,93 @@ function auth_remember_token_cookie_name()
     return 'TORI_REMEMBER_TOKEN';
 }
 
+function auth_legacy_password_hash($password)
+{
+    return md5(md5(trim((string) $password)));
+}
+
+function auth_create_password_hash($password)
+{
+    return password_hash((string) $password, PASSWORD_DEFAULT);
+}
+
+function auth_password_hash_column_exists($link)
+{
+    static $exists = null;
+
+    if ($exists !== null) {
+        return $exists;
+    }
+
+    $result = db_query($link, "SHOW COLUMNS FROM employees LIKE 'PASSWORD_HASH'");
+
+    if ($result === false) {
+        throw new RuntimeException(db_error($link));
+    }
+
+    $exists = db_has_rows($result);
+    return $exists;
+}
+
+function auth_find_employee_by_login($link, $login)
+{
+    $passwordHashField = auth_password_hash_column_exists($link)
+        ? 'PASSWORD_HASH'
+        : 'NULL AS PASSWORD_HASH';
+
+    return db_query(
+        $link,
+        'SELECT id, rate, defaultStartTime, allowedDelayMinutes, userTimeZoneMins, dayTransitionTime, remoteWork, '
+            . 'passwd, ' . $passwordHashField . ' FROM employees WHERE login = ? LIMIT 2',
+        's',
+        array((string) $login)
+    );
+}
+
+function auth_verify_employee_password($employee, $password)
+{
+    $password = (string) $password;
+    $modernHash = trim((string) ($employee['PASSWORD_HASH'] ?? ''));
+
+    if ($modernHash !== '' && password_verify($password, $modernHash)) {
+        return array(
+            'is_valid' => true,
+            'uses_legacy_hash' => false,
+            'needs_hash_upgrade' => password_needs_rehash($modernHash, PASSWORD_DEFAULT),
+        );
+    }
+
+    $legacyHash = (string) ($employee['passwd'] ?? '');
+
+    if (hash_equals($legacyHash, auth_legacy_password_hash($password))) {
+        return array(
+            'is_valid' => true,
+            'uses_legacy_hash' => true,
+            'needs_hash_upgrade' => true,
+        );
+    }
+
+    return array(
+        'is_valid' => false,
+        'uses_legacy_hash' => false,
+        'needs_hash_upgrade' => false,
+    );
+}
+
+function auth_upgrade_employee_password_hash($link, $employeeId, $password)
+{
+    if (!auth_password_hash_column_exists($link)) {
+        return true;
+    }
+
+    return db_execute(
+        $link,
+        'UPDATE employees SET PASSWORD_HASH = ? WHERE id = ?',
+        'si',
+        array(auth_create_password_hash($password), (int) $employeeId)
+    );
+}
+
 function auth_remember_token_lifetime_seconds()
 {
     return 60 * 60 * 24 * 30;
