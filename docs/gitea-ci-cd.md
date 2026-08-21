@@ -1,129 +1,132 @@
-# Gitea CI/CD
+# Непрерывная интеграция и развёртывание в Gitea
 
-## What is already in the repository
+## Что уже есть в репозитории
 
-`quality.yml` runs for pushes, pull requests, and manual starts on `main` and
-`develop`. The PHP 8.4 job checks every PHP file with `php -l`, runs
-`php tests/run.php`, PHPStan and Composer audit, then rejects tracked local
-secrets and whitespace errors. It uses the `ubuntu-latest` runner label, then
-runs in the official `php:8.4-cli-bookworm` container. This matches the
-production PHP-FPM 8.4 version.
+`quality.yml` запускается при отправке изменений, запросе на слияние и ручном старте
+для веток `main` и `develop`. Задача PHP 8.4 проверяет каждый PHP-файл через
+`php -l`, запускает `php tests/run.php`, PHPStan и Composer audit, а затем не
+допускает в Git локальные секреты и ошибки пробелов. Она использует метку раннера
+`ubuntu-latest`, после чего работает в официальном контейнере
+`php:8.4-cli-bookworm`. Это соответствует рабочей версии PHP-FPM 8.4.
 
-The separate PHP 8.5 job repeats syntax checks, unit tests, PHPStan and the
-Composer audit. It is a compatibility warning system for the future PHP
-upgrade and does not alter the production runtime.
+Отдельная задача PHP 8.5 повторяет проверку синтаксиса, модульные тесты, PHPStan
+и Composer audit. Это система раннего предупреждения для будущего обновления PHP;
+на рабочий сервер она не влияет.
 
-The same workflow starts an isolated `mysql:8.4` service with the temporary
-`tori_integration_test` database. It runs workday, pause, remote-work,
-presence, business-trip reminder and remember-token scenarios, then applies
-every classified migration with `scripts/ci/check-sql-migrations.sh`.
-The job has no production or stage database credentials and the service is
-discarded after the workflow finishes.
+Тот же сценарий запускает изолированный сервис `mysql:8.4` с временной базой
+`tori_integration_test`. В нём выполняются сценарии рабочего дня, приостановок,
+удалённой работы, присутствия, напоминаний о командировках и запомненной
+авторизации, после чего применяются все классифицированные миграции через
+`scripts/ci/check-sql-migrations.sh`. У задачи нет реквизитов рабочей или
+тестовой базы данных, а временная MySQL удаляется после завершения сценария.
 
-After the three local checks succeed, the optional `stage-smoke` job runs on
-the same `ubuntu-latest` runner. It only requests the protected `health.php`
-endpoint and the authorization page of the test stand. It never deploys code,
-changes Nginx or PHP-FPM, writes to the application database, or runs SQL.
-Until the required repository secrets are added, this job completes with a
-clear skip message and the rest of CI remains fully usable.
+После успешного завершения трёх локальных проверок запускается необязательная
+задача `stage-smoke` на том же раннере `ubuntu-latest`. Она только запрашивает
+защищённый адрес `health.php` и страницу авторизации тестового стенда. Она не
+развёртывает код, не меняет Nginx или PHP-FPM, не пишет в БД и не запускает SQL.
+Пока секреты репозитория не добавлены, задача завершается с понятным сообщением о
+пропуске, а остальные проверки CI продолжают работать.
 
-`stage-deploy.yml` is manual only. It repeats the checks and deploys a release
-to the test stand using `scripts/deploy-stage-release.sh`. It does not change a
-database or execute SQL files. Database migrations must remain a reviewed,
-separate step until integration tests are configured.
+`stage-deploy.yml` предназначен только для ручного запуска. Этот сценарий повторяет
+проверки и развёртывает релиз на тестовый стенд через
+`scripts/deploy-stage-release.sh`. Он не меняет БД и не выполняет SQL-файлы.
+Миграции БД до настройки интеграционного деплоя должны оставаться отдельным,
+проверяемым шагом.
 
-## Gitea setup
+## Настройка Gitea
 
-1. Check the Gitea version. Gitea Actions requires Gitea 1.19 or later. For
-   versions earlier than 1.21, add this to `/etc/gitea/app.ini` and restart
-   Gitea:
+1. Проверьте версию Gitea. Для Gitea Actions требуется версия 1.19 или новее.
+   Для версий до 1.21 добавьте в `/etc/gitea/app.ini` и перезапустите Gitea:
 
    ```ini
    [actions]
    ENABLED=true
    ```
 
-2. In the repository settings, enable `Repository Actions`.
+2. В настройках репозитория включите `Repository Actions`.
 
-3. The existing global `proxmox-ubuntu` runner must be online and expose the
-   `ubuntu-latest` label. Docker must be available to that runner so it can
-   start the PHP and temporary MySQL containers.
+3. Существующий глобальный раннер `proxmox-ubuntu` должен быть онлайн и иметь
+   метку `ubuntu-latest`. На нём должен быть доступен Docker, чтобы раннер мог
+   запускать временные контейнеры PHP и MySQL.
 
-4. Push this configuration to Gitea. The first push will automatically start
-   one PHP 8.4 check in the `Actions` tab. The job runs in the runner's
-   temporary Debian container and does not access the application database,
-   Nginx, PHP-FPM, or project deployment directories.
+4. Отправьте эту конфигурацию в Gitea. Первая отправка изменений автоматически запустит
+   проверку PHP 8.4 во вкладке `Actions`. Задача работает во временном Debian
+   контейнере раннера и не имеет доступа к БД приложения, Nginx, PHP-FPM или
+   каталогам развёртывания проекта.
 
-5. The runner will download the official PHP 8.4 image from Docker Hub on its
-   first run. Later jobs reuse the local Docker image cache.
+5. При первом запуске раннер скачает официальный образ PHP 8.4 с Docker Hub.
+   Последующие задачи используют локальный кэш Docker-образов.
 
-6. To enable the read-only test-stand check, add these **repository Action
-   secrets** in `Settings -> Actions -> Secrets`:
+6. Чтобы включить проверку тестового стенда только на чтение, добавьте **секреты
+   Actions репозитория** в `Settings -> Actions -> Secrets`:
 
    ```text
    TORI_STAGE_SMOKE_URL=http://192.168.100.216:8080
-   TORI_STAGE_HEALTH_TOKEN=<same value as HEALTH_CHECK_TOKEN in the stage .env>
+   TORI_STAGE_HEALTH_TOKEN=<то же значение, что HEALTH_CHECK_TOKEN в .env тестового стенда>
    ```
 
-   `TORI_STAGE_HEALTH_URL` is optional and is needed only when `health.php` is
-   published at a different URL. No secret gives the workflow access to the
-   production server.
+   `TORI_STAGE_HEALTH_URL` необязателен. Он нужен только если `health.php`
+   опубликован по другому URL. Ни один из этих секретов не даёт сценарию доступ
+   к рабочему серверу.
 
-## Test-stand deployment
+## Развёртывание на тестовый стенд
 
-Use a separate runner with the label `tori-stage-deploy:host` on the test
-server, under an unprivileged deployment account that can write only to the
-stage release directory. Give its service environment these values:
+Используйте отдельный раннер с меткой `tori-stage-deploy:host` на тестовом
+сервере и непривилегированной учётной записью развёртывания, которая может
+записывать только в каталог релизов тестового стенда. В окружении службы раннера
+должны быть заданы значения:
 
 ```text
 TORI_STAGE_RELEASES_DIR=/var/www/tori-stage-releases
 TORI_STAGE_CURRENT_LINK=/var/www/tori-stage-current
 TORI_STAGE_SHARED_ENV=/etc/tori-stage/.env
 TORI_STAGE_HEALTH_URL=http://127.0.0.1:8080/health.php
-TORI_STAGE_HEALTH_TOKEN=<same value as HEALTH_CHECK_TOKEN in the stage .env>
+TORI_STAGE_HEALTH_TOKEN=<то же значение, что HEALTH_CHECK_TOKEN в .env тестового стенда>
 ```
 
-Point the test Nginx virtual host to `/var/www/tori-stage-current`. The deploy
-workflow copies the checked revision to a new release directory, attaches the
-server-only `.env`, switches the symlink, and checks PHP plus MySQL through the
-supplied URL. It keeps previous release directories for fast manual rollback.
+Настройте виртуальный хост Nginx тестового стенда на
+`/var/www/tori-stage-current`. Сценарий развёртывания копирует проверенную
+ревизию в новый каталог релиза, подключает серверный `.env`, переключает
+символьную ссылку и проверяет PHP и MySQL по указанному URL. Предыдущие каталоги
+релизов сохраняются для быстрого ручного отката.
 
-Add a long random value to the server-only stage `.env`:
+Добавьте длинное случайное значение в серверный `.env` тестового стенда:
 
 ```text
-HEALTH_CHECK_TOKEN=<long random value>
+HEALTH_CHECK_TOKEN=<длинное случайное значение>
 ```
 
-The token is sent only by the deployment runner as the `X-Tori-Health-Token`
-header. Requests without it receive `404` and cannot use `health.php` to probe
-the application.
+Токен передаётся только раннером развёртывания в заголовке
+`X-Tori-Health-Token`. Запросы без него получают `404` и не могут использовать
+`health.php` для проверки приложения.
 
-The stage runner must be dedicated to this private repository. Protect `main`
-and `develop` in Gitea so unreviewed code cannot reach it.
+Раннер тестового стенда должен быть выделен для этого закрытого репозитория.
+Защитите ветки `main` и `develop` в Gitea, чтобы непроверенный код не мог
+попасть на него.
 
-## Manual smoke check
+## Ручная smoke-проверка
 
-After a manual deployment to the test stand, run the following command on a
-host that can reach the stand. It checks the protected health endpoint, its
-database connection, and that the authorization page returns `200`. It does not
-write to the application or database.
+После ручного развёртывания на тестовый стенд выполните следующую команду на
+хосте, который может обратиться к стенду. Она проверит защищённый адрес состояния,
+соединение с БД и HTTP `200` у страницы авторизации. Команда не пишет в
+приложение или базу данных.
 
 ```bash
-export TORI_STAGE_HEALTH_TOKEN='<HEALTH_CHECK_TOKEN from the stage .env>'
+export TORI_STAGE_HEALTH_TOKEN='<HEALTH_CHECK_TOKEN из .env тестового стенда>'
 bash scripts/smoke-stage.sh http://192.168.100.216:8080
 ```
 
-## Database migrations
+## Миграции базы данных
 
-Versioned schema migrations are in `sql/migrations`. The CI job validates the
-catalog and applies it only to the disposable MySQL test database. The manual
-scripts in `sql/` that repair or inspect operational data are deliberately not
-run automatically. See [the migration guide](../sql/migrations/README.md) for
-the dry-run and explicit-confirmation commands.
+Версионные миграции схемы находятся в `sql/migrations`. Задача CI проверяет
+каталог и применяет миграции только к временной MySQL базы тестов. Ручные скрипты
+в `sql/`, которые исправляют или изучают рабочие данные, намеренно не запускаются
+автоматически. Команды предварительного просмотра и применения с явным
+подтверждением приведены в [руководстве по миграциям](../sql/migrations/README.md).
 
-## Further work
+## Дальнейшая работа
 
-1. Extend PHPStan from the current level 5 service scope to legacy report and
-   directory modules after their database connection handling is made explicit.
-2. Keep production deployment manual: only after the test stand is approved,
-   run a dedicated production workflow from `main`.
+1. Расширить область PHPStan с текущего уровня 5 для сервисов на старые модули
+   отчётов и справочников после явного выделения работы с их подключением к БД.
+2. Оставить развёртывание рабочего сервера ручным: после утверждения тестового
+   стенда создать отдельный рабочий сценарий, запускаемый только из `main`.
