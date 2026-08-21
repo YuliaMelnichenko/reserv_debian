@@ -21,6 +21,7 @@ $testFiles = array(
     __DIR__ . '/pause_remote_work_test.php',
     __DIR__ . '/presence_query_test.php',
     __DIR__ . '/accounting_trip_missing_data_test.php',
+    __DIR__ . '/staff_leaves_archive_test.php',
     __DIR__ . '/notification_summary_integration_test.php',
 );
 $failed = 0;
