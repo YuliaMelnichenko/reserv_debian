@@ -17,6 +17,7 @@ if ($config === null) {
 $testFiles = array(
     __DIR__ . '/remember_token_test.php',
     __DIR__ . '/password_hash_migration_test.php',
+    __DIR__ . '/password_hash_audit_test.php',
     __DIR__ . '/workday_flow_test.php',
     __DIR__ . '/pause_remote_work_test.php',
     __DIR__ . '/presence_query_test.php',

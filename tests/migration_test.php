@@ -28,6 +28,13 @@ return function () {
         'The migration script must require explicit database environment settings'
     );
 
+    $passwordHashReport = file_get_contents(__DIR__ . '/../scripts/db/password-hash-report.php');
+    test_assert_true(
+        strpos($passwordHashReport, 'TORI_PASSWORD_AUDIT_DB_HOST') !== false
+            && strpos($passwordHashReport, '--apply') === false,
+        'The password hash report must use dedicated read-only connection settings'
+    );
+
     $indexMigration = file_get_contents(__DIR__ . '/../sql/migrations/004_notification_journal_indexes.sql');
     test_assert_true(
         strpos($indexMigration, 'idx_groups_supervisor_user_type') !== false
