@@ -1,6 +1,7 @@
 <?php
 ob_start();
 require_once __DIR__ . '/inc/session.php';
+require_once __DIR__ . '/inc/deadline_page_service.php';
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -282,14 +283,7 @@ auth();
     $user_allowedDelay = $_SESSION['ss_allowedDelay'];
     $_date = date('Y-m-d');
 
-    db_set_charset($link, "utf8");
-    $query0 = db_query(
-      $link,
-      "SELECT STATE, SURNAME, FIRSTNAME, LASTNAME FROM employees WHERE id = ?",
-      'i',
-      array($user_id)
-    );
-    $vn0 = db_num_rows($query0);
+    $employeeSummary = deadline_load_employee_summary($link, $user_id);
 
     echo "<table cellpadding=\"10\" cellspacing=\"0\" border=1>";
     echo "<tr>";
@@ -305,23 +299,14 @@ auth();
  
     //-----------------------------------------------------------------------------------------------------------------
     
-    if ( $vn0 == 1 ){
-      $row0 = db_fetch_one($query0);
+    if ( is_array($employeeSummary) ){
+      $row0 = $employeeSummary['employee'];
 
       $empl_state = $row0["STATE"];
 
       $sv_name = get_sv_name_by_userid( $user_id );
 
-      db_set_charset($link, "utf8");
-    
-      $query01 = db_query(
-        $link,
-        "SELECT NAME, ROOM FROM departments WHERE ID IN (SELECT DEPID FROM GROUPS WHERE USERID = ?)",
-        'i',
-        array($user_id)
-      );
-
-      $row01 = db_fetch_one($query01);
+      $row01 = $employeeSummary['department'];
 
       $depName = $row01["NAME"];
 

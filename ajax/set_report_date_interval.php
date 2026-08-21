@@ -25,12 +25,6 @@ $currDate = date('Y-m-d');
 $start_report_date = request_post_date('start_report_date');
 $stop_report_date = request_post_date('stop_report_date');
 
-error_log("CALL set_report_date_interval: " . ajax_encode_json(array(
-  'report_type' => $report_type,
-  'start_report_date' => $start_report_date,
-  'stop_report_date' => $stop_report_date,
-)));
-
 if ($report_type == 7) {
   if ($start_report_date === null || $stop_report_date === null || $stop_report_date < $start_report_date) {
     die('Ошибка: неверный диапазон дат');
@@ -123,7 +117,6 @@ else if ($report_type == 7) {
 }
 
 if (empty($_SESSION['rep_start_date']) || empty($_SESSION['rep_stop_date'])) {
-  error_log("ERROR: даты не установлены!");
   die('Ошибка: период не определен');
 }
 

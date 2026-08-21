@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS auth_remember_tokens (
+    ID BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    USERID INT NOT NULL,
+    TOKEN_HASH CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    EXPIRES_AT DATETIME NOT NULL,
+    CREATED_DT DATETIME NOT NULL,
+    LAST_USED_DT DATETIME NOT NULL,
+    PRIMARY KEY (ID),
+    UNIQUE KEY uq_auth_remember_tokens_hash (TOKEN_HASH),
+    KEY idx_auth_remember_tokens_user_expires (USERID, EXPIRES_AT),
+    KEY idx_auth_remember_tokens_expires (EXPIRES_AT)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
