@@ -59,4 +59,9 @@ return function () {
         preg_match('/\b(?:UPDATE|DELETE|INSERT|ALTER|DROP|TRUNCATE|REPLACE)\b/i', $sqlWithoutComments),
         'Legacy database audit SQL must remain read-only'
     );
+    test_assert_true(
+        strpos($auditSql, 'information_schema.COLUMNS') !== false
+            && strpos($auditSql, 'PREPARE legacy_datetime_audit_statement') !== false,
+        'Legacy database audit must skip comparisons when historical columns are absent'
+    );
 };
