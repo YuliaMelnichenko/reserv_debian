@@ -36,6 +36,11 @@ return function () {
         'Accounting-error data loading must stay in the shared service'
     );
     test_assert_true(
+        strpos($service, 'function is_accounting_errors_active_user') !== false
+            && strpos($service, 'RELEVANCE = 1') !== false,
+        'Accounting errors must be created and shown only for active employees'
+    );
+    test_assert_true(
         strpos($service, 'get_accounting_errors_supervised_user_ids($link, $supervisorID)') !== false,
         'Supervisor notification counts must synchronize business-trip reminders before rendering'
     );
@@ -72,5 +77,11 @@ return function () {
             && strpos($styles, '#businessTripMissingDataSupervisorTableScroll') !== false
             && strpos($styles, 'margin: 16px 0 10px;') !== false,
         'Business-trip tables must align with accounting-error tables and keep spacing around their heading'
+    );
+
+    $staffLeavesPage = file_get_contents(__DIR__ . '/../views/staff_leaves_page.php');
+    test_assert_true(
+        strpos($staffLeavesPage, 'value=\\"6\\">С начала года') !== false,
+        'The staff-leaves archive must offer a year-to-date filter'
     );
 };

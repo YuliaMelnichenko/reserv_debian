@@ -20,6 +20,16 @@ return function () {
         'The previous-quarter archive period must cover April through June'
     );
     test_assert_same(
+        array('2026-01-01', '2026-07-20'),
+        getArchivePeriodDates(6, '', '', '2026-07-20'),
+        'The year-to-date archive period must include every day from January 1'
+    );
+    test_assert_same(
+        'С начала года',
+        getArchivePeriodFilterName(6),
+        'The year-to-date archive period must have an explicit label'
+    );
+    test_assert_same(
         array('2026-06-29', '2026-06-30'),
         getArchivePeriodDates(7, '2026-06-29', '2026-06-30', '2026-07-20'),
         'A manual archive period must preserve valid dates'

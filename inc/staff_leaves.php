@@ -147,6 +147,10 @@ function getArchivePeriodDates($periodType, $startDateManual, $stopDateManual, $
         );
     }
 
+    if ((int)$periodType === 6) {
+        return array($current->format('Y-01-01'), $currDate);
+    }
+
     if ((int)$periodType === 7) {
         return normalizeStaffLeaveRange($startDateManual, $stopDateManual);
     }
@@ -168,6 +172,7 @@ function getArchivePeriodFilterName($periodType)
         case 3: return 'За предыдущий месяц';
         case 4: return 'С начала квартала';
         case 5: return 'За предыдущий квартал';
+        case 6: return 'С начала года';
         case 7: return 'Задать вручную';
         default: return 'Все даты';
     }

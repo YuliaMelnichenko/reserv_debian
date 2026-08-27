@@ -26,6 +26,29 @@ function is_accounting_errors_exempt_user($userID)
     return in_array((int)$userID, array(156, 161, 600), true);
 }
 
+function is_accounting_errors_active_user($link, $userID)
+{
+    $userID = (int)$userID;
+
+    if ($userID <= 0 || is_accounting_errors_exempt_user($userID)) {
+        return false;
+    }
+
+    $result = db_query(
+        $link,
+        'SELECT 1 FROM employees WHERE ID = ? AND RELEVANCE = 1 LIMIT 1',
+        'i',
+        array($userID)
+    );
+
+    if (!$result) {
+        accounting_errors_log_database_failure($link, __FILE__ . ':' . __LINE__);
+        return false;
+    }
+
+    return db_has_rows($result);
+}
+
 function accounting_errors_log_database_failure($link, $context)
 {
     database_error_message($link, $context);
@@ -82,15 +105,18 @@ function clear_unsubmitted_accounting_errors_for_dates($link, $userID, $dates)
 
 function get_accounting_errors_rows($link, $userID, $startDate, $stopDate, $activeStatusesOnly = false)
 {
-    $sql = 'SELECT ID, ERROR_DATE, STATUS, USER_COMMENT, SUPERVISOR_COMMENT, SUPERVISORID, USER_REPLY_DT, SUPERVISOR_REPLY_DT '
-        . 'FROM accounting_errors '
-        . 'WHERE USERID = ? AND USERID NOT IN (156, 161, 600) AND ERROR_DATE >= ? AND ERROR_DATE <= ?';
+    $sql = 'SELECT error_entry.ID, error_entry.ERROR_DATE, error_entry.STATUS, error_entry.USER_COMMENT, '
+        . 'error_entry.SUPERVISOR_COMMENT, error_entry.SUPERVISORID, error_entry.USER_REPLY_DT, error_entry.SUPERVISOR_REPLY_DT '
+        . 'FROM accounting_errors error_entry '
+        . 'INNER JOIN employees employee ON employee.ID = error_entry.USERID AND employee.RELEVANCE = 1 '
+        . 'WHERE error_entry.USERID = ? AND error_entry.USERID NOT IN (156, 161, 600) '
+        . 'AND error_entry.ERROR_DATE >= ? AND error_entry.ERROR_DATE <= ?';
 
     if ($activeStatusesOnly) {
-        $sql .= ' AND STATUS IN (0, 1, 2, 3)';
+        $sql .= ' AND error_entry.STATUS IN (0, 1, 2, 3)';
     }
 
-    $sql .= ' ORDER BY ERROR_DATE DESC';
+    $sql .= ' ORDER BY error_entry.ERROR_DATE DESC';
     $result = db_query($link, $sql, 'iss', array((int) $userID, (string) $startDate, (string) $stopDate));
 
     if (!$result) {
@@ -138,7 +164,7 @@ function sync_business_trip_missing_data_for_user($link, $userID, $depthDays = 0
 {
     $userID = (int)$userID;
 
-    if ($userID <= 0 || is_accounting_errors_exempt_user($userID)) {
+    if (!is_accounting_errors_active_user($link, $userID)) {
         return 0;
     }
 
@@ -295,7 +321,11 @@ function get_business_trip_missing_data_rows($link, $userID, $depthDays = 0)
     list($startDate, $stopDate) = accounting_errors_get_range($depthDays);
     $result = db_query(
         $link,
-        'SELECT ID, TRIP_DATE FROM business_trip_missing_data WHERE USERID = ? AND TRIP_DATE >= ? AND TRIP_DATE <= ? ORDER BY TRIP_DATE DESC',
+        'SELECT trip.ID, trip.TRIP_DATE '
+            . 'FROM business_trip_missing_data trip '
+            . 'INNER JOIN employees employee ON employee.ID = trip.USERID AND employee.RELEVANCE = 1 '
+            . 'WHERE trip.USERID = ? AND trip.TRIP_DATE >= ? AND trip.TRIP_DATE <= ? '
+            . 'ORDER BY trip.TRIP_DATE DESC',
         'iss',
         array((int)$userID, $startDate, $stopDate)
     );
@@ -322,7 +352,7 @@ function sync_accounting_errors_for_user($link, $userID, $depthDays = 0)
         return false;
     }
 
-    if (is_accounting_errors_exempt_user($userID)) {
+    if (!is_accounting_errors_active_user($link, $userID)) {
         return 0;
     }
 
@@ -523,7 +553,11 @@ function get_accounting_errors_count($link, $userID)
 
     $result = db_query(
         $link,
-        'SELECT COUNT(*) AS CNT FROM accounting_errors WHERE USERID = ? AND ERROR_DATE >= ? AND ERROR_DATE <= ? AND STATUS IN (0, 1, 3)',
+        'SELECT COUNT(*) AS CNT '
+            . 'FROM accounting_errors error_entry '
+            . 'INNER JOIN employees employee ON employee.ID = error_entry.USERID AND employee.RELEVANCE = 1 '
+            . 'WHERE error_entry.USERID = ? AND error_entry.ERROR_DATE >= ? AND error_entry.ERROR_DATE <= ? '
+            . 'AND error_entry.STATUS IN (0, 1, 3)',
         'iss',
         array((int)$userID, $startDate, $stopDate)
     );
@@ -552,6 +586,7 @@ function get_accounting_errors_notification_count($link, $supervisorID)
         $link,
         'SELECT COUNT(DISTINCT ae.ID) AS CNT
          FROM accounting_errors ae
+         INNER JOIN employees employee ON employee.ID = ae.USERID AND employee.RELEVANCE = 1
          INNER JOIN GROUPS g ON g.USERID = ae.USERID
          WHERE g.SUPERVISORID = ? AND TRIM(g.TYPE) = ? AND ae.ERROR_DATE >= ? AND ae.ERROR_DATE <= ? AND ae.STATUS = 1 AND ae.USERID NOT IN (156, 161, 600)',
         'iiss',
@@ -568,6 +603,7 @@ function get_accounting_errors_notification_count($link, $supervisorID)
         $link,
         "SELECT COUNT(DISTINCT trip.ID) AS CNT
          FROM business_trip_missing_data trip
+         INNER JOIN employees employee ON employee.ID = trip.USERID AND employee.RELEVANCE = 1
          INNER JOIN GROUPS g ON g.USERID = trip.USERID
          WHERE g.SUPERVISORID = ?
            AND TRIM(g.TYPE) = ?
@@ -603,7 +639,11 @@ function get_accounting_errors_counts_by_user($link, $userID, &$totalCount, &$ac
 
     $result = db_query(
         $link,
-        'SELECT STATUS, COUNT(*) AS CNT FROM accounting_errors WHERE USERID = ? AND ERROR_DATE >= ? AND ERROR_DATE <= ? GROUP BY STATUS',
+        'SELECT error_entry.STATUS, COUNT(*) AS CNT '
+            . 'FROM accounting_errors error_entry '
+            . 'INNER JOIN employees employee ON employee.ID = error_entry.USERID AND employee.RELEVANCE = 1 '
+            . 'WHERE error_entry.USERID = ? AND error_entry.ERROR_DATE >= ? AND error_entry.ERROR_DATE <= ? '
+            . 'GROUP BY error_entry.STATUS',
         'iss',
         array((int)$userID, $startDate, $stopDate)
     );
@@ -648,6 +688,7 @@ function get_accounting_errors_supervised_users($link, $supervisorID)
          INNER JOIN employees employee ON employee.ID = membership.USERID
          WHERE membership.SUPERVISORID = ?
            AND TRIM(membership.TYPE) = ?
+           AND employee.RELEVANCE = 1
            AND membership.USERID NOT IN (156, 161, 600)
          ORDER BY employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME",
         'ii',

@@ -6,7 +6,7 @@ return function () {
     $catalog = migration_catalog(__DIR__ . '/../sql/migrations');
 
     test_assert_same(
-        array('001', '002', '003', '004', '005'),
+        array('001', '002', '003', '004', '005', '006'),
         array_column($catalog, 'id'),
         'Schema migrations must have stable versions'
     );
@@ -40,6 +40,14 @@ return function () {
         strpos($indexMigration, 'idx_groups_supervisor_user_type') !== false
             && strpos($indexMigration, 'idx_add_time_user_pause_start') !== false,
         'The notification and journal indexes must remain versioned migrations'
+    );
+
+    $inactiveCleanupMigration = file_get_contents(__DIR__ . '/../sql/migrations/006_cleanup_inactive_accounting_error_records.sql');
+    test_assert_true(
+        strpos($inactiveCleanupMigration, 'RELEVANCE = 0') !== false
+            && strpos($inactiveCleanupMigration, 'accounting_errors') !== false
+            && strpos($inactiveCleanupMigration, 'business_trip_missing_data') !== false,
+        'Inactive-employee accounting records must be cleaned through a versioned migration'
     );
 
     $smokeScript = file_get_contents(__DIR__ . '/../scripts/smoke-stage.sh');

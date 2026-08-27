@@ -271,6 +271,7 @@
 | `sql/migrations/003_business_trip_missing_data.sql` | Создаёт таблицу напоминаний о командировках без данных работы вне офиса. |
 | `sql/migrations/004_notification_journal_indexes.sql` | Добавляет индексы для ускорения уведомлений и журналов. |
 | `sql/migrations/005_employee_password_hash.sql` | Добавляет поле современного хеша пароля, не удаляя MD5. |
+| `sql/migrations/006_cleanup_inactive_accounting_error_records.sql` | Однократно удаляет ошибки учёта и напоминания о командировках сотрудников с `RELEVANCE = 0`. |
 | `sql/migrations/README.md` | Правила миграций, безопасный запуск и инструкция отчёта по хешам. |
 | `sql/accounting_errors.sql` | Старый совместимый ручной скрипт создания таблицы ошибок учёта. |
 | `sql/auth_remember_tokens.sql` | Старый совместимый ручной скрипт создания токенов авторизации. |

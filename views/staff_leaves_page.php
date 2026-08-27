@@ -55,6 +55,7 @@ echo "<div id=\"archive_filters\">";
         echo "<option value=\"3\">За предыдущий месяц</option>";
         echo "<option value=\"4\" selected>С начала квартала</option>";
         echo "<option value=\"5\">За предыдущий квартал</option>";
+        echo "<option value=\"6\">С начала года</option>";
         echo "<option value=\"7\">Задать вручную</option>";
     echo "</select>";
 

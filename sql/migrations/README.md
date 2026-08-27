@@ -39,6 +39,11 @@ successfully signs in is transparently upgraded to `password_hash()`; no passwor
 reset is needed. Keep the legacy `passwd` column until a separately approved
 final MD5-retirement migration is ready.
 
+Migration `006_cleanup_inactive_accounting_error_records.sql` removes only
+accounting-error reminders and missing-business-trip reminders for employees with
+`RELEVANCE = 0`. It does not change attendance, leave, offsite-work, or employee
+records. Apply it after a database backup as part of the normal migration process.
+
 ## Password hash report
 
 The following read-only script shows aggregate counts of active and archived
