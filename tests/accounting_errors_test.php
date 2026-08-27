@@ -40,6 +40,11 @@ return function () {
             && strpos($service, 'RELEVANCE = 1') !== false,
         'Accounting errors must be created and shown only for active employees'
     );
+    test_assert_same(
+        0,
+        preg_match('/(?<!`)\\b(?:FROM|JOIN)\\s+GROUPS\\b/', $service),
+        'Accounting-error queries must quote the reserved GROUPS table name'
+    );
     test_assert_true(
         strpos($service, 'get_accounting_errors_supervised_user_ids($link, $supervisorID)') !== false,
         'Supervisor notification counts must synchronize business-trip reminders before rendering'

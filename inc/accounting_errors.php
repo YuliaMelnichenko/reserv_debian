@@ -587,7 +587,7 @@ function get_accounting_errors_notification_count($link, $supervisorID)
         'SELECT COUNT(DISTINCT ae.ID) AS CNT
          FROM accounting_errors ae
          INNER JOIN employees employee ON employee.ID = ae.USERID AND employee.RELEVANCE = 1
-         INNER JOIN GROUPS g ON g.USERID = ae.USERID
+         INNER JOIN `GROUPS` g ON g.USERID = ae.USERID
          WHERE g.SUPERVISORID = ? AND TRIM(g.TYPE) = ? AND ae.ERROR_DATE >= ? AND ae.ERROR_DATE <= ? AND ae.STATUS = 1 AND ae.USERID NOT IN (156, 161, 600)',
         'iiss',
         array((int)$supervisorID, 3, $startDate, $stopDate)
@@ -604,7 +604,7 @@ function get_accounting_errors_notification_count($link, $supervisorID)
         "SELECT COUNT(DISTINCT trip.ID) AS CNT
          FROM business_trip_missing_data trip
          INNER JOIN employees employee ON employee.ID = trip.USERID AND employee.RELEVANCE = 1
-         INNER JOIN GROUPS g ON g.USERID = trip.USERID
+         INNER JOIN `GROUPS` g ON g.USERID = trip.USERID
          WHERE g.SUPERVISORID = ?
            AND TRIM(g.TYPE) = ?
            AND trip.TRIP_DATE >= ?
@@ -684,7 +684,7 @@ function get_accounting_errors_supervised_users($link, $supervisorID)
            employee.SURNAME,
            employee.FIRSTNAME,
            employee.LASTNAME
-         FROM GROUPS membership
+         FROM `GROUPS` membership
          INNER JOIN employees employee ON employee.ID = membership.USERID
          WHERE membership.SUPERVISORID = ?
            AND TRIM(membership.TYPE) = ?
