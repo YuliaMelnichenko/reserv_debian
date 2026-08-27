@@ -67,6 +67,7 @@ return function () {
     test_assert_same('isss', $types, 'Archive filters must preserve prepared-statement parameter types');
     test_assert_same(array(156, 'Командировка', '2026-06-30', '2026-04-01'), $params, 'Archive dates must use overlap order');
     test_assert_same(true, strpos($where, 'start_date <= ? AND stop_date >= ?') !== false, 'Archive filtering must include overlapping absences');
+    test_assert_same(true, strpos($where, 'stop_date >= start_date') !== false, 'Archive filtering must skip malformed legacy rows with reversed dates');
 
     $clippedRows = clipStaffLeaveArchiveRowsToPeriod(
         array(

@@ -216,7 +216,10 @@ function getArchiveEmployeeTitle($link, $employeeId)
 
 function buildStaffLeavesArchiveQuery($employeeId, $event, $filterStartDate, $filterStopDate, &$types, &$params)
 {
-    $where = array('stop_date < CURDATE()');
+    $where = array(
+        'stop_date < CURDATE()',
+        'stop_date >= start_date',
+    );
     $params = array();
     $types = '';
 
@@ -373,7 +376,7 @@ function fetchActiveStaffLeaves($link, $event)
     $result = db_query(
         $link,
         'SELECT id, user_id, fio, start_date, stop_date, event '
-            . 'FROM staff_leaves WHERE event = ? AND stop_date >= CURDATE() '
+            . 'FROM staff_leaves WHERE event = ? AND stop_date >= CURDATE() AND stop_date >= start_date '
             . 'ORDER BY fio ASC, start_date ASC, stop_date ASC',
         's',
         array($event)

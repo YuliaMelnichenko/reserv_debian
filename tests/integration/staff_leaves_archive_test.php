@@ -11,6 +11,22 @@ return function ($link) {
 
     integration_seed_employee($link, $employeeId, 'Архив');
     createStaffLeave($link, $employeeId, $leaveStart, $leaveStop, 'Командировка');
+    test_assert_same(
+        true,
+        db_execute(
+            $link,
+            'INSERT INTO staff_leaves (user_id, fio, start_date, stop_date, event) VALUES (?, ?, ?, ?, ?)',
+            'issss',
+            array(
+                $employeeId,
+                'Поврежденная запись',
+                date('Y-m-d', strtotime($filterStart . ' +1 day')),
+                $filterStart,
+                'Командировка',
+            )
+        ),
+        'Malformed staff-leave fixture must be created'
+    );
 
     $rows = fetchStaffLeavesArchiveRows(
         $link,
@@ -22,7 +38,7 @@ return function ($link) {
         true
     );
 
-    test_assert_same(1, count($rows), 'An overlapping absence must be included in the selected archive period');
+    test_assert_same(1, count($rows), 'An overlapping valid absence must be included while malformed legacy rows are skipped');
     test_assert_same($filterStart, $rows[0]['start_date'], 'Archive export must clip an absence to the selected start date');
     test_assert_same($filterStop, $rows[0]['stop_date'], 'Archive export must clip an absence to the selected stop date');
     test_assert_same(3, $rows[0]['calendar_days'], 'Archive metrics must count only calendar days inside the selected period');
