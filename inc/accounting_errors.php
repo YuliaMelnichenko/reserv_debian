@@ -684,7 +684,7 @@ function get_accounting_errors_supervised_users($link, $supervisorID)
            employee.SURNAME,
            employee.FIRSTNAME,
            employee.LASTNAME
-         FROM GROUPS membership
+         FROM `GROUPS` membership
          INNER JOIN employees employee ON employee.ID = membership.USERID
          WHERE membership.SUPERVISORID = ?
            AND TRIM(membership.TYPE) = ?
