@@ -36,6 +36,13 @@ return function () {
     );
     test_assert_same('Командировка', normalizeStaffLeaveEvent(' Командировка '), 'A valid leave event must be trimmed');
 
+    $staffLeavesScript = file_get_contents(__DIR__ . '/../js/staff-leaves.js');
+    test_assert_true(
+        strpos($staffLeavesScript, "data.status === 'error'") !== false
+            && strpos($staffLeavesScript, 'Некорректный ответ архива') !== false,
+        'Archive UI must report server errors instead of displaying them as an empty list'
+    );
+
     test_assert_same(
         array(
             'calendar_days' => 7,

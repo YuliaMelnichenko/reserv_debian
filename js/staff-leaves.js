@@ -389,6 +389,18 @@ function loadArchive() {
                 return;
             }
 
+            if (data && data.status === 'error') {
+                console.error('Ошибка загрузки архива:', data.message);
+                alert('Ошибка загрузки архива: ' + (data.message || 'неизвестная ошибка сервера'));
+                return;
+            }
+
+            if (!Array.isArray(data)) {
+                console.error('Некорректный ответ архива:', data);
+                alert('Ошибка загрузки архива: сервер вернул некорректный ответ.');
+                return;
+            }
+
             const table = document.getElementById('leave_table');
 
             if (!table) {
@@ -405,7 +417,7 @@ function loadArchive() {
 
             tbody.innerHTML = '';
 
-            if (!Array.isArray(data) || data.length === 0) {
+            if (data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" align="center">Нет записей</td></tr>';
                 table.style.display = 'table';
                 scheduleStaffLeavesLayout();
