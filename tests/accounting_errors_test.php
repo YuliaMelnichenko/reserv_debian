@@ -49,6 +49,10 @@ return function () {
         strpos($service, 'get_accounting_errors_supervised_user_ids($link, $supervisorID)') !== false,
         'Supervisor notification counts must synchronize business-trip reminders before rendering'
     );
+    test_assert_true(
+        strpos($service, 'ae.STATUS IN (0, 1, 3)') !== false,
+        'Supervisor accounting-error counter must include every unresolved regular error'
+    );
 
     $navigation = file_get_contents(__DIR__ . '/../navigate.php');
     test_assert_true(

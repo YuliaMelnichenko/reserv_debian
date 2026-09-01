@@ -6,30 +6,10 @@ require_once __DIR__ . '/time_journal_repository.php';
 
 function get_supervisor_notification_counts($link, $supervisorID, $currentDateTime)
 {
-    $depthResult = db_query($link, "
-        SELECT paramName, valueInt
-        FROM DBSETUP
-        WHERE paramName IN ('add_time_journal_deep_day', 'delay_journal_deep_day')
-    ");
-
-    if (!$depthResult) {
-        return false;
-    }
-
-    $depthDays = array(
-        'add_time_journal_deep_day' => 180,
-        'delay_journal_deep_day' => 180,
-    );
-
-    while ($row = db_fetch_one($depthResult)) {
-        $paramName = (string)$row['paramName'];
-
-        if (array_key_exists($paramName, $depthDays)) {
-            $depthDays[$paramName] = abs((int)$row['valueInt']);
-        }
-    }
-
     $currentDate = substr((string)$currentDateTime, 0, 10);
+    list($addTimePeriodStartDate, , $addTimePeriodStopExclusive) = get_add_time_period_date_range(
+        $currentDateTime
+    );
     list($delayQuarterStartDate, , $delayQuarterStopExclusive) = get_current_quarter_date_range(
         false,
         $currentDate
@@ -47,7 +27,8 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
               AND $startExpression <> '0000-00-00 00:00:00'
               AND $stopExpression <> '0000-00-00 00:00:00'
               AND $stopExpression > $startExpression
-              AND $stopExpression > ADDDATE(?, INTERVAL ? DAY)
+              AND $startExpression < ?
+              AND $stopExpression > ?
               AND EXISTS (
                 SELECT 1
                 FROM `GROUPS` membership
@@ -78,9 +59,9 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
                   AND visit.remoteWorkState = 0
               )
           ) AS DELAY_COUNT
-    ", 'siisssi', array(
-        $currentDateTime,
-        -$depthDays['add_time_journal_deep_day'],
+    ", 'ssisssi', array(
+        $addTimePeriodStopExclusive,
+        $addTimePeriodStartDate,
         (int)$supervisorID,
         '0',
         $delayQuarterStartDate,

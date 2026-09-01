@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../../inc/notification_summary.php';
+require_once __DIR__ . '/../../inc/accounting_errors.php';
 require_once __DIR__ . '/../../inc/pause_service.php';
 
 return function ($link) {
@@ -18,6 +19,7 @@ return function ($link) {
         array($alphaId, '0'),
         array($alphaId, '3'),
         array($betaId, '0'),
+        array($betaId, '3'),
         array($alphaId, '4'),
     ) as $membership) {
         test_assert_same(
@@ -84,6 +86,29 @@ return function ($link) {
         'Time notification fixtures must be created'
     );
 
+    test_assert_same(
+        true,
+        db_execute(
+            $link,
+            'INSERT INTO ADD_TIME (ADDDATE, SUIR, USERID, START_DT, STOP_DT, REASON, DESCRIPTION, SUPERVISORDESC, APPROVED, PAUSE_MODE)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'siississii',
+            array(
+                date('Y-m-d', strtotime($currentDate . ' +2 days')),
+                $supervisorId,
+                $betaId,
+                date('Y-m-d 10:00:00', strtotime($currentDate . ' +2 days')),
+                date('Y-m-d 11:00:00', strtotime($currentDate . ' +2 days')),
+                1,
+                'Будущая запись',
+                '',
+                0,
+                0,
+            )
+        ),
+        'Future offsite-work fixture must be created'
+    );
+
     $pauseStarted = start_time_pause(
         $link,
         $alphaId,
@@ -132,4 +157,38 @@ return function ($link) {
     test_assert_same(2, count($offsiteSummary['entries']), 'Offsite summary must include every assigned employee');
     test_assert_same($alphaId, $offsiteSummary['entries'][0]['user_id'], 'Offsite summary must be sorted by surname');
     test_assert_same(1, $offsiteSummary['entries'][0]['new_count'], 'Unapproved offsite work must be visible');
+
+    $menuCounts = get_supervisor_notification_counts($link, $supervisorId, $currentDateTime);
+    test_assert_same(1, $menuCounts['add_time_count'], 'Offsite menu counter must include only new records from the displayed period');
+    test_assert_same(1, $menuCounts['delay_count'], 'Delay menu counter must include only records without a decision');
+
+    foreach (array(0, 1, 2, 3, 4) as $status) {
+        test_assert_same(
+            true,
+            db_execute(
+                $link,
+                'INSERT INTO accounting_errors (USERID, ERROR_DATE, STATUS, COMMENT, CREATED_DT) VALUES (?, ?, ?, ?, NOW())',
+                'isis',
+                array($alphaId, $currentDate, $status, '')
+            ),
+            'Accounting-error fixture must be created'
+        );
+    }
+
+    test_assert_same(
+        true,
+        db_execute(
+            $link,
+            'INSERT INTO staff_leaves (user_id, fio, start_date, stop_date, event) VALUES (?, ?, ?, ?, ?)',
+            'issss',
+            array($betaId, 'Бета Тест Тестович', $currentDate, $currentDate, 'Командировка')
+        ),
+        'Business-trip fixture must be created'
+    );
+
+    test_assert_same(
+        4,
+        get_accounting_errors_notification_count($link, $supervisorId),
+        'Accounting-error menu counter must include all active errors and outstanding business trips'
+    );
 };
