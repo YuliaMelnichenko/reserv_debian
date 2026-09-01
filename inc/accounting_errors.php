@@ -588,7 +588,7 @@ function get_accounting_errors_notification_count($link, $supervisorID)
          FROM accounting_errors ae
          INNER JOIN employees employee ON employee.ID = ae.USERID AND employee.RELEVANCE = 1
          INNER JOIN `GROUPS` g ON g.USERID = ae.USERID
-         WHERE g.SUPERVISORID = ? AND TRIM(g.TYPE) = ? AND ae.ERROR_DATE >= ? AND ae.ERROR_DATE <= ? AND ae.STATUS = 1 AND ae.USERID NOT IN (156, 161, 600)',
+         WHERE g.SUPERVISORID = ? AND TRIM(g.TYPE) = ? AND ae.ERROR_DATE >= ? AND ae.ERROR_DATE <= ? AND ae.STATUS IN (0, 1, 3) AND ae.USERID NOT IN (156, 161, 600)',
         'iiss',
         array((int)$supervisorID, 3, $startDate, $stopDate)
     );
