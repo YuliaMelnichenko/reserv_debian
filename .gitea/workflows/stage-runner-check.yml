@@ -1,0 +1,36 @@
+name: Check stage deployment runner
+
+on:
+  workflow_dispatch:
+
+jobs:
+  preflight:
+    name: Check db12 before enabling deployment
+    runs-on: tori-stage-deploy
+    timeout-minutes: 5
+    steps:
+      - name: Check identity, tools and stage access
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(hostname -s)" = db12
+          test "$(id -un)" = tori-stage-runner
+          printf 'Host: %s\nUser: %s\n' "$(hostname -s)" "$(id -un)"
+          php8.4 -r 'echo "PHP ", PHP_VERSION, PHP_EOL; exit(PHP_MAJOR_VERSION === 8 && PHP_MINOR_VERSION === 4 ? 0 : 1);'
+          node --version
+          git --version
+          command -v rsync
+          command -v curl
+          test -w /var/lib/tori-stage-runner/work
+          test -w /var/www/tori-stage-releases
+          if test -r /var/www/tori/index.php; then
+            echo 'Production index.php must be inaccessible to this service.' >&2
+            exit 1
+          fi
+          scratch_path=$(mktemp -d /var/lib/tori-stage-runner/work/preflight.XXXXXXXX)
+          trap 'rmdir -- "$scratch_path"' EXIT
+          df -h /var/lib/tori-stage-runner/work /var/www/tori-stage-releases
+          status=$(curl --noproxy 127.0.0.1 --silent --show-error --connect-timeout 5 --max-time 15 --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8080/auth.php)
+          printf 'Stage auth.php HTTP status: %s\n' "$status"
+          test "$status" = 200
+          echo 'Stage runner preflight passed. No release was deployed.'
