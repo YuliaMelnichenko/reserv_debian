@@ -1,4 +1,20 @@
-# CI/CD temporarily disabled while runner connectivity is being repaired.
+name: Stage deployment (not enabled)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deployment-not-enabled:
+    runs-on: tori-stage-deploy
+    timeout-minutes: 1
+    steps:
+      - name: Explain deployment setup status
+        shell: bash
+        run: |
+          echo 'Deployment is not enabled. No files or database records were changed.'
+          echo 'Run Check stage deployment runner (stage-runner-check.yml) first.'
+
+# Deployment template retained until stage release directories and Nginx are ready.
 #
 # name: Deploy test stand
 #
