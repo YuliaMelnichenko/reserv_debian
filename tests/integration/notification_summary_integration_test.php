@@ -162,14 +162,17 @@ return function ($link) {
     test_assert_same(1, $menuCounts['add_time_count'], 'Offsite menu counter must include only new records from the displayed period');
     test_assert_same(1, $menuCounts['delay_count'], 'Delay menu counter must include only records without a decision');
 
+    list($errorPeriodStart, $errorPeriodStop) = accounting_errors_get_range();
     foreach (array(0, 1, 2, 3, 4) as $status) {
+        $errorUserId = 510 + $status;
+        integration_seed_employee($link, $errorUserId, 'Status fixture', $supervisorId);
         test_assert_same(
             true,
             db_execute(
                 $link,
                 'INSERT INTO accounting_errors (USERID, ERROR_DATE, STATUS, COMMENT, CREATED_DT) VALUES (?, ?, ?, ?, NOW())',
                 'isis',
-                array($alphaId, $currentDate, $status, '')
+                array($errorUserId, $errorPeriodStop, $status, '')
             ),
             'Accounting-error fixture must be created'
         );
@@ -181,13 +184,13 @@ return function ($link) {
             $link,
             'INSERT INTO staff_leaves (user_id, fio, start_date, stop_date, event) VALUES (?, ?, ?, ?, ?)',
             'issss',
-            array($betaId, 'Бета Тест Тестович', $currentDate, $currentDate, 'Командировка')
+            array($betaId, 'Бета Тест Тестович', $errorPeriodStop, $errorPeriodStop, 'Командировка')
         ),
         'Business-trip fixture must be created'
     );
 
     test_assert_same(
-        4,
+        $errorPeriodStart <= $errorPeriodStop ? 4 : 0,
         get_accounting_errors_notification_count($link, $supervisorId),
         'Accounting-error menu counter must include all active errors and outstanding business trips'
     );
