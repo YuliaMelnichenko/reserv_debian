@@ -297,7 +297,8 @@
 | Файл | Назначение |
 |---|---|
 | `.gitea/workflows/quality.yml` | Основной Gitea Actions workflow: PHP 8.4, MySQL-интеграция, PHP 8.5 и опциональный smoke-check стенда. |
-| `.gitea/workflows/stage-deploy.yml` | Пока закомментированный ручной workflow выкладки на тестовый стенд. |
+| `.gitea/workflows/stage-deploy.yml` | Ручная заглушка: выкат пока отключён, шаблон сохранён в комментариях. |
+| `.gitea/workflows/stage-runner-check.yml` | Ручная проверка runner на db12, программ, прав каталогов и доступности тестового сайта. |
 | `composer.json` | Список PHP-инструментов разработки; сейчас содержит PHPStan. |
 | `composer.lock` | Зафиксированные версии Composer-зависимостей для одинаковых CI-проверок. |
 | `phpstan.neon.dist` | Уровень и список модулей для статического анализа PHPStan. |
