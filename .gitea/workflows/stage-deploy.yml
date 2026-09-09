@@ -23,6 +23,19 @@ jobs:
           set -euo pipefail
           PHP_BIN=php8.4 bash scripts/ci/php-lint.sh
           php8.4 tests/run.php
+      - name: Verify protected stage health endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${TORI_STAGE_HEALTH_TOKEN:-}"
+          status=$(curl --noproxy '*' --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --header "X-Tori-Health-Token: ${TORI_STAGE_HEALTH_TOKEN}" \
+            "$TORI_STAGE_HEALTH_URL")
+          if test "$status" != 200; then
+            echo "Stage health endpoint returned HTTP ${status}." >&2
+            echo 'Check that the Gitea secret TORI_STAGE_HEALTH_TOKEN matches HEALTH_CHECK_TOKEN in /var/www/tori-stage/.env.' >&2
+            exit 1
+          fi
       - name: Deploy checked revision
         shell: bash
         run: bash scripts/deploy-stage-release.sh "${{ gitea.workspace }}"
