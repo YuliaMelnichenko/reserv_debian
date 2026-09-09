@@ -109,7 +109,7 @@ systemd-службу; запуск `register` сам по себе не запу
 TORI_STAGE_RELEASES_DIR=/var/www/tori-stage-releases
 TORI_STAGE_CURRENT_LINK=/var/www/tori-stage-releases/current
 TORI_STAGE_SHARED_ENV=/var/www/tori-stage/.env
-TORI_STAGE_HEALTH_URL=http://127.0.0.1:8080/health.php
+TORI_STAGE_HEALTH_URL=http://192.168.100.216:8080/health.php
 TORI_STAGE_HEALTH_TOKEN=<то же значение, что HEALTH_CHECK_TOKEN в .env тестового стенда>
 ```
 
