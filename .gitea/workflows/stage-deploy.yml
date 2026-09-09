@@ -11,7 +11,7 @@ jobs:
     env:
       TORI_STAGE_RELEASES_DIR: /var/www/tori-stage-releases
       TORI_STAGE_CURRENT_LINK: /var/www/tori-stage-releases/current
-      TORI_STAGE_SHARED_ENV: /etc/tori-stage/.env
+      TORI_STAGE_SHARED_ENV: /var/www/tori-stage/.env
       TORI_STAGE_HEALTH_URL: http://192.168.100.216:8080/health.php
       TORI_STAGE_HEALTH_TOKEN: ${{ secrets.TORI_STAGE_HEALTH_TOKEN }}
     steps:
@@ -33,7 +33,7 @@ jobs:
             "$TORI_STAGE_HEALTH_URL")
           if test "$status" != 200; then
             echo "Stage health endpoint returned HTTP ${status}." >&2
-            echo 'Check that the Gitea secret TORI_STAGE_HEALTH_TOKEN matches HEALTH_CHECK_TOKEN in /etc/tori-stage/.env.' >&2
+            echo 'Check that the Gitea secret TORI_STAGE_HEALTH_TOKEN matches HEALTH_CHECK_TOKEN in /var/www/tori-stage/.env.' >&2
             exit 1
           fi
           echo 'Protected stage health endpoint accepted the Gitea secret.'
