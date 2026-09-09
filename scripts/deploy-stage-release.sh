@@ -100,7 +100,7 @@ next_link_created=1
 mv -Tf "$next_link" "$TORI_STAGE_CURRENT_LINK"
 next_link_created=0
 
-if ! curl --fail --silent --show-error --max-time 15 \
+if ! curl --noproxy '*' --fail --silent --show-error --max-time 15 \
   --header "X-Tori-Health-Token: ${TORI_STAGE_HEALTH_TOKEN}" \
   "$TORI_STAGE_HEALTH_URL" >/dev/null; then
   if [[ -n "$previous_release" ]]; then
