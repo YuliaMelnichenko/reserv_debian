@@ -1,36 +1,28 @@
-name: Stage deployment (not enabled)
+name: Deploy test stand
 
 on:
   workflow_dispatch:
 
 jobs:
-  deployment-not-enabled:
+  deploy:
+    name: Deploy selected revision to stage
     runs-on: tori-stage-deploy
-    timeout-minutes: 1
+    timeout-minutes: 20
+    env:
+      TORI_STAGE_RELEASES_DIR: /var/www/tori-stage-releases
+      TORI_STAGE_CURRENT_LINK: /var/www/tori-stage-releases/current
+      TORI_STAGE_SHARED_ENV: /var/www/tori-stage/.env
+      TORI_STAGE_HEALTH_URL: http://127.0.0.1:8080/health.php
+      TORI_STAGE_HEALTH_TOKEN: ${{ secrets.TORI_STAGE_HEALTH_TOKEN }}
     steps:
-      - name: Explain deployment setup status
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Validate source before deployment
         shell: bash
         run: |
-          echo 'Deployment is not enabled. No files or database records were changed.'
-          echo 'Run Check stage deployment runner (stage-runner-check.yml) first.'
-
-# Deployment template retained until stage release directories and Nginx are ready.
-#
-# name: Deploy test stand
-#
-# on:
-#   workflow_dispatch:
-#
-# jobs:
-#   deploy:
-#     name: Deploy selected revision to stage
-#     runs-on: tori-stage-deploy
-#     steps:
-#       - name: Check out source
-#         uses: actions/checkout@v4
-#       - name: Validate source before deployment
-#         run: |
-#           bash scripts/ci/php-lint.sh
-#           php tests/run.php
-#       - name: Deploy release
-#         run: bash scripts/deploy-stage-release.sh "${{ gitea.workspace }}"
+          set -euo pipefail
+          PHP_BIN=php8.4 bash scripts/ci/php-lint.sh
+          php8.4 tests/run.php
+      - name: Deploy checked revision
+        shell: bash
+        run: bash scripts/deploy-stage-release.sh "${{ gitea.workspace }}"
