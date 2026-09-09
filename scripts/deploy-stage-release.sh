@@ -80,7 +80,7 @@ if [[ -L "$TORI_STAGE_CURRENT_LINK" ]]; then
   previous_release="$(readlink "$TORI_STAGE_CURRENT_LINK")"
 fi
 
-rsync -a --no-group --chown=:www-data \
+rsync -a --no-owner --no-group \
   --exclude='.env' \
   --exclude='.git' \
   --exclude='.gitea' \
@@ -89,8 +89,6 @@ rsync -a --no-group --chown=:www-data \
   --exclude='tmp' \
   --exclude='temp' \
   "${workspace_path%/}/" "${release_path%/}/"
-
-chgrp -R www-data "$release_path"
 
 # The runner uses a restrictive umask. The release directories inherit group
 # www-data from the setgid release root, so PHP-FPM can read only this release.
