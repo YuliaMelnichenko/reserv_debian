@@ -36,6 +36,7 @@ jobs:
             echo 'Check that the Gitea secret TORI_STAGE_HEALTH_TOKEN matches HEALTH_CHECK_TOKEN in /var/www/tori-stage/.env.' >&2
             exit 1
           fi
+          echo 'Protected stage health endpoint accepted the Gitea secret.'
       - name: Deploy checked revision
         shell: bash
         run: bash scripts/deploy-stage-release.sh "${{ gitea.workspace }}"
