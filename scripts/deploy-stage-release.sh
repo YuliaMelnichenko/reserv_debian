@@ -33,6 +33,26 @@ if [[ -z "$shared_env_path" || ! -f "$shared_env_path" ]]; then
   exit 1
 fi
 
+# The pre-deploy endpoint is served by the current release, while the new
+# release uses this external .env. Verify that both sides use the same secret
+# before changing the current symlink. Do not print either token to the log.
+shared_health_token="$(php -r '
+    $environment = @parse_ini_file($argv[1]);
+    if (!is_array($environment) || !isset($environment["HEALTH_CHECK_TOKEN"])) {
+        exit(1);
+    }
+    echo (string)$environment["HEALTH_CHECK_TOKEN"];
+' "$shared_env_path")" || {
+  echo "The shared stage .env does not contain HEALTH_CHECK_TOKEN." >&2
+  exit 1
+}
+
+if [[ "$shared_health_token" != "$TORI_STAGE_HEALTH_TOKEN" ]]; then
+  echo "The Gitea health secret does not match HEALTH_CHECK_TOKEN in the shared stage .env." >&2
+  echo "Update one value, then rerun the workflow. No release was activated." >&2
+  exit 1
+fi
+
 command -v rsync >/dev/null 2>&1 || { echo 'rsync is required for deployment' >&2; exit 1; }
 command -v curl >/dev/null 2>&1 || { echo 'curl is required for the health check' >&2; exit 1; }
 
