@@ -26,7 +26,9 @@ if [[ ! -d "$workspace_path" ]]; then
   exit 1
 fi
 
-if [[ ! -f "$TORI_STAGE_SHARED_ENV" ]]; then
+shared_env_path="$(readlink -f "$TORI_STAGE_SHARED_ENV" 2>/dev/null || true)"
+
+if [[ -z "$shared_env_path" || ! -f "$shared_env_path" ]]; then
   echo "Shared stage .env does not exist: $TORI_STAGE_SHARED_ENV" >&2
   exit 1
 fi
@@ -93,7 +95,8 @@ rsync -a \
 find "$release_path" -type d -exec chmod 2750 {} +
 find "$release_path" -type f -exec chmod 0640 {} +
 
-ln -s "$TORI_STAGE_SHARED_ENV" "$release_path/.env"
+ln -s "$shared_env_path" "$release_path/.env"
+echo "Stage configuration linked from: $shared_env_path"
 
 ln -s "$release_path" "$next_link"
 next_link_created=1
