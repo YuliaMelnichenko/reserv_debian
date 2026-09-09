@@ -95,6 +95,8 @@ rsync -a --no-owner --no-group \
 find "$release_path" -type d -exec chmod 2750 {} +
 find "$release_path" -type f -exec chmod 0640 {} +
 
+setfacl -R -m u:www-data:rX "$release_path"
+
 ln -s "$shared_env_path" "$release_path/.env"
 echo "Stage configuration linked from: $shared_env_path"
 
