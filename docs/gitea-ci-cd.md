@@ -108,19 +108,14 @@ systemd-службу; запуск `register` сам по себе не запу
 ```text
 TORI_STAGE_RELEASES_DIR=/var/www/tori-stage-releases
 TORI_STAGE_CURRENT_LINK=/var/www/tori-stage-releases/current
-TORI_STAGE_SHARED_ENV=/etc/tori-stage/.env
+TORI_STAGE_SHARED_ENV=/var/www/tori-stage/.env
 TORI_STAGE_HEALTH_URL=http://192.168.100.216:8080/health.php
 TORI_STAGE_HEALTH_TOKEN=<то же значение, что HEALTH_CHECK_TOKEN в .env тестового стенда>
 ```
 
-Серверный `.env` тестового стенда хранится вне каталогов релизов по пути
-`/etc/tori-stage/.env`. Перед первым CD-переключением создайте его из текущей
-проверенной конфигурации:
-
-```bash
-sudo install -d -o root -g www-data -m 0751 /etc/tori-stage
-sudo install -o root -g www-data -m 0640 /var/www/tori-stage/.env /etc/tori-stage/.env
-```
+Серверный `.env` тестового стенда остаётся в существующем каталоге
+`/var/www/tori-stage/.env`. Каждый новый релиз получает на него символическую
+ссылку, поэтому файл не копируется и не теряется при переключении релизов.
 
 Виртуальный хост Nginx тестового стенда должен использовать
 `/var/www/tori-stage-releases/current`. Сценарий развёртывания копирует
@@ -145,7 +140,7 @@ HEALTH_CHECK_TOKEN=<длинное случайное значение>
 
 Для ручного CD в `Settings -> Actions -> Secrets` репозитория достаточно
 существующего секрета `TORI_STAGE_HEALTH_TOKEN`. Его значение должно совпадать
-с `HEALTH_CHECK_TOKEN` в `/etc/tori-stage/.env`. Остальные пути намеренно
+с `HEALTH_CHECK_TOKEN` в `/var/www/tori-stage/.env`. Остальные пути намеренно
 не являются секретами и зафиксированы в `stage-deploy.yml`, чтобы выкат был
 воспроизводимым.
 
