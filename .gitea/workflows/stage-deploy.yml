@@ -37,30 +37,6 @@ jobs:
             exit 1
           fi
           echo 'Protected stage health endpoint accepted the Gitea secret.'
-      - name: Verify exact health token match
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          env_token=$(
-            php8.4 -r '
-              $e = parse_ini_file($argv[1]);
-              if (!is_array($e) || !isset($e["HEALTH_CHECK_TOKEN"])) {
-                  fwrite(STDERR, "HEALTH_CHECK_TOKEN is missing in stage .env\n");
-                  exit(2);
-              }
-              echo (string)$e["HEALTH_CHECK_TOKEN"];
-            ' "$TORI_STAGE_SHARED_ENV"
-          )
-
-          if [[ "$TORI_STAGE_HEALTH_TOKEN" == "$env_token" ]]; then
-            echo "Gitea secret exactly matches HEALTH_CHECK_TOKEN."
-          else
-            echo "Gitea secret does NOT exactly match HEALTH_CHECK_TOKEN." >&2
-            echo "Gitea secret length: ${#TORI_STAGE_HEALTH_TOKEN}" >&2
-            echo "Env token length: ${#env_token}" >&2
-            exit 1
-          fi
       - name: Deploy checked revision
         shell: bash
         run: bash scripts/deploy-stage-release.sh "${{ gitea.workspace }}"
