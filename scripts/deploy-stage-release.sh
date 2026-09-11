@@ -36,10 +36,10 @@ fi
 command -v rsync >/dev/null 2>&1 || { echo 'rsync is required for deployment' >&2; exit 1; }
 command -v curl >/dev/null 2>&1 || { echo 'curl is required for the health check' >&2; exit 1; }
 
-release_stamp="$(date -u +%Y%m%d%H%M%S)"
+release_stamp="$(date -u +%Y%m%d%)"
 release_suffix="${GITEA_SHA:-manual}"
 release_suffix="${release_suffix//[^[:alnum:]._-]/_}"
-release_path="${TORI_STAGE_RELEASES_DIR%/}/${release_stamp}-${release_suffix:0:12}"
+release_path="${TORI_STAGE_RELEASES_DIR%/}/${release_stamp}-${release_suffix:0:9}"
 next_link="${TORI_STAGE_CURRENT_LINK}.next"
 previous_release=""
 deployment_complete=0
