@@ -22,7 +22,7 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
           (
             SELECT COUNT(DISTINCT a.ID)
             FROM ADD_TIME a
-            WHERE a.APPROVED = 0
+            WHERE COALESCE(a.APPROVED, 0) = 0
               AND a.PAUSE_MODE = 0
               AND $startExpression <> '0000-00-00 00:00:00'
               AND $stopExpression <> '0000-00-00 00:00:00'
@@ -40,7 +40,7 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
           (
             SELECT COUNT(DISTINCT delay_entry.id)
             FROM Delays delay_entry
-            WHERE delay_entry.status = 0
+            WHERE COALESCE(delay_entry.status, 0) = 0
               AND delay_entry.date >= ?
               AND delay_entry.date < ?
               AND EXISTS (
@@ -79,9 +79,22 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
         return false;
     }
 
+    $pauseSummary = get_pause_notification_summary($link, $supervisorID, $currentDateTime);
+
+    if ($pauseSummary === false) {
+        return false;
+    }
+
+    $pauseCount = 0;
+
+    foreach ($pauseSummary['entries'] as $entry) {
+        $pauseCount += (int)$entry['total_count'];
+    }
+
     return array(
         'add_time_count' => (int)$counts['ADD_TIME_COUNT'],
         'delay_count' => (int)$counts['DELAY_COUNT'],
+        'pause_count' => $pauseCount,
     );
 }
 

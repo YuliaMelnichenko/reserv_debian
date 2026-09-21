@@ -8,11 +8,11 @@ include_once __DIR__ . "/../funcs.php";
 require_once __DIR__ . "/../inc/notification_summary.php";
 include __DIR__ . "/../php_tori/connect.php";
 
-$notifCountStr = "";
+$notifCount = 0;
 
 if ( isset( $_SESSION['ss_id'] ) )
 {
-  $counts = get_pause_notification_count(
+  $counts = get_supervisor_notification_counts(
     $link,
     (int)$_SESSION['ss_id'],
     get_current_datetime_in_timezone_str(1, 0)
@@ -23,9 +23,9 @@ if ( isset( $_SESSION['ss_id'] ) )
     exit;
   }
 
-  if ( $counts['current_day_count'] > 0 )
-    $notifCountStr = "(" . $counts['current_day_count'] . ")";
+  $notifCount = $counts['pause_count'];
 }
 
+$notifCountStr = $notifCount > 0 ? "($notifCount)" : "";
 echo "<h5 class=\"biggersmall\">По приостановкам учета времени $notifCountStr</h5>";
 ?>

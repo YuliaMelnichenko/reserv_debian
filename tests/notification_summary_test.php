@@ -45,8 +45,9 @@ return function () {
         'The pause notification counter must load the shared summary service'
     );
     test_assert_true(
-        strpos($pauseCountController, '$notifCountStr = "";') !== false,
-        'The pause notification counter must initialize its empty state'
+        strpos($pauseCountController, '$notifCount = 0;') !== false
+            && strpos($pauseCountController, 'get_supervisor_notification_counts') !== false,
+        'The pause notification counter must initialize its empty state and use the shared supervisor count'
     );
     test_assert_same(
         0,
@@ -206,6 +207,15 @@ return function () {
     test_assert_true(
         strpos($service, 'function get_supervisor_notification_counts') !== false,
         'The shared service must provide combined supervisor notification counters'
+    );
+    test_assert_true(
+        strpos($service, "'pause_count' => \$pauseCount") !== false,
+        'Combined notification counters must include every open pause record'
+    );
+    test_assert_true(
+        strpos($service, 'COALESCE(a.APPROVED, 0) = 0') !== false
+            && strpos($service, 'COALESCE(delay_entry.status, 0) = 0') !== false,
+        'Open notification counters must include legacy records without an explicit status'
     );
     test_assert_same(
         0,

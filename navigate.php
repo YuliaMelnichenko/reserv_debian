@@ -114,6 +114,7 @@ if ( $_SESSION['ss_id'] == 500 || $_SESSION['ss_id'] == 501 ){
     else {
       $notifCount = $notificationCounts['add_time_count'];
       $delayNotifCount = $notificationCounts['delay_count'];
+      $pauseNotifCount = $notificationCounts['pause_count'];
     }
 
     $accountingErrorsNotifCount = isset($link) && $link
