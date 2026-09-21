@@ -41,18 +41,8 @@ return function () {
 
     $pauseCountController = file_get_contents(__DIR__ . '/../ajax/get_pause_notif_count.php');
     test_assert_true(
-        strpos($pauseCountController, 'inc/notification_summary.php') !== false,
-        'The pause notification counter must load the shared summary service'
-    );
-    test_assert_true(
-        strpos($pauseCountController, '$notifCount = 0;') !== false
-            && strpos($pauseCountController, 'get_supervisor_notification_counts') !== false,
-        'The pause notification counter must initialize its empty state and use the shared supervisor count'
-    );
-    test_assert_same(
-        0,
-        preg_match('/\b(?:SELECT|db_query|get_pause_notif_counts)\b/i', $pauseCountController),
-        'The pause notification counter must not perform SQL or use the legacy helper'
+        strpos($pauseCountController, 'По приостановкам учета времени</h5>') !== false,
+        'The pause notification button must remain available without an approval counter'
     );
 
     $menuCountControllers = array(
@@ -207,10 +197,6 @@ return function () {
     test_assert_true(
         strpos($service, 'function get_supervisor_notification_counts') !== false,
         'The shared service must provide combined supervisor notification counters'
-    );
-    test_assert_true(
-        strpos($service, "'pause_count' => \$pauseCount") !== false,
-        'Combined notification counters must include every open pause record'
     );
     test_assert_true(
         strpos($service, 'COALESCE(a.APPROVED, 0) = 0') !== false

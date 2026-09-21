@@ -161,8 +161,6 @@ return function ($link) {
     $menuCounts = get_supervisor_notification_counts($link, $supervisorId, $currentDateTime);
     test_assert_same(1, $menuCounts['add_time_count'], 'Offsite menu counter must include only new records from the displayed period');
     test_assert_same(1, $menuCounts['delay_count'], 'Delay menu counter must include only records without a decision');
-    test_assert_same(1, $menuCounts['pause_count'], 'Pause menu counter must include every open record in the current quarter');
-
     list($errorPeriodStart, $errorPeriodStop) = accounting_errors_get_range();
     foreach (array(0, 1, 2, 3, 4) as $status) {
         $errorUserId = 510 + $status;

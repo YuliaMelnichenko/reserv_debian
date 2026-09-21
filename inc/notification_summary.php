@@ -79,22 +79,9 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
         return false;
     }
 
-    $pauseSummary = get_pause_notification_summary($link, $supervisorID, $currentDateTime);
-
-    if ($pauseSummary === false) {
-        return false;
-    }
-
-    $pauseCount = 0;
-
-    foreach ($pauseSummary['entries'] as $entry) {
-        $pauseCount += (int)$entry['total_count'];
-    }
-
     return array(
         'add_time_count' => (int)$counts['ADD_TIME_COUNT'],
         'delay_count' => (int)$counts['DELAY_COUNT'],
-        'pause_count' => $pauseCount,
     );
 }
 
