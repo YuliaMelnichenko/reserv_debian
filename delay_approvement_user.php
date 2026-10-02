@@ -4,6 +4,7 @@ require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 include_once __DIR__ . "/funcs.php";
 require_once __DIR__ . "/inc/notification_detail_page_service.php";
+require_once __DIR__ . "/inc/delay_notification_period.php";
 save_last_location( "delay_approvement.php" );
 $mid = request_get_trimmed_string('mid');
 
@@ -81,7 +82,8 @@ echo "<table class=\"notification-page-table\">";
 
 $backUrl = "delay_approvement.php";
 $currentDate = get_current_datetime_in_timezone()[2];
-$journal = notification_detail_load_delay_context($link, $userID, $currentDate);
+$selectedPeriod = get_delay_notification_period_from_session($currentDate);
+$journal = notification_detail_load_delay_context($link, $userID, $currentDate, $selectedPeriod);
 
 if ($journal === false) {
   echo "<h5>" . html_escape(database_error_message($link, __FILE__ . ':' . __LINE__)) . "</h5>";
@@ -96,6 +98,9 @@ if ($journal === null) {
 $userName = $journal['user_name'];
 $delayTimes = $journal['entries'];
 $periodLabel = $journal['period_label'];
+
+echo render_delay_notification_period_filter($selectedPeriod);
+echo "<h5 class=\"big\">Период " . html_escape($periodLabel) . "</h5>";
 
       if ( count( $delayTimes ) == 0 ){
         echo "<table id=\"add_time_approvement_table\" class=\"notification-detail-header-table notification-detail-empty-header\">";

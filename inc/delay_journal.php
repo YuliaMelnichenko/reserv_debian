@@ -4,7 +4,7 @@ require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/delay.php';
 require_once __DIR__ . '/calendar.php';
 
-function get_delay_journal_context($link, $userID, $currentDate, $includeDeleted = true)
+function get_delay_journal_context($link, $userID, $currentDate, $includeDeleted = true, $period = null)
 {
     $userResult = db_query($link, "
         SELECT SURNAME, FIRSTNAME, LASTNAME, defaultStartTime, AllowedDelayMinutes
@@ -23,8 +23,14 @@ function get_delay_journal_context($link, $userID, $currentDate, $includeDeleted
         return null;
     }
 
-    list($periodStartDate, $periodStopDate, $periodStopExclusive) =
-        get_current_quarter_date_range(false, $currentDate);
+    if (!is_array($period)) {
+        list($periodStartDate, $periodStopDate, $periodStopExclusive) =
+            get_current_quarter_date_range(false, $currentDate);
+    } else {
+        $periodStartDate = (string)$period['start_date'];
+        $periodStopDate = (string)$period['stop_date'];
+        $periodStopExclusive = (string)$period['stop_exclusive'];
+    }
     $defaultStartTime = (string)$user['defaultStartTime'];
     $allowedDelay = (int)$user['AllowedDelayMinutes'];
 

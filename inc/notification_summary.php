@@ -85,12 +85,18 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
     );
 }
 
-function get_delay_notification_summary($link, $supervisorID, $currentDate)
+function get_delay_notification_summary($link, $supervisorID, $currentDate, $period = null)
 {
-    list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(
-        false,
-        $currentDate
-    );
+    if (!is_array($period)) {
+        list($periodStartDate, $periodStopDate, $periodStopExclusive) = get_current_quarter_date_range(
+            false,
+            $currentDate
+        );
+    } else {
+        $periodStartDate = (string)$period['start_date'];
+        $periodStopDate = (string)$period['stop_date'];
+        $periodStopExclusive = (string)$period['stop_exclusive'];
+    }
 
     $summaryResult = db_query($link, "
         SELECT
@@ -125,7 +131,7 @@ function get_delay_notification_summary($link, $supervisorID, $currentDate)
           AND TRIM(membership.TYPE) IN ('0', '-1', '3')
         GROUP BY employee.ID, employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME
         ORDER BY employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME, employee.ID
-    ", 'ssi', array($quarterStartDate, $quarterStopExclusive, (int)$supervisorID));
+    ", 'ssi', array($periodStartDate, $periodStopExclusive, (int)$supervisorID));
 
     if (!$summaryResult) {
         return false;
@@ -147,9 +153,9 @@ function get_delay_notification_summary($link, $supervisorID, $currentDate)
     }
 
     return array(
-        'quarter_start_date' => $quarterStartDate,
-        'quarter_stop_date' => $quarterStopDate,
-        'quarter_stop_exclusive' => $quarterStopExclusive,
+        'period_start_date' => $periodStartDate,
+        'period_stop_date' => $periodStopDate,
+        'period_stop_exclusive' => $periodStopExclusive,
         'entries' => $entries,
     );
 }

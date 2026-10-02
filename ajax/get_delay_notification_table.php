@@ -7,22 +7,22 @@ ajax_text_headers();
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 require_once __DIR__ . "/../inc/notification_summary.php";
+require_once __DIR__ . "/../inc/delay_notification_period.php";
 
 $userID_ = (int)$_SESSION['ss_id'];
 $currentDate = get_current_datetime_in_timezone()[2];
-$summary = get_delay_notification_summary($link, $userID_, $currentDate);
+$selectedPeriod = get_delay_notification_period_from_session($currentDate);
+$summary = get_delay_notification_summary($link, $userID_, $currentDate, $selectedPeriod);
 
 if ($summary === false) {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
-$periodLabel = format_date_range_label(
-  $summary['quarter_start_date'],
-  $summary['quarter_stop_date']
-);
+$periodLabel = format_period_label($summary['period_start_date'], $summary['period_stop_date']);
 
-echo "<h5 class=\"big\">Текущий квартал: " . html_escape($periodLabel) . "</h5>";
+echo render_delay_notification_period_filter($selectedPeriod);
+echo "<h5 class=\"big\">Период " . html_escape($periodLabel) . "</h5>";
 echo "<div class=\"notification-table-scroll\">";
 echo "<table class=\"add_time notification-summary-table\" id=\"delay_approvement_table_users\">";
 echo "<tr class=\"notification-table-head\">";

@@ -18,9 +18,9 @@ function notification_detail_load_add_time_context($link, $userID, $currentDateT
     );
 }
 
-function notification_detail_load_delay_context($link, $userID, $currentDate)
+function notification_detail_load_delay_context($link, $userID, $currentDate, $period = null)
 {
-    $journal = get_delay_journal_context($link, $userID, $currentDate);
+    $journal = get_delay_journal_context($link, $userID, $currentDate, true, $period);
 
     if (!is_array($journal)) {
         return $journal;
