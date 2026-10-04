@@ -82,7 +82,7 @@ echo "<table class=\"notification-page-table\">";
 $backUrl = "delay_approvement.php";
 $currentDate = get_current_datetime_in_timezone()[2];
 list($periodStartDate, $periodStopDate, $periodStopExclusive) =
-  get_current_and_previous_quarter_date_range($currentDate);
+  get_delay_notification_period_date_range($currentDate);
 $journal = notification_detail_load_delay_context($link, $userID, $currentDate, array(
   'start_date' => $periodStartDate,
   'stop_date' => $periodStopDate,

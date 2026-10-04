@@ -34,7 +34,7 @@ return function () {
     );
     test_assert_same(
         array('2026-01-01', '2026-05-15', '2026-05-16'),
-        get_current_and_previous_quarter_date_range('2026-05-15 12:00:00'),
+        get_delay_notification_period_date_range('2026-05-15 12:00:00'),
         'Notification periods must include the previous quarter through the reference day'
     );
     test_assert_same('с 01.01.2026 по 15.05.2026', format_period_label('2026-01-01', '2026-05-15'), 'Period labels must be explicit');

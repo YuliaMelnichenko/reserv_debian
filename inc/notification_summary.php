@@ -88,7 +88,7 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
 function get_delay_notification_summary($link, $supervisorID, $currentDate)
 {
     list($periodStartDate, $periodStopDate, $periodStopExclusive) =
-        get_current_and_previous_quarter_date_range($currentDate);
+        get_delay_notification_period_date_range($currentDate);
 
     $summaryResult = db_query($link, "
         SELECT
