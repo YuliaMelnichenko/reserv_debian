@@ -4,7 +4,6 @@ require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 include_once __DIR__ . "/funcs.php";
 require_once __DIR__ . "/inc/notification_summary.php";
-require_once __DIR__ . "/inc/delay_notification_period.php";
 save_last_location( "delay_approvement.php" );
 require_page_superuser();
 ?>
@@ -34,8 +33,7 @@ include_once __DIR__ . "/php_tori/connect.php";
 
 db_set_charset($link, "utf8");
 $currentDate = get_current_datetime_in_timezone()[2];
-$selectedPeriod = get_delay_notification_period_from_session($currentDate);
-$summary = get_delay_notification_summary($link, $userID_, $currentDate, $selectedPeriod);
+$summary = get_delay_notification_summary($link, $userID_, $currentDate);
 
 if ($summary === false) {
   echo html_escape(database_error_message($link, __FILE__ . ':' . __LINE__));
@@ -62,7 +60,6 @@ echo "<table class=\"notification-page-table\">";
       echo "<h5 class=\"dark\"><br>/уведомления по опозданиям<br><br></h5>";
     echo "</div>";
 
-echo render_delay_notification_period_filter($selectedPeriod);
 echo "<h5 class=\"big\">Период " . html_escape($periodLabel) . "</h5>";
 
 echo "<div class=\"notification-table-scroll notification-table-scroll-wide\">";

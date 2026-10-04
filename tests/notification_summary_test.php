@@ -186,10 +186,9 @@ return function () {
         'Pause notifications must use the same surname order as other notification lists'
     );
     test_assert_true(
-        strpos($delayController, 'render_delay_notification_period_filter') !== false
-            && strpos($delayController, 'Период ') !== false
+        strpos($delayController, 'Период ') !== false
             && strpos($delayController, 'Без<br>объяснения') !== false,
-        'The delay notification table must show a selectable period and missing explanations'
+        'The delay notification table must show its period and missing explanations'
     );
     test_assert_true(
         strpos($service, 'function get_pause_notification_count') !== false,

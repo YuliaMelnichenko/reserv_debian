@@ -71,7 +71,7 @@ function get_current_quarter_date_range($stopAtYesterday = false, $referenceDate
     return array($startDate, $stopDate, $stopExclusive);
 }
 
-function get_add_time_period_date_range($referenceDate = null)
+function get_current_and_previous_quarter_date_range($referenceDate = null)
 {
     list($quarterStartDate, $stopDate, $stopExclusive) = get_current_quarter_date_range(
         false,
@@ -81,6 +81,11 @@ function get_add_time_period_date_range($referenceDate = null)
     $startDate = date('Y-m-d', strtotime('-3 months', strtotime($quarterStartDate)));
 
     return array($startDate, $stopDate, $stopExclusive);
+}
+
+function get_add_time_period_date_range($referenceDate = null)
+{
+    return get_current_and_previous_quarter_date_range($referenceDate);
 }
 
 function format_date_range_label($startDate, $stopDate)

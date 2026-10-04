@@ -32,6 +32,11 @@ return function () {
         get_add_time_period_date_range('2026-05-15 12:00:00'),
         'The remote-work period must include the current quarter and three preceding calendar months'
     );
+    test_assert_same(
+        array('2026-01-01', '2026-05-15', '2026-05-16'),
+        get_current_and_previous_quarter_date_range('2026-05-15 12:00:00'),
+        'Notification periods must include the previous quarter through the reference day'
+    );
     test_assert_same('с 01.01.2026 по 15.05.2026', format_period_label('2026-01-01', '2026-05-15'), 'Period labels must be explicit');
 
     test_assert_same('2024-02-01', GetFirstMonthDay('2024-02-29'), 'The first leap-month date must be correct');
