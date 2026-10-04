@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/workday_registration.php';
 
 function time_pause_result($status, $message = null)
 {
@@ -67,7 +68,7 @@ function start_time_pause_for_group(
     }
 
     $visitResult = db_query($link, "
-        SELECT ID, state, take_pause
+        SELECT ID, in_dt, state, take_pause
         FROM visiting
         WHERE ID = ?
           AND user_id = ?
@@ -85,6 +86,13 @@ function start_time_pause_for_group(
     if (!$visit) {
         $transaction->rollback();
         return time_pause_result('error', 'Не найдена активная запись рабочего дня');
+    }
+
+    $periodStart = $currentDate . ' 00:00:00';
+    $periodStop = date('Y-m-d 00:00:00', strtotime($currentDate . ' +1 day'));
+    if (!is_workday_visit_current($visit, $periodStart, $periodStop, $currentDateTime, 3 * 60 * 60)) {
+        $transaction->rollback();
+        return time_pause_result('error', 'Запись рабочего дня устарела. Обновите страницу');
     }
 
     if (!in_array((int)$visit['state'], array(2, 4), true)) {
@@ -224,7 +232,7 @@ function finish_time_pause($link, $userID, $visitingID, $pauseID, $currentDateTi
     }
 
     $visitResult = db_query($link, "
-        SELECT ID
+        SELECT ID, in_dt, state
         FROM visiting
         WHERE ID = ?
           AND user_id = ?
@@ -237,9 +245,17 @@ function finish_time_pause($link, $userID, $visitingID, $pauseID, $currentDateTi
         return false;
     }
 
-    if (!db_fetch_one($visitResult)) {
+    $visit = db_fetch_one($visitResult);
+    if (!$visit) {
         $transaction->rollback();
         return time_pause_result('error', 'Не найдена активная запись рабочего дня');
+    }
+
+    $periodStart = substr($currentDateTime, 0, 10) . ' 00:00:00';
+    $periodStop = date('Y-m-d 00:00:00', strtotime($periodStart . ' +1 day'));
+    if (!is_workday_visit_current($visit, $periodStart, $periodStop, $currentDateTime, 3 * 60 * 60)) {
+        $transaction->rollback();
+        return time_pause_result('error', 'Запись рабочего дня устарела. Обновите страницу');
     }
 
     $pauseResult = db_query($link, "

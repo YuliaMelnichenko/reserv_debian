@@ -47,6 +47,20 @@ return function ($link) {
     ));
     test_assert_same('2026-07-28 10:30:00', $closedPause['STOP_DT'], 'Pause finish must be persisted');
 
+    integration_seed_employee($link, 102, 'Старая смена', 201);
+    test_assert_same(
+        true,
+        db_execute(
+            $link,
+            "INSERT INTO visiting (ID, user_id, in_dt, state, take_pause) VALUES (2, 102, '2021-07-28 08:00:00', 2, 0)"
+        ),
+        'A historical pause visit fixture must be created'
+    );
+    $stalePause = start_time_pause($link, 102, 2, 201, '2026-07-28', '2026-07-28 10:00:00', 'Старая смена');
+    test_assert_same('error', $stalePause['status'], 'A stale session must not start a pause on a historical visit');
+    $staleVisit = db_fetch_one(db_query($link, 'SELECT take_pause FROM visiting WHERE ID = 2'));
+    test_assert_same(0, (int)$staleVisit['take_pause'], 'A historical visit must not be modified by a pause');
+
     $remoteStart = start_remote_work($link, 101, 201);
     test_assert_same('success', $remoteStart['status'], 'Employee must start remote work');
 

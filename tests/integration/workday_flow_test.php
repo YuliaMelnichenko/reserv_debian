@@ -74,4 +74,50 @@ return function ($link) {
     test_assert_same('Без объяснения', $delay['explaneDesk'], 'A delay must be visible before an employee submits a comment');
     test_assert_same(0, (int)$delay['status'], 'A delay without a comment must remain under review');
     test_assert_same(2, (int)$lateSession['ss_there_is_delay'], 'The employee must still be offered an explanation after arrival');
+
+    integration_seed_employee($link, 103, 'Старая смена');
+    test_assert_same(
+        true,
+        db_execute(
+            $link,
+            "INSERT INTO visiting (ID, user_id, in_dt, state) VALUES (50, 103, '2021-07-28 08:00:00', 3)"
+        ),
+        'A historical open visit fixture must be created'
+    );
+
+    $periodStart = '2026-07-30 00:00:00';
+    $periodStop = '2026-07-31 00:00:00';
+    $now = '2026-07-30 01:00:00';
+    $currentState = sync_time_registration_state_from_db($link, 103, $periodStart, $periodStop, $now, 10800);
+    test_assert_same(1, $currentState['state'], 'A visit from 2021 must not be treated as the current shift');
+    test_assert_same(0, $currentState['visiting_ID'], 'A historical visit must be removed from the current session');
+
+    $newSession = array();
+    test_assert_same(
+        '1',
+        workday_transition_arrive($link, $newSession, array(
+            'user_id' => 103,
+            'period_start' => $periodStart,
+            'period_stop' => $periodStop,
+            'now' => $now,
+            'max_open_shift_seconds' => 10800,
+            'target_state' => 2,
+        )),
+        'A historical open visit must not block a new arrival'
+    );
+    $historicalVisit = db_fetch_one(db_query($link, 'SELECT state FROM visiting WHERE ID = 50'));
+    test_assert_same(3, (int)$historicalVisit['state'], 'Historical visits must remain unchanged');
+
+    integration_seed_employee($link, 104, 'Ночная смена');
+    test_assert_same(
+        true,
+        db_execute(
+            $link,
+            "INSERT INTO visiting (ID, user_id, in_dt, state) VALUES (52, 104, '2026-07-29 23:30:00', 3)"
+        ),
+        'A recent overnight visit fixture must be created'
+    );
+    $overnightState = sync_time_registration_state_from_db($link, 104, $periodStart, $periodStop, $now, 10800);
+    test_assert_same(3, $overnightState['state'], 'A recent overnight shift must remain available');
+    test_assert_same(52, $overnightState['visiting_ID'], 'The overnight visit must retain its ID');
 };

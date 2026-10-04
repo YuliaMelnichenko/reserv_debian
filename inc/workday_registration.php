@@ -41,6 +41,7 @@ function is_workday_visit_current($visitRow, $startDTStr, $stopDTStr, $dateTimeS
 
 function sync_time_registration_state_from_db($link, $userID, $startDTStr, $stopDTStr, $dateTimeStr, $maxOpenShiftSeconds)
 {
+    $earliestOpenShiftDT = date('Y-m-d H:i:s', strtotime($dateTimeStr) - (int)$maxOpenShiftSeconds);
     $query = db_query($link, "
         SELECT ID, state
         FROM visiting
@@ -54,12 +55,13 @@ function sync_time_registration_state_from_db($link, $userID, $startDTStr, $stop
             (
               state != 0
               AND in_dt < ?
-              AND TIMESTAMPDIFF(SECOND, ?, ?) <= ?
+              AND in_dt >= ?
+              AND in_dt <= ?
             )
           )
         ORDER BY in_dt DESC, ID DESC
         LIMIT 1
-    ", 'isssssi', array((int)$userID, $startDTStr, $stopDTStr, $startDTStr, $startDTStr, $dateTimeStr, (int)$maxOpenShiftSeconds));
+    ", 'isssss', array((int)$userID, $startDTStr, $stopDTStr, $startDTStr, $earliestOpenShiftDT, $dateTimeStr));
 
     if (!$query) {
         ajax_database_error($link, __FILE__ . ':' . __LINE__);

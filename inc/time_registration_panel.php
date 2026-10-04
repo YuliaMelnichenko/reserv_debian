@@ -62,6 +62,7 @@ $stopDTStr = $dateArr[1];
 
 $maxOpenShiftHours = 3;
 $maxOpenShiftSeconds = $maxOpenShiftHours * 60 * 60;
+$earliestOpenShiftDT = date('Y-m-d H:i:s', strtotime($currentDateTime) - $maxOpenShiftSeconds);
 
 $query = db_query($link, "
   SELECT ID, in_dt, eat_start_dt, eat_stop_dt, out_dt, state
@@ -76,19 +77,19 @@ $query = db_query($link, "
       (
         state != 0
         AND in_dt < ?
-        AND TIMESTAMPDIFF(SECOND, ?, ?) <= ?
+        AND in_dt >= ?
+        AND in_dt <= ?
       )
     )
   ORDER BY in_dt DESC, ID DESC
   LIMIT 1
-", 'isssssi', array(
+", 'isssss', array(
   $userID,
   $startDTStr,
   $stopDTStr,
   $startDTStr,
-  $startDTStr,
+  $earliestOpenShiftDT,
   $currentDateTime,
-  $maxOpenShiftSeconds
 ));
 
 if (!$query) {

@@ -86,6 +86,7 @@ function workday_transition_create_delay_for_arrival($link, $userId, $arrivalDat
 function workday_transition_arrive($link, &$session, $context)
 {
     $userId = $context['user_id'];
+    $earliestOpenShiftDT = date('Y-m-d H:i:s', strtotime($context['now']) - (int)$context['max_open_shift_seconds']);
     $session['ss_visiting_ID'] = 0;
     $transaction = db_transaction_start($link);
 
@@ -111,20 +112,20 @@ function workday_transition_arrive($link, &$session, $context)
             (in_dt >= ? AND in_dt < ?)
             OR (
               in_dt < ?
-              AND TIMESTAMPDIFF(SECOND, ?, ?) <= ?
+              AND in_dt >= ?
+              AND in_dt <= ?
             )
           )
         ORDER BY in_dt DESC, ID DESC
         LIMIT 1
         FOR UPDATE
-    ", 'isssssi', array(
+    ", 'isssss', array(
         $userId,
         $context['period_start'],
         $context['period_stop'],
         $context['period_start'],
-        $context['period_start'],
+        $earliestOpenShiftDT,
         $context['now'],
-        $context['max_open_shift_seconds'],
     ));
 
     if (!$openResult) {
