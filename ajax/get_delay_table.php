@@ -24,12 +24,12 @@ if ($journal === null) {
 $user_defaultStartTime = $journal['default_start_time'];
 $user_allowedDelay = $journal['allowed_delay'];
 $delays = $journal['entries'];
-$periodLabel = format_date_range_label(
+$periodLabel = format_period_label(
   $journal['period_start_date'],
   $journal['period_stop_date']
 );
 
-echo "<h5 class=\"big\">Текущий квартал: " . html_escape($periodLabel) . "</h5>";
+echo "<h5 class=\"big\">Период " . html_escape($periodLabel) . "</h5>";
 echo "<div class=\"notification-table-scroll notification-table-scroll-full\">";
 
 echo "<table class=\"add_time notification-table-full\" cellpadding=\"0\" cellspacing=\"0\" border=1>";

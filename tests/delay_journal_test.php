@@ -36,10 +36,10 @@ return function () {
         'The delay journal must load acceptor names in its data query'
     );
     test_assert_true(
-        strpos($service, 'get_current_quarter_date_range') !== false
+        strpos($service, 'get_delay_notification_period_date_range') !== false
             && strpos($service, 'period_start_date') !== false
             && strpos($service, 'period_stop_date') !== false,
-        'The employee delay journal must expose the current-quarter period'
+        'The employee delay journal must include the previous quarter'
     );
     test_assert_same(0, preg_match('/SELECT\s+\*/i', $service), 'Delay journal queries must select explicit fields');
 
@@ -89,8 +89,8 @@ return function () {
         'The existing employee delay action must remain available'
     );
     test_assert_true(
-        strpos($employeeTable, 'Текущий квартал:') !== false,
-        'The employee delay table must display its current-quarter period'
+        strpos($employeeTable, 'Период ') !== false,
+        'The employee delay table must display its full period'
     );
     test_assert_true(
         strpos($service, '$includeDeleted') !== false,

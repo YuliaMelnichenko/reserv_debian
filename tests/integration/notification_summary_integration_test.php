@@ -157,6 +157,16 @@ return function ($link) {
         in_array($previousQuarterWeekday, array_column($delayJournal['entries'], 'date'), true),
         'Supervisor detail must include the previous-quarter delay'
     );
+    $personalDelayJournal = get_delay_journal_context($link, $alphaId, $currentDate, false);
+    test_assert_same(
+        $previousQuarterStart,
+        $personalDelayJournal['period_start_date'],
+        'Employee delay journal must start with the previous quarter'
+    );
+    test_assert_true(
+        in_array($previousQuarterWeekday, array_column($personalDelayJournal['entries'], 'date'), true),
+        'Employee delay journal must include the previous-quarter delay'
+    );
     test_assert_same(
         2,
         $delayEntriesByUserId[$betaId]['accepted_count'],
