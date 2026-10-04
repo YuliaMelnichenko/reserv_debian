@@ -142,9 +142,9 @@ return function () {
         $pauseSummaryStart - $delaySummaryStart
     );
     test_assert_true(
-        strpos($delaySummarySource, 'LEFT JOIN visiting visit') !== false
-            && strpos($delaySummarySource, 'AND EXISTS (') === false,
-        'Delay notification summaries must join visits once instead of running a correlated query per delay'
+        strpos($delaySummarySource, 'LEFT JOIN visiting visit') === false
+            && strpos($delaySummarySource, 'COUNT(DISTINCT delay_entry.id)') !== false,
+        'Delay notification summaries must count stored delay records even without a historical visit'
     );
     test_assert_true(
         strpos($service, 'get_current_quarter_date_range') !== false,

@@ -4,6 +4,15 @@ require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/delay.php';
 require_once __DIR__ . '/calendar.php';
 
+function delay_journal_duration_seconds($duration)
+{
+    if (!preg_match('/^(\d+):([0-5]\d):([0-5]\d)$/', trim((string)$duration), $parts)) {
+        return 0;
+    }
+
+    return (int)$parts[1] * 3600 + (int)$parts[2] * 60 + (int)$parts[3];
+}
+
 function get_delay_journal_context($link, $userID, $currentDate, $includeDeleted = true, $period = null)
 {
     $userResult = db_query($link, "
@@ -38,6 +47,7 @@ function get_delay_journal_context($link, $userID, $currentDate, $includeDeleted
         SELECT
           a.id,
           a.date,
+          a.duration,
           a.supervisorID,
           a.explaneDesk,
           a.acceptorID,
@@ -78,15 +88,13 @@ function get_delay_journal_context($link, $userID, $currentDate, $includeDeleted
 
         $delay = get_delay_value($row['in_dt'], $defaultStartTime, $allowedDelay);
 
-        if ($delay[0] !== 1) {
-            continue;
-        }
-
         $entries[] = array(
             'id' => (int)$row['id'],
             'date' => (string)$row['date'],
-            'arrival' => (string)$row['in_dt'],
-            'duration' => (int)$delay[1],
+            'arrival' => (string)($row['in_dt'] ?? ''),
+            'duration' => $delay[0] === 1
+                ? (int)$delay[1]
+                : delay_journal_duration_seconds($row['duration']),
             'employee_comment' => strip_tags((string)$row['explaneDesk']),
             'supervisor_id' => (int)$row['supervisorID'],
             'supervisor_name' => trim((string)$row['supervisor_name']),

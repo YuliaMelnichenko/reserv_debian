@@ -37,6 +37,16 @@ return function () {
         get_delay_notification_period_date_range('2026-05-15 12:00:00'),
         'Notification periods must include the previous quarter through the reference day'
     );
+    test_assert_same(
+        array('2026-07-01', '2026-10-04', '2026-10-05'),
+        get_delay_notification_period_date_range('2026-10-04'),
+        'October delay notifications must include the third quarter'
+    );
+    test_assert_same(
+        array('2025-10-01', '2026-01-02', '2026-01-03'),
+        get_delay_notification_period_date_range('2026-01-02'),
+        'Delay notifications must include the previous quarter across a year boundary'
+    );
     test_assert_same('с 01.01.2026 по 15.05.2026', format_period_label('2026-01-01', '2026-05-15'), 'Period labels must be explicit');
 
     test_assert_same('2024-02-01', GetFirstMonthDay('2024-02-29'), 'The first leap-month date must be correct');

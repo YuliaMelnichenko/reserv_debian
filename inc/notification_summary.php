@@ -10,10 +10,8 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
     list($addTimePeriodStartDate, , $addTimePeriodStopExclusive) = get_add_time_period_date_range(
         $currentDateTime
     );
-    list($delayQuarterStartDate, , $delayQuarterStopExclusive) = get_current_quarter_date_range(
-        false,
-        $currentDate
-    );
+    list($delayPeriodStartDate, , $delayPeriodStopExclusive) =
+        get_delay_notification_period_date_range($currentDate);
     $dateTimeExpressions = time_journal_add_work_datetime_expressions($link);
     $startExpression = $dateTimeExpressions['start'];
     $stopExpression = $dateTimeExpressions['stop'];
@@ -50,22 +48,14 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
                   AND membership.SUPERVISORID = ?
                   AND TRIM(membership.TYPE) IN ('0', '-1', '3')
               )
-              AND EXISTS (
-                SELECT 1
-                FROM visiting visit
-                WHERE visit.user_id = delay_entry.userID
-                  AND visit.in_dt >= delay_entry.date
-                  AND visit.in_dt < ADDDATE(delay_entry.date, INTERVAL 1 DAY)
-                  AND visit.remoteWorkState = 0
-              )
           ) AS DELAY_COUNT
     ", 'ssisssi', array(
         $addTimePeriodStopExclusive,
         $addTimePeriodStartDate,
         (int)$supervisorID,
         '0',
-        $delayQuarterStartDate,
-        $delayQuarterStopExclusive,
+        $delayPeriodStartDate,
+        $delayPeriodStopExclusive,
         (int)$supervisorID,
     ));
 
@@ -94,14 +84,13 @@ function get_delay_notification_summary($link, $supervisorID, $currentDate)
         SELECT
           employee.ID AS USERID,
           CONCAT_WS(' ', employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME) AS USER_NAME,
-          COUNT(DISTINCT CASE WHEN visit.ID IS NOT NULL THEN delay_entry.id END) AS TOTAL_COUNT,
-          COUNT(DISTINCT CASE WHEN visit.ID IS NOT NULL AND delay_entry.status = 1 THEN delay_entry.id END) AS ACCEPTED_COUNT,
-          COUNT(DISTINCT CASE WHEN visit.ID IS NOT NULL AND delay_entry.status = -1 THEN delay_entry.id END) AS REFUSED_COUNT,
-          COUNT(DISTINCT CASE WHEN visit.ID IS NOT NULL AND delay_entry.status IN (99, 100, 101) THEN delay_entry.id END) AS DELETED_COUNT,
-          COUNT(DISTINCT CASE WHEN visit.ID IS NOT NULL AND delay_entry.status = 0 THEN delay_entry.id END) AS NEW_COUNT,
+          COUNT(DISTINCT delay_entry.id) AS TOTAL_COUNT,
+          COUNT(DISTINCT CASE WHEN delay_entry.status = 1 THEN delay_entry.id END) AS ACCEPTED_COUNT,
+          COUNT(DISTINCT CASE WHEN delay_entry.status = -1 THEN delay_entry.id END) AS REFUSED_COUNT,
+          COUNT(DISTINCT CASE WHEN delay_entry.status IN (99, 100, 101) THEN delay_entry.id END) AS DELETED_COUNT,
+          COUNT(DISTINCT CASE WHEN COALESCE(delay_entry.status, 0) = 0 THEN delay_entry.id END) AS NEW_COUNT,
           COUNT(DISTINCT CASE
-            WHEN visit.ID IS NOT NULL
-             AND delay_entry.status = 0
+            WHEN COALESCE(delay_entry.status, 0) = 0
              AND (
                TRIM(COALESCE(delay_entry.explaneDesk, '')) = ''
                OR TRIM(delay_entry.explaneDesk) = 'Без объяснения'
@@ -114,11 +103,6 @@ function get_delay_notification_summary($link, $supervisorID, $currentDate)
           ON delay_entry.userID = employee.ID
          AND delay_entry.date >= ?
          AND delay_entry.date < ?
-        LEFT JOIN visiting visit
-          ON visit.user_id = delay_entry.userID
-         AND visit.in_dt >= delay_entry.date
-         AND visit.in_dt < ADDDATE(delay_entry.date, INTERVAL 1 DAY)
-         AND visit.remoteWorkState = 0
         WHERE membership.SUPERVISORID = ?
           AND TRIM(membership.TYPE) IN ('0', '-1', '3')
         GROUP BY employee.ID, employee.SURNAME, employee.FIRSTNAME, employee.LASTNAME

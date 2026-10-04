@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../inc/delay_journal.php';
+
 return function () {
     $controller = file_get_contents(__DIR__ . '/../ajax/get_delays_by_user.php');
 
@@ -23,6 +25,8 @@ return function () {
     );
 
     $service = file_get_contents(__DIR__ . '/../inc/delay_journal.php');
+    test_assert_same(3661, delay_journal_duration_seconds('01:01:01'), 'Stored delay duration must be readable without a visit');
+    test_assert_same(0, delay_journal_duration_seconds('invalid'), 'Invalid stored delay duration must not create false hours');
     test_assert_true(
         strpos($service, 'LEFT JOIN employees supervisor') !== false,
         'The delay journal must load supervisor names in its data query'
