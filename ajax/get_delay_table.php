@@ -7,10 +7,12 @@ ajax_text_headers();
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 require_once __DIR__ . "/../inc/delay_journal.php";
+require_once __DIR__ . "/../inc/journal_period.php";
 
 $userID_ = (int)$_SESSION['ss_id'];
 $currentDate = get_current_datetime_in_timezone()[2];
-$journal = get_delay_journal_context($link, $userID_, $currentDate, false);
+$selectedPeriod = get_journal_period_from_session('delay_journal_period', $currentDate);
+$journal = get_delay_journal_context($link, $userID_, $currentDate, false, $selectedPeriod);
 
 if ($journal === false) {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);
@@ -29,6 +31,32 @@ $periodLabel = format_period_label(
   $journal['period_stop_date']
 );
 
+echo "<div class=\"journal-period-filter\">";
+echo "<span class=\"journal-period-filter-label\">Период:</span>";
+echo "<select id=\"delay_journal_period_type\" class=\"flat journal-period-filter-select\" onchange=\"toggle_delay_journal_manual_period();\">";
+
+$periodOptions = array(
+  1 => 'С начала недели',
+  2 => 'С начала месяца',
+  3 => 'За предыдущий месяц',
+  4 => 'С начала квартала',
+  5 => 'За предыдущий квартал',
+  7 => 'Задать вручную',
+);
+
+foreach ($periodOptions as $periodMode => $periodTitle) {
+  $selected = $selectedPeriod['mode'] === $periodMode ? ' selected' : '';
+  echo "<option value=\"$periodMode\"$selected>" . html_escape($periodTitle) . "</option>";
+}
+
+echo "</select>";
+$manualDisplay = $selectedPeriod['mode'] === 7 ? '' : ' style=\"display:none;\"';
+echo "<span id=\"delay_journal_manual_period\" class=\"journal-period-filter-manual\"$manualDisplay>";
+echo "<input id=\"delay_journal_start_date\" type=\"date\" value=\"" . html_escape($selectedPeriod['start_date']) . "\">";
+echo " - <input id=\"delay_journal_stop_date\" type=\"date\" value=\"" . html_escape($selectedPeriod['stop_date']) . "\">";
+echo "</span>";
+echo "<button class=\"button_style journal-period-filter-button\" onclick=\"set_delay_journal_period();\">Показать</button>";
+echo "</div>";
 echo "<h5 class=\"big\">Период " . html_escape($periodLabel) . "</h5>";
 echo "<div class=\"notification-table-scroll notification-table-scroll-full\">";
 

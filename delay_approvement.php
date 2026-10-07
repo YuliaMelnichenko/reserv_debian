@@ -4,6 +4,7 @@ require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 include_once __DIR__ . "/funcs.php";
 require_once __DIR__ . "/inc/notification_summary.php";
+require_once __DIR__ . "/inc/journal_period.php";
 save_last_location( "delay_approvement.php" );
 require_page_superuser();
 ?>
@@ -33,7 +34,27 @@ include_once __DIR__ . "/php_tori/connect.php";
 
 db_set_charset($link, "utf8");
 $currentDate = get_current_datetime_in_timezone()[2];
-$summary = get_delay_notification_summary($link, $userID_, $currentDate);
+$periodError = '';
+
+if (request_get_has('period_mode')) {
+  $requestedPeriod = get_journal_period(
+    request_get_int('period_mode'),
+    request_date_value($_GET, 'start_date'),
+    request_date_value($_GET, 'stop_date'),
+    $currentDate
+  );
+
+  if ($requestedPeriod === null) {
+    $periodError = 'Укажите корректный период продолжительностью не более одного года.';
+  } else {
+    $_SESSION['delay_notification_period_mode'] = $requestedPeriod['mode'];
+    $_SESSION['delay_notification_period_start_date'] = $requestedPeriod['start_date'];
+    $_SESSION['delay_notification_period_stop_date'] = $requestedPeriod['stop_date'];
+  }
+}
+
+$selectedPeriod = get_journal_period_from_session('delay_notification_period', $currentDate);
+$summary = get_delay_notification_summary($link, $userID_, $currentDate, $selectedPeriod);
 
 if ($summary === false) {
   echo html_escape(database_error_message($link, __FILE__ . ':' . __LINE__));
@@ -59,6 +80,37 @@ echo "<table class=\"notification-page-table\">";
     echo "<div id=\"delayHeader\">";
       echo "<h5 class=\"dark\"><br>/уведомления по опозданиям<br><br></h5>";
     echo "</div>";
+
+echo "<form class=\"journal-period-filter\" method=\"get\" action=\"delay_approvement.php\" onsubmit=\"return validate_delay_notification_period();\">";
+echo "<label class=\"journal-period-filter-label\" for=\"delay_notification_period_type\">Период:</label>";
+echo "<select id=\"delay_notification_period_type\" name=\"period_mode\" class=\"flat journal-period-filter-select\" onchange=\"toggle_delay_notification_manual_period();\">";
+
+$periodOptions = array(
+  1 => 'С начала недели',
+  2 => 'С начала месяца',
+  3 => 'За предыдущий месяц',
+  4 => 'С начала квартала',
+  5 => 'За предыдущий квартал',
+  7 => 'Задать вручную',
+);
+
+foreach ($periodOptions as $periodMode => $periodTitle) {
+  $selected = $selectedPeriod['mode'] === $periodMode ? ' selected' : '';
+  echo "<option value=\"$periodMode\"$selected>" . html_escape($periodTitle) . "</option>";
+}
+
+echo "</select>";
+$manualDisplay = $selectedPeriod['mode'] === 7 ? '' : ' style=\"display:none;\"';
+echo "<span id=\"delay_notification_manual_period\" class=\"journal-period-filter-manual\"$manualDisplay>";
+echo "<input id=\"delay_notification_start_date\" name=\"start_date\" type=\"date\" value=\"" . html_escape($selectedPeriod['start_date']) . "\">";
+echo " - <input id=\"delay_notification_stop_date\" name=\"stop_date\" type=\"date\" value=\"" . html_escape($selectedPeriod['stop_date']) . "\">";
+echo "</span>";
+echo "<button type=\"submit\" class=\"button_style journal-period-filter-button\">Показать</button>";
+echo "</form>";
+
+if ($periodError !== '') {
+  echo "<h5 class=\"middleBold_r\">" . html_escape($periodError) . "</h5>";
+}
 
 echo "<h5 class=\"big\">Период " . html_escape($periodLabel) . "</h5>";
 
@@ -133,7 +185,7 @@ echo "</div>";
 echo "</div>";
 ?>
 
-<script type="text/javascript" src="js/tory.js?v=20260729-layout"></script>
+<script type="text/javascript" src="js/tory.js?v=20261007-delay-filter"></script>
 <script type="text/javascript" charset="utf-8">
 
 function update_clock()

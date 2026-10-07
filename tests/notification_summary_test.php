@@ -102,7 +102,7 @@ return function () {
         );
         test_assert_same(
             0,
-            preg_match('/\b(?:SELECT|db_query|get_delay_notif_counts|get_pause_notif_counts|get_add_time_notif_counts|get_user_name_by_id)\b/i', $page),
+            preg_match('/\b(?:SELECT|db_query|get_delay_notif_counts|get_pause_notif_counts|get_add_time_notif_counts|get_user_name_by_id)\b/i', preg_replace('/<[^>]*>/', '', $page)),
             'Full notification pages must not perform SQL or per-user lookups in ' . basename($pagePath)
         );
         test_assert_true(

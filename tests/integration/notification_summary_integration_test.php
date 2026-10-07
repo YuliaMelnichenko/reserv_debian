@@ -138,7 +138,16 @@ return function ($link) {
     test_assert_same('success', $pauseFinished['status'], 'Pause notification fixture must be completed through the application service');
 
     $delaySummary = get_delay_notification_summary($link, $supervisorId, $currentDate);
-    test_assert_same($previousQuarterStart, $delaySummary['period_start_date'], 'Supervisor delay summary must start with the previous quarter');
+    list($currentQuarterStart) = get_current_quarter_date_range(false, $currentDate);
+    test_assert_same($currentQuarterStart, $delaySummary['period_start_date'], 'Supervisor delay summary must default to the current quarter');
+    test_assert_same(1, $delaySummary['entries'][0]['new_count'], 'Default summary must exclude previous-quarter delays');
+    test_assert_same(1, $delaySummary['entries'][1]['accepted_count'], 'Default summary must exclude previous-quarter approvals');
+    $delaySummary = get_delay_notification_summary($link, $supervisorId, $currentDate, array(
+        'start_date' => $previousQuarterStart,
+        'stop_date' => $currentDate,
+        'stop_exclusive' => date('Y-m-d', strtotime($currentDate . ' +1 day')),
+    ));
+    test_assert_same($previousQuarterStart, $delaySummary['period_start_date'], 'Explicit summary period must include the previous quarter');
     $delayEntriesByUserId = array();
 
     foreach ($delaySummary['entries'] as $entry) {
@@ -159,13 +168,13 @@ return function ($link) {
     );
     $personalDelayJournal = get_delay_journal_context($link, $alphaId, $currentDate, false);
     test_assert_same(
-        $previousQuarterStart,
+        $currentQuarterStart,
         $personalDelayJournal['period_start_date'],
-        'Employee delay journal must start with the previous quarter'
+        'Employee delay journal must default to the current quarter'
     );
     test_assert_true(
-        in_array($previousQuarterWeekday, array_column($personalDelayJournal['entries'], 'date'), true),
-        'Employee delay journal must include the previous-quarter delay'
+        !in_array($previousQuarterWeekday, array_column($personalDelayJournal['entries'], 'date'), true),
+        'Default employee delay journal must exclude the previous-quarter delay'
     );
     test_assert_same(
         2,

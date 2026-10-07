@@ -7,10 +7,12 @@ ajax_text_headers();
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 require_once __DIR__ . "/../inc/notification_summary.php";
+require_once __DIR__ . "/../inc/journal_period.php";
 
 $userID_ = (int)$_SESSION['ss_id'];
 $currentDate = get_current_datetime_in_timezone()[2];
-$summary = get_delay_notification_summary($link, $userID_, $currentDate);
+$selectedPeriod = get_journal_period_from_session('delay_notification_period', $currentDate);
+$summary = get_delay_notification_summary($link, $userID_, $currentDate, $selectedPeriod);
 
 if ($summary === false) {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);

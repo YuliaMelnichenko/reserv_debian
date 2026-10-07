@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/calendar.php';
+require_once __DIR__ . '/date_range.php';
 
 function get_journal_period($mode, $manualStartDate = null, $manualStopDate = null, $referenceDate = null)
 {
@@ -37,6 +38,8 @@ function get_journal_period($mode, $manualStartDate = null, $manualStopDate = nu
         $stopDate = date('Y-m-d', $previousQuarterStopTimestamp);
         $startDate = date('Y-m-01', strtotime($stopDate . ' -2 months'));
     } else {
+        $manualStartDate = normalize_date_value($manualStartDate);
+        $manualStopDate = normalize_date_value($manualStopDate);
         if ($manualStartDate === null || $manualStopDate === null || $manualStartDate > $manualStopDate) {
             return null;
         }

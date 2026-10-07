@@ -4,6 +4,7 @@ require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 include_once __DIR__ . "/funcs.php";
 require_once __DIR__ . "/inc/notification_detail_page_service.php";
+require_once __DIR__ . "/inc/journal_period.php";
 save_last_location( "delay_approvement.php" );
 $mid = request_get_trimmed_string('mid');
 
@@ -81,13 +82,8 @@ echo "<table class=\"notification-page-table\">";
 
 $backUrl = "delay_approvement.php";
 $currentDate = get_current_datetime_in_timezone()[2];
-list($periodStartDate, $periodStopDate, $periodStopExclusive) =
-  get_delay_notification_period_date_range($currentDate);
-$journal = notification_detail_load_delay_context($link, $userID, $currentDate, array(
-  'start_date' => $periodStartDate,
-  'stop_date' => $periodStopDate,
-  'stop_exclusive' => $periodStopExclusive,
-));
+$selectedPeriod = get_journal_period_from_session('delay_notification_period', $currentDate);
+$journal = notification_detail_load_delay_context($link, $userID, $currentDate, $selectedPeriod);
 
 if ($journal === false) {
   echo "<h5>" . html_escape(database_error_message($link, __FILE__ . ':' . __LINE__)) . "</h5>";

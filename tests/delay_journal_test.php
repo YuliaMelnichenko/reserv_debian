@@ -36,10 +36,10 @@ return function () {
         'The delay journal must load acceptor names in its data query'
     );
     test_assert_true(
-        strpos($service, 'get_delay_notification_period_date_range') !== false
+        strpos($service, 'get_current_quarter_date_range') !== false
             && strpos($service, 'period_start_date') !== false
             && strpos($service, 'period_stop_date') !== false,
-        'The employee delay journal must include the previous quarter'
+        'The employee delay journal must default to the current quarter'
     );
     test_assert_same(0, preg_match('/SELECT\s+\*/i', $service), 'Delay journal queries must select explicit fields');
 
@@ -81,7 +81,7 @@ return function () {
     );
     test_assert_same(
         0,
-        preg_match('/\b(?:SELECT|get_all_delay_info_by_user|get_superuser_name_by_id|get_user_name_by_id)\b/i', $employeeTable),
+        preg_match('/\b(?:SELECT|get_all_delay_info_by_user|get_superuser_name_by_id|get_user_name_by_id)\b/i', preg_replace('/<[^>]*>/', '', $employeeTable)),
         'The employee delay table must not perform SQL, legacy, or per-row lookups'
     );
     test_assert_true(

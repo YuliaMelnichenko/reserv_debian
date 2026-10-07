@@ -34,7 +34,7 @@ function get_delay_journal_context($link, $userID, $currentDate, $includeDeleted
 
     if (!is_array($period)) {
         list($periodStartDate, $periodStopDate, $periodStopExclusive) =
-            get_delay_notification_period_date_range($currentDate);
+            get_current_quarter_date_range(false, $currentDate);
     } else {
         $periodStartDate = (string)$period['start_date'];
         $periodStopDate = (string)$period['stop_date'];

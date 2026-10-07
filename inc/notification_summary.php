@@ -75,10 +75,16 @@ function get_supervisor_notification_counts($link, $supervisorID, $currentDateTi
     );
 }
 
-function get_delay_notification_summary($link, $supervisorID, $currentDate)
+function get_delay_notification_summary($link, $supervisorID, $currentDate, $period = null)
 {
-    list($periodStartDate, $periodStopDate, $periodStopExclusive) =
-        get_delay_notification_period_date_range($currentDate);
+    if (is_array($period)) {
+        $periodStartDate = (string)$period['start_date'];
+        $periodStopDate = (string)$period['stop_date'];
+        $periodStopExclusive = (string)$period['stop_exclusive'];
+    } else {
+        list($periodStartDate, $periodStopDate, $periodStopExclusive) =
+            get_current_quarter_date_range(false, $currentDate);
+    }
 
     $summaryResult = db_query($link, "
         SELECT

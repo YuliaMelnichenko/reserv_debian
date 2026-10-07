@@ -24,15 +24,11 @@ $_SESSION['delay_page_user_id'] = $userID;
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 require_once __DIR__ . "/../inc/delay_journal.php";
+require_once __DIR__ . "/../inc/journal_period.php";
 
 $currentDate = get_current_datetime_in_timezone()[2];
-list($periodStartDate, $periodStopDate, $periodStopExclusive) =
-  get_delay_notification_period_date_range($currentDate);
-$journal = get_delay_journal_context($link, $userID, $currentDate, true, array(
-  'start_date' => $periodStartDate,
-  'stop_date' => $periodStopDate,
-  'stop_exclusive' => $periodStopExclusive,
-));
+$selectedPeriod = get_journal_period_from_session('delay_notification_period', $currentDate);
+$journal = get_delay_journal_context($link, $userID, $currentDate, true, $selectedPeriod);
 
 if ($journal === false) {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);
