@@ -4,7 +4,7 @@ require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/calendar.php';
 require_once __DIR__ . '/time_journal_repository.php';
 
-function get_pause_journal_context($link, $userID, $currentDateTime)
+function get_pause_journal_context($link, $userID, $currentDateTime, $period = null)
 {
     $userResult = db_query($link, "
         SELECT SURNAME, FIRSTNAME, LASTNAME
@@ -23,7 +23,13 @@ function get_pause_journal_context($link, $userID, $currentDateTime)
         return null;
     }
 
-    list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(false, $currentDateTime);
+    if (is_array($period)) {
+        $quarterStartDate = (string)$period['start_date'];
+        $quarterStopDate = (string)$period['stop_date'];
+        $quarterStopExclusive = (string)$period['stop_exclusive'];
+    } else {
+        list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(false, $currentDateTime);
+    }
     $dateTimeExpressions = time_journal_add_work_datetime_expressions($link);
     $entryResult = time_journal_query_pause_journal(
         $link,

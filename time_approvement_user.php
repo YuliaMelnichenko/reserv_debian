@@ -4,6 +4,7 @@ require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 include_once __DIR__ . "/funcs.php";
 require_once __DIR__ . "/inc/notification_detail_page_service.php";
+require_once __DIR__ . "/inc/journal_period.php";
 save_last_location( "time_approvement.php" );
 $mid = request_get_trimmed_string('mid');
 
@@ -74,7 +75,9 @@ db_set_charset($link, "utf8");
       echo "</div>";
 
       $backUrl = "time_approvement.php";
-      $journal = notification_detail_load_add_time_context($link, $userID, get_current_datetime_in_timezone_str(1, 0));
+      $currentDateTime = get_current_datetime_in_timezone_str(1, 0);
+      $selectedPeriod = get_journal_period_from_session('add_time_notification_period', $currentDateTime, 6);
+      $journal = notification_detail_load_add_time_context($link, $userID, $currentDateTime, $selectedPeriod);
 
       if ($journal === false) {
         echo "<h5>" . html_escape(database_error_message($link, __FILE__ . ':' . __LINE__)) . "</h5>";

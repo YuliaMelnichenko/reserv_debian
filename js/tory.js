@@ -948,15 +948,52 @@ function show_table(){
 }
 
 function toggle_add_time_journal_manual_period(){
-  var periodType = document.getElementById('add_time_journal_period_type');
-  var manualPeriod = document.getElementById('add_time_journal_manual_period');
+  toggle_manual_period_fields('add_time_journal_period_type', 'add_time_journal_manual_period');
+}
+
+function toggle_manual_period_fields(typeId, manualId){
+  var periodType = document.getElementById(typeId);
+  var manualPeriod = document.getElementById(manualId);
 
   if (!periodType || !manualPeriod) {
     return;
   }
 
-  manualPeriod.style.display = periodType.value === '7' ? 'inline' : 'none';
+  var manual = periodType.value === '7';
+  manualPeriod.hidden = !manual;
+  manualPeriod.style.display = manual ? 'inline' : 'none';
+  var dateInputs = manualPeriod.querySelectorAll('input[type="date"]');
+
+  for (var index = 0; index < dateInputs.length; index++) {
+    dateInputs[index].disabled = !manual;
+  }
 }
+
+function toggle_journal_period_filter(prefix){
+  toggle_manual_period_fields(prefix + '_type', prefix + '_manual');
+}
+
+function validate_journal_period_filter(prefix){
+  var periodType = document.getElementById(prefix + '_type');
+  var startDate = document.getElementById(prefix + '_start_date');
+  var stopDate = document.getElementById(prefix + '_stop_date');
+
+  if (periodType && periodType.value === '7' &&
+      (!startDate.value || !stopDate.value || startDate.value > stopDate.value)) {
+    alert('Укажите корректные дату начала и дату окончания периода.');
+    return false;
+  }
+
+  return true;
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  var filters = document.querySelectorAll('[data-journal-period-filter]');
+
+  for (var index = 0; index < filters.length; index++) {
+    toggle_journal_period_filter(filters[index].getAttribute('data-journal-period-filter'));
+  }
+});
 
 function set_add_time_journal_period(){
   var periodType = document.getElementById('add_time_journal_period_type');
@@ -1002,12 +1039,7 @@ function set_add_time_journal_period(){
 }
 
 function toggle_delay_journal_manual_period(){
-  var periodType = document.getElementById('delay_journal_period_type');
-  var manualPeriod = document.getElementById('delay_journal_manual_period');
-
-  if (periodType && manualPeriod) {
-    manualPeriod.style.display = periodType.value === '7' ? 'inline' : 'none';
-  }
+  toggle_manual_period_fields('delay_journal_period_type', 'delay_journal_manual_period');
 }
 
 function set_delay_journal_period(){
@@ -1054,26 +1086,53 @@ function set_delay_journal_period(){
 }
 
 function toggle_delay_notification_manual_period(){
-  var periodType = document.getElementById('delay_notification_period_type');
-  var manualPeriod = document.getElementById('delay_notification_manual_period');
-
-  if (periodType && manualPeriod) {
-    manualPeriod.style.display = periodType.value === '7' ? 'inline' : 'none';
-  }
+  toggle_journal_period_filter('delay_notification_period');
 }
 
 function validate_delay_notification_period(){
-  var periodType = document.getElementById('delay_notification_period_type');
-  var startDate = document.getElementById('delay_notification_start_date');
-  var stopDate = document.getElementById('delay_notification_stop_date');
+  return validate_journal_period_filter('delay_notification_period');
+}
 
-  if (periodType && periodType.value === '7' &&
-      (!startDate.value || !stopDate.value || startDate.value > stopDate.value)) {
-    alert('Укажите корректные дату начала и дату окончания периода.');
-    return false;
+function toggle_pause_journal_manual_period(){
+  toggle_manual_period_fields('pause_journal_period_type', 'pause_journal_manual_period');
+}
+
+function set_pause_journal_period(){
+  var periodType = document.getElementById('pause_journal_period_type');
+  var startDate = document.getElementById('pause_journal_start_date');
+  var stopDate = document.getElementById('pause_journal_stop_date');
+
+  if (!periodType || !startDate || !stopDate) {
+    return;
   }
 
-  return true;
+  if (periodType.value === '7' && (!startDate.value || !stopDate.value || startDate.value > stopDate.value)) {
+    alert('Укажите корректные дату начала и дату окончания периода.');
+    return;
+  }
+
+  $.ajax({
+    type: 'POST',
+    url: 'ajax/set_pause_journal_period.php',
+    dataType: 'json',
+    data: {
+      period_mode: periodType.value,
+      start_date: startDate.value,
+      stop_date: stopDate.value
+    },
+    success: function(response) {
+      if (!response || response.status !== 'ok') {
+        alert(response && response.message ? response.message : 'Не удалось применить период.');
+        return;
+      }
+
+      show_pause_table();
+    },
+    error: function(xhr) {
+      alert(xhr.responseJSON && xhr.responseJSON.message
+        ? xhr.responseJSON.message : 'Не удалось применить период.');
+    }
+  });
 }
 
 function show_pause_table(){
@@ -1084,6 +1143,7 @@ function show_pause_table(){
     function RetSWT1(dat1) {
       document.getElementById('pause_times_table').innerHTML = dat1;
       schedule_notification_layout(document.getElementById('pause_times_table'));
+      toggle_pause_journal_manual_period();
     }
   }
 }
@@ -1104,6 +1164,7 @@ function show_delay_table(){
     function RetSWT1(dat1) {
       document.getElementById('delay_table').innerHTML = dat1;
       schedule_notification_layout(document.getElementById('delay_table'));
+      toggle_delay_journal_manual_period();
     }
   }
 }

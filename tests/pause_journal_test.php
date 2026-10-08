@@ -25,7 +25,7 @@ return function () {
     $service = file_get_contents(__DIR__ . '/../inc/pause_journal.php');
     test_assert_true(
         strpos($service, 'get_current_quarter_date_range') !== false,
-        'Pause entries must be limited to the current quarter'
+        'Pause entries must retain the current quarter as their default period'
     );
     test_assert_true(
         strpos($service, 'time_journal_query_pause_journal') !== false,
@@ -64,11 +64,11 @@ return function () {
     );
     test_assert_same(
         0,
-        preg_match('/\b(?:SELECT|db_query|get_superuser_name_by_id|STARTDATE|STARTTIME|STOPTIME)\b/i', $employeeTable),
+        preg_match('/\b(?:SELECT|db_query|get_superuser_name_by_id|STARTDATE|STARTTIME|STOPTIME)\b/i', preg_replace('/<\/?select\b[^>]*>/i', '', $employeeTable)),
         'The employee pause table must not perform SQL, per-row, or legacy lookups'
     );
     test_assert_true(
-        strpos($employeeTable, 'Текущий квартал:') !== false,
-        'The existing current-quarter heading must remain available'
+        strpos($employeeTable, 'Период ') !== false,
+        'The selected period heading must remain available'
     );
 };

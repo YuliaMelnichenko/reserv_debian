@@ -16,7 +16,7 @@ echo "<body class=\"app-page\">";
 ?>
 
 <script type="text/javascript" src="lib/jquery/jquery.js"></script>
-<script type="text/javascript" src="js/tory.js?v=20260729-layout"></script>
+<script type="text/javascript" src="js/tory.js?v=20261008-journal-filter"></script>
 
 <?php
 ////////////////////////////////////////////////////////

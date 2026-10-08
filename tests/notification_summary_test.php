@@ -148,7 +148,7 @@ return function () {
     );
     test_assert_true(
         strpos($service, 'get_current_quarter_date_range') !== false,
-        'Notification summaries must be limited to the current quarter'
+        'Notification summaries must retain the current quarter as a default period'
     );
     test_assert_true(
         strpos($service, 'AND $stopExpression > $startExpression') !== false,

@@ -312,13 +312,18 @@ function sync_business_trip_missing_data_for_user($link, $userID, $depthDays = 0
     return $insertedCount;
 }
 
-function get_business_trip_missing_data_rows($link, $userID, $depthDays = 0)
+function get_business_trip_missing_data_rows($link, $userID, $depthDays = 0, $period = null)
 {
     if (is_accounting_errors_exempt_user($userID)) {
         return array();
     }
 
-    list($startDate, $stopDate) = accounting_errors_get_range($depthDays);
+    if (is_array($period)) {
+        $startDate = (string)$period['start_date'];
+        $stopDate = (string)$period['stop_date'];
+    } else {
+        list($startDate, $stopDate) = accounting_errors_get_range($depthDays);
+    }
     $result = db_query(
         $link,
         'SELECT trip.ID, trip.TRIP_DATE '
@@ -338,9 +343,9 @@ function get_business_trip_missing_data_rows($link, $userID, $depthDays = 0)
     return db_fetch_all($result);
 }
 
-function get_business_trip_missing_data_count($link, $userID, $depthDays = 0)
+function get_business_trip_missing_data_count($link, $userID, $depthDays = 0, $period = null)
 {
-    $rows = get_business_trip_missing_data_rows($link, $userID, $depthDays);
+    $rows = get_business_trip_missing_data_rows($link, $userID, $depthDays, $period);
     return is_array($rows) ? count($rows) : 0;
 }
 
@@ -622,9 +627,14 @@ function get_accounting_errors_notification_count($link, $supervisorID)
     return (int)$row['CNT'] + (int)$tripRow['CNT'];
 }
 
-function get_accounting_errors_counts_by_user($link, $userID, &$totalCount, &$acceptedCount, &$refusedCount, &$deletedCount, &$newCount, &$businessTripCount = null)
+function get_accounting_errors_counts_by_user($link, $userID, &$totalCount, &$acceptedCount, &$refusedCount, &$deletedCount, &$newCount, &$businessTripCount = null, $period = null)
 {
-    list($startDate, $stopDate) = accounting_errors_get_range();
+    if (is_array($period)) {
+        $startDate = (string)$period['start_date'];
+        $stopDate = (string)$period['stop_date'];
+    } else {
+        list($startDate, $stopDate) = accounting_errors_get_range();
+    }
 
     $totalCount = 0;
     $acceptedCount = 0;
@@ -669,7 +679,7 @@ function get_accounting_errors_counts_by_user($link, $userID, &$totalCount, &$ac
         }
     }
 
-    $businessTripCount = get_business_trip_missing_data_count($link, $userID);
+    $businessTripCount = get_business_trip_missing_data_count($link, $userID, 0, $period);
     $totalCount += $businessTripCount;
 
     return true;

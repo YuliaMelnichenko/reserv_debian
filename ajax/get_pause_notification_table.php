@@ -7,18 +7,21 @@ ajax_text_headers();
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 require_once __DIR__ . "/../inc/notification_summary.php";
+require_once __DIR__ . "/../inc/journal_period.php";
 
 $userID_ = (int)$_SESSION['ss_id'];
-$summary = get_pause_notification_summary($link, $userID_, get_current_datetime_in_timezone_str(1, 0));
+$currentDateTime = get_current_datetime_in_timezone_str(1, 0);
+$selectedPeriod = get_journal_period_from_session('pause_notification_period', $currentDateTime);
+$summary = get_pause_notification_summary($link, $userID_, $currentDateTime, $selectedPeriod);
 
 if ($summary === false) {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);
   exit;
 }
 
-$quarterLabel = format_date_range_label($summary['quarter_start_date'], $summary['quarter_stop_date']);
+$periodLabel = format_period_label($summary['quarter_start_date'], $summary['quarter_stop_date']);
 
-echo "<h5 class=\"big\">Текущий квартал: " . html_escape($quarterLabel) . "</h5>";
+echo "<h5 class=\"big\">Период " . html_escape($periodLabel) . "</h5>";
 echo "<div class=\"notification-table-scroll\">";
 echo "<table id=\"pause_approvement_table_users\" class=\"add_time notification-summary-table\">";
 echo "<tr class=\"notification-table-head\">";

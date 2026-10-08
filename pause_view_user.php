@@ -4,6 +4,7 @@ require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 include_once __DIR__ . "/funcs.php";
 require_once __DIR__ . "/inc/pause_journal.php";
+require_once __DIR__ . "/inc/journal_period.php";
 save_last_location( "pause_view.php" );
 $mid = request_get_trimmed_string('mid');
 
@@ -74,7 +75,9 @@ echo "<table class=\"notification-page-table\">";
         echo "</div>";
 
       $backUrl = "pause_view.php";
-      $journal = get_pause_journal_context($link, $userID, get_current_datetime_in_timezone_str(1, 0));
+      $currentDateTime = get_current_datetime_in_timezone_str(1, 0);
+      $selectedPeriod = get_journal_period_from_session('pause_notification_period', $currentDateTime);
+      $journal = get_pause_journal_context($link, $userID, $currentDateTime, $selectedPeriod);
 
       if ($journal === false) {
         echo "<h5>" . html_escape(database_error_message($link, __FILE__ . ':' . __LINE__)) . "</h5>";
@@ -88,14 +91,14 @@ echo "<table class=\"notification-page-table\">";
 
       $userName = $journal['user_name'];
       $addTimes = $journal['entries'];
-      $quarterLabel = format_date_range_label($journal['quarter_start_date'], $journal['quarter_stop_date']);
+      $periodLabel = format_period_label($journal['quarter_start_date'], $journal['quarter_stop_date']);
 
       if ( count( $addTimes ) == 0 )
       {
 
         echo "<table id=\"pause_approvement_table\" class=\"notification-detail-header-table notification-detail-empty-header\">";
           echo "<tr>";
-            echo "<td class=\"notification-detail-title-cell notification-detail-title-medium\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5><br></td>";
+            echo "<td class=\"notification-detail-title-cell notification-detail-title-medium\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5><h5 class=\"big\">Период " . html_escape($periodLabel) . "</h5><br></td>";
             echo "<td class=\"notification-detail-back-cell\">";
               echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"location.href='$backUrl';\"><h5>Назад</h5></button>";
             echo "</td>";
@@ -113,7 +116,7 @@ echo "<table id=\"pause_approvement_table\" class=\"notification-detail-header-t
     echo "<td class=\"nopadding_s\">";
       echo "<table class=\"notification-detail-header-table\">";
         echo "<tr>";
-          echo "<td class=\"notification-detail-title-cell notification-detail-title-medium\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5><br></td>";
+          echo "<td class=\"notification-detail-title-cell notification-detail-title-medium\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5><h5 class=\"big\">Период " . html_escape($periodLabel) . "</h5><br></td>";
           echo "<td class=\"notification-detail-back-cell\">";
             echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"location.href='$backUrl';\"><h5>Назад</h5></button>";
           echo "</td>";

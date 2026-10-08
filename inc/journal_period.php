@@ -7,7 +7,7 @@ function get_journal_period($mode, $manualStartDate = null, $manualStopDate = nu
 {
     $mode = (int)$mode;
 
-    if (!in_array($mode, array(1, 2, 3, 4, 5, 7), true)) {
+    if (!in_array($mode, array(1, 2, 3, 4, 5, 6, 7), true)) {
         return null;
     }
 
@@ -37,6 +37,8 @@ function get_journal_period($mode, $manualStartDate = null, $manualStopDate = nu
         $previousQuarterStopTimestamp = strtotime($currentQuarterStartDate . ' -1 day');
         $stopDate = date('Y-m-d', $previousQuarterStopTimestamp);
         $startDate = date('Y-m-01', strtotime($stopDate . ' -2 months'));
+    } elseif ($mode === 6) {
+        list($startDate, $stopDate) = get_add_time_period_date_range($currentDate);
     } else {
         $manualStartDate = normalize_date_value($manualStartDate);
         $manualStopDate = normalize_date_value($manualStopDate);
@@ -62,12 +64,12 @@ function get_journal_period($mode, $manualStartDate = null, $manualStopDate = nu
     );
 }
 
-function get_journal_period_from_session($sessionPrefix, $referenceDate = null)
+function get_journal_period_from_session($sessionPrefix, $referenceDate = null, $defaultMode = 4)
 {
     $sessionPrefix = (string)$sessionPrefix;
     $mode = isset($_SESSION[$sessionPrefix . '_mode'])
         ? (int)$_SESSION[$sessionPrefix . '_mode']
-        : 4;
+        : (int)$defaultMode;
     $manualStartDate = isset($_SESSION[$sessionPrefix . '_start_date'])
         ? $_SESSION[$sessionPrefix . '_start_date']
         : null;
@@ -80,5 +82,5 @@ function get_journal_period_from_session($sessionPrefix, $referenceDate = null)
         return $period;
     }
 
-    return get_journal_period(4, null, null, $referenceDate);
+    return get_journal_period($defaultMode, null, null, $referenceDate);
 }

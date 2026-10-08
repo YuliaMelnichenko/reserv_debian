@@ -4,6 +4,7 @@ require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 include_once __DIR__ . "/funcs.php";
 require_once __DIR__ . "/inc/notification_summary.php";
+require_once __DIR__ . "/inc/journal_period_filter.php";
 save_last_location( "time_approvement.php" );
 require_page_superuser();
 ?>
@@ -45,7 +46,10 @@ echo "<div class=\"notification-page-layout\">";
 include __DIR__ . "/php_tori/connect.php";
 
 db_set_charset($link, "utf8");
-$summary = get_add_time_notification_summary($link, $SUID, get_current_datetime_in_timezone_str(1, 0));
+$currentDateTime = get_current_datetime_in_timezone_str(1, 0);
+$filterState = load_supervisor_journal_period('add_time_notification_period', $currentDateTime, $_GET, 6);
+$selectedPeriod = $filterState['period'];
+$summary = get_add_time_notification_summary($link, $SUID, $currentDateTime, $selectedPeriod);
 
 if ($summary === false) {
   echo html_escape(database_error_message($link, __FILE__ . ':' . __LINE__));
@@ -69,6 +73,10 @@ $periodLabel = format_period_label(
           echo "<h5 class=\"dark\"><br>/уведомления по работе вне офиса<br><br></h5>";
         echo "</div>";
 
+echo render_supervisor_journal_period_filter('time_approvement.php', 'add_time_notification_period', $selectedPeriod, true);
+if ($filterState['error'] !== '') {
+  echo "<h5 class=\"middleBold_r\">" . html_escape($filterState['error']) . "</h5>";
+}
 echo "<h5 class=\"big\">Период " . html_escape($periodLabel) . "</h5>";
 
 echo "<div class=\"notification-table-scroll notification-table-scroll-wide\">";
@@ -137,7 +145,7 @@ echo "</div>";
 echo "</div>";
 ?>
 
-<script type="text/javascript" src="js/tory.js?v=20260729-layout"></script>
+<script type="text/javascript" src="js/tory.js?v=20261008-journal-filter"></script>
 <script type="text/javascript" charset="utf-8"> 
 
 function update_clock()

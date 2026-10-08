@@ -5,6 +5,7 @@ require_once __DIR__ . '/inc/access.php';
 require_page_superuser();
 include_once __DIR__ . '/funcs.php';
 include __DIR__ . '/php_tori/connect.php';
+require_once __DIR__ . '/inc/journal_period_filter.php';
 save_last_location('accounting_errors_approvement.php');
 ?>
 
@@ -39,9 +40,18 @@ echo "<table class=\"accounting-errors-page-table\">";
       echo "</div>";
 
       $depthDays = get_accounting_errors_default_depth_days();
-      $accountingErrorsPeriodLabel = get_accounting_errors_period_label();
+      $currentDate = get_current_datetime_in_timezone()[2];
+      $filterState = load_supervisor_journal_period('accounting_errors_notification_period', $currentDate, $_GET);
+      $selectedPeriod = $filterState['period'];
+      $accountingErrorsPeriodLabel = format_period_label($selectedPeriod['start_date'], $selectedPeriod['stop_date']);
 
-      echo "<h5 class=\"big\">Текущий квартал: $accountingErrorsPeriodLabel</h5>";
+      echo render_supervisor_journal_period_filter(
+        'accounting_errors_approvement.php', 'accounting_errors_notification_period', $selectedPeriod
+      );
+      if ($filterState['error'] !== '') {
+        echo "<h5 class=\"middleBold_r\">" . html_escape($filterState['error']) . "</h5>";
+      }
+      echo "<h5 class=\"big\">Период " . html_escape($accountingErrorsPeriodLabel) . "</h5>";
 
       echo "<div id=\"accountingErrorsApprovementTableScroll\">";
         echo "<table class=\"add_time\" id=\"accounting_errors_approvement_table_users\">";
@@ -86,7 +96,8 @@ echo "<table class=\"accounting-errors-page-table\">";
                 $refusedNotificationCount,
                 $deletedNotificationCount,
                 $newNotificationCount,
-                $businessTripNotificationCount
+                $businessTripNotificationCount,
+                $selectedPeriod
               );
 
               if (!$countsLoaded || $notificationCount <= 0) {
@@ -148,7 +159,7 @@ echo "</table>";
 echo "</div>";
 ?>
 
-<script type="text/javascript" src="js/tory.js?v=20260729-layout"></script>
+<script type="text/javascript" src="js/tory.js?v=20261008-journal-filter"></script>
 <script type="text/javascript" charset="utf-8">
 
 function update_clock(){

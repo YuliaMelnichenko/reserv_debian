@@ -7,6 +7,7 @@ ajax_text_headers();
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 require_once __DIR__ . "/../inc/add_time_journal.php";
+require_once __DIR__ . "/../inc/journal_period.php";
 
 $_SESSION['add_time_page_mode'] = 2;
 
@@ -26,7 +27,11 @@ if ($userID <= 0) {
 require_ajax_self_or_superuser($userID);
 $_SESSION['add_time_page_user_id'] = $userID;
 
-$journal = get_add_time_journal_context($link, $userID, get_current_datetime_in_timezone_str(1, 0));
+$currentDateTime = get_current_datetime_in_timezone_str(1, 0);
+$selectedPeriod = get_journal_period_from_session('add_time_notification_period', $currentDateTime, 6);
+$journal = get_add_time_journal_context(
+  $link, $userID, $currentDateTime, true, $selectedPeriod['start_date'], $selectedPeriod['stop_date']
+);
 
 if ($journal === false) {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);

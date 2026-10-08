@@ -21,6 +21,7 @@ echo "<body class=\"app-page accounting-errors-page\">";
 
 <?php
 include_once __DIR__ . "/funcs.php";
+require_once __DIR__ . "/inc/journal_period.php";
 save_last_location("accounting_errors_approvement.php");
 include __DIR__ . "/php_tori/connect.php";
 
@@ -46,14 +47,18 @@ $userID = (int)$resArr[1];
 require_page_supervisor_for_user($userID, 3);
 
 $depthDays = get_accounting_errors_default_depth_days();
-list($accountingErrorsStartDate, $accountingErrorsStopDate) = accounting_errors_get_range($depthDays);
+$currentDate = get_current_datetime_in_timezone()[2];
+$selectedPeriod = get_journal_period_from_session('accounting_errors_notification_period', $currentDate);
+$accountingErrorsStartDate = $selectedPeriod['start_date'];
+$accountingErrorsStopDate = $selectedPeriod['stop_date'];
+$currentQuarterStart = accounting_errors_get_range($depthDays)[0];
 $backUrl = "accounting_errors_approvement.php";
 
 sync_accounting_errors_for_user($link, $userID, $depthDays);
 
 $regularRows = get_accounting_errors_rows($link, $userID, $accountingErrorsStartDate, $accountingErrorsStopDate);
 $hasRegularErrors = $regularRows === false || count($regularRows) > 0;
-$businessTripRows = get_business_trip_missing_data_rows($link, $userID, $depthDays);
+$businessTripRows = get_business_trip_missing_data_rows($link, $userID, $depthDays, $selectedPeriod);
 $hasBusinessTripRows = is_array($businessTripRows) && count($businessTripRows) > 0;
 
 $userName = html_escape(get_user_name_by_id($userID));
@@ -78,6 +83,7 @@ echo "<table class=\"accounting-errors-page-table\">";
       echo "<div id=\"accountingErrorsUserToolbar\" class=\"notification-detail-accounting-toolbar\">";
         echo "<div class=\"notification-detail-accounting-labels\">";
           echo "<h5 class=\"big\">Сотрудник: $userName</h5><br><br>";
+          echo "<h5 class=\"big\">Период " . html_escape(format_period_label($accountingErrorsStartDate, $accountingErrorsStopDate)) . "</h5>";
         echo "</div>";
         echo "<button class=\"button_style journal-back-button\" onclick=\"location.href='$backUrl'\">Назад</button>";
       echo "</div>";
@@ -152,6 +158,12 @@ echo "<table class=\"accounting-errors-page-table\">";
                 echo "<td class=\"add_time accounting-errors-supervisor-comment-cell\"><h5 class=\"middle\">$supervisorCommentView</h5></td>";
 
                 echo "<td class=\"add_time accounting-errors-user-actions-cell\">";
+
+                if ($errorDate < $currentQuarterStart) {
+                    echo "<h5 class=\"middle\">Архив</h5></td></tr>";
+                    $color = $color === '#ddffff' ? '#ffffff' : '#ddffff';
+                    continue;
+                }
 
                 $acceptImg = "accept_small.bmp";
                 $refuseImg = "refuse_small.bmp";

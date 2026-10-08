@@ -59,7 +59,7 @@ foreach ($periodOptions as $periodMode => $periodTitle) {
 }
 
 echo "</select>";
-$manualDisplay = $selectedPeriod['mode'] === 7 ? '' : ' style=\"display:none;\"';
+$manualDisplay = $selectedPeriod['mode'] === 7 ? '' : ' hidden style=\"display:none;\"';
 echo "<span id=\"add_time_journal_manual_period\" class=\"journal-period-filter-manual\"$manualDisplay>";
 echo "<input id=\"add_time_journal_start_date\" type=\"date\" value=\"" . html_escape($selectedPeriod['start_date']) . "\">";
 echo " - <input id=\"add_time_journal_stop_date\" type=\"date\" value=\"" . html_escape($selectedPeriod['stop_date']) . "\">";

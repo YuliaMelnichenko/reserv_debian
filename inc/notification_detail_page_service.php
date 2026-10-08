@@ -3,9 +3,16 @@
 require_once __DIR__ . '/add_time_journal.php';
 require_once __DIR__ . '/delay_journal.php';
 
-function notification_detail_load_add_time_context($link, $userID, $currentDateTime)
+function notification_detail_load_add_time_context($link, $userID, $currentDateTime, $period = null)
 {
-    $journal = get_add_time_journal_context($link, $userID, $currentDateTime);
+    $journal = get_add_time_journal_context(
+        $link,
+        $userID,
+        $currentDateTime,
+        true,
+        is_array($period) ? $period['start_date'] : null,
+        is_array($period) ? $period['stop_date'] : null
+    );
 
     if (!is_array($journal)) {
         return $journal;

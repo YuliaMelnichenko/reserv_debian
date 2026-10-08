@@ -4,6 +4,7 @@ require_once __DIR__ . '/inc/session.php';
 require_once __DIR__ . '/inc/access.php';
 include_once __DIR__ . "/funcs.php";
 require_once __DIR__ . "/inc/notification_summary.php";
+require_once __DIR__ . "/inc/journal_period_filter.php";
 save_last_location( "pause_view.php" );
 require_page_superuser();
 ?>
@@ -32,14 +33,17 @@ echo "<div class=\"notification-page-layout\">";
 include_once __DIR__ . "/php_tori/connect.php";
 
 db_set_charset($link, "utf8");
-$summary = get_pause_notification_summary($link, $userID_, get_current_datetime_in_timezone_str(1, 0));
+$currentDateTime = get_current_datetime_in_timezone_str(1, 0);
+$filterState = load_supervisor_journal_period('pause_notification_period', $currentDateTime, $_GET);
+$selectedPeriod = $filterState['period'];
+$summary = get_pause_notification_summary($link, $userID_, $currentDateTime, $selectedPeriod);
 
 if ($summary === false) {
   echo html_escape(database_error_message($link, __FILE__ . ':' . __LINE__));
   exit;
 }
 
-$quarterLabel = format_date_range_label($summary['quarter_start_date'], $summary['quarter_stop_date']);
+$periodLabel = format_period_label($summary['quarter_start_date'], $summary['quarter_stop_date']);
 
 echo "<table class=\"notification-page-table\">";
   echo "<tr>";
@@ -53,7 +57,11 @@ echo "<table class=\"notification-page-table\">";
           echo "<h5 nowrap class=\"dark\"><br>/уведомления по приостановкам учета времени<br><br></h5>";
         echo "</div>";
 
-    echo "<h5 class=\"big\">Текущий квартал: " . html_escape($quarterLabel) . "</h5>";
+    echo render_supervisor_journal_period_filter('pause_view.php', 'pause_notification_period', $selectedPeriod);
+    if ($filterState['error'] !== '') {
+      echo "<h5 class=\"middleBold_r\">" . html_escape($filterState['error']) . "</h5>";
+    }
+    echo "<h5 class=\"big\">Период " . html_escape($periodLabel) . "</h5>";
 
     echo "<div class=\"notification-table-scroll notification-table-scroll-narrow\">";
     echo "<table id = \"pause_approvement_table_users\" class=\"add_time notification-summary-table\">";
@@ -111,7 +119,7 @@ echo "<table class=\"notification-page-table\">";
 echo "</div>";
 ?>
 
-<script type="text/javascript" src="js/tory.js?v=20260729-layout"></script>
+<script type="text/javascript" src="js/tory.js?v=20261008-journal-filter"></script>
 <script type="text/javascript" charset="utf-8"> 
 
 function update_clock()

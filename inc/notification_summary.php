@@ -142,12 +142,18 @@ function get_delay_notification_summary($link, $supervisorID, $currentDate, $per
     );
 }
 
-function get_pause_notification_summary($link, $supervisorID, $currentDateTime)
+function get_pause_notification_summary($link, $supervisorID, $currentDateTime, $period = null)
 {
-    list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(
-        false,
-        $currentDateTime
-    );
+    if (is_array($period)) {
+        $quarterStartDate = (string)$period['start_date'];
+        $quarterStopDate = (string)$period['stop_date'];
+        $quarterStopExclusive = (string)$period['stop_exclusive'];
+    } else {
+        list($quarterStartDate, $quarterStopDate, $quarterStopExclusive) = get_current_quarter_date_range(
+            false,
+            $currentDateTime
+        );
+    }
     $currentDate = substr((string)$currentDateTime, 0, 10);
     $currentDayStartDateTime = $currentDate . ' 00:00:00';
     $currentDayStopDateTime = date('Y-m-d 00:00:00', strtotime($currentDate . ' +1 day'));
@@ -247,9 +253,15 @@ function get_pause_notification_count($link, $userID, $currentDateTime)
     );
 }
 
-function get_add_time_notification_summary($link, $supervisorID, $currentDateTime)
+function get_add_time_notification_summary($link, $supervisorID, $currentDateTime, $period = null)
 {
-    list($periodStartDate, $periodStopDate, $periodStopExclusive) = get_add_time_period_date_range($currentDateTime);
+    if (is_array($period)) {
+        $periodStartDate = (string)$period['start_date'];
+        $periodStopDate = (string)$period['stop_date'];
+        $periodStopExclusive = (string)$period['stop_exclusive'];
+    } else {
+        list($periodStartDate, $periodStopDate, $periodStopExclusive) = get_add_time_period_date_range($currentDateTime);
+    }
     $dateTimeExpressions = time_journal_add_work_datetime_expressions($link, 'add_time');
     $startExpression = $dateTimeExpressions['start'];
     $stopExpression = $dateTimeExpressions['stop'];

@@ -4060,6 +4060,10 @@ h5.activ_time {
   margin-right: 5px;
 }
 
+.journal-period-filter-manual[hidden] {
+  display: none !important;
+}
+
 .journal-period-filter-manual input {
   width: 110px;
 }

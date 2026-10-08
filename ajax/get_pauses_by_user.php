@@ -7,6 +7,7 @@ ajax_text_headers();
 include_once __DIR__ . "/../funcs.php";
 include_once __DIR__ . "/../php_tori/connect.php";
 require_once __DIR__ . "/../inc/pause_journal.php";
+require_once __DIR__ . "/../inc/journal_period.php";
 
 $_SESSION['pause_page_mode'] = 2;
 
@@ -26,7 +27,9 @@ if ($userID <= 0) {
 require_ajax_self_or_superuser($userID);
 $_SESSION['add_time_page_user_id'] = $userID;
 
-$journal = get_pause_journal_context($link, $userID, get_current_datetime_in_timezone_str(1, 0));
+$currentDateTime = get_current_datetime_in_timezone_str(1, 0);
+$selectedPeriod = get_journal_period_from_session('pause_notification_period', $currentDateTime);
+$journal = get_pause_journal_context($link, $userID, $currentDateTime, $selectedPeriod);
 
 if ($journal === false) {
   ajax_database_error($link, __FILE__ . ':' . __LINE__);
@@ -39,14 +42,14 @@ if ($journal === null) {
 
 $userName = $journal['user_name'];
 $addTimes = $journal['entries'];
-$quarterLabel = format_date_range_label($journal['quarter_start_date'], $journal['quarter_stop_date']);
+$periodLabel = format_period_label($journal['quarter_start_date'], $journal['quarter_stop_date']);
 
 echo "<table id=\"pause_approvement_table\" class=\"slim\" border=0>";
   echo "<tr>";
     echo "<td class=\"nopadding_s\">";
       echo "<table class=\"slim\" border=0>";
         echo "<tr>";
-          echo "<td class=\"nopadding\" valign=\"middle\" width=473 align=\"left\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5><h5 class=\"big\">Текущий квартал: " . html_escape($quarterLabel) . "</h5></td>";
+          echo "<td class=\"nopadding\" valign=\"middle\" width=473 align=\"left\"><h5 class=\"bigbig17\">" . html_escape($userName) . "</h5><h5 class=\"big\">Период " . html_escape($periodLabel) . "</h5></td>";
           echo "<td class=\"nopadding\" width=10 valign=\"middle\" align=\"right\">";
             echo "<button class=\"journal-back-button\" title=\"Назад\" onclick=\"pause_go_back();\"><h5>Назад</h5></button>";
           echo "</td>";
