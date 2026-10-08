@@ -150,7 +150,8 @@ function get_add_time_duration_by_times_ex($addTimeInfo)
             is_array($entry)
             && isset($entry[7])
             && (int)$entry[7] === 0
-            && add_time_entry_is_active($entry)
+            && isset($entry[4])
+            && (int)$entry[4] === 1
         ) {
             $duration += get_defined_time_range_duration($entry[0] ?? null, $entry[1] ?? null);
         }

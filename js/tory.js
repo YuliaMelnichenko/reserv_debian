@@ -1859,10 +1859,10 @@ function fit_report_layout() {
 
   var tableWidth = Math.ceil(contentTable.getBoundingClientRect().width);
   var tableHeight = Math.ceil(contentTable.getBoundingClientRect().height);
-  var availableWidth = Math.max(
-    165,
-    Math.floor(window.innerWidth - reportWindow.getBoundingClientRect().left - 10)
-  );
+  var availableWidth = Math.floor(reportWindow.parentElement.getBoundingClientRect().width);
+  if (availableWidth <= 0) {
+    return;
+  }
   var availableHeight = reportWindow.clientHeight;
   var needsVerticalScroll = tableHeight > availableHeight;
   var scrollbarWidth = needsVerticalScroll ? get_vertical_scrollbar_width() : 0;

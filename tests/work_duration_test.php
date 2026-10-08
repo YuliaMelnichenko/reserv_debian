@@ -62,11 +62,20 @@ return function () {
     $addTimeInfo = array(
         array('2026-07-20 07:00:00', '2026-07-20 09:00:00', 1, '', 1, 0, 7200, 0),
         array('2026-07-20 18:00:00', '2026-07-20 19:00:00', 1, '', -1, 0, 3600, 0),
+        array('2026-07-20 09:00:00', '2026-07-20 10:00:00', 1, '', 0, 0, 3600, 0),
         array('2026-07-20 11:00:00', '2026-07-20 11:30:00', 1, '', 0, 0, 1800, 1),
         array('0000-00-00 00:00:00', '0000-00-00 00:00:00', 1, '', 0, 0, 0, 1),
     );
 
-    test_assert_same(7200, get_add_time_duration_by_times_ex($addTimeInfo), 'Active offsite work must be added');
+    test_assert_same(7200, get_add_time_duration_by_times_ex($addTimeInfo), 'Only approved offsite work must be added');
+    test_assert_same(
+        0,
+        get_add_time_duration_by_times_ex(array(
+            array('2026-07-20 09:00:00', '2026-07-20 10:00:00', 1, '', 0, 0, 3600, 0),
+            array('2026-07-20 10:00:00', '2026-07-20 11:00:00', 1, '', 101, 0, 3600, 0),
+        )),
+        'Pending and deleted offsite work must not increase worked hours'
+    );
     test_assert_same(1800, get_pause_time_duration_by_times($addTimeInfo), 'Only valid active pauses must be subtracted');
     test_assert_same(
         0,
@@ -120,6 +129,14 @@ return function () {
     test_assert_same(7200, $durations[2], 'Offsite work must be reported separately');
     test_assert_same(1800, $durations[5], 'Pauses must be reported separately');
     test_assert_same(34200, $durations[3], 'The net duration must combine work, lunch, offsite work and pauses');
+
+    $pendingDurations = get_durations(
+        'NDF', 'NDF', 'NDF', 'NDF',
+        array(array('2026-07-20 09:00:00', '2026-07-20 10:00:00', 1, '', 0, 0, 3600, 0)),
+        0, 0, '2026-07-20 18:00:00', '09:00:00', 30
+    );
+    test_assert_same(0, $pendingDurations[2], 'Pending offsite work must not appear in the daily offsite total');
+    test_assert_same(0, $pendingDurations[3], 'Pending offsite work must not appear in worked hours');
 
     test_assert_same(
         array(0, 0, 0, 0, 0, 0),

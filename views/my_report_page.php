@@ -36,7 +36,7 @@ echo "<div id=\"penalty_list_header\">";
 echo "</div>";
 
 echo "<div align=\"left\">";
-  echo "<table>";
+  echo "<table class=\"report-page-layout\">";
     echo "<tr>";
     $ss_id_tmp = $_SESSION['ss_id'];
 
@@ -46,11 +46,11 @@ echo "<div align=\"left\">";
     }
 
     if ( $directorView == 0 ){
-      echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
+      echo "<td class=\"report-page-nav\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 250>";
       include_once dirname(__DIR__) . "/navigate.php";
     }
     else{
-      echo "<td bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 0>";
+      echo "<td class=\"report-page-nav report-page-nav-empty\" bgcolor=\"#ddeeff\" bordercolor=\"#888888\" valign=\"top\" align=\"left\" width = 0>";
     }
     echo "</td>";
 

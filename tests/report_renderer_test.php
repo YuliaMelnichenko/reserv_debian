@@ -50,6 +50,16 @@ return function () {
     );
 
     $reportStyles = file_get_contents(__DIR__ . '/../style/main.css');
+    $reportPage = file_get_contents(__DIR__ . '/../views/my_report_page.php');
+    $reportScript = file_get_contents(__DIR__ . '/../js/tory.js');
+    test_assert_true(
+        strpos($reportPage, 'report-page-layout') !== false
+            && strpos($reportStyles, '.report-page-layout {') !== false
+            && strpos($reportStyles, 'table-layout: fixed;') !== false
+            && strpos($reportStyles, 'padding: 0 10px 10px 0;') !== false
+            && strpos($reportScript, 'reportWindow.parentElement.getBoundingClientRect().width') !== false,
+        'The report scroll area must fit inside the blue page content with right and bottom padding'
+    );
     test_assert_true(
         strpos($reportStyles, 'width: max-content;') !== false
             && strpos($reportStyles, 'padding: 0 5px 2px 0;') !== false,
