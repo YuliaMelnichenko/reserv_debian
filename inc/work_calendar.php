@@ -321,6 +321,33 @@ function get_staff_leave_events_by_days($link, $userID, $startDate, $stopDate, $
     return $leaveEvents;
 }
 
+function calculate_staff_leave_norms($dates, $dailyNorms, $leaveEvents, $weeklyRate, $dayTypesByDate)
+{
+    $normsBeforeLeaves = $dailyNorms;
+    $normsAfterLeaves = $dailyNorms;
+
+    foreach ($dates as $index => $date) {
+        $event = isset($leaveEvents[$index]) ? $leaveEvents[$index] : 'NDF';
+
+        if ($event !== 'Отпуск' && $event !== 'Больничный') {
+            continue;
+        }
+
+        $dayType = isset($dayTypesByDate[$date]) ? (int)$dayTypesByDate[$date] : null;
+        if ($dayType === 0 || (isWeekEnd($date) && $dayType !== 1)) {
+            continue;
+        }
+
+        if ((float)$weeklyRate > 0 && (float)$weeklyRate < 40) {
+            $normsBeforeLeaves[$index] = ($dayType === 2 ? 7 : 8) * 3600;
+        }
+
+        $normsAfterLeaves[$index] = 0;
+    }
+
+    return array($normsBeforeLeaves, $normsAfterLeaves);
+}
+
 function get_work_dayoff_types_by_range($link, $startDate, $stopDate)
 {
     $query = db_query($link, "

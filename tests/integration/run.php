@@ -25,6 +25,7 @@ $testFiles = array(
     __DIR__ . '/accounting_errors_active_employee_test.php',
     __DIR__ . '/legacy_datetime_audit_sql_test.php',
     __DIR__ . '/staff_leaves_archive_test.php',
+    __DIR__ . '/staff_leave_norm_test.php',
     __DIR__ . '/notification_summary_integration_test.php',
     __DIR__ . '/notification_decision_test.php',
 );

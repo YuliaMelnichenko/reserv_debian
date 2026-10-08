@@ -297,11 +297,10 @@ function get_stat_set_by_range_full_ex( $startDate, $stopDate, $userID, $userRat
     }
   }
 
-  $days_norm_before_leaves = $days_norm;
-
-  $days_norm = apply_staff_leaves_to_days_norm($link, $userID, $startDate, $stopDate, $days_dates_set, $days_norm);
-
   $days_leave_events = get_staff_leave_events_by_days($link, $userID, $startDate, $stopDate, $days_dates_set);
+  list($days_norm_before_leaves, $days_norm) = calculate_staff_leave_norms(
+    $days_dates_set, $days_norm, $days_leave_events, $userRate, $dayTypesByDate
+  );
 
   unset($tempDates);
   $tempDates = array();
